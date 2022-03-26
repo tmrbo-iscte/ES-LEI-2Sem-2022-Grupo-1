@@ -1,0 +1,475 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > AxisSpace</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/highlight-idea.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.pack.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.jfree.chart.axis</a>
+</div>
+
+<h1>Coverage Summary for Class: AxisSpace (org.jfree.chart.axis)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">AxisSpace</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    52,6%
+  </span>
+  <span class="absValue">
+    (10/19)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    46,9%
+  </span>
+  <span class="absValue">
+    (46/98)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<div class="sourceCode" id="sourceCode"><i class="no-highlight">1</i>&nbsp;/* ===========================================================
+<i class="no-highlight">2</i>&nbsp; * JFreeChart : a free chart library for the Java(tm) platform
+<i class="no-highlight">3</i>&nbsp; * ===========================================================
+<i class="no-highlight">4</i>&nbsp; *
+<i class="no-highlight">5</i>&nbsp; * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+<i class="no-highlight">6</i>&nbsp; *
+<i class="no-highlight">7</i>&nbsp; * Project Info:  http://www.jfree.org/jfreechart/index.html
+<i class="no-highlight">8</i>&nbsp; *
+<i class="no-highlight">9</i>&nbsp; * This library is free software; you can redistribute it and/or modify it
+<i class="no-highlight">10</i>&nbsp; * under the terms of the GNU Lesser General Public License as published by
+<i class="no-highlight">11</i>&nbsp; * the Free Software Foundation; either version 2.1 of the License, or
+<i class="no-highlight">12</i>&nbsp; * (at your option) any later version.
+<i class="no-highlight">13</i>&nbsp; *
+<i class="no-highlight">14</i>&nbsp; * This library is distributed in the hope that it will be useful, but
+<i class="no-highlight">15</i>&nbsp; * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+<i class="no-highlight">16</i>&nbsp; * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+<i class="no-highlight">17</i>&nbsp; * License for more details.
+<i class="no-highlight">18</i>&nbsp; *
+<i class="no-highlight">19</i>&nbsp; * You should have received a copy of the GNU Lesser General Public
+<i class="no-highlight">20</i>&nbsp; * License along with this library; if not, write to the Free Software
+<i class="no-highlight">21</i>&nbsp; * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+<i class="no-highlight">22</i>&nbsp; * USA.
+<i class="no-highlight">23</i>&nbsp; *
+<i class="no-highlight">24</i>&nbsp; * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+<i class="no-highlight">25</i>&nbsp; * Other names may be trademarks of their respective owners.]
+<i class="no-highlight">26</i>&nbsp; *
+<i class="no-highlight">27</i>&nbsp; * --------------
+<i class="no-highlight">28</i>&nbsp; * AxisSpace.java
+<i class="no-highlight">29</i>&nbsp; * --------------
+<i class="no-highlight">30</i>&nbsp; * (C) Copyright 2003-2022, by David Gilbert and Contributors.
+<i class="no-highlight">31</i>&nbsp; *
+<i class="no-highlight">32</i>&nbsp; * Original Author:  David Gilbert;
+<i class="no-highlight">33</i>&nbsp; * Contributor(s):   -;
+<i class="no-highlight">34</i>&nbsp; *
+<i class="no-highlight">35</i>&nbsp; */
+<i class="no-highlight">36</i>&nbsp;
+<i class="no-highlight">37</i>&nbsp;package org.jfree.chart.axis;
+<i class="no-highlight">38</i>&nbsp;
+<i class="no-highlight">39</i>&nbsp;import java.awt.geom.Rectangle2D;
+<i class="no-highlight">40</i>&nbsp;import java.io.Serializable;
+<i class="no-highlight">41</i>&nbsp;import org.jfree.chart.api.RectangleEdge;
+<i class="no-highlight">42</i>&nbsp;import org.jfree.chart.internal.Args;
+<i class="no-highlight">43</i>&nbsp;import org.jfree.chart.api.PublicCloneable;
+<i class="no-highlight">44</i>&nbsp;
+<i class="no-highlight">45</i>&nbsp;/**
+<i class="no-highlight">46</i>&nbsp; * A record that contains the space required at each edge of a plot.
+<i class="no-highlight">47</i>&nbsp; */
+<i class="no-highlight">48</i>&nbsp;public class AxisSpace implements Cloneable, PublicCloneable, Serializable {
+<i class="no-highlight">49</i>&nbsp;
+<i class="no-highlight">50</i>&nbsp;    /** For serialization. */
+<i class="no-highlight">51</i>&nbsp;    private static final long serialVersionUID = -2490732595134766305L;
+<i class="no-highlight">52</i>&nbsp;
+<i class="no-highlight">53</i>&nbsp;    /** The top space. */
+<i class="no-highlight">54</i>&nbsp;    private double top;
+<i class="no-highlight">55</i>&nbsp;
+<i class="no-highlight">56</i>&nbsp;    /** The bottom space. */
+<i class="no-highlight">57</i>&nbsp;    private double bottom;
+<i class="no-highlight">58</i>&nbsp;
+<i class="no-highlight">59</i>&nbsp;    /** The left space. */
+<i class="no-highlight">60</i>&nbsp;    private double left;
+<i class="no-highlight">61</i>&nbsp;
+<i class="no-highlight">62</i>&nbsp;    /** The right space. */
+<i class="no-highlight">63</i>&nbsp;    private double right;
+<i class="no-highlight">64</i>&nbsp;
+<i class="no-highlight">65</i>&nbsp;    /**
+<i class="no-highlight">66</i>&nbsp;     * Creates a new axis space record.
+<i class="no-highlight">67</i>&nbsp;     */
+<b class="fc"><i class="no-highlight">68</i>&nbsp;    public AxisSpace() {</b>
+<b class="fc"><i class="no-highlight">69</i>&nbsp;        this.top = 0.0;</b>
+<b class="fc"><i class="no-highlight">70</i>&nbsp;        this.bottom = 0.0;</b>
+<b class="fc"><i class="no-highlight">71</i>&nbsp;        this.left = 0.0;</b>
+<b class="fc"><i class="no-highlight">72</i>&nbsp;        this.right = 0.0;</b>
+<i class="no-highlight">73</i>&nbsp;    }
+<i class="no-highlight">74</i>&nbsp;
+<i class="no-highlight">75</i>&nbsp;    /**
+<i class="no-highlight">76</i>&nbsp;     * Returns the space reserved for axes at the top of the plot area.
+<i class="no-highlight">77</i>&nbsp;     *
+<i class="no-highlight">78</i>&nbsp;     * @return The space (in Java2D units).
+<i class="no-highlight">79</i>&nbsp;     */
+<i class="no-highlight">80</i>&nbsp;    public double getTop() {
+<b class="nc"><i class="no-highlight">81</i>&nbsp;        return this.top;</b>
+<i class="no-highlight">82</i>&nbsp;    }
+<i class="no-highlight">83</i>&nbsp;
+<i class="no-highlight">84</i>&nbsp;    /**
+<i class="no-highlight">85</i>&nbsp;     * Sets the space reserved for axes at the top of the plot area.
+<i class="no-highlight">86</i>&nbsp;     *
+<i class="no-highlight">87</i>&nbsp;     * @param space  the space (in Java2D units).
+<i class="no-highlight">88</i>&nbsp;     */
+<i class="no-highlight">89</i>&nbsp;    public void setTop(double space) {
+<b class="fc"><i class="no-highlight">90</i>&nbsp;        this.top = space;</b>
+<i class="no-highlight">91</i>&nbsp;    }
+<i class="no-highlight">92</i>&nbsp;
+<i class="no-highlight">93</i>&nbsp;    /**
+<i class="no-highlight">94</i>&nbsp;     * Returns the space reserved for axes at the bottom of the plot area.
+<i class="no-highlight">95</i>&nbsp;     *
+<i class="no-highlight">96</i>&nbsp;     * @return The space (in Java2D units).
+<i class="no-highlight">97</i>&nbsp;     */
+<i class="no-highlight">98</i>&nbsp;    public double getBottom() {
+<b class="nc"><i class="no-highlight">99</i>&nbsp;        return this.bottom;</b>
+<i class="no-highlight">100</i>&nbsp;    }
+<i class="no-highlight">101</i>&nbsp;
+<i class="no-highlight">102</i>&nbsp;    /**
+<i class="no-highlight">103</i>&nbsp;     * Sets the space reserved for axes at the bottom of the plot area.
+<i class="no-highlight">104</i>&nbsp;     *
+<i class="no-highlight">105</i>&nbsp;     * @param space  the space (in Java2D units).
+<i class="no-highlight">106</i>&nbsp;     */
+<i class="no-highlight">107</i>&nbsp;    public void setBottom(double space) {
+<b class="fc"><i class="no-highlight">108</i>&nbsp;        this.bottom = space;</b>
+<i class="no-highlight">109</i>&nbsp;    }
+<i class="no-highlight">110</i>&nbsp;
+<i class="no-highlight">111</i>&nbsp;    /**
+<i class="no-highlight">112</i>&nbsp;     * Returns the space reserved for axes at the left of the plot area.
+<i class="no-highlight">113</i>&nbsp;     *
+<i class="no-highlight">114</i>&nbsp;     * @return The space (in Java2D units).
+<i class="no-highlight">115</i>&nbsp;     */
+<i class="no-highlight">116</i>&nbsp;    public double getLeft() {
+<b class="nc"><i class="no-highlight">117</i>&nbsp;        return this.left;</b>
+<i class="no-highlight">118</i>&nbsp;    }
+<i class="no-highlight">119</i>&nbsp;
+<i class="no-highlight">120</i>&nbsp;    /**
+<i class="no-highlight">121</i>&nbsp;     * Sets the space reserved for axes at the left of the plot area.
+<i class="no-highlight">122</i>&nbsp;     *
+<i class="no-highlight">123</i>&nbsp;     * @param space  the space (in Java2D units).
+<i class="no-highlight">124</i>&nbsp;     */
+<i class="no-highlight">125</i>&nbsp;    public void setLeft(double space) {
+<b class="fc"><i class="no-highlight">126</i>&nbsp;        this.left = space;</b>
+<i class="no-highlight">127</i>&nbsp;    }
+<i class="no-highlight">128</i>&nbsp;
+<i class="no-highlight">129</i>&nbsp;    /**
+<i class="no-highlight">130</i>&nbsp;     * Returns the space reserved for axes at the right of the plot area.
+<i class="no-highlight">131</i>&nbsp;     *
+<i class="no-highlight">132</i>&nbsp;     * @return The space (in Java2D units).
+<i class="no-highlight">133</i>&nbsp;     */
+<i class="no-highlight">134</i>&nbsp;    public double getRight() {
+<b class="nc"><i class="no-highlight">135</i>&nbsp;        return this.right;</b>
+<i class="no-highlight">136</i>&nbsp;    }
+<i class="no-highlight">137</i>&nbsp;
+<i class="no-highlight">138</i>&nbsp;    /**
+<i class="no-highlight">139</i>&nbsp;     * Sets the space reserved for axes at the right of the plot area.
+<i class="no-highlight">140</i>&nbsp;     *
+<i class="no-highlight">141</i>&nbsp;     * @param space  the space (in Java2D units).
+<i class="no-highlight">142</i>&nbsp;     */
+<i class="no-highlight">143</i>&nbsp;    public void setRight(double space) {
+<b class="fc"><i class="no-highlight">144</i>&nbsp;        this.right = space;</b>
+<i class="no-highlight">145</i>&nbsp;    }
+<i class="no-highlight">146</i>&nbsp;
+<i class="no-highlight">147</i>&nbsp;    /**
+<i class="no-highlight">148</i>&nbsp;     * Adds space to the top, bottom, left or right edge of the plot area.
+<i class="no-highlight">149</i>&nbsp;     *
+<i class="no-highlight">150</i>&nbsp;     * @param space  the space (in Java2D units).
+<i class="no-highlight">151</i>&nbsp;     * @param edge  the edge ({@code null} not permitted).
+<i class="no-highlight">152</i>&nbsp;     */
+<i class="no-highlight">153</i>&nbsp;    public void add(double space, RectangleEdge edge) {
+<b class="fc"><i class="no-highlight">154</i>&nbsp;        Args.nullNotPermitted(edge, &quot;edge&quot;);</b>
+<b class="fc"><i class="no-highlight">155</i>&nbsp;        if (edge == RectangleEdge.TOP) {</b>
+<b class="nc"><i class="no-highlight">156</i>&nbsp;            this.top += space;</b>
+<i class="no-highlight">157</i>&nbsp;        }
+<b class="fc"><i class="no-highlight">158</i>&nbsp;        else if (edge == RectangleEdge.BOTTOM) {</b>
+<b class="fc"><i class="no-highlight">159</i>&nbsp;            this.bottom += space;</b>
+<i class="no-highlight">160</i>&nbsp;        }
+<b class="fc"><i class="no-highlight">161</i>&nbsp;        else if (edge == RectangleEdge.LEFT) {</b>
+<b class="fc"><i class="no-highlight">162</i>&nbsp;            this.left += space;</b>
+<i class="no-highlight">163</i>&nbsp;        }
+<b class="nc"><i class="no-highlight">164</i>&nbsp;        else if (edge == RectangleEdge.RIGHT) {</b>
+<b class="nc"><i class="no-highlight">165</i>&nbsp;            this.right += space;</b>
+<i class="no-highlight">166</i>&nbsp;        }
+<i class="no-highlight">167</i>&nbsp;        else {
+<b class="nc"><i class="no-highlight">168</i>&nbsp;            throw new IllegalStateException(&quot;Unrecognised &#39;edge&#39; argument.&quot;);</b>
+<i class="no-highlight">169</i>&nbsp;        }
+<i class="no-highlight">170</i>&nbsp;    }
+<i class="no-highlight">171</i>&nbsp;
+<i class="no-highlight">172</i>&nbsp;    /**
+<i class="no-highlight">173</i>&nbsp;     * Ensures that this object reserves at least as much space as another.
+<i class="no-highlight">174</i>&nbsp;     *
+<i class="no-highlight">175</i>&nbsp;     * @param space  the other space.
+<i class="no-highlight">176</i>&nbsp;     */
+<i class="no-highlight">177</i>&nbsp;    public void ensureAtLeast(AxisSpace space) {
+<b class="nc"><i class="no-highlight">178</i>&nbsp;        this.top = Math.max(this.top, space.top);</b>
+<b class="nc"><i class="no-highlight">179</i>&nbsp;        this.bottom = Math.max(this.bottom, space.bottom);</b>
+<b class="nc"><i class="no-highlight">180</i>&nbsp;        this.left = Math.max(this.left, space.left);</b>
+<b class="nc"><i class="no-highlight">181</i>&nbsp;        this.right = Math.max(this.right, space.right);</b>
+<i class="no-highlight">182</i>&nbsp;    }
+<i class="no-highlight">183</i>&nbsp;
+<i class="no-highlight">184</i>&nbsp;    /**
+<i class="no-highlight">185</i>&nbsp;     * Ensures there is a minimum amount of space at the edge corresponding to
+<i class="no-highlight">186</i>&nbsp;     * the specified axis location.
+<i class="no-highlight">187</i>&nbsp;     *
+<i class="no-highlight">188</i>&nbsp;     * @param space  the space.
+<i class="no-highlight">189</i>&nbsp;     * @param edge  the location.
+<i class="no-highlight">190</i>&nbsp;     */
+<i class="no-highlight">191</i>&nbsp;    public void ensureAtLeast(double space, RectangleEdge edge) {
+<b class="nc"><i class="no-highlight">192</i>&nbsp;        if (edge == RectangleEdge.TOP) {</b>
+<b class="nc"><i class="no-highlight">193</i>&nbsp;            if (this.top &lt; space) {</b>
+<b class="nc"><i class="no-highlight">194</i>&nbsp;                this.top = space;</b>
+<i class="no-highlight">195</i>&nbsp;            }
+<i class="no-highlight">196</i>&nbsp;        }
+<b class="nc"><i class="no-highlight">197</i>&nbsp;        else if (edge == RectangleEdge.BOTTOM) {</b>
+<b class="nc"><i class="no-highlight">198</i>&nbsp;            if (this.bottom &lt; space) {</b>
+<b class="nc"><i class="no-highlight">199</i>&nbsp;                this.bottom = space;</b>
+<i class="no-highlight">200</i>&nbsp;            }
+<i class="no-highlight">201</i>&nbsp;        }
+<b class="nc"><i class="no-highlight">202</i>&nbsp;        else if (edge == RectangleEdge.LEFT) {</b>
+<b class="nc"><i class="no-highlight">203</i>&nbsp;            if (this.left &lt; space) {</b>
+<b class="nc"><i class="no-highlight">204</i>&nbsp;                this.left = space;</b>
+<i class="no-highlight">205</i>&nbsp;            }
+<i class="no-highlight">206</i>&nbsp;        }
+<b class="nc"><i class="no-highlight">207</i>&nbsp;        else if (edge == RectangleEdge.RIGHT) {</b>
+<b class="nc"><i class="no-highlight">208</i>&nbsp;            if (this.right &lt; space) {</b>
+<b class="nc"><i class="no-highlight">209</i>&nbsp;                this.right = space;</b>
+<i class="no-highlight">210</i>&nbsp;            }
+<i class="no-highlight">211</i>&nbsp;        }
+<i class="no-highlight">212</i>&nbsp;        else {
+<b class="nc"><i class="no-highlight">213</i>&nbsp;            throw new IllegalStateException(</b>
+<i class="no-highlight">214</i>&nbsp;                &quot;AxisSpace.ensureAtLeast(): unrecognised AxisLocation.&quot;
+<i class="no-highlight">215</i>&nbsp;            );
+<i class="no-highlight">216</i>&nbsp;        }
+<i class="no-highlight">217</i>&nbsp;    }
+<i class="no-highlight">218</i>&nbsp;
+<i class="no-highlight">219</i>&nbsp;    /**
+<i class="no-highlight">220</i>&nbsp;     * Shrinks an area by the space attributes.
+<i class="no-highlight">221</i>&nbsp;     *
+<i class="no-highlight">222</i>&nbsp;     * @param area  the area to shrink.
+<i class="no-highlight">223</i>&nbsp;     * @param result  an optional carrier for the result.
+<i class="no-highlight">224</i>&nbsp;     *
+<i class="no-highlight">225</i>&nbsp;     * @return The result.
+<i class="no-highlight">226</i>&nbsp;     */
+<i class="no-highlight">227</i>&nbsp;    public Rectangle2D shrink(Rectangle2D area, Rectangle2D result) {
+<b class="fc"><i class="no-highlight">228</i>&nbsp;        if (result == null) {</b>
+<b class="fc"><i class="no-highlight">229</i>&nbsp;            result = new Rectangle2D.Double();</b>
+<i class="no-highlight">230</i>&nbsp;        }
+<b class="fc"><i class="no-highlight">231</i>&nbsp;        result.setRect(</b>
+<b class="fc"><i class="no-highlight">232</i>&nbsp;            area.getX() + this.left,</b>
+<b class="fc"><i class="no-highlight">233</i>&nbsp;            area.getY() + this.top,</b>
+<b class="fc"><i class="no-highlight">234</i>&nbsp;            area.getWidth() - this.left - this.right,</b>
+<b class="fc"><i class="no-highlight">235</i>&nbsp;            area.getHeight() - this.top - this.bottom</b>
+<i class="no-highlight">236</i>&nbsp;        );
+<b class="fc"><i class="no-highlight">237</i>&nbsp;        return result;</b>
+<i class="no-highlight">238</i>&nbsp;    }
+<i class="no-highlight">239</i>&nbsp;
+<i class="no-highlight">240</i>&nbsp;    /**
+<i class="no-highlight">241</i>&nbsp;     * Expands an area by the amount of space represented by this object.
+<i class="no-highlight">242</i>&nbsp;     *
+<i class="no-highlight">243</i>&nbsp;     * @param area  the area to expand.
+<i class="no-highlight">244</i>&nbsp;     * @param result  an optional carrier for the result.
+<i class="no-highlight">245</i>&nbsp;     *
+<i class="no-highlight">246</i>&nbsp;     * @return The result.
+<i class="no-highlight">247</i>&nbsp;     */
+<i class="no-highlight">248</i>&nbsp;    public Rectangle2D expand(Rectangle2D area, Rectangle2D result) {
+<b class="nc"><i class="no-highlight">249</i>&nbsp;        if (result == null) {</b>
+<b class="nc"><i class="no-highlight">250</i>&nbsp;            result = new Rectangle2D.Double();</b>
+<i class="no-highlight">251</i>&nbsp;        }
+<b class="nc"><i class="no-highlight">252</i>&nbsp;        result.setRect(</b>
+<b class="nc"><i class="no-highlight">253</i>&nbsp;            area.getX() - this.left,</b>
+<b class="nc"><i class="no-highlight">254</i>&nbsp;            area.getY() - this.top,</b>
+<b class="nc"><i class="no-highlight">255</i>&nbsp;            area.getWidth() + this.left + this.right,</b>
+<b class="nc"><i class="no-highlight">256</i>&nbsp;            area.getHeight() + this.top + this.bottom</b>
+<i class="no-highlight">257</i>&nbsp;        );
+<b class="nc"><i class="no-highlight">258</i>&nbsp;        return result;</b>
+<i class="no-highlight">259</i>&nbsp;    }
+<i class="no-highlight">260</i>&nbsp;
+<i class="no-highlight">261</i>&nbsp;    /**
+<i class="no-highlight">262</i>&nbsp;     * Calculates the reserved area.
+<i class="no-highlight">263</i>&nbsp;     *
+<i class="no-highlight">264</i>&nbsp;     * @param area  the area.
+<i class="no-highlight">265</i>&nbsp;     * @param edge  the edge.
+<i class="no-highlight">266</i>&nbsp;     *
+<i class="no-highlight">267</i>&nbsp;     * @return The reserved area.
+<i class="no-highlight">268</i>&nbsp;     */
+<i class="no-highlight">269</i>&nbsp;    public Rectangle2D reserved(Rectangle2D area, RectangleEdge edge) {
+<b class="nc"><i class="no-highlight">270</i>&nbsp;        Rectangle2D result = null;</b>
+<b class="nc"><i class="no-highlight">271</i>&nbsp;        if (edge == RectangleEdge.TOP) {</b>
+<b class="nc"><i class="no-highlight">272</i>&nbsp;            result = new Rectangle2D.Double(</b>
+<b class="nc"><i class="no-highlight">273</i>&nbsp;                area.getX(), area.getY(), area.getWidth(), this.top</b>
+<i class="no-highlight">274</i>&nbsp;            );
+<i class="no-highlight">275</i>&nbsp;        }
+<b class="nc"><i class="no-highlight">276</i>&nbsp;        else if (edge == RectangleEdge.BOTTOM) {</b>
+<b class="nc"><i class="no-highlight">277</i>&nbsp;            result = new Rectangle2D.Double(</b>
+<b class="nc"><i class="no-highlight">278</i>&nbsp;                area.getX(), area.getMaxY() - this.top,</b>
+<b class="nc"><i class="no-highlight">279</i>&nbsp;                area.getWidth(), this.bottom</b>
+<i class="no-highlight">280</i>&nbsp;            );
+<i class="no-highlight">281</i>&nbsp;        }
+<b class="nc"><i class="no-highlight">282</i>&nbsp;        else if (edge == RectangleEdge.LEFT) {</b>
+<b class="nc"><i class="no-highlight">283</i>&nbsp;            result = new Rectangle2D.Double(</b>
+<b class="nc"><i class="no-highlight">284</i>&nbsp;                area.getX(), area.getY(), this.left, area.getHeight()</b>
+<i class="no-highlight">285</i>&nbsp;            );
+<i class="no-highlight">286</i>&nbsp;        }
+<b class="nc"><i class="no-highlight">287</i>&nbsp;        else if (edge == RectangleEdge.RIGHT) {</b>
+<b class="nc"><i class="no-highlight">288</i>&nbsp;            result = new Rectangle2D.Double(</b>
+<b class="nc"><i class="no-highlight">289</i>&nbsp;                area.getMaxX() - this.right, area.getY(),</b>
+<b class="nc"><i class="no-highlight">290</i>&nbsp;                this.right, area.getHeight()</b>
+<i class="no-highlight">291</i>&nbsp;            );
+<i class="no-highlight">292</i>&nbsp;        }
+<b class="nc"><i class="no-highlight">293</i>&nbsp;        return result;</b>
+<i class="no-highlight">294</i>&nbsp;    }
+<i class="no-highlight">295</i>&nbsp;
+<i class="no-highlight">296</i>&nbsp;    /**
+<i class="no-highlight">297</i>&nbsp;     * Returns a clone of the object.
+<i class="no-highlight">298</i>&nbsp;     *
+<i class="no-highlight">299</i>&nbsp;     * @return A clone.
+<i class="no-highlight">300</i>&nbsp;     *
+<i class="no-highlight">301</i>&nbsp;     * @throws CloneNotSupportedException This class won&#39;t throw this exception,
+<i class="no-highlight">302</i>&nbsp;     *         but subclasses (if any) might.
+<i class="no-highlight">303</i>&nbsp;     */
+<i class="no-highlight">304</i>&nbsp;    @Override
+<i class="no-highlight">305</i>&nbsp;    public Object clone() throws CloneNotSupportedException {
+<b class="fc"><i class="no-highlight">306</i>&nbsp;        return super.clone();</b>
+<i class="no-highlight">307</i>&nbsp;    }
+<i class="no-highlight">308</i>&nbsp;
+<i class="no-highlight">309</i>&nbsp;    /**
+<i class="no-highlight">310</i>&nbsp;     * Tests this object for equality with another object.
+<i class="no-highlight">311</i>&nbsp;     *
+<i class="no-highlight">312</i>&nbsp;     * @param obj  the object to compare against.
+<i class="no-highlight">313</i>&nbsp;     *
+<i class="no-highlight">314</i>&nbsp;     * @return {@code true} or {@code false}.
+<i class="no-highlight">315</i>&nbsp;     */
+<i class="no-highlight">316</i>&nbsp;    @Override
+<i class="no-highlight">317</i>&nbsp;    public boolean equals(Object obj) {
+<b class="fc"><i class="no-highlight">318</i>&nbsp;        if (obj == this) {</b>
+<b class="nc"><i class="no-highlight">319</i>&nbsp;            return true;</b>
+<i class="no-highlight">320</i>&nbsp;        }
+<b class="fc"><i class="no-highlight">321</i>&nbsp;        if (!(obj instanceof AxisSpace)) {</b>
+<b class="nc"><i class="no-highlight">322</i>&nbsp;            return false;</b>
+<i class="no-highlight">323</i>&nbsp;        }
+<b class="fc"><i class="no-highlight">324</i>&nbsp;        AxisSpace that = (AxisSpace) obj;</b>
+<b class="fc"><i class="no-highlight">325</i>&nbsp;        if (this.top != that.top) {</b>
+<b class="fc"><i class="no-highlight">326</i>&nbsp;            return false;</b>
+<i class="no-highlight">327</i>&nbsp;        }
+<b class="fc"><i class="no-highlight">328</i>&nbsp;        if (this.bottom != that.bottom) {</b>
+<b class="fc"><i class="no-highlight">329</i>&nbsp;            return false;</b>
+<i class="no-highlight">330</i>&nbsp;        }
+<b class="fc"><i class="no-highlight">331</i>&nbsp;        if (this.left != that.left) {</b>
+<b class="fc"><i class="no-highlight">332</i>&nbsp;            return false;</b>
+<i class="no-highlight">333</i>&nbsp;        }
+<b class="fc"><i class="no-highlight">334</i>&nbsp;        if (this.right != that.right) {</b>
+<b class="fc"><i class="no-highlight">335</i>&nbsp;            return false;</b>
+<i class="no-highlight">336</i>&nbsp;        }
+<b class="fc"><i class="no-highlight">337</i>&nbsp;        return true;</b>
+<i class="no-highlight">338</i>&nbsp;    }
+<i class="no-highlight">339</i>&nbsp;
+<i class="no-highlight">340</i>&nbsp;    /**
+<i class="no-highlight">341</i>&nbsp;     * Returns a hash code for this object.
+<i class="no-highlight">342</i>&nbsp;     *
+<i class="no-highlight">343</i>&nbsp;     * @return A hash code.
+<i class="no-highlight">344</i>&nbsp;     */
+<i class="no-highlight">345</i>&nbsp;    @Override
+<i class="no-highlight">346</i>&nbsp;    public int hashCode() {
+<b class="fc"><i class="no-highlight">347</i>&nbsp;        int result = 23;</b>
+<b class="fc"><i class="no-highlight">348</i>&nbsp;        long l = Double.doubleToLongBits(this.top);</b>
+<b class="fc"><i class="no-highlight">349</i>&nbsp;        result = 37 * result + (int) (l ^ (l &gt;&gt;&gt; 32));</b>
+<b class="fc"><i class="no-highlight">350</i>&nbsp;        l = Double.doubleToLongBits(this.bottom);</b>
+<b class="fc"><i class="no-highlight">351</i>&nbsp;        result = 37 * result + (int) (l ^ (l &gt;&gt;&gt; 32));</b>
+<b class="fc"><i class="no-highlight">352</i>&nbsp;        l = Double.doubleToLongBits(this.left);</b>
+<b class="fc"><i class="no-highlight">353</i>&nbsp;        result = 37 * result + (int) (l ^ (l &gt;&gt;&gt; 32));</b>
+<b class="fc"><i class="no-highlight">354</i>&nbsp;        l = Double.doubleToLongBits(this.right);</b>
+<b class="fc"><i class="no-highlight">355</i>&nbsp;        result = 37 * result + (int) (l ^ (l &gt;&gt;&gt; 32));</b>
+<b class="fc"><i class="no-highlight">356</i>&nbsp;        return result;</b>
+<i class="no-highlight">357</i>&nbsp;    }
+<i class="no-highlight">358</i>&nbsp;
+<i class="no-highlight">359</i>&nbsp;    /**
+<i class="no-highlight">360</i>&nbsp;     * Returns a string representing the object (for debugging purposes).
+<i class="no-highlight">361</i>&nbsp;     *
+<i class="no-highlight">362</i>&nbsp;     * @return A string.
+<i class="no-highlight">363</i>&nbsp;     */
+<i class="no-highlight">364</i>&nbsp;    @Override
+<i class="no-highlight">365</i>&nbsp;    public String toString() {
+<b class="nc"><i class="no-highlight">366</i>&nbsp;        return super.toString() + &quot;[left=&quot; + this.left + &quot;,right=&quot; + this.right</b>
+<i class="no-highlight">367</i>&nbsp;                    + &quot;,top=&quot; + this.top + &quot;,bottom=&quot; + this.bottom + &quot;]&quot;;
+<i class="no-highlight">368</i>&nbsp;    }
+<i class="no-highlight">369</i>&nbsp;
+<i class="no-highlight">370</i>&nbsp;}
+</div>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+        var codeBlock = document.getElementById('sourceCode');
+
+        if (codeBlock) {
+            hljs.highlightBlock(codeBlock);
+        }
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2022-03-26 17:36</div>
+</div>
+</body>
+</html>

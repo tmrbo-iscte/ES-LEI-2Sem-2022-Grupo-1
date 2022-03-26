@@ -1,0 +1,289 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > TickUnit</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/highlight-idea.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.pack.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.jfree.chart.axis</a>
+</div>
+
+<h1>Coverage Summary for Class: TickUnit (org.jfree.chart.axis)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">TickUnit</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    87,5%
+  </span>
+  <span class="absValue">
+    (7/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    79,3%
+  </span>
+  <span class="absValue">
+    (23/29)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<div class="sourceCode" id="sourceCode"><i class="no-highlight">1</i>&nbsp;/* ===========================================================
+<i class="no-highlight">2</i>&nbsp; * JFreeChart : a free chart library for the Java(tm) platform
+<i class="no-highlight">3</i>&nbsp; * ===========================================================
+<i class="no-highlight">4</i>&nbsp; *
+<i class="no-highlight">5</i>&nbsp; * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+<i class="no-highlight">6</i>&nbsp; *
+<i class="no-highlight">7</i>&nbsp; * Project Info:  http://www.jfree.org/jfreechart/index.html
+<i class="no-highlight">8</i>&nbsp; *
+<i class="no-highlight">9</i>&nbsp; * This library is free software; you can redistribute it and/or modify it
+<i class="no-highlight">10</i>&nbsp; * under the terms of the GNU Lesser General Public License as published by
+<i class="no-highlight">11</i>&nbsp; * the Free Software Foundation; either version 2.1 of the License, or
+<i class="no-highlight">12</i>&nbsp; * (at your option) any later version.
+<i class="no-highlight">13</i>&nbsp; *
+<i class="no-highlight">14</i>&nbsp; * This library is distributed in the hope that it will be useful, but
+<i class="no-highlight">15</i>&nbsp; * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+<i class="no-highlight">16</i>&nbsp; * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+<i class="no-highlight">17</i>&nbsp; * License for more details.
+<i class="no-highlight">18</i>&nbsp; *
+<i class="no-highlight">19</i>&nbsp; * You should have received a copy of the GNU Lesser General Public
+<i class="no-highlight">20</i>&nbsp; * License along with this library; if not, write to the Free Software
+<i class="no-highlight">21</i>&nbsp; * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+<i class="no-highlight">22</i>&nbsp; * USA.
+<i class="no-highlight">23</i>&nbsp; *
+<i class="no-highlight">24</i>&nbsp; * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+<i class="no-highlight">25</i>&nbsp; * Other names may be trademarks of their respective owners.]
+<i class="no-highlight">26</i>&nbsp; *
+<i class="no-highlight">27</i>&nbsp; * -------------
+<i class="no-highlight">28</i>&nbsp; * TickUnit.java
+<i class="no-highlight">29</i>&nbsp; * -------------
+<i class="no-highlight">30</i>&nbsp; * (C) Copyright 2001-2022, by David Gilbert.
+<i class="no-highlight">31</i>&nbsp; *
+<i class="no-highlight">32</i>&nbsp; * Original Author:  David Gilbert;
+<i class="no-highlight">33</i>&nbsp; * Contributor(s):   -;
+<i class="no-highlight">34</i>&nbsp; *
+<i class="no-highlight">35</i>&nbsp; */
+<i class="no-highlight">36</i>&nbsp;
+<i class="no-highlight">37</i>&nbsp;package org.jfree.chart.axis;
+<i class="no-highlight">38</i>&nbsp;
+<i class="no-highlight">39</i>&nbsp;import java.io.Serializable;
+<i class="no-highlight">40</i>&nbsp;
+<i class="no-highlight">41</i>&nbsp;/**
+<i class="no-highlight">42</i>&nbsp; * Base class representing a tick unit.  This determines the spacing of the
+<i class="no-highlight">43</i>&nbsp; * tick marks on an axis.
+<i class="no-highlight">44</i>&nbsp; * &lt;P&gt;
+<i class="no-highlight">45</i>&nbsp; * This class (and any subclasses) should be immutable, the reason being that
+<i class="no-highlight">46</i>&nbsp; * ORDERED collections of tick units are maintained and if one instance can be
+<i class="no-highlight">47</i>&nbsp; * changed, it may destroy the order of the collection that it belongs to.
+<i class="no-highlight">48</i>&nbsp; * In addition, if the implementations are immutable, they can belong to
+<i class="no-highlight">49</i>&nbsp; * multiple collections.
+<i class="no-highlight">50</i>&nbsp; *
+<i class="no-highlight">51</i>&nbsp; * @see ValueAxis
+<i class="no-highlight">52</i>&nbsp; */
+<i class="no-highlight">53</i>&nbsp;public abstract class TickUnit implements Comparable, Serializable {
+<i class="no-highlight">54</i>&nbsp;
+<i class="no-highlight">55</i>&nbsp;    /** For serialization. */
+<i class="no-highlight">56</i>&nbsp;    private static final long serialVersionUID = 510179855057013974L;
+<i class="no-highlight">57</i>&nbsp;
+<i class="no-highlight">58</i>&nbsp;    /** The size of the tick unit. */
+<i class="no-highlight">59</i>&nbsp;    private double size;
+<i class="no-highlight">60</i>&nbsp;
+<i class="no-highlight">61</i>&nbsp;    /**
+<i class="no-highlight">62</i>&nbsp;     * The number of minor ticks.
+<i class="no-highlight">63</i>&nbsp;     */
+<i class="no-highlight">64</i>&nbsp;    private int minorTickCount;
+<i class="no-highlight">65</i>&nbsp;
+<i class="no-highlight">66</i>&nbsp;    /**
+<i class="no-highlight">67</i>&nbsp;     * Constructs a new tick unit.
+<i class="no-highlight">68</i>&nbsp;     *
+<i class="no-highlight">69</i>&nbsp;     * @param size  the tick unit size.
+<i class="no-highlight">70</i>&nbsp;     */
+<b class="fc"><i class="no-highlight">71</i>&nbsp;    public TickUnit(double size) {</b>
+<b class="fc"><i class="no-highlight">72</i>&nbsp;        this.size = size;</b>
+<i class="no-highlight">73</i>&nbsp;    }
+<i class="no-highlight">74</i>&nbsp;
+<i class="no-highlight">75</i>&nbsp;    /**
+<i class="no-highlight">76</i>&nbsp;     * Constructs a new tick unit.
+<i class="no-highlight">77</i>&nbsp;     *
+<i class="no-highlight">78</i>&nbsp;     * @param size  the tick unit size.
+<i class="no-highlight">79</i>&nbsp;     * @param minorTickCount  the minor tick count.
+<i class="no-highlight">80</i>&nbsp;     */
+<b class="fc"><i class="no-highlight">81</i>&nbsp;    public TickUnit(double size, int minorTickCount) {</b>
+<b class="fc"><i class="no-highlight">82</i>&nbsp;        this.size = size;</b>
+<b class="fc"><i class="no-highlight">83</i>&nbsp;        this.minorTickCount = minorTickCount;</b>
+<i class="no-highlight">84</i>&nbsp;    }
+<i class="no-highlight">85</i>&nbsp;
+<i class="no-highlight">86</i>&nbsp;    /**
+<i class="no-highlight">87</i>&nbsp;     * Returns the size of the tick unit.
+<i class="no-highlight">88</i>&nbsp;     *
+<i class="no-highlight">89</i>&nbsp;     * @return The size of the tick unit.
+<i class="no-highlight">90</i>&nbsp;     */
+<i class="no-highlight">91</i>&nbsp;    public double getSize() {
+<b class="fc"><i class="no-highlight">92</i>&nbsp;        return this.size;</b>
+<i class="no-highlight">93</i>&nbsp;    }
+<i class="no-highlight">94</i>&nbsp;
+<i class="no-highlight">95</i>&nbsp;    /**
+<i class="no-highlight">96</i>&nbsp;     * Returns the minor tick count.
+<i class="no-highlight">97</i>&nbsp;     *
+<i class="no-highlight">98</i>&nbsp;     * @return The minor tick count.
+<i class="no-highlight">99</i>&nbsp;     */
+<i class="no-highlight">100</i>&nbsp;    public int getMinorTickCount() {
+<b class="fc"><i class="no-highlight">101</i>&nbsp;        return this.minorTickCount;</b>
+<i class="no-highlight">102</i>&nbsp;    }
+<i class="no-highlight">103</i>&nbsp;
+<i class="no-highlight">104</i>&nbsp;    /**
+<i class="no-highlight">105</i>&nbsp;     * Converts the supplied value to a string.
+<i class="no-highlight">106</i>&nbsp;     * &lt;P&gt;
+<i class="no-highlight">107</i>&nbsp;     * Subclasses may implement special formatting by overriding this method.
+<i class="no-highlight">108</i>&nbsp;     *
+<i class="no-highlight">109</i>&nbsp;     * @param value  the data value.
+<i class="no-highlight">110</i>&nbsp;     *
+<i class="no-highlight">111</i>&nbsp;     * @return Value as string.
+<i class="no-highlight">112</i>&nbsp;     */
+<i class="no-highlight">113</i>&nbsp;    public String valueToString(double value) {
+<b class="nc"><i class="no-highlight">114</i>&nbsp;        return String.valueOf(value);</b>
+<i class="no-highlight">115</i>&nbsp;    }
+<i class="no-highlight">116</i>&nbsp;
+<i class="no-highlight">117</i>&nbsp;    /**
+<i class="no-highlight">118</i>&nbsp;     * Compares this tick unit to an arbitrary object.
+<i class="no-highlight">119</i>&nbsp;     *
+<i class="no-highlight">120</i>&nbsp;     * @param object  the object to compare against.
+<i class="no-highlight">121</i>&nbsp;     *
+<i class="no-highlight">122</i>&nbsp;     * @return {@code 1} if the size of the other object is less than this,
+<i class="no-highlight">123</i>&nbsp;     *      {@code 0} if both have the same size and {@code -1} this
+<i class="no-highlight">124</i>&nbsp;     *      size is less than the others.
+<i class="no-highlight">125</i>&nbsp;     */
+<i class="no-highlight">126</i>&nbsp;    @Override
+<i class="no-highlight">127</i>&nbsp;    public int compareTo(Object object) {
+<i class="no-highlight">128</i>&nbsp;
+<b class="fc"><i class="no-highlight">129</i>&nbsp;        if (object instanceof TickUnit) {</b>
+<b class="fc"><i class="no-highlight">130</i>&nbsp;            TickUnit other = (TickUnit) object;</b>
+<b class="fc"><i class="no-highlight">131</i>&nbsp;            if (this.size &gt; other.getSize()) {</b>
+<b class="fc"><i class="no-highlight">132</i>&nbsp;                return 1;</b>
+<i class="no-highlight">133</i>&nbsp;            }
+<b class="fc"><i class="no-highlight">134</i>&nbsp;            else if (this.size &lt; other.getSize()) {</b>
+<b class="fc"><i class="no-highlight">135</i>&nbsp;                return -1;</b>
+<i class="no-highlight">136</i>&nbsp;            }
+<i class="no-highlight">137</i>&nbsp;            else {
+<b class="fc"><i class="no-highlight">138</i>&nbsp;                return 0;</b>
+<i class="no-highlight">139</i>&nbsp;            }
+<i class="no-highlight">140</i>&nbsp;        }
+<i class="no-highlight">141</i>&nbsp;        else {
+<b class="nc"><i class="no-highlight">142</i>&nbsp;            return -1;</b>
+<i class="no-highlight">143</i>&nbsp;        }
+<i class="no-highlight">144</i>&nbsp;
+<i class="no-highlight">145</i>&nbsp;    }
+<i class="no-highlight">146</i>&nbsp;
+<i class="no-highlight">147</i>&nbsp;    /**
+<i class="no-highlight">148</i>&nbsp;     * Tests this unit for equality with another object.
+<i class="no-highlight">149</i>&nbsp;     *
+<i class="no-highlight">150</i>&nbsp;     * @param obj  the object.
+<i class="no-highlight">151</i>&nbsp;     *
+<i class="no-highlight">152</i>&nbsp;     * @return {@code true} or {@code false}.
+<i class="no-highlight">153</i>&nbsp;     */
+<i class="no-highlight">154</i>&nbsp;    @Override
+<i class="no-highlight">155</i>&nbsp;    public boolean equals(Object obj) {
+<b class="fc"><i class="no-highlight">156</i>&nbsp;        if (obj == this) {</b>
+<b class="nc"><i class="no-highlight">157</i>&nbsp;            return true;</b>
+<i class="no-highlight">158</i>&nbsp;        }
+<b class="fc"><i class="no-highlight">159</i>&nbsp;        if (!(obj instanceof TickUnit)) {</b>
+<b class="nc"><i class="no-highlight">160</i>&nbsp;            return false;</b>
+<i class="no-highlight">161</i>&nbsp;        }
+<b class="fc"><i class="no-highlight">162</i>&nbsp;        TickUnit that = (TickUnit) obj;</b>
+<b class="fc"><i class="no-highlight">163</i>&nbsp;        if (this.size != that.size) {</b>
+<b class="fc"><i class="no-highlight">164</i>&nbsp;            return false;</b>
+<i class="no-highlight">165</i>&nbsp;        }
+<b class="fc"><i class="no-highlight">166</i>&nbsp;        if (this.minorTickCount != that.minorTickCount) {</b>
+<b class="nc"><i class="no-highlight">167</i>&nbsp;            return false;</b>
+<i class="no-highlight">168</i>&nbsp;        }
+<b class="fc"><i class="no-highlight">169</i>&nbsp;        return true;</b>
+<i class="no-highlight">170</i>&nbsp;    }
+<i class="no-highlight">171</i>&nbsp;
+<i class="no-highlight">172</i>&nbsp;    /**
+<i class="no-highlight">173</i>&nbsp;     * Returns a hash code for this instance.
+<i class="no-highlight">174</i>&nbsp;     *
+<i class="no-highlight">175</i>&nbsp;     * @return A hash code.
+<i class="no-highlight">176</i>&nbsp;     */
+<i class="no-highlight">177</i>&nbsp;    @Override
+<i class="no-highlight">178</i>&nbsp;    public int hashCode() {
+<b class="fc"><i class="no-highlight">179</i>&nbsp;        long temp = this.size != +0.0d ? Double.doubleToLongBits(this.size)</b>
+<b class="nc"><i class="no-highlight">180</i>&nbsp;                : 0L;</b>
+<b class="fc"><i class="no-highlight">181</i>&nbsp;        return (int) (temp ^ (temp &gt;&gt;&gt; 32));</b>
+<i class="no-highlight">182</i>&nbsp;    }
+<i class="no-highlight">183</i>&nbsp;
+<i class="no-highlight">184</i>&nbsp;}
+</div>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+        var codeBlock = document.getElementById('sourceCode');
+
+        if (codeBlock) {
+            hljs.highlightBlock(codeBlock);
+        }
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2022-03-26 17:36</div>
+</div>
+</body>
+</html>

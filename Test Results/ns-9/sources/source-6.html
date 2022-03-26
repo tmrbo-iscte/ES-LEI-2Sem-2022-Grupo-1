@@ -1,0 +1,784 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > LegendTitle</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/highlight-idea.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.pack.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.jfree.chart.legend</a>
+</div>
+
+<h1>Coverage Summary for Class: LegendTitle (org.jfree.chart.legend)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">LegendTitle</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    36,1%
+  </span>
+  <span class="absValue">
+    (13/36)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    32,8%
+  </span>
+  <span class="absValue">
+    (59/180)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<div class="sourceCode" id="sourceCode"><i class="no-highlight">1</i>&nbsp;/* ===========================================================
+<i class="no-highlight">2</i>&nbsp; * JFreeChart : a free chart library for the Java(tm) platform
+<i class="no-highlight">3</i>&nbsp; * ===========================================================
+<i class="no-highlight">4</i>&nbsp; *
+<i class="no-highlight">5</i>&nbsp; * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+<i class="no-highlight">6</i>&nbsp; *
+<i class="no-highlight">7</i>&nbsp; * Project Info:  http://www.jfree.org/jfreechart/index.html
+<i class="no-highlight">8</i>&nbsp; *
+<i class="no-highlight">9</i>&nbsp; * This library is free software; you can redistribute it and/or modify it
+<i class="no-highlight">10</i>&nbsp; * under the terms of the GNU Lesser General Public License as published by
+<i class="no-highlight">11</i>&nbsp; * the Free Software Foundation; either version 2.1 of the License, or
+<i class="no-highlight">12</i>&nbsp; * (at your option) any later version.
+<i class="no-highlight">13</i>&nbsp; *
+<i class="no-highlight">14</i>&nbsp; * This library is distributed in the hope that it will be useful, but
+<i class="no-highlight">15</i>&nbsp; * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+<i class="no-highlight">16</i>&nbsp; * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+<i class="no-highlight">17</i>&nbsp; * License for more details.
+<i class="no-highlight">18</i>&nbsp; *
+<i class="no-highlight">19</i>&nbsp; * You should have received a copy of the GNU Lesser General Public
+<i class="no-highlight">20</i>&nbsp; * License along with this library; if not, write to the Free Software
+<i class="no-highlight">21</i>&nbsp; * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+<i class="no-highlight">22</i>&nbsp; * USA.
+<i class="no-highlight">23</i>&nbsp; *
+<i class="no-highlight">24</i>&nbsp; * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+<i class="no-highlight">25</i>&nbsp; * Other names may be trademarks of their respective owners.]
+<i class="no-highlight">26</i>&nbsp; *
+<i class="no-highlight">27</i>&nbsp; * ----------------
+<i class="no-highlight">28</i>&nbsp; * LegendTitle.java
+<i class="no-highlight">29</i>&nbsp; * ----------------
+<i class="no-highlight">30</i>&nbsp; * (C) Copyright 2002-2022, by David Gilbert.
+<i class="no-highlight">31</i>&nbsp; *
+<i class="no-highlight">32</i>&nbsp; * Original Author:  David Gilbert;
+<i class="no-highlight">33</i>&nbsp; * Contributor(s):   Pierre-Marie Le Biot;
+<i class="no-highlight">34</i>&nbsp; * 
+<i class="no-highlight">35</i>&nbsp; */
+<i class="no-highlight">36</i>&nbsp;
+<i class="no-highlight">37</i>&nbsp;package org.jfree.chart.legend;
+<i class="no-highlight">38</i>&nbsp;
+<i class="no-highlight">39</i>&nbsp;import java.awt.Color;
+<i class="no-highlight">40</i>&nbsp;import java.awt.Font;
+<i class="no-highlight">41</i>&nbsp;import java.awt.Graphics2D;
+<i class="no-highlight">42</i>&nbsp;import java.awt.Paint;
+<i class="no-highlight">43</i>&nbsp;import java.awt.geom.Rectangle2D;
+<i class="no-highlight">44</i>&nbsp;import java.io.IOException;
+<i class="no-highlight">45</i>&nbsp;import java.io.ObjectInputStream;
+<i class="no-highlight">46</i>&nbsp;import java.io.ObjectOutputStream;
+<i class="no-highlight">47</i>&nbsp;import java.io.Serializable;
+<i class="no-highlight">48</i>&nbsp;import org.jfree.chart.ChartElementVisitor;
+<i class="no-highlight">49</i>&nbsp;
+<i class="no-highlight">50</i>&nbsp;import org.jfree.chart.block.Arrangement;
+<i class="no-highlight">51</i>&nbsp;import org.jfree.chart.block.Block;
+<i class="no-highlight">52</i>&nbsp;import org.jfree.chart.block.BlockContainer;
+<i class="no-highlight">53</i>&nbsp;import org.jfree.chart.block.BlockFrame;
+<i class="no-highlight">54</i>&nbsp;import org.jfree.chart.block.BlockResult;
+<i class="no-highlight">55</i>&nbsp;import org.jfree.chart.block.BorderArrangement;
+<i class="no-highlight">56</i>&nbsp;import org.jfree.chart.block.CenterArrangement;
+<i class="no-highlight">57</i>&nbsp;import org.jfree.chart.block.ColumnArrangement;
+<i class="no-highlight">58</i>&nbsp;import org.jfree.chart.block.EntityBlockParams;
+<i class="no-highlight">59</i>&nbsp;import org.jfree.chart.block.FlowArrangement;
+<i class="no-highlight">60</i>&nbsp;import org.jfree.chart.block.LabelBlock;
+<i class="no-highlight">61</i>&nbsp;import org.jfree.chart.block.RectangleConstraint;
+<i class="no-highlight">62</i>&nbsp;import org.jfree.chart.entity.EntityCollection;
+<i class="no-highlight">63</i>&nbsp;import org.jfree.chart.entity.StandardEntityCollection;
+<i class="no-highlight">64</i>&nbsp;import org.jfree.chart.entity.TitleEntity;
+<i class="no-highlight">65</i>&nbsp;import org.jfree.chart.event.TitleChangeEvent;
+<i class="no-highlight">66</i>&nbsp;import org.jfree.chart.api.RectangleAnchor;
+<i class="no-highlight">67</i>&nbsp;import org.jfree.chart.api.RectangleEdge;
+<i class="no-highlight">68</i>&nbsp;import org.jfree.chart.api.PublicCloneable;
+<i class="no-highlight">69</i>&nbsp;import org.jfree.chart.internal.SerialUtils;
+<i class="no-highlight">70</i>&nbsp;import org.jfree.chart.api.RectangleInsets;
+<i class="no-highlight">71</i>&nbsp;import org.jfree.chart.block.Size2D;
+<i class="no-highlight">72</i>&nbsp;import org.jfree.chart.internal.PaintUtils;
+<i class="no-highlight">73</i>&nbsp;import org.jfree.chart.internal.Args;
+<i class="no-highlight">74</i>&nbsp;import org.jfree.chart.title.Title;
+<i class="no-highlight">75</i>&nbsp;import org.jfree.chart.api.SortOrder;
+<i class="no-highlight">76</i>&nbsp;
+<i class="no-highlight">77</i>&nbsp;
+<i class="no-highlight">78</i>&nbsp;/**
+<i class="no-highlight">79</i>&nbsp; * A chart title that displays a legend for the data in the chart.
+<i class="no-highlight">80</i>&nbsp; * &lt;P&gt;
+<i class="no-highlight">81</i>&nbsp; * The title can be populated with legend items manually, or you can assign a
+<i class="no-highlight">82</i>&nbsp; * reference to the plot, in which case the legend items will be automatically
+<i class="no-highlight">83</i>&nbsp; * created to match the dataset(s).
+<i class="no-highlight">84</i>&nbsp; */
+<i class="no-highlight">85</i>&nbsp;public class LegendTitle extends Title
+<i class="no-highlight">86</i>&nbsp;        implements Cloneable, PublicCloneable, Serializable {
+<i class="no-highlight">87</i>&nbsp;
+<i class="no-highlight">88</i>&nbsp;    /** For serialization. */
+<i class="no-highlight">89</i>&nbsp;    private static final long serialVersionUID = 2644010518533854633L;
+<i class="no-highlight">90</i>&nbsp;
+<i class="no-highlight">91</i>&nbsp;    /** The default item font. */
+<b class="fc"><i class="no-highlight">92</i>&nbsp;    public static final Font DEFAULT_ITEM_FONT</b>
+<i class="no-highlight">93</i>&nbsp;            = new Font(&quot;SansSerif&quot;, Font.PLAIN, 12);
+<i class="no-highlight">94</i>&nbsp;
+<i class="no-highlight">95</i>&nbsp;    /** The default item paint. */
+<b class="fc"><i class="no-highlight">96</i>&nbsp;    public static final Paint DEFAULT_ITEM_PAINT = Color.BLACK;</b>
+<i class="no-highlight">97</i>&nbsp;
+<i class="no-highlight">98</i>&nbsp;    /** The sources for legend items. */
+<i class="no-highlight">99</i>&nbsp;    private LegendItemSource[] sources;
+<i class="no-highlight">100</i>&nbsp;
+<i class="no-highlight">101</i>&nbsp;    /** The background paint (possibly {@code null}). */
+<i class="no-highlight">102</i>&nbsp;    private transient Paint backgroundPaint;
+<i class="no-highlight">103</i>&nbsp;
+<i class="no-highlight">104</i>&nbsp;    /** The edge for the legend item graphic relative to the text. */
+<i class="no-highlight">105</i>&nbsp;    private RectangleEdge legendItemGraphicEdge;
+<i class="no-highlight">106</i>&nbsp;
+<i class="no-highlight">107</i>&nbsp;    /** The anchor point for the legend item graphic. */
+<i class="no-highlight">108</i>&nbsp;    private RectangleAnchor legendItemGraphicAnchor;
+<i class="no-highlight">109</i>&nbsp;
+<i class="no-highlight">110</i>&nbsp;    /** The legend item graphic location. */
+<i class="no-highlight">111</i>&nbsp;    private RectangleAnchor legendItemGraphicLocation;
+<i class="no-highlight">112</i>&nbsp;
+<i class="no-highlight">113</i>&nbsp;    /** The padding for the legend item graphic. */
+<i class="no-highlight">114</i>&nbsp;    private RectangleInsets legendItemGraphicPadding;
+<i class="no-highlight">115</i>&nbsp;
+<i class="no-highlight">116</i>&nbsp;    /** The item font. */
+<i class="no-highlight">117</i>&nbsp;    private Font itemFont;
+<i class="no-highlight">118</i>&nbsp;
+<i class="no-highlight">119</i>&nbsp;    /** The item paint. */
+<i class="no-highlight">120</i>&nbsp;    private transient Paint itemPaint;
+<i class="no-highlight">121</i>&nbsp;
+<i class="no-highlight">122</i>&nbsp;    /** The padding for the item labels. */
+<i class="no-highlight">123</i>&nbsp;    private RectangleInsets itemLabelPadding;
+<i class="no-highlight">124</i>&nbsp;
+<i class="no-highlight">125</i>&nbsp;    /**
+<i class="no-highlight">126</i>&nbsp;     * A container that holds and displays the legend items.
+<i class="no-highlight">127</i>&nbsp;     */
+<i class="no-highlight">128</i>&nbsp;    private BlockContainer items;
+<i class="no-highlight">129</i>&nbsp;
+<i class="no-highlight">130</i>&nbsp;    /**
+<i class="no-highlight">131</i>&nbsp;     * The layout for the legend when it is positioned at the top or bottom
+<i class="no-highlight">132</i>&nbsp;     * of the chart.
+<i class="no-highlight">133</i>&nbsp;     */
+<i class="no-highlight">134</i>&nbsp;    private Arrangement hLayout;
+<i class="no-highlight">135</i>&nbsp;
+<i class="no-highlight">136</i>&nbsp;    /**
+<i class="no-highlight">137</i>&nbsp;     * The layout for the legend when it is positioned at the left or right
+<i class="no-highlight">138</i>&nbsp;     * of the chart.
+<i class="no-highlight">139</i>&nbsp;     */
+<i class="no-highlight">140</i>&nbsp;    private Arrangement vLayout;
+<i class="no-highlight">141</i>&nbsp;
+<i class="no-highlight">142</i>&nbsp;    /**
+<i class="no-highlight">143</i>&nbsp;     * An optional container for wrapping the legend items (allows for adding
+<i class="no-highlight">144</i>&nbsp;     * a title or other text to the legend).
+<i class="no-highlight">145</i>&nbsp;     */
+<i class="no-highlight">146</i>&nbsp;    private BlockContainer wrapper;
+<i class="no-highlight">147</i>&nbsp;
+<i class="no-highlight">148</i>&nbsp;    /**
+<i class="no-highlight">149</i>&nbsp;     * Whether to render legend items in ascending or descending order.
+<i class="no-highlight">150</i>&nbsp;     */
+<i class="no-highlight">151</i>&nbsp;    private SortOrder sortOrder;
+<i class="no-highlight">152</i>&nbsp;
+<i class="no-highlight">153</i>&nbsp;    /**
+<i class="no-highlight">154</i>&nbsp;     * Constructs a new (empty) legend for the specified source.
+<i class="no-highlight">155</i>&nbsp;     *
+<i class="no-highlight">156</i>&nbsp;     * @param source  the source.
+<i class="no-highlight">157</i>&nbsp;     */
+<i class="no-highlight">158</i>&nbsp;    public LegendTitle(LegendItemSource source) {
+<b class="fc"><i class="no-highlight">159</i>&nbsp;        this(source, new FlowArrangement(), new ColumnArrangement());</b>
+<i class="no-highlight">160</i>&nbsp;    }
+<i class="no-highlight">161</i>&nbsp;
+<i class="no-highlight">162</i>&nbsp;    /**
+<i class="no-highlight">163</i>&nbsp;     * Creates a new legend title with the specified arrangement.
+<i class="no-highlight">164</i>&nbsp;     *
+<i class="no-highlight">165</i>&nbsp;     * @param source  the source.
+<i class="no-highlight">166</i>&nbsp;     * @param hLayout  the horizontal item arrangement ({@code null} not
+<i class="no-highlight">167</i>&nbsp;     *                 permitted).
+<i class="no-highlight">168</i>&nbsp;     * @param vLayout  the vertical item arrangement ({@code null} not
+<i class="no-highlight">169</i>&nbsp;     *                 permitted).
+<i class="no-highlight">170</i>&nbsp;     */
+<i class="no-highlight">171</i>&nbsp;    public LegendTitle(LegendItemSource source,
+<b class="fc"><i class="no-highlight">172</i>&nbsp;                       Arrangement hLayout, Arrangement vLayout) {</b>
+<b class="fc"><i class="no-highlight">173</i>&nbsp;        this.sources = new LegendItemSource[] {source};</b>
+<b class="fc"><i class="no-highlight">174</i>&nbsp;        this.items = new BlockContainer(hLayout);</b>
+<b class="fc"><i class="no-highlight">175</i>&nbsp;        this.hLayout = hLayout;</b>
+<b class="fc"><i class="no-highlight">176</i>&nbsp;        this.vLayout = vLayout;</b>
+<b class="fc"><i class="no-highlight">177</i>&nbsp;        this.backgroundPaint = null;</b>
+<b class="fc"><i class="no-highlight">178</i>&nbsp;        this.legendItemGraphicEdge = RectangleEdge.LEFT;</b>
+<b class="fc"><i class="no-highlight">179</i>&nbsp;        this.legendItemGraphicAnchor = RectangleAnchor.CENTER;</b>
+<b class="fc"><i class="no-highlight">180</i>&nbsp;        this.legendItemGraphicLocation = RectangleAnchor.CENTER;</b>
+<b class="fc"><i class="no-highlight">181</i>&nbsp;        this.legendItemGraphicPadding = new RectangleInsets(2.0, 2.0, 2.0, 2.0);</b>
+<b class="fc"><i class="no-highlight">182</i>&nbsp;        this.itemFont = DEFAULT_ITEM_FONT;</b>
+<b class="fc"><i class="no-highlight">183</i>&nbsp;        this.itemPaint = DEFAULT_ITEM_PAINT;</b>
+<b class="fc"><i class="no-highlight">184</i>&nbsp;        this.itemLabelPadding = new RectangleInsets(2.0, 2.0, 2.0, 2.0);</b>
+<b class="fc"><i class="no-highlight">185</i>&nbsp;        this.sortOrder = SortOrder.ASCENDING;</b>
+<i class="no-highlight">186</i>&nbsp;    }
+<i class="no-highlight">187</i>&nbsp;
+<i class="no-highlight">188</i>&nbsp;    /**
+<i class="no-highlight">189</i>&nbsp;     * Returns the legend item sources.
+<i class="no-highlight">190</i>&nbsp;     *
+<i class="no-highlight">191</i>&nbsp;     * @return The sources.
+<i class="no-highlight">192</i>&nbsp;     */
+<i class="no-highlight">193</i>&nbsp;    public LegendItemSource[] getSources() {
+<b class="fc"><i class="no-highlight">194</i>&nbsp;        return this.sources;</b>
+<i class="no-highlight">195</i>&nbsp;    }
+<i class="no-highlight">196</i>&nbsp;
+<i class="no-highlight">197</i>&nbsp;    /**
+<i class="no-highlight">198</i>&nbsp;     * Sets the legend item sources and sends a {@link TitleChangeEvent} to
+<i class="no-highlight">199</i>&nbsp;     * all registered listeners.
+<i class="no-highlight">200</i>&nbsp;     *
+<i class="no-highlight">201</i>&nbsp;     * @param sources  the sources ({@code null} not permitted).
+<i class="no-highlight">202</i>&nbsp;     */
+<i class="no-highlight">203</i>&nbsp;    public void setSources(LegendItemSource[] sources) {
+<b class="nc"><i class="no-highlight">204</i>&nbsp;        Args.nullNotPermitted(sources, &quot;sources&quot;);</b>
+<b class="nc"><i class="no-highlight">205</i>&nbsp;        this.sources = sources;</b>
+<b class="nc"><i class="no-highlight">206</i>&nbsp;        notifyListeners(new TitleChangeEvent(this));</b>
+<i class="no-highlight">207</i>&nbsp;    }
+<i class="no-highlight">208</i>&nbsp;
+<i class="no-highlight">209</i>&nbsp;    /**
+<i class="no-highlight">210</i>&nbsp;     * Returns the background paint.
+<i class="no-highlight">211</i>&nbsp;     *
+<i class="no-highlight">212</i>&nbsp;     * @return The background paint (possibly {@code null}).
+<i class="no-highlight">213</i>&nbsp;     */
+<i class="no-highlight">214</i>&nbsp;    public Paint getBackgroundPaint() {
+<b class="nc"><i class="no-highlight">215</i>&nbsp;        return this.backgroundPaint;</b>
+<i class="no-highlight">216</i>&nbsp;    }
+<i class="no-highlight">217</i>&nbsp;
+<i class="no-highlight">218</i>&nbsp;    /**
+<i class="no-highlight">219</i>&nbsp;     * Sets the background paint for the legend and sends a
+<i class="no-highlight">220</i>&nbsp;     * {@link TitleChangeEvent} to all registered listeners.
+<i class="no-highlight">221</i>&nbsp;     *
+<i class="no-highlight">222</i>&nbsp;     * @param paint  the paint ({@code null} permitted).
+<i class="no-highlight">223</i>&nbsp;     */
+<i class="no-highlight">224</i>&nbsp;    public void setBackgroundPaint(Paint paint) {
+<b class="fc"><i class="no-highlight">225</i>&nbsp;        this.backgroundPaint = paint;</b>
+<b class="fc"><i class="no-highlight">226</i>&nbsp;        notifyListeners(new TitleChangeEvent(this));</b>
+<i class="no-highlight">227</i>&nbsp;    }
+<i class="no-highlight">228</i>&nbsp;
+<i class="no-highlight">229</i>&nbsp;    /**
+<i class="no-highlight">230</i>&nbsp;     * Returns the location of the shape within each legend item.
+<i class="no-highlight">231</i>&nbsp;     *
+<i class="no-highlight">232</i>&nbsp;     * @return The location (never {@code null}).
+<i class="no-highlight">233</i>&nbsp;     */
+<i class="no-highlight">234</i>&nbsp;    public RectangleEdge getLegendItemGraphicEdge() {
+<b class="nc"><i class="no-highlight">235</i>&nbsp;        return this.legendItemGraphicEdge;</b>
+<i class="no-highlight">236</i>&nbsp;    }
+<i class="no-highlight">237</i>&nbsp;
+<i class="no-highlight">238</i>&nbsp;    /**
+<i class="no-highlight">239</i>&nbsp;     * Sets the location of the shape within each legend item.
+<i class="no-highlight">240</i>&nbsp;     *
+<i class="no-highlight">241</i>&nbsp;     * @param edge  the edge ({@code null} not permitted).
+<i class="no-highlight">242</i>&nbsp;     */
+<i class="no-highlight">243</i>&nbsp;    public void setLegendItemGraphicEdge(RectangleEdge edge) {
+<b class="fc"><i class="no-highlight">244</i>&nbsp;        Args.nullNotPermitted(edge, &quot;edge&quot;);</b>
+<b class="fc"><i class="no-highlight">245</i>&nbsp;        this.legendItemGraphicEdge = edge;</b>
+<b class="fc"><i class="no-highlight">246</i>&nbsp;        notifyListeners(new TitleChangeEvent(this));</b>
+<i class="no-highlight">247</i>&nbsp;    }
+<i class="no-highlight">248</i>&nbsp;
+<i class="no-highlight">249</i>&nbsp;    /**
+<i class="no-highlight">250</i>&nbsp;     * Returns the legend item graphic anchor.
+<i class="no-highlight">251</i>&nbsp;     *
+<i class="no-highlight">252</i>&nbsp;     * @return The graphic anchor (never {@code null}).
+<i class="no-highlight">253</i>&nbsp;     */
+<i class="no-highlight">254</i>&nbsp;    public RectangleAnchor getLegendItemGraphicAnchor() {
+<b class="nc"><i class="no-highlight">255</i>&nbsp;        return this.legendItemGraphicAnchor;</b>
+<i class="no-highlight">256</i>&nbsp;    }
+<i class="no-highlight">257</i>&nbsp;
+<i class="no-highlight">258</i>&nbsp;    /**
+<i class="no-highlight">259</i>&nbsp;     * Sets the anchor point used for the graphic in each legend item.
+<i class="no-highlight">260</i>&nbsp;     *
+<i class="no-highlight">261</i>&nbsp;     * @param anchor  the anchor point ({@code null} not permitted).
+<i class="no-highlight">262</i>&nbsp;     */
+<i class="no-highlight">263</i>&nbsp;    public void setLegendItemGraphicAnchor(RectangleAnchor anchor) {
+<b class="fc"><i class="no-highlight">264</i>&nbsp;        Args.nullNotPermitted(anchor, &quot;anchor&quot;);</b>
+<b class="fc"><i class="no-highlight">265</i>&nbsp;        this.legendItemGraphicAnchor = anchor;</b>
+<i class="no-highlight">266</i>&nbsp;    }
+<i class="no-highlight">267</i>&nbsp;
+<i class="no-highlight">268</i>&nbsp;    /**
+<i class="no-highlight">269</i>&nbsp;     * Returns the legend item graphic location.
+<i class="no-highlight">270</i>&nbsp;     *
+<i class="no-highlight">271</i>&nbsp;     * @return The location (never {@code null}).
+<i class="no-highlight">272</i>&nbsp;     */
+<i class="no-highlight">273</i>&nbsp;    public RectangleAnchor getLegendItemGraphicLocation() {
+<b class="nc"><i class="no-highlight">274</i>&nbsp;        return this.legendItemGraphicLocation;</b>
+<i class="no-highlight">275</i>&nbsp;    }
+<i class="no-highlight">276</i>&nbsp;
+<i class="no-highlight">277</i>&nbsp;    /**
+<i class="no-highlight">278</i>&nbsp;     * Sets the legend item graphic location.
+<i class="no-highlight">279</i>&nbsp;     *
+<i class="no-highlight">280</i>&nbsp;     * @param anchor  the anchor ({@code null} not permitted).
+<i class="no-highlight">281</i>&nbsp;     */
+<i class="no-highlight">282</i>&nbsp;    public void setLegendItemGraphicLocation(RectangleAnchor anchor) {
+<b class="fc"><i class="no-highlight">283</i>&nbsp;        this.legendItemGraphicLocation = anchor;</b>
+<i class="no-highlight">284</i>&nbsp;    }
+<i class="no-highlight">285</i>&nbsp;
+<i class="no-highlight">286</i>&nbsp;    /**
+<i class="no-highlight">287</i>&nbsp;     * Returns the padding that will be applied to each item graphic.
+<i class="no-highlight">288</i>&nbsp;     *
+<i class="no-highlight">289</i>&nbsp;     * @return The padding (never {@code null}).
+<i class="no-highlight">290</i>&nbsp;     */
+<i class="no-highlight">291</i>&nbsp;    public RectangleInsets getLegendItemGraphicPadding() {
+<b class="nc"><i class="no-highlight">292</i>&nbsp;        return this.legendItemGraphicPadding;</b>
+<i class="no-highlight">293</i>&nbsp;    }
+<i class="no-highlight">294</i>&nbsp;
+<i class="no-highlight">295</i>&nbsp;    /**
+<i class="no-highlight">296</i>&nbsp;     * Sets the padding that will be applied to each item graphic in the
+<i class="no-highlight">297</i>&nbsp;     * legend and sends a {@link TitleChangeEvent} to all registered listeners.
+<i class="no-highlight">298</i>&nbsp;     *
+<i class="no-highlight">299</i>&nbsp;     * @param padding  the padding ({@code null} not permitted).
+<i class="no-highlight">300</i>&nbsp;     */
+<i class="no-highlight">301</i>&nbsp;    public void setLegendItemGraphicPadding(RectangleInsets padding) {
+<b class="nc"><i class="no-highlight">302</i>&nbsp;        Args.nullNotPermitted(padding, &quot;padding&quot;);</b>
+<b class="nc"><i class="no-highlight">303</i>&nbsp;        this.legendItemGraphicPadding = padding;</b>
+<b class="nc"><i class="no-highlight">304</i>&nbsp;        notifyListeners(new TitleChangeEvent(this));</b>
+<i class="no-highlight">305</i>&nbsp;    }
+<i class="no-highlight">306</i>&nbsp;
+<i class="no-highlight">307</i>&nbsp;    /**
+<i class="no-highlight">308</i>&nbsp;     * Returns the item font.
+<i class="no-highlight">309</i>&nbsp;     *
+<i class="no-highlight">310</i>&nbsp;     * @return The font (never {@code null}).
+<i class="no-highlight">311</i>&nbsp;     */
+<i class="no-highlight">312</i>&nbsp;    public Font getItemFont() {
+<b class="nc"><i class="no-highlight">313</i>&nbsp;        return this.itemFont;</b>
+<i class="no-highlight">314</i>&nbsp;    }
+<i class="no-highlight">315</i>&nbsp;
+<i class="no-highlight">316</i>&nbsp;    /**
+<i class="no-highlight">317</i>&nbsp;     * Sets the item font and sends a {@link TitleChangeEvent} to
+<i class="no-highlight">318</i>&nbsp;     * all registered listeners.
+<i class="no-highlight">319</i>&nbsp;     *
+<i class="no-highlight">320</i>&nbsp;     * @param font  the font ({@code null} not permitted).
+<i class="no-highlight">321</i>&nbsp;     */
+<i class="no-highlight">322</i>&nbsp;    public void setItemFont(Font font) {
+<b class="fc"><i class="no-highlight">323</i>&nbsp;        Args.nullNotPermitted(font, &quot;font&quot;);</b>
+<b class="fc"><i class="no-highlight">324</i>&nbsp;        this.itemFont = font;</b>
+<b class="fc"><i class="no-highlight">325</i>&nbsp;        notifyListeners(new TitleChangeEvent(this));</b>
+<i class="no-highlight">326</i>&nbsp;    }
+<i class="no-highlight">327</i>&nbsp;
+<i class="no-highlight">328</i>&nbsp;    /**
+<i class="no-highlight">329</i>&nbsp;     * Returns the item paint.
+<i class="no-highlight">330</i>&nbsp;     *
+<i class="no-highlight">331</i>&nbsp;     * @return The paint (never {@code null}).
+<i class="no-highlight">332</i>&nbsp;     */
+<i class="no-highlight">333</i>&nbsp;    public Paint getItemPaint() {
+<b class="nc"><i class="no-highlight">334</i>&nbsp;        return this.itemPaint;</b>
+<i class="no-highlight">335</i>&nbsp;    }
+<i class="no-highlight">336</i>&nbsp;
+<i class="no-highlight">337</i>&nbsp;    /**
+<i class="no-highlight">338</i>&nbsp;     * Sets the item paint.
+<i class="no-highlight">339</i>&nbsp;     *
+<i class="no-highlight">340</i>&nbsp;     * @param paint  the paint ({@code null} not permitted).
+<i class="no-highlight">341</i>&nbsp;     */
+<i class="no-highlight">342</i>&nbsp;    public void setItemPaint(Paint paint) {
+<b class="nc"><i class="no-highlight">343</i>&nbsp;        Args.nullNotPermitted(paint, &quot;paint&quot;);</b>
+<b class="nc"><i class="no-highlight">344</i>&nbsp;        this.itemPaint = paint;</b>
+<b class="nc"><i class="no-highlight">345</i>&nbsp;        notifyListeners(new TitleChangeEvent(this));</b>
+<i class="no-highlight">346</i>&nbsp;    }
+<i class="no-highlight">347</i>&nbsp;
+<i class="no-highlight">348</i>&nbsp;    /**
+<i class="no-highlight">349</i>&nbsp;     * Returns the padding used for the items labels.
+<i class="no-highlight">350</i>&nbsp;     *
+<i class="no-highlight">351</i>&nbsp;     * @return The padding (never {@code null}).
+<i class="no-highlight">352</i>&nbsp;     */
+<i class="no-highlight">353</i>&nbsp;    public RectangleInsets getItemLabelPadding() {
+<b class="nc"><i class="no-highlight">354</i>&nbsp;        return this.itemLabelPadding;</b>
+<i class="no-highlight">355</i>&nbsp;    }
+<i class="no-highlight">356</i>&nbsp;
+<i class="no-highlight">357</i>&nbsp;    /**
+<i class="no-highlight">358</i>&nbsp;     * Sets the padding used for the item labels in the legend.
+<i class="no-highlight">359</i>&nbsp;     *
+<i class="no-highlight">360</i>&nbsp;     * @param padding  the padding ({@code null} not permitted).
+<i class="no-highlight">361</i>&nbsp;     */
+<i class="no-highlight">362</i>&nbsp;    public void setItemLabelPadding(RectangleInsets padding) {
+<b class="nc"><i class="no-highlight">363</i>&nbsp;        Args.nullNotPermitted(padding, &quot;padding&quot;);</b>
+<b class="nc"><i class="no-highlight">364</i>&nbsp;        this.itemLabelPadding = padding;</b>
+<b class="nc"><i class="no-highlight">365</i>&nbsp;        notifyListeners(new TitleChangeEvent(this));</b>
+<i class="no-highlight">366</i>&nbsp;    }
+<i class="no-highlight">367</i>&nbsp;
+<i class="no-highlight">368</i>&nbsp;    /**
+<i class="no-highlight">369</i>&nbsp;     * Gets the order used to display legend items.
+<i class="no-highlight">370</i>&nbsp;     * 
+<i class="no-highlight">371</i>&nbsp;     * @return The order (never {@code null}).
+<i class="no-highlight">372</i>&nbsp;     */
+<i class="no-highlight">373</i>&nbsp;    public SortOrder getSortOrder() {
+<b class="nc"><i class="no-highlight">374</i>&nbsp;        return this.sortOrder;</b>
+<i class="no-highlight">375</i>&nbsp;    }
+<i class="no-highlight">376</i>&nbsp;
+<i class="no-highlight">377</i>&nbsp;    /**
+<i class="no-highlight">378</i>&nbsp;     * Sets the order used to display legend items.
+<i class="no-highlight">379</i>&nbsp;     * 
+<i class="no-highlight">380</i>&nbsp;     * @param order Specifies ascending or descending order ({@code null}
+<i class="no-highlight">381</i>&nbsp;     *              not permitted).
+<i class="no-highlight">382</i>&nbsp;     */
+<i class="no-highlight">383</i>&nbsp;    public void setSortOrder(SortOrder order) {
+<b class="fc"><i class="no-highlight">384</i>&nbsp;        Args.nullNotPermitted(order, &quot;order&quot;);</b>
+<b class="fc"><i class="no-highlight">385</i>&nbsp;        this.sortOrder = order;</b>
+<b class="fc"><i class="no-highlight">386</i>&nbsp;        notifyListeners(new TitleChangeEvent(this));</b>
+<i class="no-highlight">387</i>&nbsp;    }
+<i class="no-highlight">388</i>&nbsp;
+<i class="no-highlight">389</i>&nbsp;    /**
+<i class="no-highlight">390</i>&nbsp;     * Fetches the latest legend items.
+<i class="no-highlight">391</i>&nbsp;     */
+<i class="no-highlight">392</i>&nbsp;    protected void fetchLegendItems() {
+<b class="nc"><i class="no-highlight">393</i>&nbsp;        this.items.clear();</b>
+<b class="nc"><i class="no-highlight">394</i>&nbsp;        RectangleEdge p = getPosition();</b>
+<b class="nc"><i class="no-highlight">395</i>&nbsp;        if (RectangleEdge.isTopOrBottom(p)) {</b>
+<b class="nc"><i class="no-highlight">396</i>&nbsp;            this.items.setArrangement(this.hLayout);</b>
+<i class="no-highlight">397</i>&nbsp;        }
+<i class="no-highlight">398</i>&nbsp;        else {
+<b class="nc"><i class="no-highlight">399</i>&nbsp;            this.items.setArrangement(this.vLayout);</b>
+<i class="no-highlight">400</i>&nbsp;        }
+<i class="no-highlight">401</i>&nbsp;
+<b class="nc"><i class="no-highlight">402</i>&nbsp;        if (this.sortOrder.equals(SortOrder.ASCENDING)) {</b>
+<b class="nc"><i class="no-highlight">403</i>&nbsp;            for (int s = 0; s &lt; this.sources.length; s++) {</b>
+<b class="nc"><i class="no-highlight">404</i>&nbsp;                LegendItemCollection legendItems =</b>
+<b class="nc"><i class="no-highlight">405</i>&nbsp;                    this.sources[s].getLegendItems();</b>
+<b class="nc"><i class="no-highlight">406</i>&nbsp;                if (legendItems != null) {</b>
+<b class="nc"><i class="no-highlight">407</i>&nbsp;                    for (int i = 0; i &lt; legendItems.getItemCount(); i++) {</b>
+<b class="nc"><i class="no-highlight">408</i>&nbsp;                        addItemBlock(legendItems.get(i));</b>
+<i class="no-highlight">409</i>&nbsp;                    }
+<i class="no-highlight">410</i>&nbsp;                }
+<i class="no-highlight">411</i>&nbsp;            }
+<i class="no-highlight">412</i>&nbsp;        }
+<i class="no-highlight">413</i>&nbsp;        else {
+<b class="nc"><i class="no-highlight">414</i>&nbsp;            for (int s = this.sources.length - 1; s &gt;= 0; s--) {</b>
+<b class="nc"><i class="no-highlight">415</i>&nbsp;                LegendItemCollection legendItems =</b>
+<b class="nc"><i class="no-highlight">416</i>&nbsp;                    this.sources[s].getLegendItems();</b>
+<b class="nc"><i class="no-highlight">417</i>&nbsp;                if (legendItems != null) {</b>
+<b class="nc"><i class="no-highlight">418</i>&nbsp;                    for (int i = legendItems.getItemCount()-1; i &gt;= 0; i--) {</b>
+<b class="nc"><i class="no-highlight">419</i>&nbsp;                        addItemBlock(legendItems.get(i));</b>
+<i class="no-highlight">420</i>&nbsp;                    }
+<i class="no-highlight">421</i>&nbsp;                }
+<i class="no-highlight">422</i>&nbsp;            }
+<i class="no-highlight">423</i>&nbsp;        }
+<i class="no-highlight">424</i>&nbsp;    }
+<i class="no-highlight">425</i>&nbsp;
+<i class="no-highlight">426</i>&nbsp;    private void addItemBlock(LegendItem item) {
+<b class="nc"><i class="no-highlight">427</i>&nbsp;        Block block = createLegendItemBlock(item);</b>
+<b class="nc"><i class="no-highlight">428</i>&nbsp;        this.items.add(block);</b>
+<i class="no-highlight">429</i>&nbsp;    }
+<i class="no-highlight">430</i>&nbsp;
+<i class="no-highlight">431</i>&nbsp;    /**
+<i class="no-highlight">432</i>&nbsp;     * Creates a legend item block.
+<i class="no-highlight">433</i>&nbsp;     *
+<i class="no-highlight">434</i>&nbsp;     * @param item  the legend item.
+<i class="no-highlight">435</i>&nbsp;     *
+<i class="no-highlight">436</i>&nbsp;     * @return The block.
+<i class="no-highlight">437</i>&nbsp;     */
+<i class="no-highlight">438</i>&nbsp;    protected Block createLegendItemBlock(LegendItem item) {
+<i class="no-highlight">439</i>&nbsp;        BlockContainer result;
+<b class="nc"><i class="no-highlight">440</i>&nbsp;        LegendGraphic lg = new LegendGraphic(item.getShape(),</b>
+<b class="nc"><i class="no-highlight">441</i>&nbsp;                item.getFillPaint());</b>
+<b class="nc"><i class="no-highlight">442</i>&nbsp;        lg.setFillPaintTransformer(item.getFillPaintTransformer());</b>
+<b class="nc"><i class="no-highlight">443</i>&nbsp;        lg.setShapeFilled(item.isShapeFilled());</b>
+<b class="nc"><i class="no-highlight">444</i>&nbsp;        lg.setLine(item.getLine());</b>
+<b class="nc"><i class="no-highlight">445</i>&nbsp;        lg.setLineStroke(item.getLineStroke());</b>
+<b class="nc"><i class="no-highlight">446</i>&nbsp;        lg.setLinePaint(item.getLinePaint());</b>
+<b class="nc"><i class="no-highlight">447</i>&nbsp;        lg.setLineVisible(item.isLineVisible());</b>
+<b class="nc"><i class="no-highlight">448</i>&nbsp;        lg.setShapeVisible(item.isShapeVisible());</b>
+<b class="nc"><i class="no-highlight">449</i>&nbsp;        lg.setShapeOutlineVisible(item.isShapeOutlineVisible());</b>
+<b class="nc"><i class="no-highlight">450</i>&nbsp;        lg.setOutlinePaint(item.getOutlinePaint());</b>
+<b class="nc"><i class="no-highlight">451</i>&nbsp;        lg.setOutlineStroke(item.getOutlineStroke());</b>
+<b class="nc"><i class="no-highlight">452</i>&nbsp;        lg.setPadding(this.legendItemGraphicPadding);</b>
+<i class="no-highlight">453</i>&nbsp;
+<b class="nc"><i class="no-highlight">454</i>&nbsp;        LegendItemBlockContainer legendItem = new LegendItemBlockContainer(</b>
+<b class="nc"><i class="no-highlight">455</i>&nbsp;                new BorderArrangement(), item.getDataset(),</b>
+<b class="nc"><i class="no-highlight">456</i>&nbsp;                item.getSeriesKey());</b>
+<b class="nc"><i class="no-highlight">457</i>&nbsp;        lg.setShapeAnchor(getLegendItemGraphicAnchor());</b>
+<b class="nc"><i class="no-highlight">458</i>&nbsp;        lg.setShapeLocation(getLegendItemGraphicLocation());</b>
+<b class="nc"><i class="no-highlight">459</i>&nbsp;        legendItem.add(lg, this.legendItemGraphicEdge);</b>
+<b class="nc"><i class="no-highlight">460</i>&nbsp;        Font textFont = item.getLabelFont();</b>
+<b class="nc"><i class="no-highlight">461</i>&nbsp;        if (textFont == null) {</b>
+<b class="nc"><i class="no-highlight">462</i>&nbsp;            textFont = this.itemFont;</b>
+<i class="no-highlight">463</i>&nbsp;        }
+<b class="nc"><i class="no-highlight">464</i>&nbsp;        Paint textPaint = item.getLabelPaint();</b>
+<b class="nc"><i class="no-highlight">465</i>&nbsp;        if (textPaint == null) {</b>
+<b class="nc"><i class="no-highlight">466</i>&nbsp;            textPaint = this.itemPaint;</b>
+<i class="no-highlight">467</i>&nbsp;        }
+<b class="nc"><i class="no-highlight">468</i>&nbsp;        LabelBlock labelBlock = new LabelBlock(item.getLabel(), textFont,</b>
+<i class="no-highlight">469</i>&nbsp;                textPaint);
+<b class="nc"><i class="no-highlight">470</i>&nbsp;        labelBlock.setPadding(this.itemLabelPadding);</b>
+<b class="nc"><i class="no-highlight">471</i>&nbsp;        legendItem.add(labelBlock);</b>
+<b class="nc"><i class="no-highlight">472</i>&nbsp;        legendItem.setToolTipText(item.getToolTipText());</b>
+<b class="nc"><i class="no-highlight">473</i>&nbsp;        legendItem.setURLText(item.getURLText());</b>
+<i class="no-highlight">474</i>&nbsp;
+<b class="nc"><i class="no-highlight">475</i>&nbsp;        result = new BlockContainer(new CenterArrangement());</b>
+<b class="nc"><i class="no-highlight">476</i>&nbsp;        result.add(legendItem);</b>
+<i class="no-highlight">477</i>&nbsp;
+<b class="nc"><i class="no-highlight">478</i>&nbsp;        return result;</b>
+<i class="no-highlight">479</i>&nbsp;    }
+<i class="no-highlight">480</i>&nbsp;
+<i class="no-highlight">481</i>&nbsp;    /**
+<i class="no-highlight">482</i>&nbsp;     * Returns the container that holds the legend items.
+<i class="no-highlight">483</i>&nbsp;     *
+<i class="no-highlight">484</i>&nbsp;     * @return The container for the legend items.
+<i class="no-highlight">485</i>&nbsp;     */
+<i class="no-highlight">486</i>&nbsp;    public BlockContainer getItemContainer() {
+<b class="nc"><i class="no-highlight">487</i>&nbsp;        return this.items;</b>
+<i class="no-highlight">488</i>&nbsp;    }
+<i class="no-highlight">489</i>&nbsp;
+<i class="no-highlight">490</i>&nbsp;    /**
+<i class="no-highlight">491</i>&nbsp;     * Arranges the contents of the block, within the given constraints, and
+<i class="no-highlight">492</i>&nbsp;     * returns the block size.
+<i class="no-highlight">493</i>&nbsp;     *
+<i class="no-highlight">494</i>&nbsp;     * @param g2  the graphics device.
+<i class="no-highlight">495</i>&nbsp;     * @param constraint  the constraint ({@code null} not permitted).
+<i class="no-highlight">496</i>&nbsp;     *
+<i class="no-highlight">497</i>&nbsp;     * @return The block size (in Java2D units, never {@code null}).
+<i class="no-highlight">498</i>&nbsp;     */
+<i class="no-highlight">499</i>&nbsp;    @Override
+<i class="no-highlight">500</i>&nbsp;    public Size2D arrange(Graphics2D g2, RectangleConstraint constraint) {
+<b class="nc"><i class="no-highlight">501</i>&nbsp;        Size2D result = new Size2D();</b>
+<b class="nc"><i class="no-highlight">502</i>&nbsp;        fetchLegendItems();</b>
+<b class="nc"><i class="no-highlight">503</i>&nbsp;        if (this.items.isEmpty()) {</b>
+<b class="nc"><i class="no-highlight">504</i>&nbsp;            return result;</b>
+<i class="no-highlight">505</i>&nbsp;        }
+<b class="nc"><i class="no-highlight">506</i>&nbsp;        BlockContainer container = this.wrapper;</b>
+<b class="nc"><i class="no-highlight">507</i>&nbsp;        if (container == null) {</b>
+<b class="nc"><i class="no-highlight">508</i>&nbsp;            container = this.items;</b>
+<i class="no-highlight">509</i>&nbsp;        }
+<b class="nc"><i class="no-highlight">510</i>&nbsp;        RectangleConstraint c = toContentConstraint(constraint);</b>
+<b class="nc"><i class="no-highlight">511</i>&nbsp;        Size2D size = container.arrange(g2, c);</b>
+<b class="nc"><i class="no-highlight">512</i>&nbsp;        result.height = calculateTotalHeight(size.height);</b>
+<b class="nc"><i class="no-highlight">513</i>&nbsp;        result.width = calculateTotalWidth(size.width);</b>
+<b class="nc"><i class="no-highlight">514</i>&nbsp;        return result;</b>
+<i class="no-highlight">515</i>&nbsp;    }
+<i class="no-highlight">516</i>&nbsp;
+<i class="no-highlight">517</i>&nbsp;    /**
+<i class="no-highlight">518</i>&nbsp;     * Receives a chart element visitor. 
+<i class="no-highlight">519</i>&nbsp;     * 
+<i class="no-highlight">520</i>&nbsp;     * @param visitor  the visitor ({@code null} not permitted).
+<i class="no-highlight">521</i>&nbsp;     */
+<i class="no-highlight">522</i>&nbsp;    @Override
+<i class="no-highlight">523</i>&nbsp;    public void receive(ChartElementVisitor visitor) {
+<i class="no-highlight">524</i>&nbsp;        // FIXME : visit the legend components
+<b class="nc"><i class="no-highlight">525</i>&nbsp;        super.receive(visitor);</b>
+<i class="no-highlight">526</i>&nbsp;    }
+<i class="no-highlight">527</i>&nbsp;
+<i class="no-highlight">528</i>&nbsp;    /**
+<i class="no-highlight">529</i>&nbsp;     * Draws the title on a Java 2D graphics device (such as the screen or a
+<i class="no-highlight">530</i>&nbsp;     * printer).
+<i class="no-highlight">531</i>&nbsp;     *
+<i class="no-highlight">532</i>&nbsp;     * @param g2  the graphics device.
+<i class="no-highlight">533</i>&nbsp;     * @param area  the available area for the title.
+<i class="no-highlight">534</i>&nbsp;     */
+<i class="no-highlight">535</i>&nbsp;    @Override
+<i class="no-highlight">536</i>&nbsp;    public void draw(Graphics2D g2, Rectangle2D area) {
+<b class="nc"><i class="no-highlight">537</i>&nbsp;        draw(g2, area, null);</b>
+<i class="no-highlight">538</i>&nbsp;    }
+<i class="no-highlight">539</i>&nbsp;
+<i class="no-highlight">540</i>&nbsp;    /**
+<i class="no-highlight">541</i>&nbsp;     * Draws the block within the specified area.
+<i class="no-highlight">542</i>&nbsp;     *
+<i class="no-highlight">543</i>&nbsp;     * @param g2  the graphics device.
+<i class="no-highlight">544</i>&nbsp;     * @param area  the area.
+<i class="no-highlight">545</i>&nbsp;     * @param params  ignored ({@code null} permitted).
+<i class="no-highlight">546</i>&nbsp;     *
+<i class="no-highlight">547</i>&nbsp;     * @return An {@link org.jfree.chart.block.EntityBlockResult} or
+<i class="no-highlight">548</i>&nbsp;     *         {@code null}.
+<i class="no-highlight">549</i>&nbsp;     */
+<i class="no-highlight">550</i>&nbsp;    @Override
+<i class="no-highlight">551</i>&nbsp;    public Object draw(Graphics2D g2, Rectangle2D area, Object params) {
+<b class="nc"><i class="no-highlight">552</i>&nbsp;        Rectangle2D target = (Rectangle2D) area.clone();</b>
+<b class="nc"><i class="no-highlight">553</i>&nbsp;        Rectangle2D hotspot = (Rectangle2D) area.clone();</b>
+<b class="nc"><i class="no-highlight">554</i>&nbsp;        StandardEntityCollection sec = null;</b>
+<b class="nc"><i class="no-highlight">555</i>&nbsp;        if (params instanceof EntityBlockParams</b>
+<b class="nc"><i class="no-highlight">556</i>&nbsp;                &amp;&amp; ((EntityBlockParams) params).getGenerateEntities()) {</b>
+<b class="nc"><i class="no-highlight">557</i>&nbsp;            sec = new StandardEntityCollection();</b>
+<b class="nc"><i class="no-highlight">558</i>&nbsp;            sec.add(new TitleEntity(hotspot, this));</b>
+<i class="no-highlight">559</i>&nbsp;        }
+<b class="nc"><i class="no-highlight">560</i>&nbsp;        target = trimMargin(target);</b>
+<b class="nc"><i class="no-highlight">561</i>&nbsp;        if (this.backgroundPaint != null) {</b>
+<b class="nc"><i class="no-highlight">562</i>&nbsp;            g2.setPaint(this.backgroundPaint);</b>
+<b class="nc"><i class="no-highlight">563</i>&nbsp;            g2.fill(target);</b>
+<i class="no-highlight">564</i>&nbsp;        }
+<b class="nc"><i class="no-highlight">565</i>&nbsp;        BlockFrame border = getFrame();</b>
+<b class="nc"><i class="no-highlight">566</i>&nbsp;        border.draw(g2, target);</b>
+<b class="nc"><i class="no-highlight">567</i>&nbsp;        border.getInsets().trim(target);</b>
+<b class="nc"><i class="no-highlight">568</i>&nbsp;        BlockContainer container = this.wrapper;</b>
+<b class="nc"><i class="no-highlight">569</i>&nbsp;        if (container == null) {</b>
+<b class="nc"><i class="no-highlight">570</i>&nbsp;            container = this.items;</b>
+<i class="no-highlight">571</i>&nbsp;        }
+<b class="nc"><i class="no-highlight">572</i>&nbsp;        target = trimPadding(target);</b>
+<b class="nc"><i class="no-highlight">573</i>&nbsp;        Object val = container.draw(g2, target, params);</b>
+<b class="nc"><i class="no-highlight">574</i>&nbsp;        if (val instanceof BlockResult) {</b>
+<b class="nc"><i class="no-highlight">575</i>&nbsp;            EntityCollection ec = ((BlockResult) val).getEntityCollection();</b>
+<b class="nc"><i class="no-highlight">576</i>&nbsp;            if (ec != null &amp;&amp; sec != null) {</b>
+<b class="nc"><i class="no-highlight">577</i>&nbsp;                sec.addAll(ec);</b>
+<b class="nc"><i class="no-highlight">578</i>&nbsp;                ((BlockResult) val).setEntityCollection(sec);</b>
+<i class="no-highlight">579</i>&nbsp;            }
+<i class="no-highlight">580</i>&nbsp;        }
+<b class="nc"><i class="no-highlight">581</i>&nbsp;        return val;</b>
+<i class="no-highlight">582</i>&nbsp;    }
+<i class="no-highlight">583</i>&nbsp;
+<i class="no-highlight">584</i>&nbsp;    /**
+<i class="no-highlight">585</i>&nbsp;     * Returns the wrapper container, if any.
+<i class="no-highlight">586</i>&nbsp;     *
+<i class="no-highlight">587</i>&nbsp;     * @return The wrapper container (possibly {@code null}).
+<i class="no-highlight">588</i>&nbsp;     */
+<i class="no-highlight">589</i>&nbsp;    public BlockContainer getWrapper() {
+<b class="nc"><i class="no-highlight">590</i>&nbsp;        return this.wrapper;</b>
+<i class="no-highlight">591</i>&nbsp;    }
+<i class="no-highlight">592</i>&nbsp;
+<i class="no-highlight">593</i>&nbsp;    /**
+<i class="no-highlight">594</i>&nbsp;     * Sets the wrapper container for the legend.
+<i class="no-highlight">595</i>&nbsp;     *
+<i class="no-highlight">596</i>&nbsp;     * @param wrapper  the wrapper container.
+<i class="no-highlight">597</i>&nbsp;     */
+<i class="no-highlight">598</i>&nbsp;    public void setWrapper(BlockContainer wrapper) {
+<b class="nc"><i class="no-highlight">599</i>&nbsp;        this.wrapper = wrapper;</b>
+<i class="no-highlight">600</i>&nbsp;    }
+<i class="no-highlight">601</i>&nbsp;
+<i class="no-highlight">602</i>&nbsp;    /**
+<i class="no-highlight">603</i>&nbsp;     * Tests this title for equality with an arbitrary object.
+<i class="no-highlight">604</i>&nbsp;     *
+<i class="no-highlight">605</i>&nbsp;     * @param obj  the object ({@code null} permitted).
+<i class="no-highlight">606</i>&nbsp;     *
+<i class="no-highlight">607</i>&nbsp;     * @return A boolean.
+<i class="no-highlight">608</i>&nbsp;     */
+<i class="no-highlight">609</i>&nbsp;    @Override
+<i class="no-highlight">610</i>&nbsp;    public boolean equals(Object obj) {
+<b class="fc"><i class="no-highlight">611</i>&nbsp;        if (obj == this) {</b>
+<b class="nc"><i class="no-highlight">612</i>&nbsp;            return true;</b>
+<i class="no-highlight">613</i>&nbsp;        }
+<b class="fc"><i class="no-highlight">614</i>&nbsp;        if (!(obj instanceof LegendTitle)) {</b>
+<b class="nc"><i class="no-highlight">615</i>&nbsp;            return false;</b>
+<i class="no-highlight">616</i>&nbsp;        }
+<b class="fc"><i class="no-highlight">617</i>&nbsp;        if (!super.equals(obj)) {</b>
+<b class="fc"><i class="no-highlight">618</i>&nbsp;            return false;</b>
+<i class="no-highlight">619</i>&nbsp;        }
+<b class="fc"><i class="no-highlight">620</i>&nbsp;        LegendTitle that = (LegendTitle) obj;</b>
+<b class="fc"><i class="no-highlight">621</i>&nbsp;        if (!PaintUtils.equal(this.backgroundPaint, that.backgroundPaint)) {</b>
+<b class="fc"><i class="no-highlight">622</i>&nbsp;            return false;</b>
+<i class="no-highlight">623</i>&nbsp;        }
+<b class="fc"><i class="no-highlight">624</i>&nbsp;        if (this.legendItemGraphicEdge != that.legendItemGraphicEdge) {</b>
+<b class="fc"><i class="no-highlight">625</i>&nbsp;            return false;</b>
+<i class="no-highlight">626</i>&nbsp;        }
+<b class="fc"><i class="no-highlight">627</i>&nbsp;        if (this.legendItemGraphicAnchor != that.legendItemGraphicAnchor) {</b>
+<b class="fc"><i class="no-highlight">628</i>&nbsp;            return false;</b>
+<i class="no-highlight">629</i>&nbsp;        }
+<b class="fc"><i class="no-highlight">630</i>&nbsp;        if (this.legendItemGraphicLocation != that.legendItemGraphicLocation) {</b>
+<b class="fc"><i class="no-highlight">631</i>&nbsp;            return false;</b>
+<i class="no-highlight">632</i>&nbsp;        }
+<b class="fc"><i class="no-highlight">633</i>&nbsp;        if (!this.itemFont.equals(that.itemFont)) {</b>
+<b class="fc"><i class="no-highlight">634</i>&nbsp;            return false;</b>
+<i class="no-highlight">635</i>&nbsp;        }
+<b class="fc"><i class="no-highlight">636</i>&nbsp;        if (!this.itemPaint.equals(that.itemPaint)) {</b>
+<b class="nc"><i class="no-highlight">637</i>&nbsp;            return false;</b>
+<i class="no-highlight">638</i>&nbsp;        }
+<b class="fc"><i class="no-highlight">639</i>&nbsp;        if (!this.hLayout.equals(that.hLayout)) {</b>
+<b class="nc"><i class="no-highlight">640</i>&nbsp;            return false;</b>
+<i class="no-highlight">641</i>&nbsp;        }
+<b class="fc"><i class="no-highlight">642</i>&nbsp;        if (!this.vLayout.equals(that.vLayout)) {</b>
+<b class="nc"><i class="no-highlight">643</i>&nbsp;            return false;</b>
+<i class="no-highlight">644</i>&nbsp;        }
+<b class="fc"><i class="no-highlight">645</i>&nbsp;        if (!this.sortOrder.equals(that.sortOrder)) {</b>
+<b class="fc"><i class="no-highlight">646</i>&nbsp;            return false;</b>
+<i class="no-highlight">647</i>&nbsp;        }
+<b class="fc"><i class="no-highlight">648</i>&nbsp;        return true;</b>
+<i class="no-highlight">649</i>&nbsp;    }
+<i class="no-highlight">650</i>&nbsp;
+<i class="no-highlight">651</i>&nbsp;    /**
+<i class="no-highlight">652</i>&nbsp;     * Provides serialization support.
+<i class="no-highlight">653</i>&nbsp;     *
+<i class="no-highlight">654</i>&nbsp;     * @param stream  the output stream.
+<i class="no-highlight">655</i>&nbsp;     *
+<i class="no-highlight">656</i>&nbsp;     * @throws IOException  if there is an I/O error.
+<i class="no-highlight">657</i>&nbsp;     */
+<i class="no-highlight">658</i>&nbsp;    private void writeObject(ObjectOutputStream stream) throws IOException {
+<b class="fc"><i class="no-highlight">659</i>&nbsp;        stream.defaultWriteObject();</b>
+<b class="fc"><i class="no-highlight">660</i>&nbsp;        SerialUtils.writePaint(this.backgroundPaint, stream);</b>
+<b class="fc"><i class="no-highlight">661</i>&nbsp;        SerialUtils.writePaint(this.itemPaint, stream);</b>
+<i class="no-highlight">662</i>&nbsp;    }
+<i class="no-highlight">663</i>&nbsp;
+<i class="no-highlight">664</i>&nbsp;    /**
+<i class="no-highlight">665</i>&nbsp;     * Provides serialization support.
+<i class="no-highlight">666</i>&nbsp;     *
+<i class="no-highlight">667</i>&nbsp;     * @param stream  the input stream.
+<i class="no-highlight">668</i>&nbsp;     *
+<i class="no-highlight">669</i>&nbsp;     * @throws IOException  if there is an I/O error.
+<i class="no-highlight">670</i>&nbsp;     * @throws ClassNotFoundException  if there is a classpath problem.
+<i class="no-highlight">671</i>&nbsp;     */
+<i class="no-highlight">672</i>&nbsp;    private void readObject(ObjectInputStream stream)
+<i class="no-highlight">673</i>&nbsp;        throws IOException, ClassNotFoundException {
+<b class="fc"><i class="no-highlight">674</i>&nbsp;        stream.defaultReadObject();</b>
+<b class="fc"><i class="no-highlight">675</i>&nbsp;        this.backgroundPaint = SerialUtils.readPaint(stream);</b>
+<b class="fc"><i class="no-highlight">676</i>&nbsp;        this.itemPaint = SerialUtils.readPaint(stream);</b>
+<i class="no-highlight">677</i>&nbsp;    }
+<i class="no-highlight">678</i>&nbsp;
+<i class="no-highlight">679</i>&nbsp;}
+</div>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+        var codeBlock = document.getElementById('sourceCode');
+
+        if (codeBlock) {
+            hljs.highlightBlock(codeBlock);
+        }
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2022-03-26 17:36</div>
+</div>
+</body>
+</html>

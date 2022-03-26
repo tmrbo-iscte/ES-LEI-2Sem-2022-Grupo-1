@@ -1,0 +1,532 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > ModuloAxis</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/highlight-idea.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.pack.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.jfree.chart.axis</a>
+</div>
+
+<h1>Coverage Summary for Class: ModuloAxis (org.jfree.chart.axis)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ModuloAxis</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    23,5%
+  </span>
+  <span class="absValue">
+    (4/17)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    20,6%
+  </span>
+  <span class="absValue">
+    (21/102)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<div class="sourceCode" id="sourceCode"><i class="no-highlight">1</i>&nbsp;/* ===========================================================
+<i class="no-highlight">2</i>&nbsp; * JFreeChart : a free chart library for the Java(tm) platform
+<i class="no-highlight">3</i>&nbsp; * ===========================================================
+<i class="no-highlight">4</i>&nbsp; *
+<i class="no-highlight">5</i>&nbsp; * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+<i class="no-highlight">6</i>&nbsp; *
+<i class="no-highlight">7</i>&nbsp; * Project Info:  http://www.jfree.org/jfreechart/index.html
+<i class="no-highlight">8</i>&nbsp; *
+<i class="no-highlight">9</i>&nbsp; * This library is free software; you can redistribute it and/or modify it
+<i class="no-highlight">10</i>&nbsp; * under the terms of the GNU Lesser General Public License as published by
+<i class="no-highlight">11</i>&nbsp; * the Free Software Foundation; either version 2.1 of the License, or
+<i class="no-highlight">12</i>&nbsp; * (at your option) any later version.
+<i class="no-highlight">13</i>&nbsp; *
+<i class="no-highlight">14</i>&nbsp; * This library is distributed in the hope that it will be useful, but
+<i class="no-highlight">15</i>&nbsp; * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+<i class="no-highlight">16</i>&nbsp; * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+<i class="no-highlight">17</i>&nbsp; * License for more details.
+<i class="no-highlight">18</i>&nbsp; *
+<i class="no-highlight">19</i>&nbsp; * You should have received a copy of the GNU Lesser General Public
+<i class="no-highlight">20</i>&nbsp; * License along with this library; if not, write to the Free Software
+<i class="no-highlight">21</i>&nbsp; * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+<i class="no-highlight">22</i>&nbsp; * USA.
+<i class="no-highlight">23</i>&nbsp; *
+<i class="no-highlight">24</i>&nbsp; * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+<i class="no-highlight">25</i>&nbsp; * Other names may be trademarks of their respective owners.]
+<i class="no-highlight">26</i>&nbsp; *
+<i class="no-highlight">27</i>&nbsp; * ---------------
+<i class="no-highlight">28</i>&nbsp; * ModuloAxis.java
+<i class="no-highlight">29</i>&nbsp; * ---------------
+<i class="no-highlight">30</i>&nbsp; * (C) Copyright 2004-2022, by David Gilbert.
+<i class="no-highlight">31</i>&nbsp; *
+<i class="no-highlight">32</i>&nbsp; * Original Author:  David Gilbert;
+<i class="no-highlight">33</i>&nbsp; * Contributor(s):   -;
+<i class="no-highlight">34</i>&nbsp; *
+<i class="no-highlight">35</i>&nbsp; */
+<i class="no-highlight">36</i>&nbsp;
+<i class="no-highlight">37</i>&nbsp;package org.jfree.chart.axis;
+<i class="no-highlight">38</i>&nbsp;
+<i class="no-highlight">39</i>&nbsp;import java.awt.geom.Rectangle2D;
+<i class="no-highlight">40</i>&nbsp;
+<i class="no-highlight">41</i>&nbsp;import org.jfree.chart.event.AxisChangeEvent;
+<i class="no-highlight">42</i>&nbsp;import org.jfree.chart.api.RectangleEdge;
+<i class="no-highlight">43</i>&nbsp;import org.jfree.data.Range;
+<i class="no-highlight">44</i>&nbsp;
+<i class="no-highlight">45</i>&nbsp;/**
+<i class="no-highlight">46</i>&nbsp; * An axis that displays numerical values within a fixed range using a modulo
+<i class="no-highlight">47</i>&nbsp; * calculation.
+<i class="no-highlight">48</i>&nbsp; */
+<i class="no-highlight">49</i>&nbsp;public class ModuloAxis extends NumberAxis {
+<i class="no-highlight">50</i>&nbsp;
+<i class="no-highlight">51</i>&nbsp;    /**
+<i class="no-highlight">52</i>&nbsp;     * The fixed range for the axis - all data values will be mapped to this
+<i class="no-highlight">53</i>&nbsp;     * range using a modulo calculation.
+<i class="no-highlight">54</i>&nbsp;     */
+<i class="no-highlight">55</i>&nbsp;    private Range fixedRange;
+<i class="no-highlight">56</i>&nbsp;
+<i class="no-highlight">57</i>&nbsp;    /**
+<i class="no-highlight">58</i>&nbsp;     * The display start value (this will sometimes be &amp;gt; displayEnd, in which
+<i class="no-highlight">59</i>&nbsp;     * case the axis wraps around at some point in the middle of the axis).
+<i class="no-highlight">60</i>&nbsp;     */
+<i class="no-highlight">61</i>&nbsp;    private double displayStart;
+<i class="no-highlight">62</i>&nbsp;
+<i class="no-highlight">63</i>&nbsp;    /**
+<i class="no-highlight">64</i>&nbsp;     * The display end value.
+<i class="no-highlight">65</i>&nbsp;     */
+<i class="no-highlight">66</i>&nbsp;    private double displayEnd;
+<i class="no-highlight">67</i>&nbsp;
+<i class="no-highlight">68</i>&nbsp;    /**
+<i class="no-highlight">69</i>&nbsp;     * Creates a new axis.
+<i class="no-highlight">70</i>&nbsp;     *
+<i class="no-highlight">71</i>&nbsp;     * @param label  the axis label ({@code null} permitted).
+<i class="no-highlight">72</i>&nbsp;     * @param fixedRange  the fixed range ({@code null} not permitted).
+<i class="no-highlight">73</i>&nbsp;     */
+<i class="no-highlight">74</i>&nbsp;    public ModuloAxis(String label, Range fixedRange) {
+<b class="fc"><i class="no-highlight">75</i>&nbsp;        super(label);</b>
+<b class="fc"><i class="no-highlight">76</i>&nbsp;        this.fixedRange = fixedRange;</b>
+<b class="fc"><i class="no-highlight">77</i>&nbsp;        this.displayStart = 270.0;</b>
+<b class="fc"><i class="no-highlight">78</i>&nbsp;        this.displayEnd = 90.0;</b>
+<i class="no-highlight">79</i>&nbsp;    }
+<i class="no-highlight">80</i>&nbsp;
+<i class="no-highlight">81</i>&nbsp;    /**
+<i class="no-highlight">82</i>&nbsp;     * Returns the display start value.
+<i class="no-highlight">83</i>&nbsp;     *
+<i class="no-highlight">84</i>&nbsp;     * @return The display start value.
+<i class="no-highlight">85</i>&nbsp;     */
+<i class="no-highlight">86</i>&nbsp;    public double getDisplayStart() {
+<b class="nc"><i class="no-highlight">87</i>&nbsp;        return this.displayStart;</b>
+<i class="no-highlight">88</i>&nbsp;    }
+<i class="no-highlight">89</i>&nbsp;
+<i class="no-highlight">90</i>&nbsp;    /**
+<i class="no-highlight">91</i>&nbsp;     * Returns the display end value.
+<i class="no-highlight">92</i>&nbsp;     *
+<i class="no-highlight">93</i>&nbsp;     * @return The display end value.
+<i class="no-highlight">94</i>&nbsp;     */
+<i class="no-highlight">95</i>&nbsp;    public double getDisplayEnd() {
+<b class="nc"><i class="no-highlight">96</i>&nbsp;        return this.displayEnd;</b>
+<i class="no-highlight">97</i>&nbsp;    }
+<i class="no-highlight">98</i>&nbsp;
+<i class="no-highlight">99</i>&nbsp;    /**
+<i class="no-highlight">100</i>&nbsp;     * Sets the display range.  The values will be mapped to the fixed range if
+<i class="no-highlight">101</i>&nbsp;     * necessary.
+<i class="no-highlight">102</i>&nbsp;     *
+<i class="no-highlight">103</i>&nbsp;     * @param start  the start value.
+<i class="no-highlight">104</i>&nbsp;     * @param end  the end value.
+<i class="no-highlight">105</i>&nbsp;     */
+<i class="no-highlight">106</i>&nbsp;    public void setDisplayRange(double start, double end) {
+<b class="fc"><i class="no-highlight">107</i>&nbsp;        this.displayStart = mapValueToFixedRange(start);</b>
+<b class="fc"><i class="no-highlight">108</i>&nbsp;        this.displayEnd = mapValueToFixedRange(end);</b>
+<b class="fc"><i class="no-highlight">109</i>&nbsp;        if (this.displayStart &lt; this.displayEnd) {</b>
+<b class="fc"><i class="no-highlight">110</i>&nbsp;            setRange(this.displayStart, this.displayEnd);</b>
+<i class="no-highlight">111</i>&nbsp;        }
+<i class="no-highlight">112</i>&nbsp;        else {
+<b class="nc"><i class="no-highlight">113</i>&nbsp;            setRange(this.displayStart, this.fixedRange.getUpperBound()</b>
+<b class="nc"><i class="no-highlight">114</i>&nbsp;                  + (this.displayEnd - this.fixedRange.getLowerBound()));</b>
+<i class="no-highlight">115</i>&nbsp;        }
+<b class="fc"><i class="no-highlight">116</i>&nbsp;        notifyListeners(new AxisChangeEvent(this));</b>
+<i class="no-highlight">117</i>&nbsp;    }
+<i class="no-highlight">118</i>&nbsp;
+<i class="no-highlight">119</i>&nbsp;    /**
+<i class="no-highlight">120</i>&nbsp;     * This method should calculate a range that will show all the data values.
+<i class="no-highlight">121</i>&nbsp;     * For now, it just sets the axis range to the fixedRange.
+<i class="no-highlight">122</i>&nbsp;     */
+<i class="no-highlight">123</i>&nbsp;    @Override
+<i class="no-highlight">124</i>&nbsp;    protected void autoAdjustRange() {
+<b class="nc"><i class="no-highlight">125</i>&nbsp;        setRange(this.fixedRange, false, false);</b>
+<i class="no-highlight">126</i>&nbsp;    }
+<i class="no-highlight">127</i>&nbsp;
+<i class="no-highlight">128</i>&nbsp;    /**
+<i class="no-highlight">129</i>&nbsp;     * Translates a data value to a Java2D coordinate.
+<i class="no-highlight">130</i>&nbsp;     *
+<i class="no-highlight">131</i>&nbsp;     * @param value  the value.
+<i class="no-highlight">132</i>&nbsp;     * @param area  the area.
+<i class="no-highlight">133</i>&nbsp;     * @param edge  the edge.
+<i class="no-highlight">134</i>&nbsp;     *
+<i class="no-highlight">135</i>&nbsp;     * @return A Java2D coordinate.
+<i class="no-highlight">136</i>&nbsp;     */
+<i class="no-highlight">137</i>&nbsp;    @Override
+<i class="no-highlight">138</i>&nbsp;    public double valueToJava2D(double value, Rectangle2D area,
+<i class="no-highlight">139</i>&nbsp;            RectangleEdge edge) {
+<i class="no-highlight">140</i>&nbsp;        double result;
+<b class="nc"><i class="no-highlight">141</i>&nbsp;        double v = mapValueToFixedRange(value);</b>
+<b class="nc"><i class="no-highlight">142</i>&nbsp;        if (this.displayStart &lt; this.displayEnd) {  // regular number axis</b>
+<b class="nc"><i class="no-highlight">143</i>&nbsp;            result = trans(v, area, edge);</b>
+<i class="no-highlight">144</i>&nbsp;        }
+<i class="no-highlight">145</i>&nbsp;        else {  // displayStart &gt; displayEnd, need to handle split
+<b class="nc"><i class="no-highlight">146</i>&nbsp;            double cutoff = (this.displayStart + this.displayEnd) / 2.0;</b>
+<b class="nc"><i class="no-highlight">147</i>&nbsp;            double length1 = this.fixedRange.getUpperBound()</b>
+<i class="no-highlight">148</i>&nbsp;                             - this.displayStart;
+<b class="nc"><i class="no-highlight">149</i>&nbsp;            double length2 = this.displayEnd - this.fixedRange.getLowerBound();</b>
+<b class="nc"><i class="no-highlight">150</i>&nbsp;            if (v &gt; cutoff) {</b>
+<b class="nc"><i class="no-highlight">151</i>&nbsp;                result = transStart(v, area, edge, length1, length2);</b>
+<i class="no-highlight">152</i>&nbsp;            }
+<i class="no-highlight">153</i>&nbsp;            else {
+<b class="nc"><i class="no-highlight">154</i>&nbsp;                result = transEnd(v, area, edge, length1, length2);</b>
+<i class="no-highlight">155</i>&nbsp;            }
+<i class="no-highlight">156</i>&nbsp;        }
+<b class="nc"><i class="no-highlight">157</i>&nbsp;        return result;</b>
+<i class="no-highlight">158</i>&nbsp;    }
+<i class="no-highlight">159</i>&nbsp;
+<i class="no-highlight">160</i>&nbsp;    /**
+<i class="no-highlight">161</i>&nbsp;     * A regular translation from a data value to a Java2D value.
+<i class="no-highlight">162</i>&nbsp;     *
+<i class="no-highlight">163</i>&nbsp;     * @param value  the value.
+<i class="no-highlight">164</i>&nbsp;     * @param area  the data area.
+<i class="no-highlight">165</i>&nbsp;     * @param edge  the edge along which the axis lies.
+<i class="no-highlight">166</i>&nbsp;     *
+<i class="no-highlight">167</i>&nbsp;     * @return The Java2D coordinate.
+<i class="no-highlight">168</i>&nbsp;     */
+<i class="no-highlight">169</i>&nbsp;    private double trans(double value, Rectangle2D area, RectangleEdge edge) {
+<b class="nc"><i class="no-highlight">170</i>&nbsp;        double min = 0.0;</b>
+<b class="nc"><i class="no-highlight">171</i>&nbsp;        double max = 0.0;</b>
+<b class="nc"><i class="no-highlight">172</i>&nbsp;        if (RectangleEdge.isTopOrBottom(edge)) {</b>
+<b class="nc"><i class="no-highlight">173</i>&nbsp;            min = area.getX();</b>
+<b class="nc"><i class="no-highlight">174</i>&nbsp;            max = area.getX() + area.getWidth();</b>
+<i class="no-highlight">175</i>&nbsp;        }
+<b class="nc"><i class="no-highlight">176</i>&nbsp;        else if (RectangleEdge.isLeftOrRight(edge)) {</b>
+<b class="nc"><i class="no-highlight">177</i>&nbsp;            min = area.getMaxY();</b>
+<b class="nc"><i class="no-highlight">178</i>&nbsp;            max = area.getMaxY() - area.getHeight();</b>
+<i class="no-highlight">179</i>&nbsp;        }
+<b class="nc"><i class="no-highlight">180</i>&nbsp;        if (isInverted()) {</b>
+<b class="nc"><i class="no-highlight">181</i>&nbsp;            return max - ((value - this.displayStart)</b>
+<i class="no-highlight">182</i>&nbsp;                   / (this.displayEnd - this.displayStart)) * (max - min);
+<i class="no-highlight">183</i>&nbsp;        }
+<i class="no-highlight">184</i>&nbsp;        else {
+<b class="nc"><i class="no-highlight">185</i>&nbsp;            return min + ((value - this.displayStart)</b>
+<i class="no-highlight">186</i>&nbsp;                   / (this.displayEnd - this.displayStart)) * (max - min);
+<i class="no-highlight">187</i>&nbsp;        }
+<i class="no-highlight">188</i>&nbsp;
+<i class="no-highlight">189</i>&nbsp;    }
+<i class="no-highlight">190</i>&nbsp;
+<i class="no-highlight">191</i>&nbsp;    /**
+<i class="no-highlight">192</i>&nbsp;     * Translates a data value to a Java2D value for the first section of the
+<i class="no-highlight">193</i>&nbsp;     * axis.
+<i class="no-highlight">194</i>&nbsp;     *
+<i class="no-highlight">195</i>&nbsp;     * @param value  the value.
+<i class="no-highlight">196</i>&nbsp;     * @param area  the data area.
+<i class="no-highlight">197</i>&nbsp;     * @param edge  the edge along which the axis lies.
+<i class="no-highlight">198</i>&nbsp;     * @param length1  the length of the first section.
+<i class="no-highlight">199</i>&nbsp;     * @param length2  the length of the second section.
+<i class="no-highlight">200</i>&nbsp;     *
+<i class="no-highlight">201</i>&nbsp;     * @return The Java2D coordinate.
+<i class="no-highlight">202</i>&nbsp;     */
+<i class="no-highlight">203</i>&nbsp;    private double transStart(double value, Rectangle2D area, RectangleEdge edge,
+<i class="no-highlight">204</i>&nbsp;            double length1, double length2) {
+<b class="nc"><i class="no-highlight">205</i>&nbsp;        double min = 0.0;</b>
+<b class="nc"><i class="no-highlight">206</i>&nbsp;        double max = 0.0;</b>
+<b class="nc"><i class="no-highlight">207</i>&nbsp;        if (RectangleEdge.isTopOrBottom(edge)) {</b>
+<b class="nc"><i class="no-highlight">208</i>&nbsp;            min = area.getX();</b>
+<b class="nc"><i class="no-highlight">209</i>&nbsp;            max = area.getX() + area.getWidth() * length1 / (length1 + length2);</b>
+<i class="no-highlight">210</i>&nbsp;        }
+<b class="nc"><i class="no-highlight">211</i>&nbsp;        else if (RectangleEdge.isLeftOrRight(edge)) {</b>
+<b class="nc"><i class="no-highlight">212</i>&nbsp;            min = area.getMaxY();</b>
+<b class="nc"><i class="no-highlight">213</i>&nbsp;            max = area.getMaxY() - area.getHeight() * length1</b>
+<i class="no-highlight">214</i>&nbsp;                  / (length1 + length2);
+<i class="no-highlight">215</i>&nbsp;        }
+<b class="nc"><i class="no-highlight">216</i>&nbsp;        if (isInverted()) {</b>
+<b class="nc"><i class="no-highlight">217</i>&nbsp;            return max - ((value - this.displayStart)</b>
+<b class="nc"><i class="no-highlight">218</i>&nbsp;                / (this.fixedRange.getUpperBound() - this.displayStart))</b>
+<i class="no-highlight">219</i>&nbsp;                * (max - min);
+<i class="no-highlight">220</i>&nbsp;        }
+<i class="no-highlight">221</i>&nbsp;        else {
+<b class="nc"><i class="no-highlight">222</i>&nbsp;            return min + ((value - this.displayStart)</b>
+<b class="nc"><i class="no-highlight">223</i>&nbsp;                / (this.fixedRange.getUpperBound() - this.displayStart))</b>
+<i class="no-highlight">224</i>&nbsp;                * (max - min);
+<i class="no-highlight">225</i>&nbsp;        }
+<i class="no-highlight">226</i>&nbsp;
+<i class="no-highlight">227</i>&nbsp;    }
+<i class="no-highlight">228</i>&nbsp;
+<i class="no-highlight">229</i>&nbsp;    /**
+<i class="no-highlight">230</i>&nbsp;     * Translates a data value to a Java2D value for the second section of the
+<i class="no-highlight">231</i>&nbsp;     * axis.
+<i class="no-highlight">232</i>&nbsp;     *
+<i class="no-highlight">233</i>&nbsp;     * @param value  the value.
+<i class="no-highlight">234</i>&nbsp;     * @param area  the data area.
+<i class="no-highlight">235</i>&nbsp;     * @param edge  the edge along which the axis lies.
+<i class="no-highlight">236</i>&nbsp;     * @param length1  the length of the first section.
+<i class="no-highlight">237</i>&nbsp;     * @param length2  the length of the second section.
+<i class="no-highlight">238</i>&nbsp;     *
+<i class="no-highlight">239</i>&nbsp;     * @return The Java2D coordinate.
+<i class="no-highlight">240</i>&nbsp;     */
+<i class="no-highlight">241</i>&nbsp;    private double transEnd(double value, Rectangle2D area, RectangleEdge edge,
+<i class="no-highlight">242</i>&nbsp;            double length1, double length2) {
+<b class="nc"><i class="no-highlight">243</i>&nbsp;        double min = 0.0;</b>
+<b class="nc"><i class="no-highlight">244</i>&nbsp;        double max = 0.0;</b>
+<b class="nc"><i class="no-highlight">245</i>&nbsp;        if (RectangleEdge.isTopOrBottom(edge)) {</b>
+<b class="nc"><i class="no-highlight">246</i>&nbsp;            max = area.getMaxX();</b>
+<b class="nc"><i class="no-highlight">247</i>&nbsp;            min = area.getMaxX() - area.getWidth() * length2</b>
+<i class="no-highlight">248</i>&nbsp;                  / (length1 + length2);
+<i class="no-highlight">249</i>&nbsp;        }
+<b class="nc"><i class="no-highlight">250</i>&nbsp;        else if (RectangleEdge.isLeftOrRight(edge)) {</b>
+<b class="nc"><i class="no-highlight">251</i>&nbsp;            max = area.getMinY();</b>
+<b class="nc"><i class="no-highlight">252</i>&nbsp;            min = area.getMinY() + area.getHeight() * length2</b>
+<i class="no-highlight">253</i>&nbsp;                  / (length1 + length2);
+<i class="no-highlight">254</i>&nbsp;        }
+<b class="nc"><i class="no-highlight">255</i>&nbsp;        if (isInverted()) {</b>
+<b class="nc"><i class="no-highlight">256</i>&nbsp;            return max - ((value - this.fixedRange.getLowerBound())</b>
+<b class="nc"><i class="no-highlight">257</i>&nbsp;                    / (this.displayEnd - this.fixedRange.getLowerBound()))</b>
+<i class="no-highlight">258</i>&nbsp;                    * (max - min);
+<i class="no-highlight">259</i>&nbsp;        }
+<i class="no-highlight">260</i>&nbsp;        else {
+<b class="nc"><i class="no-highlight">261</i>&nbsp;            return min + ((value - this.fixedRange.getLowerBound())</b>
+<b class="nc"><i class="no-highlight">262</i>&nbsp;                    / (this.displayEnd - this.fixedRange.getLowerBound()))</b>
+<i class="no-highlight">263</i>&nbsp;                    * (max - min);
+<i class="no-highlight">264</i>&nbsp;        }
+<i class="no-highlight">265</i>&nbsp;
+<i class="no-highlight">266</i>&nbsp;    }
+<i class="no-highlight">267</i>&nbsp;
+<i class="no-highlight">268</i>&nbsp;    /**
+<i class="no-highlight">269</i>&nbsp;     * Maps a data value into the fixed range.
+<i class="no-highlight">270</i>&nbsp;     *
+<i class="no-highlight">271</i>&nbsp;     * @param value  the value.
+<i class="no-highlight">272</i>&nbsp;     *
+<i class="no-highlight">273</i>&nbsp;     * @return The mapped value.
+<i class="no-highlight">274</i>&nbsp;     */
+<i class="no-highlight">275</i>&nbsp;    private double mapValueToFixedRange(double value) {
+<b class="fc"><i class="no-highlight">276</i>&nbsp;        double lower = this.fixedRange.getLowerBound();</b>
+<b class="fc"><i class="no-highlight">277</i>&nbsp;        double length = this.fixedRange.getLength();</b>
+<b class="fc"><i class="no-highlight">278</i>&nbsp;        if (value &lt; lower) {</b>
+<b class="nc"><i class="no-highlight">279</i>&nbsp;            return lower + length + ((value - lower) % length);</b>
+<i class="no-highlight">280</i>&nbsp;        }
+<i class="no-highlight">281</i>&nbsp;        else {
+<b class="fc"><i class="no-highlight">282</i>&nbsp;            return lower + ((value - lower) % length);</b>
+<i class="no-highlight">283</i>&nbsp;        }
+<i class="no-highlight">284</i>&nbsp;    }
+<i class="no-highlight">285</i>&nbsp;
+<i class="no-highlight">286</i>&nbsp;    /**
+<i class="no-highlight">287</i>&nbsp;     * Translates a Java2D coordinate into a data value.
+<i class="no-highlight">288</i>&nbsp;     *
+<i class="no-highlight">289</i>&nbsp;     * @param java2DValue  the Java2D coordinate.
+<i class="no-highlight">290</i>&nbsp;     * @param area  the area.
+<i class="no-highlight">291</i>&nbsp;     * @param edge  the edge.
+<i class="no-highlight">292</i>&nbsp;     *
+<i class="no-highlight">293</i>&nbsp;     * @return The Java2D coordinate.
+<i class="no-highlight">294</i>&nbsp;     */
+<i class="no-highlight">295</i>&nbsp;    @Override
+<i class="no-highlight">296</i>&nbsp;    public double java2DToValue(double java2DValue, Rectangle2D area,
+<i class="no-highlight">297</i>&nbsp;            RectangleEdge edge) {
+<b class="nc"><i class="no-highlight">298</i>&nbsp;        double result = 0.0;</b>
+<b class="nc"><i class="no-highlight">299</i>&nbsp;        if (this.displayStart &lt; this.displayEnd) {  // regular number axis</b>
+<b class="nc"><i class="no-highlight">300</i>&nbsp;            result = super.java2DToValue(java2DValue, area, edge);</b>
+<i class="no-highlight">301</i>&nbsp;        }
+<i class="no-highlight">302</i>&nbsp;        else {  // displayStart &gt; displayEnd, need to handle split
+<i class="no-highlight">303</i>&nbsp;
+<i class="no-highlight">304</i>&nbsp;        }
+<b class="nc"><i class="no-highlight">305</i>&nbsp;        return result;</b>
+<i class="no-highlight">306</i>&nbsp;    }
+<i class="no-highlight">307</i>&nbsp;
+<i class="no-highlight">308</i>&nbsp;    /**
+<i class="no-highlight">309</i>&nbsp;     * Returns the display length for the axis.
+<i class="no-highlight">310</i>&nbsp;     *
+<i class="no-highlight">311</i>&nbsp;     * @return The display length.
+<i class="no-highlight">312</i>&nbsp;     */
+<i class="no-highlight">313</i>&nbsp;    private double getDisplayLength() {
+<b class="nc"><i class="no-highlight">314</i>&nbsp;        if (this.displayStart &lt; this.displayEnd) {</b>
+<b class="nc"><i class="no-highlight">315</i>&nbsp;            return (this.displayEnd - this.displayStart);</b>
+<i class="no-highlight">316</i>&nbsp;        }
+<i class="no-highlight">317</i>&nbsp;        else {
+<b class="nc"><i class="no-highlight">318</i>&nbsp;            return (this.fixedRange.getUpperBound() - this.displayStart)</b>
+<b class="nc"><i class="no-highlight">319</i>&nbsp;                + (this.displayEnd - this.fixedRange.getLowerBound());</b>
+<i class="no-highlight">320</i>&nbsp;        }
+<i class="no-highlight">321</i>&nbsp;    }
+<i class="no-highlight">322</i>&nbsp;
+<i class="no-highlight">323</i>&nbsp;    /**
+<i class="no-highlight">324</i>&nbsp;     * Returns the central value of the current display range.
+<i class="no-highlight">325</i>&nbsp;     *
+<i class="no-highlight">326</i>&nbsp;     * @return The central value.
+<i class="no-highlight">327</i>&nbsp;     */
+<i class="no-highlight">328</i>&nbsp;    private double getDisplayCentralValue() {
+<b class="nc"><i class="no-highlight">329</i>&nbsp;        return mapValueToFixedRange(this.displayStart </b>
+<b class="nc"><i class="no-highlight">330</i>&nbsp;                + (getDisplayLength() / 2));</b>
+<i class="no-highlight">331</i>&nbsp;    }
+<i class="no-highlight">332</i>&nbsp;
+<i class="no-highlight">333</i>&nbsp;    /**
+<i class="no-highlight">334</i>&nbsp;     * Increases or decreases the axis range by the specified percentage about
+<i class="no-highlight">335</i>&nbsp;     * the central value and sends an {@link AxisChangeEvent} to all registered
+<i class="no-highlight">336</i>&nbsp;     * listeners.
+<i class="no-highlight">337</i>&nbsp;     * &lt;P&gt;
+<i class="no-highlight">338</i>&nbsp;     * To double the length of the axis range, use 200% (2.0).
+<i class="no-highlight">339</i>&nbsp;     * To halve the length of the axis range, use 50% (0.5).
+<i class="no-highlight">340</i>&nbsp;     *
+<i class="no-highlight">341</i>&nbsp;     * @param percent  the resize factor.
+<i class="no-highlight">342</i>&nbsp;     */
+<i class="no-highlight">343</i>&nbsp;    @Override
+<i class="no-highlight">344</i>&nbsp;    public void resizeRange(double percent) {
+<b class="nc"><i class="no-highlight">345</i>&nbsp;        resizeRange(percent, getDisplayCentralValue());</b>
+<i class="no-highlight">346</i>&nbsp;    }
+<i class="no-highlight">347</i>&nbsp;
+<i class="no-highlight">348</i>&nbsp;    /**
+<i class="no-highlight">349</i>&nbsp;     * Increases or decreases the axis range by the specified percentage about
+<i class="no-highlight">350</i>&nbsp;     * the specified anchor value and sends an {@link AxisChangeEvent} to all
+<i class="no-highlight">351</i>&nbsp;     * registered listeners.
+<i class="no-highlight">352</i>&nbsp;     * &lt;P&gt;
+<i class="no-highlight">353</i>&nbsp;     * To double the length of the axis range, use 200% (2.0).
+<i class="no-highlight">354</i>&nbsp;     * To halve the length of the axis range, use 50% (0.5).
+<i class="no-highlight">355</i>&nbsp;     *
+<i class="no-highlight">356</i>&nbsp;     * @param percent  the resize factor.
+<i class="no-highlight">357</i>&nbsp;     * @param anchorValue  the new central value after the resize.
+<i class="no-highlight">358</i>&nbsp;     */
+<i class="no-highlight">359</i>&nbsp;    @Override
+<i class="no-highlight">360</i>&nbsp;    public void resizeRange(double percent, double anchorValue) {
+<b class="nc"><i class="no-highlight">361</i>&nbsp;        if (percent &gt; 0.0) {</b>
+<b class="nc"><i class="no-highlight">362</i>&nbsp;            double halfLength = getDisplayLength() * percent / 2;</b>
+<b class="nc"><i class="no-highlight">363</i>&nbsp;            setDisplayRange(anchorValue - halfLength, anchorValue + halfLength);</b>
+<b class="nc"><i class="no-highlight">364</i>&nbsp;        }</b>
+<i class="no-highlight">365</i>&nbsp;        else {
+<b class="nc"><i class="no-highlight">366</i>&nbsp;            setAutoRange(true);</b>
+<i class="no-highlight">367</i>&nbsp;        }
+<i class="no-highlight">368</i>&nbsp;    }
+<i class="no-highlight">369</i>&nbsp;
+<i class="no-highlight">370</i>&nbsp;    /**
+<i class="no-highlight">371</i>&nbsp;     * Converts a length in data coordinates into the corresponding length in
+<i class="no-highlight">372</i>&nbsp;     * Java2D coordinates.
+<i class="no-highlight">373</i>&nbsp;     *
+<i class="no-highlight">374</i>&nbsp;     * @param length  the length.
+<i class="no-highlight">375</i>&nbsp;     * @param area  the plot area.
+<i class="no-highlight">376</i>&nbsp;     * @param edge  the edge along which the axis lies.
+<i class="no-highlight">377</i>&nbsp;     *
+<i class="no-highlight">378</i>&nbsp;     * @return The length in Java2D coordinates.
+<i class="no-highlight">379</i>&nbsp;     */
+<i class="no-highlight">380</i>&nbsp;    @Override
+<i class="no-highlight">381</i>&nbsp;    public double lengthToJava2D(double length, Rectangle2D area,
+<i class="no-highlight">382</i>&nbsp;            RectangleEdge edge) {
+<i class="no-highlight">383</i>&nbsp;        double axisLength;
+<b class="nc"><i class="no-highlight">384</i>&nbsp;        if (this.displayEnd &gt; this.displayStart) {</b>
+<b class="nc"><i class="no-highlight">385</i>&nbsp;            axisLength = this.displayEnd - this.displayStart;</b>
+<i class="no-highlight">386</i>&nbsp;        } else {
+<b class="nc"><i class="no-highlight">387</i>&nbsp;            axisLength = (this.fixedRange.getUpperBound() - this.displayStart)</b>
+<b class="nc"><i class="no-highlight">388</i>&nbsp;                + (this.displayEnd - this.fixedRange.getLowerBound());</b>
+<i class="no-highlight">389</i>&nbsp;        }
+<i class="no-highlight">390</i>&nbsp;        double areaLength;
+<b class="nc"><i class="no-highlight">391</i>&nbsp;        if (RectangleEdge.isLeftOrRight(edge)) {</b>
+<b class="nc"><i class="no-highlight">392</i>&nbsp;            areaLength = area.getHeight();</b>
+<i class="no-highlight">393</i>&nbsp;        } else {
+<b class="nc"><i class="no-highlight">394</i>&nbsp;            areaLength = area.getWidth();</b>
+<i class="no-highlight">395</i>&nbsp;        }
+<b class="nc"><i class="no-highlight">396</i>&nbsp;        return (length / axisLength) * areaLength;</b>
+<i class="no-highlight">397</i>&nbsp;    }
+<i class="no-highlight">398</i>&nbsp;
+<i class="no-highlight">399</i>&nbsp;    /**
+<i class="no-highlight">400</i>&nbsp;     * Tests this axis for equality with an arbitrary object.
+<i class="no-highlight">401</i>&nbsp;     *
+<i class="no-highlight">402</i>&nbsp;     * @param obj  the object ({@code null} permitted).
+<i class="no-highlight">403</i>&nbsp;     *
+<i class="no-highlight">404</i>&nbsp;     * @return A boolean.
+<i class="no-highlight">405</i>&nbsp;     */
+<i class="no-highlight">406</i>&nbsp;    @Override
+<i class="no-highlight">407</i>&nbsp;    public boolean equals(Object obj) {
+<b class="fc"><i class="no-highlight">408</i>&nbsp;        if (obj == this) {</b>
+<b class="nc"><i class="no-highlight">409</i>&nbsp;            return true;</b>
+<i class="no-highlight">410</i>&nbsp;        }
+<b class="fc"><i class="no-highlight">411</i>&nbsp;        if (!(obj instanceof ModuloAxis)) {</b>
+<b class="nc"><i class="no-highlight">412</i>&nbsp;            return false;</b>
+<i class="no-highlight">413</i>&nbsp;        }
+<b class="fc"><i class="no-highlight">414</i>&nbsp;        ModuloAxis that = (ModuloAxis) obj;</b>
+<b class="fc"><i class="no-highlight">415</i>&nbsp;        if (this.displayStart != that.displayStart) {</b>
+<b class="fc"><i class="no-highlight">416</i>&nbsp;            return false;</b>
+<i class="no-highlight">417</i>&nbsp;        }
+<b class="fc"><i class="no-highlight">418</i>&nbsp;        if (this.displayEnd != that.displayEnd) {</b>
+<b class="nc"><i class="no-highlight">419</i>&nbsp;            return false;</b>
+<i class="no-highlight">420</i>&nbsp;        }
+<b class="fc"><i class="no-highlight">421</i>&nbsp;        if (!this.fixedRange.equals(that.fixedRange)) {</b>
+<b class="nc"><i class="no-highlight">422</i>&nbsp;            return false;</b>
+<i class="no-highlight">423</i>&nbsp;        }
+<b class="fc"><i class="no-highlight">424</i>&nbsp;        return super.equals(obj);</b>
+<i class="no-highlight">425</i>&nbsp;    }
+<i class="no-highlight">426</i>&nbsp;
+<i class="no-highlight">427</i>&nbsp;}
+</div>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+        var codeBlock = document.getElementById('sourceCode');
+
+        if (codeBlock) {
+            hljs.highlightBlock(codeBlock);
+        }
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2022-03-26 17:36</div>
+</div>
+</body>
+</html>

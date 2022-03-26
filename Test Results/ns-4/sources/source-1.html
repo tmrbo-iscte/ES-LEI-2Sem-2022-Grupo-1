@@ -1,0 +1,741 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > AbstractBlock</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/highlight-idea.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.pack.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.jfree.chart.block</a>
+</div>
+
+<h1>Coverage Summary for Class: AbstractBlock (org.jfree.chart.block)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">AbstractBlock</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    60,5%
+  </span>
+  <span class="absValue">
+    (23/38)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    73,3%
+  </span>
+  <span class="absValue">
+    (99/135)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<div class="sourceCode" id="sourceCode"><i class="no-highlight">1</i>&nbsp;/* ===========================================================
+<i class="no-highlight">2</i>&nbsp; * JFreeChart : a free chart library for the Java(tm) platform
+<i class="no-highlight">3</i>&nbsp; * ===========================================================
+<i class="no-highlight">4</i>&nbsp; *
+<i class="no-highlight">5</i>&nbsp; * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+<i class="no-highlight">6</i>&nbsp; *
+<i class="no-highlight">7</i>&nbsp; * Project Info:  http://www.jfree.org/jfreechart/index.html
+<i class="no-highlight">8</i>&nbsp; *
+<i class="no-highlight">9</i>&nbsp; * This library is free software; you can redistribute it and/or modify it
+<i class="no-highlight">10</i>&nbsp; * under the terms of the GNU Lesser General Public License as published by
+<i class="no-highlight">11</i>&nbsp; * the Free Software Foundation; either version 2.1 of the License, or
+<i class="no-highlight">12</i>&nbsp; * (at your option) any later version.
+<i class="no-highlight">13</i>&nbsp; *
+<i class="no-highlight">14</i>&nbsp; * This library is distributed in the hope that it will be useful, but
+<i class="no-highlight">15</i>&nbsp; * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+<i class="no-highlight">16</i>&nbsp; * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+<i class="no-highlight">17</i>&nbsp; * License for more details.
+<i class="no-highlight">18</i>&nbsp; *
+<i class="no-highlight">19</i>&nbsp; * You should have received a copy of the GNU Lesser General Public
+<i class="no-highlight">20</i>&nbsp; * License along with this library; if not, write to the Free Software
+<i class="no-highlight">21</i>&nbsp; * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+<i class="no-highlight">22</i>&nbsp; * USA.
+<i class="no-highlight">23</i>&nbsp; *
+<i class="no-highlight">24</i>&nbsp; * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+<i class="no-highlight">25</i>&nbsp; * Other names may be trademarks of their respective owners.]
+<i class="no-highlight">26</i>&nbsp; *
+<i class="no-highlight">27</i>&nbsp; * ------------------
+<i class="no-highlight">28</i>&nbsp; * AbstractBlock.java
+<i class="no-highlight">29</i>&nbsp; * ------------------
+<i class="no-highlight">30</i>&nbsp; * (C) Copyright 2004-2022, by David Gilbert.
+<i class="no-highlight">31</i>&nbsp; *
+<i class="no-highlight">32</i>&nbsp; * Original Author:  David Gilbert;
+<i class="no-highlight">33</i>&nbsp; * Contributor(s):   -;
+<i class="no-highlight">34</i>&nbsp; *
+<i class="no-highlight">35</i>&nbsp; */
+<i class="no-highlight">36</i>&nbsp;
+<i class="no-highlight">37</i>&nbsp;package org.jfree.chart.block;
+<i class="no-highlight">38</i>&nbsp;
+<i class="no-highlight">39</i>&nbsp;import java.awt.Graphics2D;
+<i class="no-highlight">40</i>&nbsp;import java.awt.geom.Rectangle2D;
+<i class="no-highlight">41</i>&nbsp;import java.io.IOException;
+<i class="no-highlight">42</i>&nbsp;import java.io.ObjectInputStream;
+<i class="no-highlight">43</i>&nbsp;import java.io.ObjectOutputStream;
+<i class="no-highlight">44</i>&nbsp;import java.io.Serializable;
+<i class="no-highlight">45</i>&nbsp;import java.util.Objects;
+<i class="no-highlight">46</i>&nbsp;import org.jfree.chart.api.RectangleInsets;
+<i class="no-highlight">47</i>&nbsp;import org.jfree.chart.internal.Args;
+<i class="no-highlight">48</i>&nbsp;import org.jfree.chart.api.PublicCloneable;
+<i class="no-highlight">49</i>&nbsp;import org.jfree.chart.internal.CloneUtils;
+<i class="no-highlight">50</i>&nbsp;import org.jfree.chart.internal.SerialUtils;
+<i class="no-highlight">51</i>&nbsp;
+<i class="no-highlight">52</i>&nbsp;import org.jfree.data.Range;
+<i class="no-highlight">53</i>&nbsp;
+<i class="no-highlight">54</i>&nbsp;/**
+<i class="no-highlight">55</i>&nbsp; * A convenience class for creating new classes that implement
+<i class="no-highlight">56</i>&nbsp; * the {@link Block} interface.
+<i class="no-highlight">57</i>&nbsp; */
+<i class="no-highlight">58</i>&nbsp;public class AbstractBlock implements Cloneable, Serializable {
+<i class="no-highlight">59</i>&nbsp;
+<i class="no-highlight">60</i>&nbsp;    /** For serialization. */
+<i class="no-highlight">61</i>&nbsp;    private static final long serialVersionUID = 7689852412141274563L;
+<i class="no-highlight">62</i>&nbsp;
+<i class="no-highlight">63</i>&nbsp;    /** The id for the block. */
+<i class="no-highlight">64</i>&nbsp;    private String id;
+<i class="no-highlight">65</i>&nbsp;
+<i class="no-highlight">66</i>&nbsp;    /** The margin around the outside of the block. */
+<i class="no-highlight">67</i>&nbsp;    private RectangleInsets margin;
+<i class="no-highlight">68</i>&nbsp;
+<i class="no-highlight">69</i>&nbsp;    /** The frame (or border) for the block. */
+<i class="no-highlight">70</i>&nbsp;    private BlockFrame frame;
+<i class="no-highlight">71</i>&nbsp;
+<i class="no-highlight">72</i>&nbsp;    /** The padding between the block content and the border. */
+<i class="no-highlight">73</i>&nbsp;    private RectangleInsets padding;
+<i class="no-highlight">74</i>&nbsp;
+<i class="no-highlight">75</i>&nbsp;    /**
+<i class="no-highlight">76</i>&nbsp;     * The natural width of the block (may be overridden if there are
+<i class="no-highlight">77</i>&nbsp;     * constraints in sizing).
+<i class="no-highlight">78</i>&nbsp;     */
+<i class="no-highlight">79</i>&nbsp;    private double width;
+<i class="no-highlight">80</i>&nbsp;
+<i class="no-highlight">81</i>&nbsp;    /**
+<i class="no-highlight">82</i>&nbsp;     * The natural height of the block (may be overridden if there are
+<i class="no-highlight">83</i>&nbsp;     * constraints in sizing).
+<i class="no-highlight">84</i>&nbsp;     */
+<i class="no-highlight">85</i>&nbsp;    private double height;
+<i class="no-highlight">86</i>&nbsp;
+<i class="no-highlight">87</i>&nbsp;    /**
+<i class="no-highlight">88</i>&nbsp;     * The current bounds for the block (position of the block in Java2D space).
+<i class="no-highlight">89</i>&nbsp;     */
+<i class="no-highlight">90</i>&nbsp;    private transient Rectangle2D bounds;
+<i class="no-highlight">91</i>&nbsp;
+<i class="no-highlight">92</i>&nbsp;    /**
+<i class="no-highlight">93</i>&nbsp;     * Creates a new block.
+<i class="no-highlight">94</i>&nbsp;     */
+<b class="fc"><i class="no-highlight">95</i>&nbsp;    protected AbstractBlock() {</b>
+<b class="fc"><i class="no-highlight">96</i>&nbsp;        this.id = null;</b>
+<b class="fc"><i class="no-highlight">97</i>&nbsp;        this.width = 0.0;</b>
+<b class="fc"><i class="no-highlight">98</i>&nbsp;        this.height = 0.0;</b>
+<b class="fc"><i class="no-highlight">99</i>&nbsp;        this.bounds = new Rectangle2D.Float();</b>
+<b class="fc"><i class="no-highlight">100</i>&nbsp;        this.margin = RectangleInsets.ZERO_INSETS;</b>
+<b class="fc"><i class="no-highlight">101</i>&nbsp;        this.frame = BlockBorder.NONE;</b>
+<b class="fc"><i class="no-highlight">102</i>&nbsp;        this.padding = RectangleInsets.ZERO_INSETS;</b>
+<i class="no-highlight">103</i>&nbsp;    }
+<i class="no-highlight">104</i>&nbsp;
+<i class="no-highlight">105</i>&nbsp;    /**
+<i class="no-highlight">106</i>&nbsp;     * Returns the id.
+<i class="no-highlight">107</i>&nbsp;     *
+<i class="no-highlight">108</i>&nbsp;     * @return The id (possibly {@code null}).
+<i class="no-highlight">109</i>&nbsp;     *
+<i class="no-highlight">110</i>&nbsp;     * @see #setID(String)
+<i class="no-highlight">111</i>&nbsp;     */
+<i class="no-highlight">112</i>&nbsp;    public String getID() {
+<b class="nc"><i class="no-highlight">113</i>&nbsp;        return this.id;</b>
+<i class="no-highlight">114</i>&nbsp;    }
+<i class="no-highlight">115</i>&nbsp;
+<i class="no-highlight">116</i>&nbsp;    /**
+<i class="no-highlight">117</i>&nbsp;     * Sets the id for the block.
+<i class="no-highlight">118</i>&nbsp;     *
+<i class="no-highlight">119</i>&nbsp;     * @param id  the id ({@code null} permitted).
+<i class="no-highlight">120</i>&nbsp;     *
+<i class="no-highlight">121</i>&nbsp;     * @see #getID()
+<i class="no-highlight">122</i>&nbsp;     */
+<i class="no-highlight">123</i>&nbsp;    public void setID(String id) {
+<b class="fc"><i class="no-highlight">124</i>&nbsp;        this.id = id;</b>
+<i class="no-highlight">125</i>&nbsp;    }
+<i class="no-highlight">126</i>&nbsp;
+<i class="no-highlight">127</i>&nbsp;    /**
+<i class="no-highlight">128</i>&nbsp;     * Returns the natural width of the block, if this is known in advance.
+<i class="no-highlight">129</i>&nbsp;     * The actual width of the block may be overridden if layout constraints
+<i class="no-highlight">130</i>&nbsp;     * make this necessary.
+<i class="no-highlight">131</i>&nbsp;     *
+<i class="no-highlight">132</i>&nbsp;     * @return The width.
+<i class="no-highlight">133</i>&nbsp;     *
+<i class="no-highlight">134</i>&nbsp;     * @see #setWidth(double)
+<i class="no-highlight">135</i>&nbsp;     */
+<i class="no-highlight">136</i>&nbsp;    public double getWidth() {
+<b class="fc"><i class="no-highlight">137</i>&nbsp;        return this.width;</b>
+<i class="no-highlight">138</i>&nbsp;    }
+<i class="no-highlight">139</i>&nbsp;
+<i class="no-highlight">140</i>&nbsp;    /**
+<i class="no-highlight">141</i>&nbsp;     * Sets the natural width of the block, if this is known in advance.
+<i class="no-highlight">142</i>&nbsp;     *
+<i class="no-highlight">143</i>&nbsp;     * @param width  the width (in Java2D units)
+<i class="no-highlight">144</i>&nbsp;     *
+<i class="no-highlight">145</i>&nbsp;     * @see #getWidth()
+<i class="no-highlight">146</i>&nbsp;     */
+<i class="no-highlight">147</i>&nbsp;    public void setWidth(double width) {
+<b class="fc"><i class="no-highlight">148</i>&nbsp;        this.width = width;</b>
+<i class="no-highlight">149</i>&nbsp;    }
+<i class="no-highlight">150</i>&nbsp;
+<i class="no-highlight">151</i>&nbsp;    /**
+<i class="no-highlight">152</i>&nbsp;     * Returns the natural height of the block, if this is known in advance.
+<i class="no-highlight">153</i>&nbsp;     * The actual height of the block may be overridden if layout constraints
+<i class="no-highlight">154</i>&nbsp;     * make this necessary.
+<i class="no-highlight">155</i>&nbsp;     *
+<i class="no-highlight">156</i>&nbsp;     * @return The height.
+<i class="no-highlight">157</i>&nbsp;     *
+<i class="no-highlight">158</i>&nbsp;     * @see #setHeight(double)
+<i class="no-highlight">159</i>&nbsp;     */
+<i class="no-highlight">160</i>&nbsp;    public double getHeight() {
+<b class="fc"><i class="no-highlight">161</i>&nbsp;        return this.height;</b>
+<i class="no-highlight">162</i>&nbsp;    }
+<i class="no-highlight">163</i>&nbsp;
+<i class="no-highlight">164</i>&nbsp;    /**
+<i class="no-highlight">165</i>&nbsp;     * Sets the natural width of the block, if this is known in advance.
+<i class="no-highlight">166</i>&nbsp;     *
+<i class="no-highlight">167</i>&nbsp;     * @param height  the width (in Java2D units)
+<i class="no-highlight">168</i>&nbsp;     *
+<i class="no-highlight">169</i>&nbsp;     * @see #getHeight()
+<i class="no-highlight">170</i>&nbsp;     */
+<i class="no-highlight">171</i>&nbsp;    public void setHeight(double height) {
+<b class="fc"><i class="no-highlight">172</i>&nbsp;        this.height = height;</b>
+<i class="no-highlight">173</i>&nbsp;    }
+<i class="no-highlight">174</i>&nbsp;
+<i class="no-highlight">175</i>&nbsp;    /**
+<i class="no-highlight">176</i>&nbsp;     * Returns the margin.
+<i class="no-highlight">177</i>&nbsp;     *
+<i class="no-highlight">178</i>&nbsp;     * @return The margin (never {@code null}).
+<i class="no-highlight">179</i>&nbsp;     *
+<i class="no-highlight">180</i>&nbsp;     * @see #getMargin()
+<i class="no-highlight">181</i>&nbsp;     */
+<i class="no-highlight">182</i>&nbsp;    public RectangleInsets getMargin() {
+<b class="nc"><i class="no-highlight">183</i>&nbsp;        return this.margin;</b>
+<i class="no-highlight">184</i>&nbsp;    }
+<i class="no-highlight">185</i>&nbsp;
+<i class="no-highlight">186</i>&nbsp;    /**
+<i class="no-highlight">187</i>&nbsp;     * Sets the margin (use {@link RectangleInsets#ZERO_INSETS} for no
+<i class="no-highlight">188</i>&nbsp;     * padding).
+<i class="no-highlight">189</i>&nbsp;     *
+<i class="no-highlight">190</i>&nbsp;     * @param margin  the margin ({@code null} not permitted).
+<i class="no-highlight">191</i>&nbsp;     *
+<i class="no-highlight">192</i>&nbsp;     * @see #getMargin()
+<i class="no-highlight">193</i>&nbsp;     */
+<i class="no-highlight">194</i>&nbsp;    public void setMargin(RectangleInsets margin) {
+<b class="fc"><i class="no-highlight">195</i>&nbsp;        Args.nullNotPermitted(margin, &quot;margin&quot;);</b>
+<b class="fc"><i class="no-highlight">196</i>&nbsp;        this.margin = margin;</b>
+<i class="no-highlight">197</i>&nbsp;    }
+<i class="no-highlight">198</i>&nbsp;
+<i class="no-highlight">199</i>&nbsp;    /**
+<i class="no-highlight">200</i>&nbsp;     * Sets the margin.
+<i class="no-highlight">201</i>&nbsp;     *
+<i class="no-highlight">202</i>&nbsp;     * @param top  the top margin.
+<i class="no-highlight">203</i>&nbsp;     * @param left  the left margin.
+<i class="no-highlight">204</i>&nbsp;     * @param bottom  the bottom margin.
+<i class="no-highlight">205</i>&nbsp;     * @param right  the right margin.
+<i class="no-highlight">206</i>&nbsp;     *
+<i class="no-highlight">207</i>&nbsp;     * @see #getMargin()
+<i class="no-highlight">208</i>&nbsp;     */
+<i class="no-highlight">209</i>&nbsp;    public void setMargin(double top, double left, double bottom, 
+<i class="no-highlight">210</i>&nbsp;            double right) {
+<b class="nc"><i class="no-highlight">211</i>&nbsp;        setMargin(new RectangleInsets(top, left, bottom, right));</b>
+<i class="no-highlight">212</i>&nbsp;    }
+<i class="no-highlight">213</i>&nbsp;
+<i class="no-highlight">214</i>&nbsp;    /**
+<i class="no-highlight">215</i>&nbsp;     * Sets a black border with the specified line widths.
+<i class="no-highlight">216</i>&nbsp;     *
+<i class="no-highlight">217</i>&nbsp;     * @param top  the top border line width.
+<i class="no-highlight">218</i>&nbsp;     * @param left  the left border line width.
+<i class="no-highlight">219</i>&nbsp;     * @param bottom  the bottom border line width.
+<i class="no-highlight">220</i>&nbsp;     * @param right  the right border line width.
+<i class="no-highlight">221</i>&nbsp;     */
+<i class="no-highlight">222</i>&nbsp;    public void setBorder(double top, double left, double bottom,
+<i class="no-highlight">223</i>&nbsp;                          double right) {
+<b class="nc"><i class="no-highlight">224</i>&nbsp;        setFrame(new BlockBorder(top, left, bottom, right));</b>
+<i class="no-highlight">225</i>&nbsp;    }
+<i class="no-highlight">226</i>&nbsp;
+<i class="no-highlight">227</i>&nbsp;    /**
+<i class="no-highlight">228</i>&nbsp;     * Returns the current frame (border).
+<i class="no-highlight">229</i>&nbsp;     *
+<i class="no-highlight">230</i>&nbsp;     * @return The frame.
+<i class="no-highlight">231</i>&nbsp;     * 
+<i class="no-highlight">232</i>&nbsp;     * @see #setFrame(BlockFrame)
+<i class="no-highlight">233</i>&nbsp;     */
+<i class="no-highlight">234</i>&nbsp;    public BlockFrame getFrame() {
+<b class="nc"><i class="no-highlight">235</i>&nbsp;        return this.frame;</b>
+<i class="no-highlight">236</i>&nbsp;    }
+<i class="no-highlight">237</i>&nbsp;
+<i class="no-highlight">238</i>&nbsp;    /**
+<i class="no-highlight">239</i>&nbsp;     * Sets the frame (or border).
+<i class="no-highlight">240</i>&nbsp;     *
+<i class="no-highlight">241</i>&nbsp;     * @param frame  the frame ({@code null} not permitted).
+<i class="no-highlight">242</i>&nbsp;     *
+<i class="no-highlight">243</i>&nbsp;     * @see #getFrame()
+<i class="no-highlight">244</i>&nbsp;     */
+<i class="no-highlight">245</i>&nbsp;    public void setFrame(BlockFrame frame) {
+<b class="fc"><i class="no-highlight">246</i>&nbsp;        Args.nullNotPermitted(frame, &quot;frame&quot;);</b>
+<b class="fc"><i class="no-highlight">247</i>&nbsp;        this.frame = frame;</b>
+<i class="no-highlight">248</i>&nbsp;    }
+<i class="no-highlight">249</i>&nbsp;
+<i class="no-highlight">250</i>&nbsp;    /**
+<i class="no-highlight">251</i>&nbsp;     * Returns the padding.
+<i class="no-highlight">252</i>&nbsp;     *
+<i class="no-highlight">253</i>&nbsp;     * @return The padding (never {@code null}).
+<i class="no-highlight">254</i>&nbsp;     *
+<i class="no-highlight">255</i>&nbsp;     * @see #setPadding(RectangleInsets)
+<i class="no-highlight">256</i>&nbsp;     */
+<i class="no-highlight">257</i>&nbsp;    public RectangleInsets getPadding() {
+<b class="nc"><i class="no-highlight">258</i>&nbsp;        return this.padding;</b>
+<i class="no-highlight">259</i>&nbsp;    }
+<i class="no-highlight">260</i>&nbsp;
+<i class="no-highlight">261</i>&nbsp;    /**
+<i class="no-highlight">262</i>&nbsp;     * Sets the padding (use {@link RectangleInsets#ZERO_INSETS} for no
+<i class="no-highlight">263</i>&nbsp;     * padding).
+<i class="no-highlight">264</i>&nbsp;     *
+<i class="no-highlight">265</i>&nbsp;     * @param padding  the padding ({@code null} not permitted).
+<i class="no-highlight">266</i>&nbsp;     *
+<i class="no-highlight">267</i>&nbsp;     * @see #getPadding()
+<i class="no-highlight">268</i>&nbsp;     */
+<i class="no-highlight">269</i>&nbsp;    public void setPadding(RectangleInsets padding) {
+<b class="fc"><i class="no-highlight">270</i>&nbsp;        Args.nullNotPermitted(padding, &quot;padding&quot;);</b>
+<b class="fc"><i class="no-highlight">271</i>&nbsp;        this.padding = padding;</b>
+<i class="no-highlight">272</i>&nbsp;    }
+<i class="no-highlight">273</i>&nbsp;
+<i class="no-highlight">274</i>&nbsp;    /**
+<i class="no-highlight">275</i>&nbsp;     * Sets the padding.
+<i class="no-highlight">276</i>&nbsp;     *
+<i class="no-highlight">277</i>&nbsp;     * @param top  the top padding.
+<i class="no-highlight">278</i>&nbsp;     * @param left  the left padding.
+<i class="no-highlight">279</i>&nbsp;     * @param bottom  the bottom padding.
+<i class="no-highlight">280</i>&nbsp;     * @param right  the right padding.
+<i class="no-highlight">281</i>&nbsp;     */
+<i class="no-highlight">282</i>&nbsp;    public void setPadding(double top, double left, double bottom,
+<i class="no-highlight">283</i>&nbsp;                           double right) {
+<b class="nc"><i class="no-highlight">284</i>&nbsp;        setPadding(new RectangleInsets(top, left, bottom, right));</b>
+<i class="no-highlight">285</i>&nbsp;    }
+<i class="no-highlight">286</i>&nbsp;
+<i class="no-highlight">287</i>&nbsp;    /**
+<i class="no-highlight">288</i>&nbsp;     * Returns the x-offset for the content within the block.
+<i class="no-highlight">289</i>&nbsp;     *
+<i class="no-highlight">290</i>&nbsp;     * @return The x-offset.
+<i class="no-highlight">291</i>&nbsp;     *
+<i class="no-highlight">292</i>&nbsp;     * @see #getContentYOffset()
+<i class="no-highlight">293</i>&nbsp;     */
+<i class="no-highlight">294</i>&nbsp;    public double getContentXOffset() {
+<b class="nc"><i class="no-highlight">295</i>&nbsp;        return this.margin.getLeft() + this.frame.getInsets().getLeft()</b>
+<b class="nc"><i class="no-highlight">296</i>&nbsp;            + this.padding.getLeft();</b>
+<i class="no-highlight">297</i>&nbsp;    }
+<i class="no-highlight">298</i>&nbsp;
+<i class="no-highlight">299</i>&nbsp;    /**
+<i class="no-highlight">300</i>&nbsp;     * Returns the y-offset for the content within the block.
+<i class="no-highlight">301</i>&nbsp;     *
+<i class="no-highlight">302</i>&nbsp;     * @return The y-offset.
+<i class="no-highlight">303</i>&nbsp;     *
+<i class="no-highlight">304</i>&nbsp;     * @see #getContentXOffset()
+<i class="no-highlight">305</i>&nbsp;     */
+<i class="no-highlight">306</i>&nbsp;    public double getContentYOffset() {
+<b class="nc"><i class="no-highlight">307</i>&nbsp;        return this.margin.getTop() + this.frame.getInsets().getTop()</b>
+<b class="nc"><i class="no-highlight">308</i>&nbsp;            + this.padding.getTop();</b>
+<i class="no-highlight">309</i>&nbsp;    }
+<i class="no-highlight">310</i>&nbsp;
+<i class="no-highlight">311</i>&nbsp;    /**
+<i class="no-highlight">312</i>&nbsp;     * Arranges the contents of the block, with no constraints, and returns
+<i class="no-highlight">313</i>&nbsp;     * the block size.
+<i class="no-highlight">314</i>&nbsp;     *
+<i class="no-highlight">315</i>&nbsp;     * @param g2  the graphics device.
+<i class="no-highlight">316</i>&nbsp;     *
+<i class="no-highlight">317</i>&nbsp;     * @return The block size (in Java2D units, never {@code null}).
+<i class="no-highlight">318</i>&nbsp;     */
+<i class="no-highlight">319</i>&nbsp;    public Size2D arrange(Graphics2D g2) {
+<b class="fc"><i class="no-highlight">320</i>&nbsp;        return arrange(g2, RectangleConstraint.NONE);</b>
+<i class="no-highlight">321</i>&nbsp;    }
+<i class="no-highlight">322</i>&nbsp;
+<i class="no-highlight">323</i>&nbsp;    /**
+<i class="no-highlight">324</i>&nbsp;     * Arranges the contents of the block, within the given constraints, and
+<i class="no-highlight">325</i>&nbsp;     * returns the block size.
+<i class="no-highlight">326</i>&nbsp;     *
+<i class="no-highlight">327</i>&nbsp;     * @param g2  the graphics device.
+<i class="no-highlight">328</i>&nbsp;     * @param constraint  the constraint ({@code null} not permitted).
+<i class="no-highlight">329</i>&nbsp;     *
+<i class="no-highlight">330</i>&nbsp;     * @return The block size (in Java2D units, never {@code null}).
+<i class="no-highlight">331</i>&nbsp;     */
+<i class="no-highlight">332</i>&nbsp;    public Size2D arrange(Graphics2D g2, RectangleConstraint constraint) {
+<b class="nc"><i class="no-highlight">333</i>&nbsp;        Size2D base = new Size2D(getWidth(), getHeight());</b>
+<b class="nc"><i class="no-highlight">334</i>&nbsp;        return constraint.calculateConstrainedSize(base);</b>
+<i class="no-highlight">335</i>&nbsp;    }
+<i class="no-highlight">336</i>&nbsp;
+<i class="no-highlight">337</i>&nbsp;    /**
+<i class="no-highlight">338</i>&nbsp;     * Returns the current bounds of the block.
+<i class="no-highlight">339</i>&nbsp;     *
+<i class="no-highlight">340</i>&nbsp;     * @return The bounds.
+<i class="no-highlight">341</i>&nbsp;     *
+<i class="no-highlight">342</i>&nbsp;     * @see #setBounds(Rectangle2D)
+<i class="no-highlight">343</i>&nbsp;     */
+<i class="no-highlight">344</i>&nbsp;    public Rectangle2D getBounds() {
+<b class="fc"><i class="no-highlight">345</i>&nbsp;        return this.bounds;</b>
+<i class="no-highlight">346</i>&nbsp;    }
+<i class="no-highlight">347</i>&nbsp;
+<i class="no-highlight">348</i>&nbsp;    /**
+<i class="no-highlight">349</i>&nbsp;     * Sets the bounds of the block.
+<i class="no-highlight">350</i>&nbsp;     *
+<i class="no-highlight">351</i>&nbsp;     * @param bounds  the bounds ({@code null} not permitted).
+<i class="no-highlight">352</i>&nbsp;     *
+<i class="no-highlight">353</i>&nbsp;     * @see #getBounds()
+<i class="no-highlight">354</i>&nbsp;     */
+<i class="no-highlight">355</i>&nbsp;    public void setBounds(Rectangle2D bounds) {
+<b class="fc"><i class="no-highlight">356</i>&nbsp;        Args.nullNotPermitted(bounds, &quot;bounds&quot;);</b>
+<b class="fc"><i class="no-highlight">357</i>&nbsp;        this.bounds = bounds;</b>
+<i class="no-highlight">358</i>&nbsp;    }
+<i class="no-highlight">359</i>&nbsp;
+<i class="no-highlight">360</i>&nbsp;    /**
+<i class="no-highlight">361</i>&nbsp;     * Calculate the width available for content after subtracting
+<i class="no-highlight">362</i>&nbsp;     * the margin, border and padding space from the specified fixed
+<i class="no-highlight">363</i>&nbsp;     * width.
+<i class="no-highlight">364</i>&nbsp;     *
+<i class="no-highlight">365</i>&nbsp;     * @param fixedWidth  the fixed width.
+<i class="no-highlight">366</i>&nbsp;     *
+<i class="no-highlight">367</i>&nbsp;     * @return The available space.
+<i class="no-highlight">368</i>&nbsp;     *
+<i class="no-highlight">369</i>&nbsp;     * @see #trimToContentHeight(double)
+<i class="no-highlight">370</i>&nbsp;     */
+<i class="no-highlight">371</i>&nbsp;    protected double trimToContentWidth(double fixedWidth) {
+<b class="fc"><i class="no-highlight">372</i>&nbsp;        double result = this.margin.trimWidth(fixedWidth);</b>
+<b class="fc"><i class="no-highlight">373</i>&nbsp;        result = this.frame.getInsets().trimWidth(result);</b>
+<b class="fc"><i class="no-highlight">374</i>&nbsp;        result = this.padding.trimWidth(result);</b>
+<b class="fc"><i class="no-highlight">375</i>&nbsp;        return Math.max(result, 0.0);</b>
+<i class="no-highlight">376</i>&nbsp;    }
+<i class="no-highlight">377</i>&nbsp;
+<i class="no-highlight">378</i>&nbsp;    /**
+<i class="no-highlight">379</i>&nbsp;     * Calculate the height available for content after subtracting
+<i class="no-highlight">380</i>&nbsp;     * the margin, border and padding space from the specified fixed
+<i class="no-highlight">381</i>&nbsp;     * height.
+<i class="no-highlight">382</i>&nbsp;     *
+<i class="no-highlight">383</i>&nbsp;     * @param fixedHeight  the fixed height.
+<i class="no-highlight">384</i>&nbsp;     *
+<i class="no-highlight">385</i>&nbsp;     * @return The available space.
+<i class="no-highlight">386</i>&nbsp;     *
+<i class="no-highlight">387</i>&nbsp;     * @see #trimToContentWidth(double)
+<i class="no-highlight">388</i>&nbsp;     */
+<i class="no-highlight">389</i>&nbsp;    protected double trimToContentHeight(double fixedHeight) {
+<b class="fc"><i class="no-highlight">390</i>&nbsp;        double result = this.margin.trimHeight(fixedHeight);</b>
+<b class="fc"><i class="no-highlight">391</i>&nbsp;        result = this.frame.getInsets().trimHeight(result);</b>
+<b class="fc"><i class="no-highlight">392</i>&nbsp;        result = this.padding.trimHeight(result);</b>
+<b class="fc"><i class="no-highlight">393</i>&nbsp;        return Math.max(result, 0.0);</b>
+<i class="no-highlight">394</i>&nbsp;    }
+<i class="no-highlight">395</i>&nbsp;
+<i class="no-highlight">396</i>&nbsp;    /**
+<i class="no-highlight">397</i>&nbsp;     * Returns a constraint for the content of this block that will result in
+<i class="no-highlight">398</i>&nbsp;     * the bounds of the block matching the specified constraint.
+<i class="no-highlight">399</i>&nbsp;     *
+<i class="no-highlight">400</i>&nbsp;     * @param c  the outer constraint ({@code null} not permitted).
+<i class="no-highlight">401</i>&nbsp;     *
+<i class="no-highlight">402</i>&nbsp;     * @return The content constraint.
+<i class="no-highlight">403</i>&nbsp;     */
+<i class="no-highlight">404</i>&nbsp;    protected RectangleConstraint toContentConstraint(RectangleConstraint c) {
+<b class="fc"><i class="no-highlight">405</i>&nbsp;        Args.nullNotPermitted(c, &quot;c&quot;);</b>
+<b class="fc"><i class="no-highlight">406</i>&nbsp;        if (c.equals(RectangleConstraint.NONE)) {</b>
+<b class="fc"><i class="no-highlight">407</i>&nbsp;            return c;</b>
+<i class="no-highlight">408</i>&nbsp;        }
+<b class="fc"><i class="no-highlight">409</i>&nbsp;        double w = c.getWidth();</b>
+<b class="fc"><i class="no-highlight">410</i>&nbsp;        Range wr = c.getWidthRange();</b>
+<b class="fc"><i class="no-highlight">411</i>&nbsp;        double h = c.getHeight();</b>
+<b class="fc"><i class="no-highlight">412</i>&nbsp;        Range hr = c.getHeightRange();</b>
+<b class="fc"><i class="no-highlight">413</i>&nbsp;        double ww = trimToContentWidth(w);</b>
+<b class="fc"><i class="no-highlight">414</i>&nbsp;        double hh = trimToContentHeight(h);</b>
+<b class="fc"><i class="no-highlight">415</i>&nbsp;        Range wwr = trimToContentWidth(wr);</b>
+<b class="fc"><i class="no-highlight">416</i>&nbsp;        Range hhr = trimToContentHeight(hr);</b>
+<b class="fc"><i class="no-highlight">417</i>&nbsp;        return new RectangleConstraint(ww, wwr, c.getWidthConstraintType(),</b>
+<b class="fc"><i class="no-highlight">418</i>&nbsp;            hh, hhr, c.getHeightConstraintType());</b>
+<i class="no-highlight">419</i>&nbsp;    }
+<i class="no-highlight">420</i>&nbsp;
+<i class="no-highlight">421</i>&nbsp;    private Range trimToContentWidth(Range r) {
+<b class="fc"><i class="no-highlight">422</i>&nbsp;        if (r == null) {</b>
+<b class="fc"><i class="no-highlight">423</i>&nbsp;            return null;</b>
+<i class="no-highlight">424</i>&nbsp;        }
+<b class="fc"><i class="no-highlight">425</i>&nbsp;        double lowerBound = 0.0;</b>
+<b class="fc"><i class="no-highlight">426</i>&nbsp;        double upperBound = Double.POSITIVE_INFINITY;</b>
+<b class="fc"><i class="no-highlight">427</i>&nbsp;        if (r.getLowerBound() &gt; 0.0) {</b>
+<b class="fc"><i class="no-highlight">428</i>&nbsp;            lowerBound = trimToContentWidth(r.getLowerBound());</b>
+<i class="no-highlight">429</i>&nbsp;        }
+<b class="fc"><i class="no-highlight">430</i>&nbsp;        if (r.getUpperBound() &lt; Double.POSITIVE_INFINITY) {</b>
+<b class="fc"><i class="no-highlight">431</i>&nbsp;            upperBound = trimToContentWidth(r.getUpperBound());</b>
+<i class="no-highlight">432</i>&nbsp;        }
+<b class="fc"><i class="no-highlight">433</i>&nbsp;        return new Range(lowerBound, upperBound);</b>
+<i class="no-highlight">434</i>&nbsp;    }
+<i class="no-highlight">435</i>&nbsp;
+<i class="no-highlight">436</i>&nbsp;    private Range trimToContentHeight(Range r) {
+<b class="fc"><i class="no-highlight">437</i>&nbsp;        if (r == null) {</b>
+<b class="fc"><i class="no-highlight">438</i>&nbsp;            return null;</b>
+<i class="no-highlight">439</i>&nbsp;        }
+<b class="fc"><i class="no-highlight">440</i>&nbsp;        double lowerBound = 0.0;</b>
+<b class="fc"><i class="no-highlight">441</i>&nbsp;        double upperBound = Double.POSITIVE_INFINITY;</b>
+<b class="fc"><i class="no-highlight">442</i>&nbsp;        if (r.getLowerBound() &gt; 0.0) {</b>
+<b class="nc"><i class="no-highlight">443</i>&nbsp;            lowerBound = trimToContentHeight(r.getLowerBound());</b>
+<i class="no-highlight">444</i>&nbsp;        }
+<b class="fc"><i class="no-highlight">445</i>&nbsp;        if (r.getUpperBound() &lt; Double.POSITIVE_INFINITY) {</b>
+<b class="fc"><i class="no-highlight">446</i>&nbsp;            upperBound = trimToContentHeight(r.getUpperBound());</b>
+<i class="no-highlight">447</i>&nbsp;        }
+<b class="fc"><i class="no-highlight">448</i>&nbsp;        return new Range(lowerBound, upperBound);</b>
+<i class="no-highlight">449</i>&nbsp;    }
+<i class="no-highlight">450</i>&nbsp;
+<i class="no-highlight">451</i>&nbsp;    /**
+<i class="no-highlight">452</i>&nbsp;     * Adds the margin, border and padding to the specified content width.
+<i class="no-highlight">453</i>&nbsp;     *
+<i class="no-highlight">454</i>&nbsp;     * @param contentWidth  the content width.
+<i class="no-highlight">455</i>&nbsp;     *
+<i class="no-highlight">456</i>&nbsp;     * @return The adjusted width.
+<i class="no-highlight">457</i>&nbsp;     */
+<i class="no-highlight">458</i>&nbsp;    protected double calculateTotalWidth(double contentWidth) {
+<b class="fc"><i class="no-highlight">459</i>&nbsp;        double result = contentWidth;</b>
+<b class="fc"><i class="no-highlight">460</i>&nbsp;        result = this.padding.extendWidth(result);</b>
+<b class="fc"><i class="no-highlight">461</i>&nbsp;        result = this.frame.getInsets().extendWidth(result);</b>
+<b class="fc"><i class="no-highlight">462</i>&nbsp;        result = this.margin.extendWidth(result);</b>
+<b class="fc"><i class="no-highlight">463</i>&nbsp;        return result;</b>
+<i class="no-highlight">464</i>&nbsp;    }
+<i class="no-highlight">465</i>&nbsp;
+<i class="no-highlight">466</i>&nbsp;    /**
+<i class="no-highlight">467</i>&nbsp;     * Adds the margin, border and padding to the specified content height.
+<i class="no-highlight">468</i>&nbsp;     *
+<i class="no-highlight">469</i>&nbsp;     * @param contentHeight  the content height.
+<i class="no-highlight">470</i>&nbsp;     *
+<i class="no-highlight">471</i>&nbsp;     * @return The adjusted height.
+<i class="no-highlight">472</i>&nbsp;     */
+<i class="no-highlight">473</i>&nbsp;    protected double calculateTotalHeight(double contentHeight) {
+<b class="fc"><i class="no-highlight">474</i>&nbsp;        double result = contentHeight;</b>
+<b class="fc"><i class="no-highlight">475</i>&nbsp;        result = this.padding.extendHeight(result);</b>
+<b class="fc"><i class="no-highlight">476</i>&nbsp;        result = this.frame.getInsets().extendHeight(result);</b>
+<b class="fc"><i class="no-highlight">477</i>&nbsp;        result = this.margin.extendHeight(result);</b>
+<b class="fc"><i class="no-highlight">478</i>&nbsp;        return result;</b>
+<i class="no-highlight">479</i>&nbsp;    }
+<i class="no-highlight">480</i>&nbsp;
+<i class="no-highlight">481</i>&nbsp;    /**
+<i class="no-highlight">482</i>&nbsp;     * Reduces the specified area by the amount of space consumed
+<i class="no-highlight">483</i>&nbsp;     * by the margin.
+<i class="no-highlight">484</i>&nbsp;     *
+<i class="no-highlight">485</i>&nbsp;     * @param area  the area ({@code null} not permitted).
+<i class="no-highlight">486</i>&nbsp;     *
+<i class="no-highlight">487</i>&nbsp;     * @return The trimmed area.
+<i class="no-highlight">488</i>&nbsp;     */
+<i class="no-highlight">489</i>&nbsp;    protected Rectangle2D trimMargin(Rectangle2D area) {
+<i class="no-highlight">490</i>&nbsp;        // defer argument checking...
+<b class="nc"><i class="no-highlight">491</i>&nbsp;        this.margin.trim(area);</b>
+<b class="nc"><i class="no-highlight">492</i>&nbsp;        return area;</b>
+<i class="no-highlight">493</i>&nbsp;    }
+<i class="no-highlight">494</i>&nbsp;
+<i class="no-highlight">495</i>&nbsp;    /**
+<i class="no-highlight">496</i>&nbsp;     * Reduces the specified area by the amount of space consumed
+<i class="no-highlight">497</i>&nbsp;     * by the border.
+<i class="no-highlight">498</i>&nbsp;     *
+<i class="no-highlight">499</i>&nbsp;     * @param area  the area ({@code null} not permitted).
+<i class="no-highlight">500</i>&nbsp;     *
+<i class="no-highlight">501</i>&nbsp;     * @return The trimmed area.
+<i class="no-highlight">502</i>&nbsp;     */
+<i class="no-highlight">503</i>&nbsp;    protected Rectangle2D trimBorder(Rectangle2D area) {
+<i class="no-highlight">504</i>&nbsp;        // defer argument checking...
+<b class="nc"><i class="no-highlight">505</i>&nbsp;        this.frame.getInsets().trim(area);</b>
+<b class="nc"><i class="no-highlight">506</i>&nbsp;        return area;</b>
+<i class="no-highlight">507</i>&nbsp;    }
+<i class="no-highlight">508</i>&nbsp;
+<i class="no-highlight">509</i>&nbsp;    /**
+<i class="no-highlight">510</i>&nbsp;     * Reduces the specified area by the amount of space consumed
+<i class="no-highlight">511</i>&nbsp;     * by the padding.
+<i class="no-highlight">512</i>&nbsp;     *
+<i class="no-highlight">513</i>&nbsp;     * @param area  the area ({@code null} not permitted).
+<i class="no-highlight">514</i>&nbsp;     *
+<i class="no-highlight">515</i>&nbsp;     * @return The trimmed area.
+<i class="no-highlight">516</i>&nbsp;     */
+<i class="no-highlight">517</i>&nbsp;    protected Rectangle2D trimPadding(Rectangle2D area) {
+<i class="no-highlight">518</i>&nbsp;        // defer argument checking...
+<b class="nc"><i class="no-highlight">519</i>&nbsp;        this.padding.trim(area);</b>
+<b class="nc"><i class="no-highlight">520</i>&nbsp;        return area;</b>
+<i class="no-highlight">521</i>&nbsp;    }
+<i class="no-highlight">522</i>&nbsp;
+<i class="no-highlight">523</i>&nbsp;    /**
+<i class="no-highlight">524</i>&nbsp;     * Draws the border around the perimeter of the specified area.
+<i class="no-highlight">525</i>&nbsp;     *
+<i class="no-highlight">526</i>&nbsp;     * @param g2  the graphics device.
+<i class="no-highlight">527</i>&nbsp;     * @param area  the area.
+<i class="no-highlight">528</i>&nbsp;     */
+<i class="no-highlight">529</i>&nbsp;    protected void drawBorder(Graphics2D g2, Rectangle2D area) {
+<b class="nc"><i class="no-highlight">530</i>&nbsp;        this.frame.draw(g2, area);</b>
+<i class="no-highlight">531</i>&nbsp;    }
+<i class="no-highlight">532</i>&nbsp;
+<i class="no-highlight">533</i>&nbsp;    /**
+<i class="no-highlight">534</i>&nbsp;     * Tests this block for equality with an arbitrary object.
+<i class="no-highlight">535</i>&nbsp;     *
+<i class="no-highlight">536</i>&nbsp;     * @param obj  the object ({@code null} permitted).
+<i class="no-highlight">537</i>&nbsp;     *
+<i class="no-highlight">538</i>&nbsp;     * @return A boolean.
+<i class="no-highlight">539</i>&nbsp;     */
+<i class="no-highlight">540</i>&nbsp;    @Override
+<i class="no-highlight">541</i>&nbsp;    public boolean equals(Object obj) {
+<b class="fc"><i class="no-highlight">542</i>&nbsp;        if (obj == this) {</b>
+<b class="fc"><i class="no-highlight">543</i>&nbsp;            return true;</b>
+<i class="no-highlight">544</i>&nbsp;        }
+<b class="fc"><i class="no-highlight">545</i>&nbsp;        if (!(obj instanceof AbstractBlock)) {</b>
+<b class="fc"><i class="no-highlight">546</i>&nbsp;            return false;</b>
+<i class="no-highlight">547</i>&nbsp;        }
+<b class="fc"><i class="no-highlight">548</i>&nbsp;        AbstractBlock that = (AbstractBlock) obj;</b>
+<b class="fc"><i class="no-highlight">549</i>&nbsp;        if (!Objects.equals(this.id, that.id)) {</b>
+<b class="fc"><i class="no-highlight">550</i>&nbsp;            return false;</b>
+<i class="no-highlight">551</i>&nbsp;        }
+<b class="fc"><i class="no-highlight">552</i>&nbsp;        if (!this.frame.equals(that.frame)) {</b>
+<b class="fc"><i class="no-highlight">553</i>&nbsp;            return false;</b>
+<i class="no-highlight">554</i>&nbsp;        }
+<b class="fc"><i class="no-highlight">555</i>&nbsp;        if (!this.bounds.equals(that.bounds)) {</b>
+<b class="fc"><i class="no-highlight">556</i>&nbsp;            return false;</b>
+<i class="no-highlight">557</i>&nbsp;        }
+<b class="fc"><i class="no-highlight">558</i>&nbsp;        if (!this.margin.equals(that.margin)) {</b>
+<b class="fc"><i class="no-highlight">559</i>&nbsp;            return false;</b>
+<i class="no-highlight">560</i>&nbsp;        }
+<b class="fc"><i class="no-highlight">561</i>&nbsp;        if (!this.padding.equals(that.padding)) {</b>
+<b class="fc"><i class="no-highlight">562</i>&nbsp;            return false;</b>
+<i class="no-highlight">563</i>&nbsp;        }
+<b class="fc"><i class="no-highlight">564</i>&nbsp;        if (this.height != that.height) {</b>
+<b class="fc"><i class="no-highlight">565</i>&nbsp;            return false;</b>
+<i class="no-highlight">566</i>&nbsp;        }
+<b class="fc"><i class="no-highlight">567</i>&nbsp;        if (this.width != that.width) {</b>
+<b class="fc"><i class="no-highlight">568</i>&nbsp;            return false;</b>
+<i class="no-highlight">569</i>&nbsp;        }
+<b class="fc"><i class="no-highlight">570</i>&nbsp;        return true;</b>
+<i class="no-highlight">571</i>&nbsp;    }
+<i class="no-highlight">572</i>&nbsp;
+<i class="no-highlight">573</i>&nbsp;    @Override
+<i class="no-highlight">574</i>&nbsp;    public int hashCode()
+<i class="no-highlight">575</i>&nbsp;    {
+<b class="nc"><i class="no-highlight">576</i>&nbsp;        int hash = 5;</b>
+<b class="nc"><i class="no-highlight">577</i>&nbsp;        hash = 41 * hash + Objects.hashCode(this.id);</b>
+<b class="nc"><i class="no-highlight">578</i>&nbsp;        hash = 41 * hash + Objects.hashCode(this.margin);</b>
+<b class="nc"><i class="no-highlight">579</i>&nbsp;        hash = 41 * hash + Objects.hashCode(this.frame);</b>
+<b class="nc"><i class="no-highlight">580</i>&nbsp;        hash = 41 * hash + Objects.hashCode(this.padding);</b>
+<b class="nc"><i class="no-highlight">581</i>&nbsp;        hash = 41 * hash +</b>
+<b class="nc"><i class="no-highlight">582</i>&nbsp;                (int) (Double.doubleToLongBits(this.width) ^</b>
+<b class="nc"><i class="no-highlight">583</i>&nbsp;                (Double.doubleToLongBits(this.width) &gt;&gt;&gt; 32));</b>
+<b class="nc"><i class="no-highlight">584</i>&nbsp;        hash = 41 * hash +</b>
+<b class="nc"><i class="no-highlight">585</i>&nbsp;                (int) (Double.doubleToLongBits(this.height) ^</b>
+<b class="nc"><i class="no-highlight">586</i>&nbsp;                (Double.doubleToLongBits(this.height) &gt;&gt;&gt; 32));</b>
+<b class="nc"><i class="no-highlight">587</i>&nbsp;        hash = 41 * hash + Objects.hashCode(this.bounds);</b>
+<b class="nc"><i class="no-highlight">588</i>&nbsp;        return hash;</b>
+<i class="no-highlight">589</i>&nbsp;    }
+<i class="no-highlight">590</i>&nbsp;
+<i class="no-highlight">591</i>&nbsp;    /**
+<i class="no-highlight">592</i>&nbsp;     * Returns a clone of this block.
+<i class="no-highlight">593</i>&nbsp;     *
+<i class="no-highlight">594</i>&nbsp;     * @return A clone.
+<i class="no-highlight">595</i>&nbsp;     *
+<i class="no-highlight">596</i>&nbsp;     * @throws CloneNotSupportedException if there is a problem creating the
+<i class="no-highlight">597</i>&nbsp;     *         clone.
+<i class="no-highlight">598</i>&nbsp;     */
+<i class="no-highlight">599</i>&nbsp;    @Override
+<i class="no-highlight">600</i>&nbsp;    public Object clone() throws CloneNotSupportedException {
+<b class="fc"><i class="no-highlight">601</i>&nbsp;        AbstractBlock clone = (AbstractBlock) super.clone();</b>
+<b class="fc"><i class="no-highlight">602</i>&nbsp;        clone.bounds = (Rectangle2D) CloneUtils.clone(this.bounds);</b>
+<b class="fc"><i class="no-highlight">603</i>&nbsp;        if (this.frame instanceof PublicCloneable) {</b>
+<b class="nc"><i class="no-highlight">604</i>&nbsp;            PublicCloneable pc = (PublicCloneable) this.frame;</b>
+<b class="nc"><i class="no-highlight">605</i>&nbsp;            clone.frame = (BlockFrame) pc.clone();</b>
+<i class="no-highlight">606</i>&nbsp;        }
+<b class="fc"><i class="no-highlight">607</i>&nbsp;        return clone;</b>
+<i class="no-highlight">608</i>&nbsp;    }
+<i class="no-highlight">609</i>&nbsp;
+<i class="no-highlight">610</i>&nbsp;    /**
+<i class="no-highlight">611</i>&nbsp;     * Provides serialization support.
+<i class="no-highlight">612</i>&nbsp;     *
+<i class="no-highlight">613</i>&nbsp;     * @param stream  the output stream.
+<i class="no-highlight">614</i>&nbsp;     *
+<i class="no-highlight">615</i>&nbsp;     * @throws IOException if there is an I/O error.
+<i class="no-highlight">616</i>&nbsp;     */
+<i class="no-highlight">617</i>&nbsp;    private void writeObject(ObjectOutputStream stream) throws IOException {
+<b class="fc"><i class="no-highlight">618</i>&nbsp;        stream.defaultWriteObject();</b>
+<b class="fc"><i class="no-highlight">619</i>&nbsp;        SerialUtils.writeShape(this.bounds, stream);</b>
+<i class="no-highlight">620</i>&nbsp;    }
+<i class="no-highlight">621</i>&nbsp;
+<i class="no-highlight">622</i>&nbsp;    /**
+<i class="no-highlight">623</i>&nbsp;     * Provides serialization support.
+<i class="no-highlight">624</i>&nbsp;     *
+<i class="no-highlight">625</i>&nbsp;     * @param stream  the input stream.
+<i class="no-highlight">626</i>&nbsp;     *
+<i class="no-highlight">627</i>&nbsp;     * @throws IOException  if there is an I/O error.
+<i class="no-highlight">628</i>&nbsp;     * @throws ClassNotFoundException  if there is a classpath problem.
+<i class="no-highlight">629</i>&nbsp;     */
+<i class="no-highlight">630</i>&nbsp;    private void readObject(ObjectInputStream stream)
+<i class="no-highlight">631</i>&nbsp;        throws IOException, ClassNotFoundException {
+<b class="fc"><i class="no-highlight">632</i>&nbsp;        stream.defaultReadObject();</b>
+<b class="fc"><i class="no-highlight">633</i>&nbsp;        this.bounds = (Rectangle2D) SerialUtils.readShape(stream);</b>
+<i class="no-highlight">634</i>&nbsp;    }
+<i class="no-highlight">635</i>&nbsp;
+<i class="no-highlight">636</i>&nbsp;}
+</div>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+        var codeBlock = document.getElementById('sourceCode');
+
+        if (codeBlock) {
+            hljs.highlightBlock(codeBlock);
+        }
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2022-03-26 17:36</div>
+</div>
+</body>
+</html>

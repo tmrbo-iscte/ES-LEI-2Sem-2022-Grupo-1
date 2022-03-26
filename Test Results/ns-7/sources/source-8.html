@@ -1,0 +1,624 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > ShapeUtils</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/highlight-idea.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.pack.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.jfree.chart.internal</a>
+</div>
+
+<h1>Coverage Summary for Class: ShapeUtils (org.jfree.chart.internal)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ShapeUtils</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    19%
+  </span>
+  <span class="absValue">
+    (4/21)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    16,8%
+  </span>
+  <span class="absValue">
+    (31/184)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<div class="sourceCode" id="sourceCode"><i class="no-highlight">1</i>&nbsp;/* ===========================================================
+<i class="no-highlight">2</i>&nbsp; * JFreeChart : a free chart library for the Java(tm) platform
+<i class="no-highlight">3</i>&nbsp; * ===========================================================
+<i class="no-highlight">4</i>&nbsp; *
+<i class="no-highlight">5</i>&nbsp; * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+<i class="no-highlight">6</i>&nbsp; *
+<i class="no-highlight">7</i>&nbsp; * Project Info:  http://www.jfree.org/jfreechart/index.html
+<i class="no-highlight">8</i>&nbsp; *
+<i class="no-highlight">9</i>&nbsp; * This library is free software; you can redistribute it and/or modify it
+<i class="no-highlight">10</i>&nbsp; * under the terms of the GNU Lesser General Public License as published by
+<i class="no-highlight">11</i>&nbsp; * the Free Software Foundation; either version 2.1 of the License, or
+<i class="no-highlight">12</i>&nbsp; * (at your option) any later version.
+<i class="no-highlight">13</i>&nbsp; *
+<i class="no-highlight">14</i>&nbsp; * This library is distributed in the hope that it will be useful, but
+<i class="no-highlight">15</i>&nbsp; * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+<i class="no-highlight">16</i>&nbsp; * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+<i class="no-highlight">17</i>&nbsp; * License for more details.
+<i class="no-highlight">18</i>&nbsp; *
+<i class="no-highlight">19</i>&nbsp; * You should have received a copy of the GNU Lesser General Public
+<i class="no-highlight">20</i>&nbsp; * License along with this library; if not, write to the Free Software
+<i class="no-highlight">21</i>&nbsp; * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+<i class="no-highlight">22</i>&nbsp; * USA.
+<i class="no-highlight">23</i>&nbsp; *
+<i class="no-highlight">24</i>&nbsp; * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+<i class="no-highlight">25</i>&nbsp; * Other names may be trademarks of their respective owners.]
+<i class="no-highlight">26</i>&nbsp; *
+<i class="no-highlight">27</i>&nbsp; * ---------------
+<i class="no-highlight">28</i>&nbsp; * ShapeUtils.java
+<i class="no-highlight">29</i>&nbsp; * ---------------
+<i class="no-highlight">30</i>&nbsp; * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+<i class="no-highlight">31</i>&nbsp; *
+<i class="no-highlight">32</i>&nbsp; * Original Author:  David Gilbert;
+<i class="no-highlight">33</i>&nbsp; * Contributors:     -;
+<i class="no-highlight">34</i>&nbsp; */
+<i class="no-highlight">35</i>&nbsp;
+<i class="no-highlight">36</i>&nbsp;package org.jfree.chart.internal;
+<i class="no-highlight">37</i>&nbsp;
+<i class="no-highlight">38</i>&nbsp;import org.jfree.chart.api.RectangleAnchor;
+<i class="no-highlight">39</i>&nbsp;
+<i class="no-highlight">40</i>&nbsp;import java.awt.*;
+<i class="no-highlight">41</i>&nbsp;import java.awt.geom.*;
+<i class="no-highlight">42</i>&nbsp;import java.util.Arrays;
+<i class="no-highlight">43</i>&nbsp;import java.util.HashMap;
+<i class="no-highlight">44</i>&nbsp;import java.util.Map;
+<i class="no-highlight">45</i>&nbsp;import java.util.Objects;
+<i class="no-highlight">46</i>&nbsp;
+<i class="no-highlight">47</i>&nbsp;/**
+<i class="no-highlight">48</i>&nbsp; * Utility methods for {@link Shape} objects.
+<i class="no-highlight">49</i>&nbsp; */
+<i class="no-highlight">50</i>&nbsp;public class ShapeUtils {
+<i class="no-highlight">51</i>&nbsp;
+<i class="no-highlight">52</i>&nbsp;    /**
+<i class="no-highlight">53</i>&nbsp;     * Prevents instantiation.
+<i class="no-highlight">54</i>&nbsp;     */
+<i class="no-highlight">55</i>&nbsp;    private ShapeUtils() {
+<i class="no-highlight">56</i>&nbsp;    }
+<i class="no-highlight">57</i>&nbsp;
+<i class="no-highlight">58</i>&nbsp;    /**
+<i class="no-highlight">59</i>&nbsp;     * Tests two shapes for equality.  If both shapes are {@code null},
+<i class="no-highlight">60</i>&nbsp;     * this method will return {@code true}.
+<i class="no-highlight">61</i>&nbsp;     * &lt;p&gt;
+<i class="no-highlight">62</i>&nbsp;     * In the current implementation, the following shapes are supported:
+<i class="no-highlight">63</i>&nbsp;     * {@code Ellipse2D}, {@code Line2D} and {@code Rectangle2D}
+<i class="no-highlight">64</i>&nbsp;     * (implicit).
+<i class="no-highlight">65</i>&nbsp;     *
+<i class="no-highlight">66</i>&nbsp;     * @param s1  the first shape ({@code null} permitted).
+<i class="no-highlight">67</i>&nbsp;     * @param s2  the second shape ({@code null} permitted).
+<i class="no-highlight">68</i>&nbsp;     *
+<i class="no-highlight">69</i>&nbsp;     * @return A boolean.
+<i class="no-highlight">70</i>&nbsp;     */
+<i class="no-highlight">71</i>&nbsp;    public static boolean equal(Shape s1, Shape s2) {
+<b class="fc"><i class="no-highlight">72</i>&nbsp;        if (s1 instanceof Line2D &amp;&amp; s2 instanceof Line2D) {</b>
+<b class="nc"><i class="no-highlight">73</i>&nbsp;            return equal((Line2D) s1, (Line2D) s2);</b>
+<b class="fc"><i class="no-highlight">74</i>&nbsp;        } else if (s1 instanceof Polygon &amp;&amp; s2 instanceof Polygon) {</b>
+<b class="nc"><i class="no-highlight">75</i>&nbsp;            return equal((Polygon) s1, (Polygon) s2);</b>
+<b class="fc"><i class="no-highlight">76</i>&nbsp;        } else if (s1 instanceof Path2D &amp;&amp; s2 instanceof Path2D) {</b>
+<b class="nc"><i class="no-highlight">77</i>&nbsp;            return equal((Path2D) s1, (Path2D) s2);</b>
+<i class="no-highlight">78</i>&nbsp;        } else {
+<i class="no-highlight">79</i>&nbsp;            // this will handle Arc2D, Ellipse2D, Rectangle2D...
+<b class="fc"><i class="no-highlight">80</i>&nbsp;            return Objects.equals(s1, s2);</b>
+<i class="no-highlight">81</i>&nbsp;        }
+<i class="no-highlight">82</i>&nbsp;    }
+<i class="no-highlight">83</i>&nbsp;
+<i class="no-highlight">84</i>&nbsp;    /**
+<i class="no-highlight">85</i>&nbsp;     * Compares two lines and returns {@code true} if they are equal or
+<i class="no-highlight">86</i>&nbsp;     * both {@code null}.
+<i class="no-highlight">87</i>&nbsp;     *
+<i class="no-highlight">88</i>&nbsp;     * @param l1  the first line ({@code null} permitted).
+<i class="no-highlight">89</i>&nbsp;     * @param l2  the second line ({@code null} permitted).
+<i class="no-highlight">90</i>&nbsp;     *
+<i class="no-highlight">91</i>&nbsp;     * @return A boolean.
+<i class="no-highlight">92</i>&nbsp;     */
+<i class="no-highlight">93</i>&nbsp;    public static boolean equal(Line2D l1, Line2D l2) {
+<b class="fc"><i class="no-highlight">94</i>&nbsp;        if (l1 == null) {</b>
+<b class="nc"><i class="no-highlight">95</i>&nbsp;            return (l2 == null);</b>
+<i class="no-highlight">96</i>&nbsp;        }
+<b class="fc"><i class="no-highlight">97</i>&nbsp;        if (l2 == null) {</b>
+<b class="nc"><i class="no-highlight">98</i>&nbsp;            return false;</b>
+<i class="no-highlight">99</i>&nbsp;        }
+<b class="fc"><i class="no-highlight">100</i>&nbsp;        if (!l1.getP1().equals(l2.getP1())) {</b>
+<b class="fc"><i class="no-highlight">101</i>&nbsp;            return false;</b>
+<i class="no-highlight">102</i>&nbsp;        }
+<b class="fc"><i class="no-highlight">103</i>&nbsp;        if (!l1.getP2().equals(l2.getP2())) {</b>
+<b class="nc"><i class="no-highlight">104</i>&nbsp;            return false;</b>
+<i class="no-highlight">105</i>&nbsp;        }
+<b class="fc"><i class="no-highlight">106</i>&nbsp;        return true;</b>
+<i class="no-highlight">107</i>&nbsp;    }
+<i class="no-highlight">108</i>&nbsp;
+<i class="no-highlight">109</i>&nbsp;    /**
+<i class="no-highlight">110</i>&nbsp;     * Tests two polygons for equality.  If both are {@code null} this
+<i class="no-highlight">111</i>&nbsp;     * method returns {@code true}.
+<i class="no-highlight">112</i>&nbsp;     *
+<i class="no-highlight">113</i>&nbsp;     * @param p1  polygon 1 ({@code null} permitted).
+<i class="no-highlight">114</i>&nbsp;     * @param p2  polygon 2 ({@code null} permitted).
+<i class="no-highlight">115</i>&nbsp;     *
+<i class="no-highlight">116</i>&nbsp;     * @return A boolean.
+<i class="no-highlight">117</i>&nbsp;     */
+<i class="no-highlight">118</i>&nbsp;    public static boolean equal(Polygon p1, Polygon p2) {
+<b class="nc"><i class="no-highlight">119</i>&nbsp;        if (p1 == null) {</b>
+<b class="nc"><i class="no-highlight">120</i>&nbsp;            return (p2 == null);</b>
+<i class="no-highlight">121</i>&nbsp;        }
+<b class="nc"><i class="no-highlight">122</i>&nbsp;        if (p2 == null) {</b>
+<b class="nc"><i class="no-highlight">123</i>&nbsp;            return false;</b>
+<i class="no-highlight">124</i>&nbsp;        }
+<b class="nc"><i class="no-highlight">125</i>&nbsp;        if (p1.npoints != p2.npoints) {</b>
+<b class="nc"><i class="no-highlight">126</i>&nbsp;            return false;</b>
+<i class="no-highlight">127</i>&nbsp;        }
+<b class="nc"><i class="no-highlight">128</i>&nbsp;        if (!Arrays.equals(p1.xpoints, p2.xpoints)) {</b>
+<b class="nc"><i class="no-highlight">129</i>&nbsp;            return false;</b>
+<i class="no-highlight">130</i>&nbsp;        }
+<b class="nc"><i class="no-highlight">131</i>&nbsp;        if (!Arrays.equals(p1.ypoints, p2.ypoints)) {</b>
+<b class="nc"><i class="no-highlight">132</i>&nbsp;            return false;</b>
+<i class="no-highlight">133</i>&nbsp;        }
+<b class="nc"><i class="no-highlight">134</i>&nbsp;        return true;</b>
+<i class="no-highlight">135</i>&nbsp;    }
+<i class="no-highlight">136</i>&nbsp;
+<i class="no-highlight">137</i>&nbsp;    /**
+<i class="no-highlight">138</i>&nbsp;     * Tests two {@code GeneralPath} instances for equality.  If both are 
+<i class="no-highlight">139</i>&nbsp;     * {@code null} this method returns {@code true}.
+<i class="no-highlight">140</i>&nbsp;     *
+<i class="no-highlight">141</i>&nbsp;     * @param p1  path 1 ({@code null} permitted).
+<i class="no-highlight">142</i>&nbsp;     * @param p2  path 2 ({@code null} permitted).
+<i class="no-highlight">143</i>&nbsp;     *
+<i class="no-highlight">144</i>&nbsp;     * @return A boolean.
+<i class="no-highlight">145</i>&nbsp;     */
+<i class="no-highlight">146</i>&nbsp;    public static boolean equal(Path2D p1, Path2D p2) {
+<b class="fc"><i class="no-highlight">147</i>&nbsp;        if (p1 == null) {</b>
+<b class="nc"><i class="no-highlight">148</i>&nbsp;            return (p2 == null);</b>
+<i class="no-highlight">149</i>&nbsp;        }
+<b class="fc"><i class="no-highlight">150</i>&nbsp;        if (p2 == null) {</b>
+<b class="nc"><i class="no-highlight">151</i>&nbsp;            return false;</b>
+<i class="no-highlight">152</i>&nbsp;        }
+<b class="fc"><i class="no-highlight">153</i>&nbsp;        if (p1.getWindingRule() != p2.getWindingRule()) {</b>
+<b class="nc"><i class="no-highlight">154</i>&nbsp;            return false;</b>
+<i class="no-highlight">155</i>&nbsp;        }
+<b class="fc"><i class="no-highlight">156</i>&nbsp;        PathIterator iterator1 = p1.getPathIterator(null);</b>
+<b class="fc"><i class="no-highlight">157</i>&nbsp;        PathIterator iterator2 = p2.getPathIterator(null);</b>
+<b class="fc"><i class="no-highlight">158</i>&nbsp;        double[] d1 = new double[6];</b>
+<b class="fc"><i class="no-highlight">159</i>&nbsp;        double[] d2 = new double[6];</b>
+<b class="fc"><i class="no-highlight">160</i>&nbsp;        boolean done = iterator1.isDone() &amp;&amp; iterator2.isDone();</b>
+<b class="fc"><i class="no-highlight">161</i>&nbsp;        while (!done) {</b>
+<b class="fc"><i class="no-highlight">162</i>&nbsp;            if (iterator1.isDone() != iterator2.isDone()) {</b>
+<b class="nc"><i class="no-highlight">163</i>&nbsp;                return false;</b>
+<i class="no-highlight">164</i>&nbsp;            }
+<b class="fc"><i class="no-highlight">165</i>&nbsp;            int seg1 = iterator1.currentSegment(d1);</b>
+<b class="fc"><i class="no-highlight">166</i>&nbsp;            int seg2 = iterator2.currentSegment(d2);</b>
+<b class="fc"><i class="no-highlight">167</i>&nbsp;            if (seg1 != seg2) {</b>
+<b class="nc"><i class="no-highlight">168</i>&nbsp;                return false;</b>
+<i class="no-highlight">169</i>&nbsp;            }
+<b class="fc"><i class="no-highlight">170</i>&nbsp;            if (!Arrays.equals(d1, d2)) {</b>
+<b class="fc"><i class="no-highlight">171</i>&nbsp;                return false;</b>
+<i class="no-highlight">172</i>&nbsp;            }
+<b class="fc"><i class="no-highlight">173</i>&nbsp;            iterator1.next();</b>
+<b class="fc"><i class="no-highlight">174</i>&nbsp;            iterator2.next();</b>
+<b class="fc"><i class="no-highlight">175</i>&nbsp;            done = iterator1.isDone() &amp;&amp; iterator2.isDone();</b>
+<b class="fc"><i class="no-highlight">176</i>&nbsp;        }</b>
+<b class="fc"><i class="no-highlight">177</i>&nbsp;        return true;</b>
+<i class="no-highlight">178</i>&nbsp;    }
+<i class="no-highlight">179</i>&nbsp;
+<i class="no-highlight">180</i>&nbsp;    /**
+<i class="no-highlight">181</i>&nbsp;     * Creates and returns a translated shape.
+<i class="no-highlight">182</i>&nbsp;     *
+<i class="no-highlight">183</i>&nbsp;     * @param shape  the shape ({@code null} not permitted).
+<i class="no-highlight">184</i>&nbsp;     * @param transX  the x translation (in Java2D space).
+<i class="no-highlight">185</i>&nbsp;     * @param transY  the y translation (in Java2D space).
+<i class="no-highlight">186</i>&nbsp;     *
+<i class="no-highlight">187</i>&nbsp;     * @return The translated shape.
+<i class="no-highlight">188</i>&nbsp;     */
+<i class="no-highlight">189</i>&nbsp;    public static Shape createTranslatedShape(Shape shape, double transX,
+<i class="no-highlight">190</i>&nbsp;            double transY) {
+<b class="nc"><i class="no-highlight">191</i>&nbsp;        Args.nullNotPermitted(shape, &quot;shape&quot;);</b>
+<b class="nc"><i class="no-highlight">192</i>&nbsp;        final AffineTransform transform = AffineTransform.getTranslateInstance(</b>
+<i class="no-highlight">193</i>&nbsp;                transX, transY);
+<b class="nc"><i class="no-highlight">194</i>&nbsp;        return transform.createTransformedShape(shape);</b>
+<i class="no-highlight">195</i>&nbsp;    }
+<i class="no-highlight">196</i>&nbsp;
+<i class="no-highlight">197</i>&nbsp;    /**
+<i class="no-highlight">198</i>&nbsp;     * Translates a shape to a new location such that the anchor point
+<i class="no-highlight">199</i>&nbsp;     * (relative to the rectangular bounds of the shape) aligns with the
+<i class="no-highlight">200</i>&nbsp;     * specified (x, y) coordinate in Java2D space.
+<i class="no-highlight">201</i>&nbsp;     *
+<i class="no-highlight">202</i>&nbsp;     * @param shape  the shape ({@code null} not permitted).
+<i class="no-highlight">203</i>&nbsp;     * @param anchor  the anchor ({@code null} not permitted).
+<i class="no-highlight">204</i>&nbsp;     * @param locationX  the x-coordinate (in Java2D space).
+<i class="no-highlight">205</i>&nbsp;     * @param locationY  the y-coordinate (in Java2D space).
+<i class="no-highlight">206</i>&nbsp;     *
+<i class="no-highlight">207</i>&nbsp;     * @return A new and translated shape.
+<i class="no-highlight">208</i>&nbsp;     */
+<i class="no-highlight">209</i>&nbsp;    public static Shape createTranslatedShape(Shape shape, 
+<i class="no-highlight">210</i>&nbsp;            RectangleAnchor anchor, double locationX, double locationY) {
+<b class="nc"><i class="no-highlight">211</i>&nbsp;        Args.nullNotPermitted(shape, &quot;shape&quot;);</b>
+<b class="nc"><i class="no-highlight">212</i>&nbsp;        Args.nullNotPermitted(anchor, &quot;anchor&quot;);</b>
+<b class="nc"><i class="no-highlight">213</i>&nbsp;        Point2D anchorPoint = anchor.getAnchorPoint(shape.getBounds2D());</b>
+<b class="nc"><i class="no-highlight">214</i>&nbsp;        final AffineTransform transform = AffineTransform.getTranslateInstance(</b>
+<b class="nc"><i class="no-highlight">215</i>&nbsp;                locationX - anchorPoint.getX(), locationY - anchorPoint.getY());</b>
+<b class="nc"><i class="no-highlight">216</i>&nbsp;        return transform.createTransformedShape(shape);</b>
+<i class="no-highlight">217</i>&nbsp;    }
+<i class="no-highlight">218</i>&nbsp;
+<i class="no-highlight">219</i>&nbsp;    /**
+<i class="no-highlight">220</i>&nbsp;     * Rotates a shape about the specified coordinates.
+<i class="no-highlight">221</i>&nbsp;     *
+<i class="no-highlight">222</i>&nbsp;     * @param base  the shape ({@code null} permitted, returns {@code null}).
+<i class="no-highlight">223</i>&nbsp;     * @param angle  the angle (in radians).
+<i class="no-highlight">224</i>&nbsp;     * @param x  the x coordinate for the rotation point (in Java2D space).
+<i class="no-highlight">225</i>&nbsp;     * @param y  the y coordinate for the rotation point (in Java2D space).
+<i class="no-highlight">226</i>&nbsp;     *
+<i class="no-highlight">227</i>&nbsp;     * @return the rotated shape.
+<i class="no-highlight">228</i>&nbsp;     */
+<i class="no-highlight">229</i>&nbsp;    public static Shape rotateShape(Shape base, double angle, float x, float y) {
+<b class="nc"><i class="no-highlight">230</i>&nbsp;        if (base == null) {</b>
+<b class="nc"><i class="no-highlight">231</i>&nbsp;            return null;</b>
+<i class="no-highlight">232</i>&nbsp;        }
+<b class="nc"><i class="no-highlight">233</i>&nbsp;        AffineTransform rotate = AffineTransform.getRotateInstance(angle, x, y);</b>
+<b class="nc"><i class="no-highlight">234</i>&nbsp;        return rotate.createTransformedShape(base);</b>
+<i class="no-highlight">235</i>&nbsp;    }
+<i class="no-highlight">236</i>&nbsp;
+<i class="no-highlight">237</i>&nbsp;    /**
+<i class="no-highlight">238</i>&nbsp;     * Draws a shape with the specified rotation about {@code (x, y)}.
+<i class="no-highlight">239</i>&nbsp;     *
+<i class="no-highlight">240</i>&nbsp;     * @param g2  the graphics device ({@code null} not permitted).
+<i class="no-highlight">241</i>&nbsp;     * @param shape  the shape ({@code null} not permitted).
+<i class="no-highlight">242</i>&nbsp;     * @param angle  the angle (in radians).
+<i class="no-highlight">243</i>&nbsp;     * @param x  the x coordinate for the rotation point.
+<i class="no-highlight">244</i>&nbsp;     * @param y  the y coordinate for the rotation point.
+<i class="no-highlight">245</i>&nbsp;     */
+<i class="no-highlight">246</i>&nbsp;    public static void drawRotatedShape(Graphics2D g2, Shape shape, double angle,
+<i class="no-highlight">247</i>&nbsp;            float x, float y) {
+<b class="nc"><i class="no-highlight">248</i>&nbsp;        Args.nullNotPermitted(g2, &quot;g2&quot;);</b>
+<b class="nc"><i class="no-highlight">249</i>&nbsp;        Args.nullNotPermitted(shape, &quot;shape&quot;);</b>
+<b class="nc"><i class="no-highlight">250</i>&nbsp;        AffineTransform saved = g2.getTransform();</b>
+<b class="nc"><i class="no-highlight">251</i>&nbsp;        AffineTransform rotate = AffineTransform.getRotateInstance(angle, x, y);</b>
+<b class="nc"><i class="no-highlight">252</i>&nbsp;        g2.transform(rotate);</b>
+<b class="nc"><i class="no-highlight">253</i>&nbsp;        g2.draw(shape);</b>
+<b class="nc"><i class="no-highlight">254</i>&nbsp;        g2.setTransform(saved);</b>
+<i class="no-highlight">255</i>&nbsp;
+<i class="no-highlight">256</i>&nbsp;    }
+<i class="no-highlight">257</i>&nbsp;
+<i class="no-highlight">258</i>&nbsp;    /** A useful constant used internally. */
+<b class="fc"><i class="no-highlight">259</i>&nbsp;    private static final float SQRT2 = (float) Math.pow(2.0, 0.5);</b>
+<i class="no-highlight">260</i>&nbsp;
+<i class="no-highlight">261</i>&nbsp;    /**
+<i class="no-highlight">262</i>&nbsp;     * Creates a diagonal cross shape.
+<i class="no-highlight">263</i>&nbsp;     *
+<i class="no-highlight">264</i>&nbsp;     * @param l  the length of each &#39;arm&#39;.
+<i class="no-highlight">265</i>&nbsp;     * @param t  the thickness.
+<i class="no-highlight">266</i>&nbsp;     *
+<i class="no-highlight">267</i>&nbsp;     * @return A diagonal cross shape.
+<i class="no-highlight">268</i>&nbsp;     */
+<i class="no-highlight">269</i>&nbsp;    public static Shape createDiagonalCross(float l, float t) {
+<b class="nc"><i class="no-highlight">270</i>&nbsp;        final GeneralPath p0 = new GeneralPath();</b>
+<b class="nc"><i class="no-highlight">271</i>&nbsp;        p0.moveTo(-l - t, -l + t);</b>
+<b class="nc"><i class="no-highlight">272</i>&nbsp;        p0.lineTo(-l + t, -l - t);</b>
+<b class="nc"><i class="no-highlight">273</i>&nbsp;        p0.lineTo(0.0f, -t * SQRT2);</b>
+<b class="nc"><i class="no-highlight">274</i>&nbsp;        p0.lineTo(l - t, -l - t);</b>
+<b class="nc"><i class="no-highlight">275</i>&nbsp;        p0.lineTo(l + t, -l + t);</b>
+<b class="nc"><i class="no-highlight">276</i>&nbsp;        p0.lineTo(t * SQRT2, 0.0f);</b>
+<b class="nc"><i class="no-highlight">277</i>&nbsp;        p0.lineTo(l + t, l - t);</b>
+<b class="nc"><i class="no-highlight">278</i>&nbsp;        p0.lineTo(l - t, l + t);</b>
+<b class="nc"><i class="no-highlight">279</i>&nbsp;        p0.lineTo(0.0f, t * SQRT2);</b>
+<b class="nc"><i class="no-highlight">280</i>&nbsp;        p0.lineTo(-l + t, l + t);</b>
+<b class="nc"><i class="no-highlight">281</i>&nbsp;        p0.lineTo(-l - t, l - t);</b>
+<b class="nc"><i class="no-highlight">282</i>&nbsp;        p0.lineTo(-t * SQRT2, 0.0f);</b>
+<b class="nc"><i class="no-highlight">283</i>&nbsp;        p0.closePath();</b>
+<b class="nc"><i class="no-highlight">284</i>&nbsp;        return p0;</b>
+<i class="no-highlight">285</i>&nbsp;    }
+<i class="no-highlight">286</i>&nbsp;
+<i class="no-highlight">287</i>&nbsp;    /**
+<i class="no-highlight">288</i>&nbsp;     * Creates a diagonal cross shape.
+<i class="no-highlight">289</i>&nbsp;     *
+<i class="no-highlight">290</i>&nbsp;     * @param l  the length of each &#39;arm&#39;.
+<i class="no-highlight">291</i>&nbsp;     * @param t  the thickness.
+<i class="no-highlight">292</i>&nbsp;     *
+<i class="no-highlight">293</i>&nbsp;     * @return A diagonal cross shape.
+<i class="no-highlight">294</i>&nbsp;     */
+<i class="no-highlight">295</i>&nbsp;    public static Shape createRegularCross(float l, float t) {
+<b class="nc"><i class="no-highlight">296</i>&nbsp;        final GeneralPath p0 = new GeneralPath();</b>
+<b class="nc"><i class="no-highlight">297</i>&nbsp;        p0.moveTo(-l, t);</b>
+<b class="nc"><i class="no-highlight">298</i>&nbsp;        p0.lineTo(-t, t);</b>
+<b class="nc"><i class="no-highlight">299</i>&nbsp;        p0.lineTo(-t, l);</b>
+<b class="nc"><i class="no-highlight">300</i>&nbsp;        p0.lineTo(t, l);</b>
+<b class="nc"><i class="no-highlight">301</i>&nbsp;        p0.lineTo(t, t);</b>
+<b class="nc"><i class="no-highlight">302</i>&nbsp;        p0.lineTo(l, t);</b>
+<b class="nc"><i class="no-highlight">303</i>&nbsp;        p0.lineTo(l, -t);</b>
+<b class="nc"><i class="no-highlight">304</i>&nbsp;        p0.lineTo(t, -t);</b>
+<b class="nc"><i class="no-highlight">305</i>&nbsp;        p0.lineTo(t, -l);</b>
+<b class="nc"><i class="no-highlight">306</i>&nbsp;        p0.lineTo(-t, -l);</b>
+<b class="nc"><i class="no-highlight">307</i>&nbsp;        p0.lineTo(-t, -t);</b>
+<b class="nc"><i class="no-highlight">308</i>&nbsp;        p0.lineTo(-l, -t);</b>
+<b class="nc"><i class="no-highlight">309</i>&nbsp;        p0.closePath();</b>
+<b class="nc"><i class="no-highlight">310</i>&nbsp;        return p0;</b>
+<i class="no-highlight">311</i>&nbsp;    }
+<i class="no-highlight">312</i>&nbsp;
+<i class="no-highlight">313</i>&nbsp;    /**
+<i class="no-highlight">314</i>&nbsp;     * Creates a diamond shape.
+<i class="no-highlight">315</i>&nbsp;     *
+<i class="no-highlight">316</i>&nbsp;     * @param s  the size factor (equal to half the height of the diamond).
+<i class="no-highlight">317</i>&nbsp;     *
+<i class="no-highlight">318</i>&nbsp;     * @return A diamond shape.
+<i class="no-highlight">319</i>&nbsp;     */
+<i class="no-highlight">320</i>&nbsp;    public static Shape createDiamond(float s) {
+<b class="nc"><i class="no-highlight">321</i>&nbsp;        final GeneralPath p0 = new GeneralPath();</b>
+<b class="nc"><i class="no-highlight">322</i>&nbsp;        p0.moveTo(0.0f, -s);</b>
+<b class="nc"><i class="no-highlight">323</i>&nbsp;        p0.lineTo(s, 0.0f);</b>
+<b class="nc"><i class="no-highlight">324</i>&nbsp;        p0.lineTo(0.0f, s);</b>
+<b class="nc"><i class="no-highlight">325</i>&nbsp;        p0.lineTo(-s, 0.0f);</b>
+<b class="nc"><i class="no-highlight">326</i>&nbsp;        p0.closePath();</b>
+<b class="nc"><i class="no-highlight">327</i>&nbsp;        return p0;</b>
+<i class="no-highlight">328</i>&nbsp;    }
+<i class="no-highlight">329</i>&nbsp;
+<i class="no-highlight">330</i>&nbsp;    /**
+<i class="no-highlight">331</i>&nbsp;     * Creates a triangle shape that points upwards.
+<i class="no-highlight">332</i>&nbsp;     *
+<i class="no-highlight">333</i>&nbsp;     * @param s  the size factor (equal to half the height of the triangle).
+<i class="no-highlight">334</i>&nbsp;     *
+<i class="no-highlight">335</i>&nbsp;     * @return A triangle shape.
+<i class="no-highlight">336</i>&nbsp;     */
+<i class="no-highlight">337</i>&nbsp;    public static Shape createUpTriangle(float s) {
+<b class="nc"><i class="no-highlight">338</i>&nbsp;        final GeneralPath p0 = new GeneralPath();</b>
+<b class="nc"><i class="no-highlight">339</i>&nbsp;        p0.moveTo(0.0f, -s);</b>
+<b class="nc"><i class="no-highlight">340</i>&nbsp;        p0.lineTo(s, s);</b>
+<b class="nc"><i class="no-highlight">341</i>&nbsp;        p0.lineTo(-s, s);</b>
+<b class="nc"><i class="no-highlight">342</i>&nbsp;        p0.closePath();</b>
+<b class="nc"><i class="no-highlight">343</i>&nbsp;        return p0;</b>
+<i class="no-highlight">344</i>&nbsp;    }
+<i class="no-highlight">345</i>&nbsp;
+<i class="no-highlight">346</i>&nbsp;    /**
+<i class="no-highlight">347</i>&nbsp;     * Creates a triangle shape that points downwards.
+<i class="no-highlight">348</i>&nbsp;     *
+<i class="no-highlight">349</i>&nbsp;     * @param s  the size factor (equal to half the height of the triangle).
+<i class="no-highlight">350</i>&nbsp;     *
+<i class="no-highlight">351</i>&nbsp;     * @return A triangle shape.
+<i class="no-highlight">352</i>&nbsp;     */
+<i class="no-highlight">353</i>&nbsp;    public static Shape createDownTriangle(float s) {
+<b class="nc"><i class="no-highlight">354</i>&nbsp;        final GeneralPath p0 = new GeneralPath();</b>
+<b class="nc"><i class="no-highlight">355</i>&nbsp;        p0.moveTo(0.0f, s);</b>
+<b class="nc"><i class="no-highlight">356</i>&nbsp;        p0.lineTo(s, -s);</b>
+<b class="nc"><i class="no-highlight">357</i>&nbsp;        p0.lineTo(-s, -s);</b>
+<b class="nc"><i class="no-highlight">358</i>&nbsp;        p0.closePath();</b>
+<b class="nc"><i class="no-highlight">359</i>&nbsp;        return p0;</b>
+<i class="no-highlight">360</i>&nbsp;    }
+<i class="no-highlight">361</i>&nbsp;
+<i class="no-highlight">362</i>&nbsp;    /**
+<i class="no-highlight">363</i>&nbsp;     * Creates a region surrounding a line segment by &#39;widening&#39; the line
+<i class="no-highlight">364</i>&nbsp;     * segment.  A typical use for this method is the creation of a
+<i class="no-highlight">365</i>&nbsp;     * &#39;clickable&#39; region for a line that is displayed on-screen.
+<i class="no-highlight">366</i>&nbsp;     *
+<i class="no-highlight">367</i>&nbsp;     * @param line  the line ({@code null} not permitted).
+<i class="no-highlight">368</i>&nbsp;     * @param width  the width of the region.
+<i class="no-highlight">369</i>&nbsp;     *
+<i class="no-highlight">370</i>&nbsp;     * @return A region that surrounds the line.
+<i class="no-highlight">371</i>&nbsp;     */
+<i class="no-highlight">372</i>&nbsp;    public static Shape createLineRegion(Line2D line, float width) {
+<b class="nc"><i class="no-highlight">373</i>&nbsp;        Args.nullNotPermitted(line, &quot;line&quot;);</b>
+<b class="nc"><i class="no-highlight">374</i>&nbsp;        final GeneralPath result = new GeneralPath();</b>
+<b class="nc"><i class="no-highlight">375</i>&nbsp;        final float x1 = (float) line.getX1();</b>
+<b class="nc"><i class="no-highlight">376</i>&nbsp;        final float x2 = (float) line.getX2();</b>
+<b class="nc"><i class="no-highlight">377</i>&nbsp;        final float y1 = (float) line.getY1();</b>
+<b class="nc"><i class="no-highlight">378</i>&nbsp;        final float y2 = (float) line.getY2();</b>
+<b class="nc"><i class="no-highlight">379</i>&nbsp;        if ((x2 - x1) != 0.0) {</b>
+<b class="nc"><i class="no-highlight">380</i>&nbsp;            final double theta = Math.atan((y2 - y1) / (x2 - x1));</b>
+<b class="nc"><i class="no-highlight">381</i>&nbsp;            final float dx = (float) Math.sin(theta) * width;</b>
+<b class="nc"><i class="no-highlight">382</i>&nbsp;            final float dy = (float) Math.cos(theta) * width;</b>
+<b class="nc"><i class="no-highlight">383</i>&nbsp;            result.moveTo(x1 - dx, y1 + dy);</b>
+<b class="nc"><i class="no-highlight">384</i>&nbsp;            result.lineTo(x1 + dx, y1 - dy);</b>
+<b class="nc"><i class="no-highlight">385</i>&nbsp;            result.lineTo(x2 + dx, y2 - dy);</b>
+<b class="nc"><i class="no-highlight">386</i>&nbsp;            result.lineTo(x2 - dx, y2 + dy);</b>
+<b class="nc"><i class="no-highlight">387</i>&nbsp;            result.closePath();</b>
+<b class="nc"><i class="no-highlight">388</i>&nbsp;        } else {</b>
+<i class="no-highlight">389</i>&nbsp;            // special case, vertical line
+<b class="nc"><i class="no-highlight">390</i>&nbsp;            result.moveTo(x1 - width / 2.0f, y1);</b>
+<b class="nc"><i class="no-highlight">391</i>&nbsp;            result.lineTo(x1 + width / 2.0f, y1);</b>
+<b class="nc"><i class="no-highlight">392</i>&nbsp;            result.lineTo(x2 + width / 2.0f, y2);</b>
+<b class="nc"><i class="no-highlight">393</i>&nbsp;            result.lineTo(x2 - width / 2.0f, y2);</b>
+<b class="nc"><i class="no-highlight">394</i>&nbsp;            result.closePath();</b>
+<i class="no-highlight">395</i>&nbsp;        }
+<b class="nc"><i class="no-highlight">396</i>&nbsp;        return result;</b>
+<i class="no-highlight">397</i>&nbsp;    }
+<i class="no-highlight">398</i>&nbsp;
+<i class="no-highlight">399</i>&nbsp;    /**
+<i class="no-highlight">400</i>&nbsp;     * Returns a point based on (x, y) but constrained to be within the bounds
+<i class="no-highlight">401</i>&nbsp;     * of a given rectangle.
+<i class="no-highlight">402</i>&nbsp;     *
+<i class="no-highlight">403</i>&nbsp;     * @param x  the x-coordinate.
+<i class="no-highlight">404</i>&nbsp;     * @param y  the y-coordinate.
+<i class="no-highlight">405</i>&nbsp;     * @param area  the constraining rectangle ({@code null} not permitted).
+<i class="no-highlight">406</i>&nbsp;     *
+<i class="no-highlight">407</i>&nbsp;     * @return A point within the rectangle.
+<i class="no-highlight">408</i>&nbsp;     *
+<i class="no-highlight">409</i>&nbsp;     * @throws NullPointerException if {@code area} is {@code null}.
+<i class="no-highlight">410</i>&nbsp;     */
+<i class="no-highlight">411</i>&nbsp;    public static Point2D getPointInRectangle(double x, double y,
+<i class="no-highlight">412</i>&nbsp;            Rectangle2D area) {
+<b class="nc"><i class="no-highlight">413</i>&nbsp;        x = Math.max(area.getMinX(), Math.min(x, area.getMaxX()));</b>
+<b class="nc"><i class="no-highlight">414</i>&nbsp;        y = Math.max(area.getMinY(), Math.min(y, area.getMaxY()));</b>
+<b class="nc"><i class="no-highlight">415</i>&nbsp;        return new Point2D.Double(x, y);</b>
+<i class="no-highlight">416</i>&nbsp;    }
+<i class="no-highlight">417</i>&nbsp;
+<i class="no-highlight">418</i>&nbsp;    /**
+<i class="no-highlight">419</i>&nbsp;     * Checks, whether the given rectangle1 fully contains rectangle 2
+<i class="no-highlight">420</i>&nbsp;     * (even if rectangle 2 has a height or width of zero!).
+<i class="no-highlight">421</i>&nbsp;     *
+<i class="no-highlight">422</i>&nbsp;     * @param rect1  the first rectangle ({@code null} not permitted).
+<i class="no-highlight">423</i>&nbsp;     * @param rect2  the second rectangle ({@code null} not permitted).
+<i class="no-highlight">424</i>&nbsp;     *
+<i class="no-highlight">425</i>&nbsp;     * @return A boolean.
+<i class="no-highlight">426</i>&nbsp;     */
+<i class="no-highlight">427</i>&nbsp;    public static boolean contains(Rectangle2D rect1, Rectangle2D rect2) {
+<b class="nc"><i class="no-highlight">428</i>&nbsp;        Args.nullNotPermitted(rect1, &quot;rect1&quot;);</b>
+<b class="nc"><i class="no-highlight">429</i>&nbsp;        Args.nullNotPermitted(rect2, &quot;rect2&quot;);</b>
+<b class="nc"><i class="no-highlight">430</i>&nbsp;        final double x0 = rect1.getX();</b>
+<b class="nc"><i class="no-highlight">431</i>&nbsp;        final double y0 = rect1.getY();</b>
+<b class="nc"><i class="no-highlight">432</i>&nbsp;        final double x = rect2.getX();</b>
+<b class="nc"><i class="no-highlight">433</i>&nbsp;        final double y = rect2.getY();</b>
+<b class="nc"><i class="no-highlight">434</i>&nbsp;        final double w = rect2.getWidth();</b>
+<b class="nc"><i class="no-highlight">435</i>&nbsp;        final double h = rect2.getHeight();</b>
+<b class="nc"><i class="no-highlight">436</i>&nbsp;        return ((x &gt;= x0) &amp;&amp; (y &gt;= y0)</b>
+<b class="nc"><i class="no-highlight">437</i>&nbsp;                &amp;&amp; ((x + w) &lt;= (x0 + rect1.getWidth()))</b>
+<b class="nc"><i class="no-highlight">438</i>&nbsp;                &amp;&amp; ((y + h) &lt;= (y0 + rect1.getHeight())));</b>
+<i class="no-highlight">439</i>&nbsp;    }
+<i class="no-highlight">440</i>&nbsp;
+<i class="no-highlight">441</i>&nbsp;    /**
+<i class="no-highlight">442</i>&nbsp;     * Checks, whether the given rectangle1 fully contains rectangle 2
+<i class="no-highlight">443</i>&nbsp;     * (even if rectangle 2 has a height or width of zero!).
+<i class="no-highlight">444</i>&nbsp;     *
+<i class="no-highlight">445</i>&nbsp;     * @param rect1  the first rectangle.
+<i class="no-highlight">446</i>&nbsp;     * @param rect2  the second rectangle.
+<i class="no-highlight">447</i>&nbsp;     *
+<i class="no-highlight">448</i>&nbsp;     * @return A boolean.
+<i class="no-highlight">449</i>&nbsp;     */
+<i class="no-highlight">450</i>&nbsp;    public static boolean intersects(Rectangle2D rect1, Rectangle2D rect2) {
+<b class="nc"><i class="no-highlight">451</i>&nbsp;        Args.nullNotPermitted(rect1, &quot;rect1&quot;);</b>
+<b class="nc"><i class="no-highlight">452</i>&nbsp;        Args.nullNotPermitted(rect2, &quot;rect2&quot;);</b>
+<b class="nc"><i class="no-highlight">453</i>&nbsp;        final double x0 = rect1.getX();</b>
+<b class="nc"><i class="no-highlight">454</i>&nbsp;        final double y0 = rect1.getY();</b>
+<i class="no-highlight">455</i>&nbsp;
+<b class="nc"><i class="no-highlight">456</i>&nbsp;        final double x = rect2.getX();</b>
+<b class="nc"><i class="no-highlight">457</i>&nbsp;        final double width = rect2.getWidth();</b>
+<b class="nc"><i class="no-highlight">458</i>&nbsp;        final double y = rect2.getY();</b>
+<b class="nc"><i class="no-highlight">459</i>&nbsp;        final double height = rect2.getHeight();</b>
+<b class="nc"><i class="no-highlight">460</i>&nbsp;        return (x + width &gt;= x0 &amp;&amp; y + height &gt;= y0 &amp;&amp; x &lt;= x0 + rect1.getWidth()</b>
+<b class="nc"><i class="no-highlight">461</i>&nbsp;              &amp;&amp; y &lt;= y0 + rect1.getHeight());</b>
+<i class="no-highlight">462</i>&nbsp;    }
+<i class="no-highlight">463</i>&nbsp;    
+<i class="no-highlight">464</i>&nbsp;    /**
+<i class="no-highlight">465</i>&nbsp;     * Returns {@code true} if the specified point (x, y) falls within or
+<i class="no-highlight">466</i>&nbsp;     * on the boundary of the specified rectangle.
+<i class="no-highlight">467</i>&nbsp;     *
+<i class="no-highlight">468</i>&nbsp;     * @param rect  the rectangle ({@code null} not permitted).
+<i class="no-highlight">469</i>&nbsp;     * @param x  the x-coordinate.
+<i class="no-highlight">470</i>&nbsp;     * @param y  the y-coordinate.
+<i class="no-highlight">471</i>&nbsp;     *
+<i class="no-highlight">472</i>&nbsp;     * @return A boolean.
+<i class="no-highlight">473</i>&nbsp;     */
+<i class="no-highlight">474</i>&nbsp;    public static boolean isPointInRect(Rectangle2D rect, double x, double y) {
+<b class="nc"><i class="no-highlight">475</i>&nbsp;        return (x &gt;= rect.getMinX() &amp;&amp; x &lt;= rect.getMaxX()</b>
+<b class="nc"><i class="no-highlight">476</i>&nbsp;                &amp;&amp; y &gt;= rect.getMinY() &amp;&amp; y &lt;= rect.getMaxY());</b>
+<i class="no-highlight">477</i>&nbsp;    }
+<i class="no-highlight">478</i>&nbsp;    
+<i class="no-highlight">479</i>&nbsp;    /**
+<i class="no-highlight">480</i>&nbsp;     * Clones a map containing shapes.
+<i class="no-highlight">481</i>&nbsp;     * 
+<i class="no-highlight">482</i>&nbsp;     * @param source  the source map.
+<i class="no-highlight">483</i>&nbsp;     * 
+<i class="no-highlight">484</i>&nbsp;     * @return A new map containing cloned shapes.
+<i class="no-highlight">485</i>&nbsp;     */
+<i class="no-highlight">486</i>&nbsp;    public static &lt;K extends Comparable&lt;K&gt;&gt; Map&lt;K, Shape&gt; cloneMap(Map&lt;K, Shape&gt; source) {
+<b class="nc"><i class="no-highlight">487</i>&nbsp;        Map&lt;K, Shape&gt; result = new HashMap&lt;&gt;();</b>
+<b class="nc"><i class="no-highlight">488</i>&nbsp;        for (K key : source.keySet()) {</b>
+<b class="nc"><i class="no-highlight">489</i>&nbsp;            result.put(key, source.get(key));</b>
+<b class="nc"><i class="no-highlight">490</i>&nbsp;        }</b>
+<b class="nc"><i class="no-highlight">491</i>&nbsp;        return result;</b>
+<i class="no-highlight">492</i>&nbsp;    }
+<i class="no-highlight">493</i>&nbsp;    
+<i class="no-highlight">494</i>&nbsp;    /**
+<i class="no-highlight">495</i>&nbsp;     * Returns {@code true} if the two maps contain the same set of entries and 
+<i class="no-highlight">496</i>&nbsp;     * {@code false} otherwise.
+<i class="no-highlight">497</i>&nbsp;     * 
+<i class="no-highlight">498</i>&nbsp;     * @param &lt;K&gt;  the key type.
+<i class="no-highlight">499</i>&nbsp;     * @param map1  the first map.
+<i class="no-highlight">500</i>&nbsp;     * @param map2  the second map.
+<i class="no-highlight">501</i>&nbsp;     * 
+<i class="no-highlight">502</i>&nbsp;     * @return A boolean.
+<i class="no-highlight">503</i>&nbsp;     */
+<i class="no-highlight">504</i>&nbsp;    public static &lt;K extends Comparable&lt;K&gt;&gt; boolean equal(Map&lt;K, Shape&gt; map1, Map&lt;K, Shape&gt; map2) {
+<b class="nc"><i class="no-highlight">505</i>&nbsp;        if (!map1.keySet().equals(map2.keySet())) {</b>
+<b class="nc"><i class="no-highlight">506</i>&nbsp;            return false;</b>
+<i class="no-highlight">507</i>&nbsp;        }
+<b class="nc"><i class="no-highlight">508</i>&nbsp;        for (K key : map1.keySet()) {</b>
+<b class="nc"><i class="no-highlight">509</i>&nbsp;            Shape p1 = map1.get(key);</b>
+<b class="nc"><i class="no-highlight">510</i>&nbsp;            Shape p2 = map2.get(key);</b>
+<b class="nc"><i class="no-highlight">511</i>&nbsp;            if (!ShapeUtils.equal(p1, p2)) {</b>
+<b class="nc"><i class="no-highlight">512</i>&nbsp;                return false;</b>
+<i class="no-highlight">513</i>&nbsp;            }
+<b class="nc"><i class="no-highlight">514</i>&nbsp;        }</b>
+<b class="nc"><i class="no-highlight">515</i>&nbsp;        return true;</b>
+<i class="no-highlight">516</i>&nbsp;    }
+<i class="no-highlight">517</i>&nbsp; 
+<i class="no-highlight">518</i>&nbsp;}
+<i class="no-highlight">519</i>&nbsp;
+</div>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+        var codeBlock = document.getElementById('sourceCode');
+
+        if (codeBlock) {
+            hljs.highlightBlock(codeBlock);
+        }
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2022-03-26 17:36</div>
+</div>
+</body>
+</html>

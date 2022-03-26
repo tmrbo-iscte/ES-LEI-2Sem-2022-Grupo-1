@@ -1,0 +1,1139 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > LogarithmicAxis</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/highlight-idea.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.pack.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.jfree.chart.axis</a>
+</div>
+
+<h1>Coverage Summary for Class: LogarithmicAxis (org.jfree.chart.axis)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">LogarithmicAxis</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    51,7%
+  </span>
+  <span class="absValue">
+    (15/29)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    19,4%
+  </span>
+  <span class="absValue">
+    (59/304)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<div class="sourceCode" id="sourceCode"><i class="no-highlight">1</i>&nbsp;/* ===========================================================
+<i class="no-highlight">2</i>&nbsp; * JFreeChart : a free chart library for the Java(tm) platform
+<i class="no-highlight">3</i>&nbsp; * ===========================================================
+<i class="no-highlight">4</i>&nbsp; *
+<i class="no-highlight">5</i>&nbsp; * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+<i class="no-highlight">6</i>&nbsp; *
+<i class="no-highlight">7</i>&nbsp; * Project Info:  http://www.jfree.org/jfreechart/index.html
+<i class="no-highlight">8</i>&nbsp; *
+<i class="no-highlight">9</i>&nbsp; * This library is free software; you can redistribute it and/or modify it
+<i class="no-highlight">10</i>&nbsp; * under the terms of the GNU Lesser General Public License as published by
+<i class="no-highlight">11</i>&nbsp; * the Free Software Foundation; either version 2.1 of the License, or
+<i class="no-highlight">12</i>&nbsp; * (at your option) any later version.
+<i class="no-highlight">13</i>&nbsp; *
+<i class="no-highlight">14</i>&nbsp; * This library is distributed in the hope that it will be useful, but
+<i class="no-highlight">15</i>&nbsp; * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+<i class="no-highlight">16</i>&nbsp; * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+<i class="no-highlight">17</i>&nbsp; * License for more details.
+<i class="no-highlight">18</i>&nbsp; *
+<i class="no-highlight">19</i>&nbsp; * You should have received a copy of the GNU Lesser General Public
+<i class="no-highlight">20</i>&nbsp; * License along with this library; if not, write to the Free Software
+<i class="no-highlight">21</i>&nbsp; * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+<i class="no-highlight">22</i>&nbsp; * USA.
+<i class="no-highlight">23</i>&nbsp; *
+<i class="no-highlight">24</i>&nbsp; * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+<i class="no-highlight">25</i>&nbsp; * Other names may be trademarks of their respective owners.]
+<i class="no-highlight">26</i>&nbsp; *
+<i class="no-highlight">27</i>&nbsp; * --------------------
+<i class="no-highlight">28</i>&nbsp; * LogarithmicAxis.java
+<i class="no-highlight">29</i>&nbsp; * --------------------
+<i class="no-highlight">30</i>&nbsp; * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+<i class="no-highlight">31</i>&nbsp; *
+<i class="no-highlight">32</i>&nbsp; * Original Author:  Michael Duffy / Eric Thomas;
+<i class="no-highlight">33</i>&nbsp; * Contributor(s):   David Gilbert;
+<i class="no-highlight">34</i>&nbsp; *                   David M. O&#39;Donnell;
+<i class="no-highlight">35</i>&nbsp; *                   Scott Sams;
+<i class="no-highlight">36</i>&nbsp; *                   Sergei Ivanov;
+<i class="no-highlight">37</i>&nbsp; *
+<i class="no-highlight">38</i>&nbsp; */
+<i class="no-highlight">39</i>&nbsp;
+<i class="no-highlight">40</i>&nbsp;package org.jfree.chart.axis;
+<i class="no-highlight">41</i>&nbsp;
+<i class="no-highlight">42</i>&nbsp;import java.awt.Graphics2D;
+<i class="no-highlight">43</i>&nbsp;import java.awt.geom.Rectangle2D;
+<i class="no-highlight">44</i>&nbsp;import java.text.DecimalFormat;
+<i class="no-highlight">45</i>&nbsp;import java.text.NumberFormat;
+<i class="no-highlight">46</i>&nbsp;import java.util.List;
+<i class="no-highlight">47</i>&nbsp;
+<i class="no-highlight">48</i>&nbsp;import org.jfree.chart.plot.Plot;
+<i class="no-highlight">49</i>&nbsp;import org.jfree.chart.plot.ValueAxisPlot;
+<i class="no-highlight">50</i>&nbsp;import org.jfree.chart.api.RectangleEdge;
+<i class="no-highlight">51</i>&nbsp;import org.jfree.chart.text.TextAnchor;
+<i class="no-highlight">52</i>&nbsp;import org.jfree.data.Range;
+<i class="no-highlight">53</i>&nbsp;
+<i class="no-highlight">54</i>&nbsp;/**
+<i class="no-highlight">55</i>&nbsp; * A numerical axis that uses a logarithmic scale.
+<i class="no-highlight">56</i>&nbsp; */
+<i class="no-highlight">57</i>&nbsp;public class LogarithmicAxis extends NumberAxis {
+<i class="no-highlight">58</i>&nbsp;
+<i class="no-highlight">59</i>&nbsp;    /** For serialization. */
+<i class="no-highlight">60</i>&nbsp;    private static final long serialVersionUID = 2502918599004103054L;
+<i class="no-highlight">61</i>&nbsp;
+<i class="no-highlight">62</i>&nbsp;    /** Useful constant for log(10). */
+<b class="fc"><i class="no-highlight">63</i>&nbsp;    public static final double LOG10_VALUE = Math.log(10.0);</b>
+<i class="no-highlight">64</i>&nbsp;
+<i class="no-highlight">65</i>&nbsp;    /** Smallest arbitrarily-close-to-zero value allowed. */
+<i class="no-highlight">66</i>&nbsp;    public static final double SMALL_LOG_VALUE = 1e-100;
+<i class="no-highlight">67</i>&nbsp;
+<i class="no-highlight">68</i>&nbsp;    /** Flag set true to allow negative values in data. */
+<b class="fc"><i class="no-highlight">69</i>&nbsp;    protected boolean allowNegativesFlag = false;</b>
+<i class="no-highlight">70</i>&nbsp;
+<i class="no-highlight">71</i>&nbsp;    /**
+<i class="no-highlight">72</i>&nbsp;     * Flag set true make axis throw exception if any values are &amp;lt;= 0 and 
+<i class="no-highlight">73</i>&nbsp;     * &#39;allowNegativesFlag&#39; is false.
+<i class="no-highlight">74</i>&nbsp;     */
+<b class="fc"><i class="no-highlight">75</i>&nbsp;    protected boolean strictValuesFlag = true;</b>
+<i class="no-highlight">76</i>&nbsp;
+<i class="no-highlight">77</i>&nbsp;    /** Number formatter for generating numeric strings. */
+<b class="fc"><i class="no-highlight">78</i>&nbsp;    protected final NumberFormat numberFormatterObj</b>
+<b class="fc"><i class="no-highlight">79</i>&nbsp;        = NumberFormat.getInstance();</b>
+<i class="no-highlight">80</i>&nbsp;
+<i class="no-highlight">81</i>&nbsp;    /** Flag set true for &quot;1e#&quot;-style tick labels. */
+<b class="fc"><i class="no-highlight">82</i>&nbsp;    protected boolean expTickLabelsFlag = false;</b>
+<i class="no-highlight">83</i>&nbsp;
+<i class="no-highlight">84</i>&nbsp;    /** Flag set true for &quot;10^n&quot;-style tick labels. */
+<b class="fc"><i class="no-highlight">85</i>&nbsp;    protected boolean log10TickLabelsFlag = false;</b>
+<i class="no-highlight">86</i>&nbsp;
+<i class="no-highlight">87</i>&nbsp;    /** True to make &#39;autoAdjustRange()&#39; select &quot;10^n&quot; values. */
+<b class="fc"><i class="no-highlight">88</i>&nbsp;    protected boolean autoRangeNextLogFlag = false;</b>
+<i class="no-highlight">89</i>&nbsp;
+<i class="no-highlight">90</i>&nbsp;    /** Helper flag for log axis processing. */
+<b class="fc"><i class="no-highlight">91</i>&nbsp;    protected boolean smallLogFlag = false;</b>
+<i class="no-highlight">92</i>&nbsp;
+<i class="no-highlight">93</i>&nbsp;    /**
+<i class="no-highlight">94</i>&nbsp;     * Creates a new axis.
+<i class="no-highlight">95</i>&nbsp;     *
+<i class="no-highlight">96</i>&nbsp;     * @param label  the axis label.
+<i class="no-highlight">97</i>&nbsp;     */
+<i class="no-highlight">98</i>&nbsp;    public LogarithmicAxis(String label) {
+<b class="fc"><i class="no-highlight">99</i>&nbsp;        super(label);</b>
+<b class="fc"><i class="no-highlight">100</i>&nbsp;        setupNumberFmtObj();      //setup number formatter obj</b>
+<i class="no-highlight">101</i>&nbsp;    }
+<i class="no-highlight">102</i>&nbsp;
+<i class="no-highlight">103</i>&nbsp;    /**
+<i class="no-highlight">104</i>&nbsp;     * Sets the &#39;allowNegativesFlag&#39; flag; true to allow negative values
+<i class="no-highlight">105</i>&nbsp;     * in data, false to be able to plot positive values arbitrarily close to
+<i class="no-highlight">106</i>&nbsp;     * zero.
+<i class="no-highlight">107</i>&nbsp;     *
+<i class="no-highlight">108</i>&nbsp;     * @param flgVal  the new value of the flag.
+<i class="no-highlight">109</i>&nbsp;     */
+<i class="no-highlight">110</i>&nbsp;    public void setAllowNegativesFlag(boolean flgVal) {
+<b class="fc"><i class="no-highlight">111</i>&nbsp;        this.allowNegativesFlag = flgVal;</b>
+<i class="no-highlight">112</i>&nbsp;    }
+<i class="no-highlight">113</i>&nbsp;
+<i class="no-highlight">114</i>&nbsp;    /**
+<i class="no-highlight">115</i>&nbsp;     * Returns the &#39;allowNegativesFlag&#39; flag; true to allow negative values
+<i class="no-highlight">116</i>&nbsp;     * in data, false to be able to plot positive values arbitrarily close
+<i class="no-highlight">117</i>&nbsp;     * to zero.
+<i class="no-highlight">118</i>&nbsp;     *
+<i class="no-highlight">119</i>&nbsp;     * @return The flag.
+<i class="no-highlight">120</i>&nbsp;     */
+<i class="no-highlight">121</i>&nbsp;    public boolean getAllowNegativesFlag() {
+<b class="fc"><i class="no-highlight">122</i>&nbsp;        return this.allowNegativesFlag;</b>
+<i class="no-highlight">123</i>&nbsp;    }
+<i class="no-highlight">124</i>&nbsp;
+<i class="no-highlight">125</i>&nbsp;    /**
+<i class="no-highlight">126</i>&nbsp;     * Sets the &#39;strictValuesFlag&#39; flag; if true and &#39;allowNegativesFlag&#39;
+<i class="no-highlight">127</i>&nbsp;     * is false then this axis will throw a runtime exception if any of its
+<i class="no-highlight">128</i>&nbsp;     * values are less than or equal to zero; if false then the axis will
+<i class="no-highlight">129</i>&nbsp;     * adjust for values less than or equal to zero as needed.
+<i class="no-highlight">130</i>&nbsp;     *
+<i class="no-highlight">131</i>&nbsp;     * @param flgVal true for strict enforcement.
+<i class="no-highlight">132</i>&nbsp;     */
+<i class="no-highlight">133</i>&nbsp;    public void setStrictValuesFlag(boolean flgVal) {
+<b class="nc"><i class="no-highlight">134</i>&nbsp;        this.strictValuesFlag = flgVal;</b>
+<i class="no-highlight">135</i>&nbsp;    }
+<i class="no-highlight">136</i>&nbsp;
+<i class="no-highlight">137</i>&nbsp;    /**
+<i class="no-highlight">138</i>&nbsp;     * Returns the &#39;strictValuesFlag&#39; flag; if true and &#39;allowNegativesFlag&#39;
+<i class="no-highlight">139</i>&nbsp;     * is false then this axis will throw a runtime exception if any of its
+<i class="no-highlight">140</i>&nbsp;     * values are less than or equal to zero; if false then the axis will
+<i class="no-highlight">141</i>&nbsp;     * adjust for values less than or equal to zero as needed.
+<i class="no-highlight">142</i>&nbsp;     *
+<i class="no-highlight">143</i>&nbsp;     * @return {@code true} if strict enforcement is enabled.
+<i class="no-highlight">144</i>&nbsp;     */
+<i class="no-highlight">145</i>&nbsp;    public boolean getStrictValuesFlag() {
+<b class="nc"><i class="no-highlight">146</i>&nbsp;        return this.strictValuesFlag;</b>
+<i class="no-highlight">147</i>&nbsp;    }
+<i class="no-highlight">148</i>&nbsp;
+<i class="no-highlight">149</i>&nbsp;    /**
+<i class="no-highlight">150</i>&nbsp;     * Sets the &#39;expTickLabelsFlag&#39; flag.  If the &#39;log10TickLabelsFlag&#39;
+<i class="no-highlight">151</i>&nbsp;     * is false then this will set whether or not &quot;1e#&quot;-style tick labels
+<i class="no-highlight">152</i>&nbsp;     * are used.  The default is to use regular numeric tick labels.
+<i class="no-highlight">153</i>&nbsp;     *
+<i class="no-highlight">154</i>&nbsp;     * @param flgVal true for &quot;1e#&quot;-style tick labels, false for
+<i class="no-highlight">155</i>&nbsp;     * log10 or regular numeric tick labels.
+<i class="no-highlight">156</i>&nbsp;     */
+<i class="no-highlight">157</i>&nbsp;    public void setExpTickLabelsFlag(boolean flgVal) {
+<b class="nc"><i class="no-highlight">158</i>&nbsp;        this.expTickLabelsFlag = flgVal;</b>
+<b class="nc"><i class="no-highlight">159</i>&nbsp;        setupNumberFmtObj();             //setup number formatter obj</b>
+<i class="no-highlight">160</i>&nbsp;    }
+<i class="no-highlight">161</i>&nbsp;
+<i class="no-highlight">162</i>&nbsp;    /**
+<i class="no-highlight">163</i>&nbsp;     * Returns the &#39;expTickLabelsFlag&#39; flag.
+<i class="no-highlight">164</i>&nbsp;     *
+<i class="no-highlight">165</i>&nbsp;     * @return {@code true} for &quot;1e#&quot;-style tick labels,
+<i class="no-highlight">166</i>&nbsp;     *         {@code false} for log10 or regular numeric tick labels.
+<i class="no-highlight">167</i>&nbsp;     */
+<i class="no-highlight">168</i>&nbsp;    public boolean getExpTickLabelsFlag() {
+<b class="nc"><i class="no-highlight">169</i>&nbsp;      return this.expTickLabelsFlag;</b>
+<i class="no-highlight">170</i>&nbsp;    }
+<i class="no-highlight">171</i>&nbsp;
+<i class="no-highlight">172</i>&nbsp;    /**
+<i class="no-highlight">173</i>&nbsp;     * Sets the &#39;log10TickLabelsFlag&#39; flag.  The default value is false.
+<i class="no-highlight">174</i>&nbsp;     *
+<i class="no-highlight">175</i>&nbsp;     * @param flag true for &quot;10^n&quot;-style tick labels, false for &quot;1e#&quot;-style
+<i class="no-highlight">176</i>&nbsp;     * or regular numeric tick labels.
+<i class="no-highlight">177</i>&nbsp;     */
+<i class="no-highlight">178</i>&nbsp;    public void setLog10TickLabelsFlag(boolean flag) {
+<b class="fc"><i class="no-highlight">179</i>&nbsp;        this.log10TickLabelsFlag = flag;</b>
+<i class="no-highlight">180</i>&nbsp;    }
+<i class="no-highlight">181</i>&nbsp;
+<i class="no-highlight">182</i>&nbsp;    /**
+<i class="no-highlight">183</i>&nbsp;     * Returns the &#39;log10TickLabelsFlag&#39; flag.
+<i class="no-highlight">184</i>&nbsp;     *
+<i class="no-highlight">185</i>&nbsp;     * @return {@code true} for &quot;10^n&quot;-style tick labels,
+<i class="no-highlight">186</i>&nbsp;     *         {@code false} for &quot;1e#&quot;-style or regular numeric tick
+<i class="no-highlight">187</i>&nbsp;     *         labels.
+<i class="no-highlight">188</i>&nbsp;     */
+<i class="no-highlight">189</i>&nbsp;    public boolean getLog10TickLabelsFlag() {
+<b class="nc"><i class="no-highlight">190</i>&nbsp;        return this.log10TickLabelsFlag;</b>
+<i class="no-highlight">191</i>&nbsp;    }
+<i class="no-highlight">192</i>&nbsp;
+<i class="no-highlight">193</i>&nbsp;    /**
+<i class="no-highlight">194</i>&nbsp;     * Sets the &#39;autoRangeNextLogFlag&#39; flag.  This determines whether or
+<i class="no-highlight">195</i>&nbsp;     * not the &#39;autoAdjustRange()&#39; method will select the next &quot;10^n&quot;
+<i class="no-highlight">196</i>&nbsp;     * values when determining the upper and lower bounds.  The default
+<i class="no-highlight">197</i>&nbsp;     * value is false.
+<i class="no-highlight">198</i>&nbsp;     *
+<i class="no-highlight">199</i>&nbsp;     * @param flag {@code true} to make the &#39;autoAdjustRange()&#39;
+<i class="no-highlight">200</i>&nbsp;     * method select the next &quot;10^n&quot; values, {@code false} to not.
+<i class="no-highlight">201</i>&nbsp;     */
+<i class="no-highlight">202</i>&nbsp;    public void setAutoRangeNextLogFlag(boolean flag) {
+<b class="nc"><i class="no-highlight">203</i>&nbsp;        this.autoRangeNextLogFlag = flag;</b>
+<i class="no-highlight">204</i>&nbsp;    }
+<i class="no-highlight">205</i>&nbsp;
+<i class="no-highlight">206</i>&nbsp;    /**
+<i class="no-highlight">207</i>&nbsp;     * Returns the &#39;autoRangeNextLogFlag&#39; flag.
+<i class="no-highlight">208</i>&nbsp;     *
+<i class="no-highlight">209</i>&nbsp;     * @return {@code true} if the &#39;autoAdjustRange()&#39; method will
+<i class="no-highlight">210</i>&nbsp;     * select the next &quot;10^n&quot; values, {@code false} if not.
+<i class="no-highlight">211</i>&nbsp;     */
+<i class="no-highlight">212</i>&nbsp;    public boolean getAutoRangeNextLogFlag() {
+<b class="nc"><i class="no-highlight">213</i>&nbsp;        return this.autoRangeNextLogFlag;</b>
+<i class="no-highlight">214</i>&nbsp;    }
+<i class="no-highlight">215</i>&nbsp;
+<i class="no-highlight">216</i>&nbsp;    /**
+<i class="no-highlight">217</i>&nbsp;     * Overridden version that calls original and then sets up flag for
+<i class="no-highlight">218</i>&nbsp;     * log axis processing.
+<i class="no-highlight">219</i>&nbsp;     *
+<i class="no-highlight">220</i>&nbsp;     * @param range  the new range.
+<i class="no-highlight">221</i>&nbsp;     */
+<i class="no-highlight">222</i>&nbsp;    @Override
+<i class="no-highlight">223</i>&nbsp;    public void setRange(Range range) {
+<b class="fc"><i class="no-highlight">224</i>&nbsp;        super.setRange(range);      // call parent method</b>
+<b class="fc"><i class="no-highlight">225</i>&nbsp;        setupSmallLogFlag();        // setup flag based on bounds values</b>
+<i class="no-highlight">226</i>&nbsp;    }
+<i class="no-highlight">227</i>&nbsp;
+<i class="no-highlight">228</i>&nbsp;    /**
+<i class="no-highlight">229</i>&nbsp;     * Sets up flag for log axis processing.  Set true if negative values
+<i class="no-highlight">230</i>&nbsp;     * not allowed and the lower bound is between 0 and 10.
+<i class="no-highlight">231</i>&nbsp;     */
+<i class="no-highlight">232</i>&nbsp;    protected void setupSmallLogFlag() {
+<i class="no-highlight">233</i>&nbsp;        // set flag true if negative values not allowed and the
+<i class="no-highlight">234</i>&nbsp;        // lower bound is between 0 and 10:
+<b class="fc"><i class="no-highlight">235</i>&nbsp;        double lowerVal = getRange().getLowerBound();</b>
+<b class="fc"><i class="no-highlight">236</i>&nbsp;        this.smallLogFlag = (!this.allowNegativesFlag &amp;&amp; lowerVal &lt; 10.0</b>
+<i class="no-highlight">237</i>&nbsp;                &amp;&amp; lowerVal &gt; 0.0);
+<i class="no-highlight">238</i>&nbsp;    }
+<i class="no-highlight">239</i>&nbsp;
+<i class="no-highlight">240</i>&nbsp;    /**
+<i class="no-highlight">241</i>&nbsp;     * Sets up the number formatter object according to the
+<i class="no-highlight">242</i>&nbsp;     * &#39;expTickLabelsFlag&#39; flag.
+<i class="no-highlight">243</i>&nbsp;     */
+<i class="no-highlight">244</i>&nbsp;    protected void setupNumberFmtObj() {
+<b class="fc"><i class="no-highlight">245</i>&nbsp;        if (this.numberFormatterObj instanceof DecimalFormat) {</b>
+<i class="no-highlight">246</i>&nbsp;            //setup for &quot;1e#&quot;-style tick labels or regular
+<i class="no-highlight">247</i>&nbsp;            // numeric tick labels, depending on flag:
+<b class="fc"><i class="no-highlight">248</i>&nbsp;            ((DecimalFormat) this.numberFormatterObj).applyPattern(</b>
+<b class="fc"><i class="no-highlight">249</i>&nbsp;                    this.expTickLabelsFlag ? &quot;0E0&quot; : &quot;0.###&quot;);</b>
+<i class="no-highlight">250</i>&nbsp;        }
+<i class="no-highlight">251</i>&nbsp;    }
+<i class="no-highlight">252</i>&nbsp;
+<i class="no-highlight">253</i>&nbsp;    /**
+<i class="no-highlight">254</i>&nbsp;     * Returns the log10 value, depending on if values between 0 and
+<i class="no-highlight">255</i>&nbsp;     * 1 are being plotted.  If negative values are not allowed and
+<i class="no-highlight">256</i>&nbsp;     * the lower bound is between 0 and 10 then a normal log is
+<i class="no-highlight">257</i>&nbsp;     * returned; otherwise the returned value is adjusted if the
+<i class="no-highlight">258</i>&nbsp;     * given value is less than 10.
+<i class="no-highlight">259</i>&nbsp;     *
+<i class="no-highlight">260</i>&nbsp;     * @param val the value.
+<i class="no-highlight">261</i>&nbsp;     *
+<i class="no-highlight">262</i>&nbsp;     * @return log&lt;sub&gt;10&lt;/sub&gt;(val).
+<i class="no-highlight">263</i>&nbsp;     *
+<i class="no-highlight">264</i>&nbsp;     * @see #switchedPow10(double)
+<i class="no-highlight">265</i>&nbsp;     */
+<i class="no-highlight">266</i>&nbsp;    protected double switchedLog10(double val) {
+<b class="fc"><i class="no-highlight">267</i>&nbsp;        return this.smallLogFlag ? Math.log(val)</b>
+<b class="fc"><i class="no-highlight">268</i>&nbsp;                / LOG10_VALUE : adjustedLog10(val);</b>
+<i class="no-highlight">269</i>&nbsp;    }
+<i class="no-highlight">270</i>&nbsp;
+<i class="no-highlight">271</i>&nbsp;    /**
+<i class="no-highlight">272</i>&nbsp;     * Returns a power of 10, depending on if values between 0 and
+<i class="no-highlight">273</i>&nbsp;     * 1 are being plotted.  If negative values are not allowed and
+<i class="no-highlight">274</i>&nbsp;     * the lower bound is between 0 and 10 then a normal power is
+<i class="no-highlight">275</i>&nbsp;     * returned; otherwise the returned value is adjusted if the
+<i class="no-highlight">276</i>&nbsp;     * given value is less than 1.
+<i class="no-highlight">277</i>&nbsp;     *
+<i class="no-highlight">278</i>&nbsp;     * @param val the value.
+<i class="no-highlight">279</i>&nbsp;     *
+<i class="no-highlight">280</i>&nbsp;     * @return 10&lt;sup&gt;val&lt;/sup&gt;.
+<i class="no-highlight">281</i>&nbsp;     * 
+<i class="no-highlight">282</i>&nbsp;     * @see #switchedLog10(double)
+<i class="no-highlight">283</i>&nbsp;     */
+<i class="no-highlight">284</i>&nbsp;    public double switchedPow10(double val) {
+<b class="fc"><i class="no-highlight">285</i>&nbsp;        return this.smallLogFlag ? Math.pow(10.0, val) : adjustedPow10(val);</b>
+<i class="no-highlight">286</i>&nbsp;    }
+<i class="no-highlight">287</i>&nbsp;
+<i class="no-highlight">288</i>&nbsp;    /**
+<i class="no-highlight">289</i>&nbsp;     * Returns an adjusted log10 value for graphing purposes.  The first
+<i class="no-highlight">290</i>&nbsp;     * adjustment is that negative values are changed to positive during
+<i class="no-highlight">291</i>&nbsp;     * the calculations, and then the answer is negated at the end.  The
+<i class="no-highlight">292</i>&nbsp;     * second is that, for values less than 10, an increasingly large
+<i class="no-highlight">293</i>&nbsp;     * (0 to 1) scaling factor is added such that at 0 the value is
+<i class="no-highlight">294</i>&nbsp;     * adjusted to 1, resulting in a returned result of 0.
+<i class="no-highlight">295</i>&nbsp;     *
+<i class="no-highlight">296</i>&nbsp;     * @param val  value for which log10 should be calculated.
+<i class="no-highlight">297</i>&nbsp;     *
+<i class="no-highlight">298</i>&nbsp;     * @return An adjusted log&lt;sub&gt;10&lt;/sub&gt;(val).
+<i class="no-highlight">299</i>&nbsp;     *
+<i class="no-highlight">300</i>&nbsp;     * @see #adjustedPow10(double)
+<i class="no-highlight">301</i>&nbsp;     */
+<i class="no-highlight">302</i>&nbsp;    public double adjustedLog10(double val) {
+<b class="fc"><i class="no-highlight">303</i>&nbsp;        boolean negFlag = (val &lt; 0.0);</b>
+<b class="fc"><i class="no-highlight">304</i>&nbsp;        if (negFlag) {</b>
+<b class="nc"><i class="no-highlight">305</i>&nbsp;            val = -val;          // if negative then set flag and make positive</b>
+<i class="no-highlight">306</i>&nbsp;        }
+<b class="fc"><i class="no-highlight">307</i>&nbsp;        if (val &lt; 10.0) {                // if &lt; 10 then</b>
+<b class="fc"><i class="no-highlight">308</i>&nbsp;            val += (10.0 - val) / 10.0;  //increase so 0 translates to 0</b>
+<i class="no-highlight">309</i>&nbsp;        }
+<i class="no-highlight">310</i>&nbsp;        //return value; negate if original value was negative:
+<b class="fc"><i class="no-highlight">311</i>&nbsp;        double res = Math.log(val) / LOG10_VALUE;</b>
+<b class="fc"><i class="no-highlight">312</i>&nbsp;        return negFlag ? (-res) : res;</b>
+<i class="no-highlight">313</i>&nbsp;    }
+<i class="no-highlight">314</i>&nbsp;
+<i class="no-highlight">315</i>&nbsp;    /**
+<i class="no-highlight">316</i>&nbsp;     * Returns an adjusted power of 10 value for graphing purposes.  The first
+<i class="no-highlight">317</i>&nbsp;     * adjustment is that negative values are changed to positive during
+<i class="no-highlight">318</i>&nbsp;     * the calculations, and then the answer is negated at the end.  The
+<i class="no-highlight">319</i>&nbsp;     * second is that, for values less than 1, a progressive logarithmic
+<i class="no-highlight">320</i>&nbsp;     * offset is subtracted such that at 0 the returned result is also 0.
+<i class="no-highlight">321</i>&nbsp;     *
+<i class="no-highlight">322</i>&nbsp;     * @param val  value for which power of 10 should be calculated.
+<i class="no-highlight">323</i>&nbsp;     *
+<i class="no-highlight">324</i>&nbsp;     * @return An adjusted 10&lt;sup&gt;val&lt;/sup&gt;.
+<i class="no-highlight">325</i>&nbsp;     * 
+<i class="no-highlight">326</i>&nbsp;     * @see #adjustedLog10(double)
+<i class="no-highlight">327</i>&nbsp;     */
+<i class="no-highlight">328</i>&nbsp;    public double adjustedPow10(double val) {
+<b class="fc"><i class="no-highlight">329</i>&nbsp;        boolean negFlag = (val &lt; 0.0);</b>
+<b class="fc"><i class="no-highlight">330</i>&nbsp;        if (negFlag) {</b>
+<b class="nc"><i class="no-highlight">331</i>&nbsp;            val = -val; // if negative then set flag and make positive</b>
+<i class="no-highlight">332</i>&nbsp;        }
+<i class="no-highlight">333</i>&nbsp;        double res;
+<b class="fc"><i class="no-highlight">334</i>&nbsp;        if (val &lt; 1.0) {</b>
+<b class="fc"><i class="no-highlight">335</i>&nbsp;            res = (Math.pow(10, val + 1.0) - 10.0) / 9.0; //invert adjustLog10</b>
+<i class="no-highlight">336</i>&nbsp;        }
+<i class="no-highlight">337</i>&nbsp;        else {
+<b class="fc"><i class="no-highlight">338</i>&nbsp;            res = Math.pow(10, val);</b>
+<i class="no-highlight">339</i>&nbsp;        }
+<b class="fc"><i class="no-highlight">340</i>&nbsp;        return negFlag ? (-res) : res;</b>
+<i class="no-highlight">341</i>&nbsp;    }
+<i class="no-highlight">342</i>&nbsp;
+<i class="no-highlight">343</i>&nbsp;    /**
+<i class="no-highlight">344</i>&nbsp;     * Returns the largest (closest to positive infinity) double value that is
+<i class="no-highlight">345</i>&nbsp;     * not greater than the argument, is equal to a mathematical integer and
+<i class="no-highlight">346</i>&nbsp;     * satisfying the condition that log base 10 of the value is an integer
+<i class="no-highlight">347</i>&nbsp;     * (i.e., the value returned will be a power of 10: 1, 10, 100, 1000, etc.).
+<i class="no-highlight">348</i>&nbsp;     *
+<i class="no-highlight">349</i>&nbsp;     * @param lower a double value below which a floor will be calcualted.
+<i class="no-highlight">350</i>&nbsp;     *
+<i class="no-highlight">351</i>&nbsp;     * @return 10&lt;sup&gt;N&lt;/sup&gt; with N .. { 1 ... }
+<i class="no-highlight">352</i>&nbsp;     */
+<i class="no-highlight">353</i>&nbsp;    protected double computeLogFloor(double lower) {
+<i class="no-highlight">354</i>&nbsp;
+<i class="no-highlight">355</i>&nbsp;        double logFloor;
+<b class="nc"><i class="no-highlight">356</i>&nbsp;        if (this.allowNegativesFlag) {</b>
+<i class="no-highlight">357</i>&nbsp;            //negative values are allowed
+<b class="nc"><i class="no-highlight">358</i>&nbsp;            if (lower &gt; 10.0) {   //parameter value is &gt; 10</b>
+<i class="no-highlight">359</i>&nbsp;                // The Math.log() function is based on e not 10.
+<b class="nc"><i class="no-highlight">360</i>&nbsp;                logFloor = Math.log(lower) / LOG10_VALUE;</b>
+<b class="nc"><i class="no-highlight">361</i>&nbsp;                logFloor = Math.floor(logFloor);</b>
+<b class="nc"><i class="no-highlight">362</i>&nbsp;                logFloor = Math.pow(10, logFloor);</b>
+<i class="no-highlight">363</i>&nbsp;            }
+<b class="nc"><i class="no-highlight">364</i>&nbsp;            else if (lower &lt; -10.0) {   //parameter value is &lt; -10</b>
+<i class="no-highlight">365</i>&nbsp;                //calculate log using positive value:
+<b class="nc"><i class="no-highlight">366</i>&nbsp;                logFloor = Math.log(-lower) / LOG10_VALUE;</b>
+<i class="no-highlight">367</i>&nbsp;                //calculate floor using negative value:
+<b class="nc"><i class="no-highlight">368</i>&nbsp;                logFloor = Math.floor(-logFloor);</b>
+<i class="no-highlight">369</i>&nbsp;                //calculate power using positive value; then negate
+<b class="nc"><i class="no-highlight">370</i>&nbsp;                logFloor = -Math.pow(10, -logFloor);</b>
+<i class="no-highlight">371</i>&nbsp;            }
+<i class="no-highlight">372</i>&nbsp;            else {
+<i class="no-highlight">373</i>&nbsp;                //parameter value is -10 &gt; val &lt; 10
+<b class="nc"><i class="no-highlight">374</i>&nbsp;                logFloor = Math.floor(lower);   //use as-is</b>
+<i class="no-highlight">375</i>&nbsp;            }
+<i class="no-highlight">376</i>&nbsp;        }
+<i class="no-highlight">377</i>&nbsp;        else {
+<i class="no-highlight">378</i>&nbsp;            //negative values not allowed
+<b class="nc"><i class="no-highlight">379</i>&nbsp;            if (lower &gt; 0.0) {   //parameter value is &gt; 0</b>
+<i class="no-highlight">380</i>&nbsp;                // The Math.log() function is based on e not 10.
+<b class="nc"><i class="no-highlight">381</i>&nbsp;                logFloor = Math.log(lower) / LOG10_VALUE;</b>
+<b class="nc"><i class="no-highlight">382</i>&nbsp;                logFloor = Math.floor(logFloor);</b>
+<b class="nc"><i class="no-highlight">383</i>&nbsp;                logFloor = Math.pow(10, logFloor);</b>
+<i class="no-highlight">384</i>&nbsp;            }
+<i class="no-highlight">385</i>&nbsp;            else {
+<i class="no-highlight">386</i>&nbsp;                //parameter value is &lt;= 0
+<b class="nc"><i class="no-highlight">387</i>&nbsp;                logFloor = Math.floor(lower);   //use as-is</b>
+<i class="no-highlight">388</i>&nbsp;            }
+<i class="no-highlight">389</i>&nbsp;        }
+<b class="nc"><i class="no-highlight">390</i>&nbsp;        return logFloor;</b>
+<i class="no-highlight">391</i>&nbsp;    }
+<i class="no-highlight">392</i>&nbsp;
+<i class="no-highlight">393</i>&nbsp;    /**
+<i class="no-highlight">394</i>&nbsp;     * Returns the smallest (closest to negative infinity) double value that is
+<i class="no-highlight">395</i>&nbsp;     * not less than the argument, is equal to a mathematical integer and
+<i class="no-highlight">396</i>&nbsp;     * satisfying the condition that log base 10 of the value is an integer
+<i class="no-highlight">397</i>&nbsp;     * (i.e., the value returned will be a power of 10: 1, 10, 100, 1000, etc.).
+<i class="no-highlight">398</i>&nbsp;     *
+<i class="no-highlight">399</i>&nbsp;     * @param upper a double value above which a ceiling will be calcualted.
+<i class="no-highlight">400</i>&nbsp;     *
+<i class="no-highlight">401</i>&nbsp;     * @return 10&lt;sup&gt;N&lt;/sup&gt; with N .. { 1 ... }
+<i class="no-highlight">402</i>&nbsp;     */
+<i class="no-highlight">403</i>&nbsp;    protected double computeLogCeil(double upper) {
+<i class="no-highlight">404</i>&nbsp;
+<i class="no-highlight">405</i>&nbsp;        double logCeil;
+<b class="nc"><i class="no-highlight">406</i>&nbsp;        if (this.allowNegativesFlag) {</b>
+<i class="no-highlight">407</i>&nbsp;            //negative values are allowed
+<b class="nc"><i class="no-highlight">408</i>&nbsp;            if (upper &gt; 10.0) {</b>
+<i class="no-highlight">409</i>&nbsp;                //parameter value is &gt; 10
+<i class="no-highlight">410</i>&nbsp;                // The Math.log() function is based on e not 10.
+<b class="nc"><i class="no-highlight">411</i>&nbsp;                logCeil = Math.log(upper) / LOG10_VALUE;</b>
+<b class="nc"><i class="no-highlight">412</i>&nbsp;                logCeil = Math.ceil(logCeil);</b>
+<b class="nc"><i class="no-highlight">413</i>&nbsp;                logCeil = Math.pow(10, logCeil);</b>
+<i class="no-highlight">414</i>&nbsp;            }
+<b class="nc"><i class="no-highlight">415</i>&nbsp;            else if (upper &lt; -10.0) {</b>
+<i class="no-highlight">416</i>&nbsp;                //parameter value is &lt; -10
+<i class="no-highlight">417</i>&nbsp;                //calculate log using positive value:
+<b class="nc"><i class="no-highlight">418</i>&nbsp;                logCeil = Math.log(-upper) / LOG10_VALUE;</b>
+<i class="no-highlight">419</i>&nbsp;                //calculate ceil using negative value:
+<b class="nc"><i class="no-highlight">420</i>&nbsp;                logCeil = Math.ceil(-logCeil);</b>
+<i class="no-highlight">421</i>&nbsp;                //calculate power using positive value; then negate
+<b class="nc"><i class="no-highlight">422</i>&nbsp;                logCeil = -Math.pow(10, -logCeil);</b>
+<i class="no-highlight">423</i>&nbsp;            }
+<i class="no-highlight">424</i>&nbsp;            else {
+<i class="no-highlight">425</i>&nbsp;               //parameter value is -10 &gt; val &lt; 10
+<b class="nc"><i class="no-highlight">426</i>&nbsp;               logCeil = Math.ceil(upper);     //use as-is</b>
+<i class="no-highlight">427</i>&nbsp;            }
+<i class="no-highlight">428</i>&nbsp;        }
+<i class="no-highlight">429</i>&nbsp;        else {
+<i class="no-highlight">430</i>&nbsp;            //negative values not allowed
+<b class="nc"><i class="no-highlight">431</i>&nbsp;            if (upper &gt; 0.0) {</b>
+<i class="no-highlight">432</i>&nbsp;                //parameter value is &gt; 0
+<i class="no-highlight">433</i>&nbsp;                // The Math.log() function is based on e not 10.
+<b class="nc"><i class="no-highlight">434</i>&nbsp;                logCeil = Math.log(upper) / LOG10_VALUE;</b>
+<b class="nc"><i class="no-highlight">435</i>&nbsp;                logCeil = Math.ceil(logCeil);</b>
+<b class="nc"><i class="no-highlight">436</i>&nbsp;                logCeil = Math.pow(10, logCeil);</b>
+<i class="no-highlight">437</i>&nbsp;            }
+<i class="no-highlight">438</i>&nbsp;            else {
+<i class="no-highlight">439</i>&nbsp;                //parameter value is &lt;= 0
+<b class="nc"><i class="no-highlight">440</i>&nbsp;                logCeil = Math.ceil(upper);     //use as-is</b>
+<i class="no-highlight">441</i>&nbsp;            }
+<i class="no-highlight">442</i>&nbsp;        }
+<b class="nc"><i class="no-highlight">443</i>&nbsp;        return logCeil;</b>
+<i class="no-highlight">444</i>&nbsp;    }
+<i class="no-highlight">445</i>&nbsp;
+<i class="no-highlight">446</i>&nbsp;    /**
+<i class="no-highlight">447</i>&nbsp;     * Rescales the axis to ensure that all data is visible.
+<i class="no-highlight">448</i>&nbsp;     */
+<i class="no-highlight">449</i>&nbsp;    @Override
+<i class="no-highlight">450</i>&nbsp;    public void autoAdjustRange() {
+<i class="no-highlight">451</i>&nbsp;
+<b class="fc"><i class="no-highlight">452</i>&nbsp;        Plot plot = getPlot();</b>
+<b class="fc"><i class="no-highlight">453</i>&nbsp;        if (plot == null) {</b>
+<i class="no-highlight">454</i>&nbsp;            return;  // no plot, no data.
+<i class="no-highlight">455</i>&nbsp;        }
+<i class="no-highlight">456</i>&nbsp;
+<b class="nc"><i class="no-highlight">457</i>&nbsp;        if (plot instanceof ValueAxisPlot) {</b>
+<b class="nc"><i class="no-highlight">458</i>&nbsp;            ValueAxisPlot vap = (ValueAxisPlot) plot;</b>
+<i class="no-highlight">459</i>&nbsp;
+<i class="no-highlight">460</i>&nbsp;            double lower;
+<b class="nc"><i class="no-highlight">461</i>&nbsp;            Range r = vap.getDataRange(this);</b>
+<b class="nc"><i class="no-highlight">462</i>&nbsp;            if (r == null) {</b>
+<i class="no-highlight">463</i>&nbsp;                   //no real data present
+<b class="nc"><i class="no-highlight">464</i>&nbsp;                r = getDefaultAutoRange();</b>
+<b class="nc"><i class="no-highlight">465</i>&nbsp;                lower = r.getLowerBound();    //get lower bound value</b>
+<i class="no-highlight">466</i>&nbsp;            }
+<i class="no-highlight">467</i>&nbsp;            else {
+<i class="no-highlight">468</i>&nbsp;                //actual data is present
+<b class="nc"><i class="no-highlight">469</i>&nbsp;                lower = r.getLowerBound();    //get lower bound value</b>
+<b class="nc"><i class="no-highlight">470</i>&nbsp;                if (this.strictValuesFlag</b>
+<i class="no-highlight">471</i>&nbsp;                        &amp;&amp; !this.allowNegativesFlag &amp;&amp; lower &lt;= 0.0) {
+<i class="no-highlight">472</i>&nbsp;                    //strict flag set, allow-negatives not set and values &lt;= 0
+<b class="nc"><i class="no-highlight">473</i>&nbsp;                    throw new RuntimeException(&quot;Values less than or equal to &quot;</b>
+<i class="no-highlight">474</i>&nbsp;                            + &quot;zero not allowed with logarithmic axis&quot;);
+<i class="no-highlight">475</i>&nbsp;                }
+<i class="no-highlight">476</i>&nbsp;            }
+<i class="no-highlight">477</i>&nbsp;
+<i class="no-highlight">478</i>&nbsp;            //apply lower margin by decreasing lower bound:
+<i class="no-highlight">479</i>&nbsp;            final double lowerMargin;
+<b class="nc"><i class="no-highlight">480</i>&nbsp;            if (lower &gt; 0.0 &amp;&amp; (lowerMargin = getLowerMargin()) &gt; 0.0) {</b>
+<i class="no-highlight">481</i>&nbsp;                   //lower bound and margin OK; get log10 of lower bound
+<b class="nc"><i class="no-highlight">482</i>&nbsp;                final double logLower = (Math.log(lower) / LOG10_VALUE);</b>
+<i class="no-highlight">483</i>&nbsp;                double logAbs;      //get absolute value of log10 value
+<b class="nc"><i class="no-highlight">484</i>&nbsp;                if ((logAbs = Math.abs(logLower)) &lt; 1.0) {</b>
+<b class="nc"><i class="no-highlight">485</i>&nbsp;                    logAbs = 1.0;     //if less than 1.0 then make it 1.0</b>
+<i class="no-highlight">486</i>&nbsp;                }              //subtract out margin and get exponential value:
+<b class="nc"><i class="no-highlight">487</i>&nbsp;                lower = Math.pow(10, (logLower - (logAbs * lowerMargin)));</b>
+<i class="no-highlight">488</i>&nbsp;            }
+<i class="no-highlight">489</i>&nbsp;
+<i class="no-highlight">490</i>&nbsp;            //if flag then change to log version of lowest value
+<i class="no-highlight">491</i>&nbsp;            // to make range begin at a 10^n value:
+<b class="nc"><i class="no-highlight">492</i>&nbsp;            if (this.autoRangeNextLogFlag) {</b>
+<b class="nc"><i class="no-highlight">493</i>&nbsp;                lower = computeLogFloor(lower);</b>
+<i class="no-highlight">494</i>&nbsp;            }
+<i class="no-highlight">495</i>&nbsp;
+<b class="nc"><i class="no-highlight">496</i>&nbsp;            if (!this.allowNegativesFlag &amp;&amp; lower &gt;= 0.0</b>
+<i class="no-highlight">497</i>&nbsp;                    &amp;&amp; lower &lt; SMALL_LOG_VALUE) {
+<i class="no-highlight">498</i>&nbsp;                //negatives not allowed and lower range bound is zero
+<b class="nc"><i class="no-highlight">499</i>&nbsp;                lower = r.getLowerBound();    //use data range bound instead</b>
+<i class="no-highlight">500</i>&nbsp;            }
+<i class="no-highlight">501</i>&nbsp;
+<b class="nc"><i class="no-highlight">502</i>&nbsp;            double upper = r.getUpperBound();</b>
+<i class="no-highlight">503</i>&nbsp;
+<i class="no-highlight">504</i>&nbsp;             //apply upper margin by increasing upper bound:
+<i class="no-highlight">505</i>&nbsp;            final double upperMargin;
+<b class="nc"><i class="no-highlight">506</i>&nbsp;            if (upper &gt; 0.0 &amp;&amp; (upperMargin = getUpperMargin()) &gt; 0.0) {</b>
+<i class="no-highlight">507</i>&nbsp;                   //upper bound and margin OK; get log10 of upper bound
+<b class="nc"><i class="no-highlight">508</i>&nbsp;                final double logUpper = (Math.log(upper) / LOG10_VALUE);</b>
+<i class="no-highlight">509</i>&nbsp;                double logAbs;      //get absolute value of log10 value
+<b class="nc"><i class="no-highlight">510</i>&nbsp;                if ((logAbs = Math.abs(logUpper)) &lt; 1.0) {</b>
+<b class="nc"><i class="no-highlight">511</i>&nbsp;                    logAbs = 1.0;     //if less than 1.0 then make it 1.0</b>
+<i class="no-highlight">512</i>&nbsp;                }              //add in margin and get exponential value:
+<b class="nc"><i class="no-highlight">513</i>&nbsp;                upper = Math.pow(10, (logUpper + (logAbs * upperMargin)));</b>
+<i class="no-highlight">514</i>&nbsp;            }
+<i class="no-highlight">515</i>&nbsp;
+<b class="nc"><i class="no-highlight">516</i>&nbsp;            if (!this.allowNegativesFlag &amp;&amp; upper &lt; 1.0 &amp;&amp; upper &gt; 0.0</b>
+<i class="no-highlight">517</i>&nbsp;                    &amp;&amp; lower &gt; 0.0) {
+<i class="no-highlight">518</i>&nbsp;                //negatives not allowed and upper bound between 0 &amp; 1
+<i class="no-highlight">519</i>&nbsp;                //round up to nearest significant digit for bound:
+<i class="no-highlight">520</i>&nbsp;                //get negative exponent:
+<b class="nc"><i class="no-highlight">521</i>&nbsp;                double expVal = Math.log(upper) / LOG10_VALUE;</b>
+<b class="nc"><i class="no-highlight">522</i>&nbsp;                expVal = Math.ceil(-expVal + 0.001); //get positive exponent</b>
+<b class="nc"><i class="no-highlight">523</i>&nbsp;                expVal = Math.pow(10, expVal);      //create multiplier value</b>
+<i class="no-highlight">524</i>&nbsp;                //multiply, round up, and divide for bound value:
+<b class="nc"><i class="no-highlight">525</i>&nbsp;                upper = (expVal &gt; 0.0) ? Math.ceil(upper * expVal) / expVal</b>
+<b class="nc"><i class="no-highlight">526</i>&nbsp;                    : Math.ceil(upper);</b>
+<b class="nc"><i class="no-highlight">527</i>&nbsp;            }</b>
+<i class="no-highlight">528</i>&nbsp;            else {
+<i class="no-highlight">529</i>&nbsp;                //negatives allowed or upper bound not between 0 &amp; 1
+<i class="no-highlight">530</i>&nbsp;                //if flag then change to log version of highest value to
+<i class="no-highlight">531</i>&nbsp;                // make range begin at a 10^n value; else use nearest int
+<b class="nc"><i class="no-highlight">532</i>&nbsp;                upper = (this.autoRangeNextLogFlag) ? computeLogCeil(upper)</b>
+<b class="nc"><i class="no-highlight">533</i>&nbsp;                    : Math.ceil(upper);</b>
+<i class="no-highlight">534</i>&nbsp;            }
+<i class="no-highlight">535</i>&nbsp;            // ensure the autorange is at least &lt;minRange&gt; in size...
+<b class="nc"><i class="no-highlight">536</i>&nbsp;            double minRange = getAutoRangeMinimumSize();</b>
+<b class="nc"><i class="no-highlight">537</i>&nbsp;            if (upper - lower &lt; minRange) {</b>
+<b class="nc"><i class="no-highlight">538</i>&nbsp;                upper = (upper + lower + minRange) / 2;</b>
+<b class="nc"><i class="no-highlight">539</i>&nbsp;                lower = (upper + lower - minRange) / 2;</b>
+<i class="no-highlight">540</i>&nbsp;                //if autorange still below minimum then adjust by 1%
+<i class="no-highlight">541</i>&nbsp;                // (can be needed when minRange is very small):
+<b class="nc"><i class="no-highlight">542</i>&nbsp;                if (upper - lower &lt; minRange) {</b>
+<b class="nc"><i class="no-highlight">543</i>&nbsp;                    double absUpper = Math.abs(upper);</b>
+<i class="no-highlight">544</i>&nbsp;                    //need to account for case where upper==0.0
+<b class="nc"><i class="no-highlight">545</i>&nbsp;                    double adjVal = (absUpper &gt; SMALL_LOG_VALUE) ? absUpper</b>
+<b class="nc"><i class="no-highlight">546</i>&nbsp;                        / 100.0 : 0.01;</b>
+<b class="nc"><i class="no-highlight">547</i>&nbsp;                    upper = (upper + lower + adjVal) / 2;</b>
+<b class="nc"><i class="no-highlight">548</i>&nbsp;                    lower = (upper + lower - adjVal) / 2;</b>
+<i class="no-highlight">549</i>&nbsp;                }
+<i class="no-highlight">550</i>&nbsp;            }
+<i class="no-highlight">551</i>&nbsp;
+<b class="nc"><i class="no-highlight">552</i>&nbsp;            setRange(new Range(lower, upper), false, false);</b>
+<b class="nc"><i class="no-highlight">553</i>&nbsp;            setupSmallLogFlag();       //setup flag based on bounds values</b>
+<i class="no-highlight">554</i>&nbsp;        }
+<i class="no-highlight">555</i>&nbsp;    }
+<i class="no-highlight">556</i>&nbsp;
+<i class="no-highlight">557</i>&nbsp;    /**
+<i class="no-highlight">558</i>&nbsp;     * Converts a data value to a coordinate in Java2D space, assuming that
+<i class="no-highlight">559</i>&nbsp;     * the axis runs along one edge of the specified plotArea.
+<i class="no-highlight">560</i>&nbsp;     * Note that it is possible for the coordinate to fall outside the
+<i class="no-highlight">561</i>&nbsp;     * plotArea.
+<i class="no-highlight">562</i>&nbsp;     *
+<i class="no-highlight">563</i>&nbsp;     * @param value  the data value.
+<i class="no-highlight">564</i>&nbsp;     * @param plotArea  the area for plotting the data.
+<i class="no-highlight">565</i>&nbsp;     * @param edge  the axis location.
+<i class="no-highlight">566</i>&nbsp;     *
+<i class="no-highlight">567</i>&nbsp;     * @return The Java2D coordinate.
+<i class="no-highlight">568</i>&nbsp;     */
+<i class="no-highlight">569</i>&nbsp;    @Override
+<i class="no-highlight">570</i>&nbsp;    public double valueToJava2D(double value, Rectangle2D plotArea,
+<i class="no-highlight">571</i>&nbsp;                                RectangleEdge edge) {
+<i class="no-highlight">572</i>&nbsp;
+<b class="fc"><i class="no-highlight">573</i>&nbsp;        Range range = getRange();</b>
+<b class="fc"><i class="no-highlight">574</i>&nbsp;        double axisMin = switchedLog10(range.getLowerBound());</b>
+<b class="fc"><i class="no-highlight">575</i>&nbsp;        double axisMax = switchedLog10(range.getUpperBound());</b>
+<i class="no-highlight">576</i>&nbsp;
+<b class="fc"><i class="no-highlight">577</i>&nbsp;        double min = 0.0;</b>
+<b class="fc"><i class="no-highlight">578</i>&nbsp;        double max = 0.0;</b>
+<b class="fc"><i class="no-highlight">579</i>&nbsp;        if (RectangleEdge.isTopOrBottom(edge)) {</b>
+<b class="fc"><i class="no-highlight">580</i>&nbsp;            min = plotArea.getMinX();</b>
+<b class="fc"><i class="no-highlight">581</i>&nbsp;            max = plotArea.getMaxX();</b>
+<i class="no-highlight">582</i>&nbsp;        }
+<b class="nc"><i class="no-highlight">583</i>&nbsp;        else if (RectangleEdge.isLeftOrRight(edge)) {</b>
+<b class="nc"><i class="no-highlight">584</i>&nbsp;            min = plotArea.getMaxY();</b>
+<b class="nc"><i class="no-highlight">585</i>&nbsp;            max = plotArea.getMinY();</b>
+<i class="no-highlight">586</i>&nbsp;        }
+<i class="no-highlight">587</i>&nbsp;
+<b class="fc"><i class="no-highlight">588</i>&nbsp;        value = switchedLog10(value);</b>
+<i class="no-highlight">589</i>&nbsp;
+<b class="fc"><i class="no-highlight">590</i>&nbsp;        if (isInverted()) {</b>
+<b class="nc"><i class="no-highlight">591</i>&nbsp;            return max - (((value - axisMin) / (axisMax - axisMin))</b>
+<i class="no-highlight">592</i>&nbsp;                    * (max - min));
+<i class="no-highlight">593</i>&nbsp;        }
+<i class="no-highlight">594</i>&nbsp;        else {
+<b class="fc"><i class="no-highlight">595</i>&nbsp;            return min + (((value - axisMin) / (axisMax - axisMin))</b>
+<i class="no-highlight">596</i>&nbsp;                    * (max - min));
+<i class="no-highlight">597</i>&nbsp;        }
+<i class="no-highlight">598</i>&nbsp;
+<i class="no-highlight">599</i>&nbsp;    }
+<i class="no-highlight">600</i>&nbsp;
+<i class="no-highlight">601</i>&nbsp;    /**
+<i class="no-highlight">602</i>&nbsp;     * Converts a coordinate in Java2D space to the corresponding data
+<i class="no-highlight">603</i>&nbsp;     * value, assuming that the axis runs along one edge of the specified
+<i class="no-highlight">604</i>&nbsp;     * plotArea.
+<i class="no-highlight">605</i>&nbsp;     *
+<i class="no-highlight">606</i>&nbsp;     * @param java2DValue  the coordinate in Java2D space.
+<i class="no-highlight">607</i>&nbsp;     * @param plotArea  the area in which the data is plotted.
+<i class="no-highlight">608</i>&nbsp;     * @param edge  the axis location.
+<i class="no-highlight">609</i>&nbsp;     *
+<i class="no-highlight">610</i>&nbsp;     * @return The data value.
+<i class="no-highlight">611</i>&nbsp;     */
+<i class="no-highlight">612</i>&nbsp;    @Override
+<i class="no-highlight">613</i>&nbsp;    public double java2DToValue(double java2DValue, Rectangle2D plotArea,
+<i class="no-highlight">614</i>&nbsp;                                RectangleEdge edge) {
+<i class="no-highlight">615</i>&nbsp;
+<b class="fc"><i class="no-highlight">616</i>&nbsp;        Range range = getRange();</b>
+<b class="fc"><i class="no-highlight">617</i>&nbsp;        double axisMin = switchedLog10(range.getLowerBound());</b>
+<b class="fc"><i class="no-highlight">618</i>&nbsp;        double axisMax = switchedLog10(range.getUpperBound());</b>
+<i class="no-highlight">619</i>&nbsp;
+<b class="fc"><i class="no-highlight">620</i>&nbsp;        double plotMin = 0.0;</b>
+<b class="fc"><i class="no-highlight">621</i>&nbsp;        double plotMax = 0.0;</b>
+<b class="fc"><i class="no-highlight">622</i>&nbsp;        if (RectangleEdge.isTopOrBottom(edge)) {</b>
+<b class="fc"><i class="no-highlight">623</i>&nbsp;            plotMin = plotArea.getX();</b>
+<b class="fc"><i class="no-highlight">624</i>&nbsp;            plotMax = plotArea.getMaxX();</b>
+<i class="no-highlight">625</i>&nbsp;        }
+<b class="nc"><i class="no-highlight">626</i>&nbsp;        else if (RectangleEdge.isLeftOrRight(edge)) {</b>
+<b class="nc"><i class="no-highlight">627</i>&nbsp;            plotMin = plotArea.getMaxY();</b>
+<b class="nc"><i class="no-highlight">628</i>&nbsp;            plotMax = plotArea.getMinY();</b>
+<i class="no-highlight">629</i>&nbsp;        }
+<i class="no-highlight">630</i>&nbsp;
+<b class="fc"><i class="no-highlight">631</i>&nbsp;        if (isInverted()) {</b>
+<b class="nc"><i class="no-highlight">632</i>&nbsp;            return switchedPow10(axisMax - ((java2DValue - plotMin)</b>
+<i class="no-highlight">633</i>&nbsp;                    / (plotMax - plotMin)) * (axisMax - axisMin));
+<i class="no-highlight">634</i>&nbsp;        }
+<i class="no-highlight">635</i>&nbsp;        else {
+<b class="fc"><i class="no-highlight">636</i>&nbsp;            return switchedPow10(axisMin + ((java2DValue - plotMin)</b>
+<i class="no-highlight">637</i>&nbsp;                    / (plotMax - plotMin)) * (axisMax - axisMin));
+<i class="no-highlight">638</i>&nbsp;        }
+<i class="no-highlight">639</i>&nbsp;    }
+<i class="no-highlight">640</i>&nbsp;
+<i class="no-highlight">641</i>&nbsp;    /**
+<i class="no-highlight">642</i>&nbsp;     * Zooms in on the current range.
+<i class="no-highlight">643</i>&nbsp;     *
+<i class="no-highlight">644</i>&nbsp;     * @param lowerPercent  the new lower bound.
+<i class="no-highlight">645</i>&nbsp;     * @param upperPercent  the new upper bound.
+<i class="no-highlight">646</i>&nbsp;     */
+<i class="no-highlight">647</i>&nbsp;    @Override
+<i class="no-highlight">648</i>&nbsp;    public void zoomRange(double lowerPercent, double upperPercent) {
+<b class="nc"><i class="no-highlight">649</i>&nbsp;        double startLog = switchedLog10(getRange().getLowerBound());</b>
+<b class="nc"><i class="no-highlight">650</i>&nbsp;        double lengthLog = switchedLog10(getRange().getUpperBound()) - startLog;</b>
+<i class="no-highlight">651</i>&nbsp;        Range adjusted;
+<i class="no-highlight">652</i>&nbsp;
+<b class="nc"><i class="no-highlight">653</i>&nbsp;        if (isInverted()) {</b>
+<b class="nc"><i class="no-highlight">654</i>&nbsp;            adjusted = new Range(</b>
+<b class="nc"><i class="no-highlight">655</i>&nbsp;                    switchedPow10(startLog + (lengthLog * (1 - upperPercent))),</b>
+<b class="nc"><i class="no-highlight">656</i>&nbsp;                    switchedPow10(startLog + (lengthLog * (1 - lowerPercent))));</b>
+<i class="no-highlight">657</i>&nbsp;        }
+<i class="no-highlight">658</i>&nbsp;        else {
+<b class="nc"><i class="no-highlight">659</i>&nbsp;            adjusted = new Range(</b>
+<b class="nc"><i class="no-highlight">660</i>&nbsp;                    switchedPow10(startLog + (lengthLog * lowerPercent)),</b>
+<b class="nc"><i class="no-highlight">661</i>&nbsp;                    switchedPow10(startLog + (lengthLog * upperPercent)));</b>
+<i class="no-highlight">662</i>&nbsp;        }
+<i class="no-highlight">663</i>&nbsp;
+<b class="nc"><i class="no-highlight">664</i>&nbsp;        setRange(adjusted);</b>
+<i class="no-highlight">665</i>&nbsp;    }
+<i class="no-highlight">666</i>&nbsp;
+<i class="no-highlight">667</i>&nbsp;    /**
+<i class="no-highlight">668</i>&nbsp;     * Calculates the positions of the tick labels for the axis, storing the
+<i class="no-highlight">669</i>&nbsp;     * results in the tick label list (ready for drawing).
+<i class="no-highlight">670</i>&nbsp;     *
+<i class="no-highlight">671</i>&nbsp;     * @param g2  the graphics device.
+<i class="no-highlight">672</i>&nbsp;     * @param dataArea  the area in which the plot should be drawn.
+<i class="no-highlight">673</i>&nbsp;     * @param edge  the location of the axis.
+<i class="no-highlight">674</i>&nbsp;     *
+<i class="no-highlight">675</i>&nbsp;     * @return A list of ticks.
+<i class="no-highlight">676</i>&nbsp;     */
+<i class="no-highlight">677</i>&nbsp;    @Override
+<i class="no-highlight">678</i>&nbsp;    protected List refreshTicksHorizontal(Graphics2D g2, Rectangle2D dataArea,
+<i class="no-highlight">679</i>&nbsp;            RectangleEdge edge) {
+<i class="no-highlight">680</i>&nbsp;
+<b class="nc"><i class="no-highlight">681</i>&nbsp;        List ticks = new java.util.ArrayList();</b>
+<b class="nc"><i class="no-highlight">682</i>&nbsp;        Range range = getRange();</b>
+<i class="no-highlight">683</i>&nbsp;
+<i class="no-highlight">684</i>&nbsp;        //get lower bound value:
+<b class="nc"><i class="no-highlight">685</i>&nbsp;        double lowerBoundVal = range.getLowerBound();</b>
+<i class="no-highlight">686</i>&nbsp;              //if small log values and lower bound value too small
+<i class="no-highlight">687</i>&nbsp;              // then set to a small value (don&#39;t allow &lt;= 0):
+<b class="nc"><i class="no-highlight">688</i>&nbsp;        if (this.smallLogFlag &amp;&amp; lowerBoundVal &lt; SMALL_LOG_VALUE) {</b>
+<b class="nc"><i class="no-highlight">689</i>&nbsp;            lowerBoundVal = SMALL_LOG_VALUE;</b>
+<i class="no-highlight">690</i>&nbsp;        }
+<i class="no-highlight">691</i>&nbsp;
+<i class="no-highlight">692</i>&nbsp;        //get upper bound value
+<b class="nc"><i class="no-highlight">693</i>&nbsp;        double upperBoundVal = range.getUpperBound();</b>
+<i class="no-highlight">694</i>&nbsp;
+<i class="no-highlight">695</i>&nbsp;        //get log10 version of lower bound and round to integer:
+<b class="nc"><i class="no-highlight">696</i>&nbsp;        int iBegCount = (int) Math.rint(switchedLog10(lowerBoundVal));</b>
+<i class="no-highlight">697</i>&nbsp;        //get log10 version of upper bound and round to integer:
+<b class="nc"><i class="no-highlight">698</i>&nbsp;        int iEndCount = (int) Math.rint(switchedLog10(upperBoundVal));</b>
+<i class="no-highlight">699</i>&nbsp;
+<b class="nc"><i class="no-highlight">700</i>&nbsp;        if (iBegCount == iEndCount &amp;&amp; iBegCount &gt; 0</b>
+<b class="nc"><i class="no-highlight">701</i>&nbsp;                &amp;&amp; Math.pow(10, iBegCount) &gt; lowerBoundVal) {</b>
+<i class="no-highlight">702</i>&nbsp;              //only 1 power of 10 value, it&#39;s &gt; 0 and its resulting
+<i class="no-highlight">703</i>&nbsp;              // tick value will be larger than lower bound of data
+<b class="nc"><i class="no-highlight">704</i>&nbsp;            --iBegCount;       //decrement to generate more ticks</b>
+<i class="no-highlight">705</i>&nbsp;        }
+<i class="no-highlight">706</i>&nbsp;
+<i class="no-highlight">707</i>&nbsp;        double currentTickValue;
+<i class="no-highlight">708</i>&nbsp;        String tickLabel;
+<b class="nc"><i class="no-highlight">709</i>&nbsp;        boolean zeroTickFlag = false;</b>
+<b class="nc"><i class="no-highlight">710</i>&nbsp;        for (int i = iBegCount; i &lt;= iEndCount; i++) {</b>
+<i class="no-highlight">711</i>&nbsp;            //for each power of 10 value; create ten ticks
+<b class="nc"><i class="no-highlight">712</i>&nbsp;            for (int j = 0; j &lt; 10; ++j) {</b>
+<i class="no-highlight">713</i>&nbsp;                //for each tick to be displayed
+<b class="nc"><i class="no-highlight">714</i>&nbsp;                if (this.smallLogFlag) {</b>
+<i class="no-highlight">715</i>&nbsp;                    //small log values in use; create numeric value for tick
+<b class="nc"><i class="no-highlight">716</i>&nbsp;                    currentTickValue = Math.pow(10, i) + (Math.pow(10, i) * j);</b>
+<b class="nc"><i class="no-highlight">717</i>&nbsp;                    if (this.expTickLabelsFlag</b>
+<i class="no-highlight">718</i>&nbsp;                        || (i &lt; 0 &amp;&amp; currentTickValue &gt; 0.0
+<i class="no-highlight">719</i>&nbsp;                        &amp;&amp; currentTickValue &lt; 1.0)) {
+<i class="no-highlight">720</i>&nbsp;                        //showing &quot;1e#&quot;-style ticks or negative exponent
+<i class="no-highlight">721</i>&nbsp;                        // generating tick value between 0 &amp; 1; show fewer
+<b class="nc"><i class="no-highlight">722</i>&nbsp;                        if (j == 0 || (i &gt; -4 &amp;&amp; j &lt; 2)</b>
+<i class="no-highlight">723</i>&nbsp;                                   || currentTickValue &gt;= upperBoundVal) {
+<i class="no-highlight">724</i>&nbsp;                          //first tick of series, or not too small a value and
+<i class="no-highlight">725</i>&nbsp;                          // one of first 3 ticks, or last tick to be displayed
+<i class="no-highlight">726</i>&nbsp;                            // set exact number of fractional digits to be shown
+<i class="no-highlight">727</i>&nbsp;                            // (no effect if showing &quot;1e#&quot;-style ticks):
+<b class="nc"><i class="no-highlight">728</i>&nbsp;                            this.numberFormatterObj</b>
+<b class="nc"><i class="no-highlight">729</i>&nbsp;                                .setMaximumFractionDigits(-i);</b>
+<i class="no-highlight">730</i>&nbsp;                               //create tick label (force use of fmt obj):
+<b class="nc"><i class="no-highlight">731</i>&nbsp;                            tickLabel = makeTickLabel(currentTickValue, true);</b>
+<i class="no-highlight">732</i>&nbsp;                        }
+<i class="no-highlight">733</i>&nbsp;                        else {    //no tick label to be shown
+<b class="nc"><i class="no-highlight">734</i>&nbsp;                            tickLabel = &quot;&quot;;</b>
+<i class="no-highlight">735</i>&nbsp;                        }
+<i class="no-highlight">736</i>&nbsp;                    }
+<i class="no-highlight">737</i>&nbsp;                    else {     //tick value not between 0 &amp; 1
+<i class="no-highlight">738</i>&nbsp;                               //show tick label if it&#39;s the first or last in
+<i class="no-highlight">739</i>&nbsp;                               // the set, or if it&#39;s 1-5; beyond that show
+<i class="no-highlight">740</i>&nbsp;                               // fewer as the values get larger:
+<b class="nc"><i class="no-highlight">741</i>&nbsp;                        tickLabel = (j &lt; 1 || (i &lt; 1 &amp;&amp; j &lt; 5) || (j &lt; 4 - i)</b>
+<i class="no-highlight">742</i>&nbsp;                                         || currentTickValue &gt;= upperBoundVal)
+<b class="nc"><i class="no-highlight">743</i>&nbsp;                                         ? makeTickLabel(currentTickValue) : &quot;&quot;;</b>
+<i class="no-highlight">744</i>&nbsp;                    }
+<i class="no-highlight">745</i>&nbsp;                }
+<i class="no-highlight">746</i>&nbsp;                else { //not small log values in use; allow for values &lt;= 0
+<b class="nc"><i class="no-highlight">747</i>&nbsp;                    if (zeroTickFlag) {   //if did zero tick last iter then</b>
+<b class="nc"><i class="no-highlight">748</i>&nbsp;                        --j;              //decrement to do 1.0 tick now</b>
+<i class="no-highlight">749</i>&nbsp;                    }     //calculate power-of-ten value for tick:
+<b class="nc"><i class="no-highlight">750</i>&nbsp;                    currentTickValue = (i &gt;= 0)</b>
+<b class="nc"><i class="no-highlight">751</i>&nbsp;                        ? Math.pow(10, i) + (Math.pow(10, i) * j)</b>
+<b class="nc"><i class="no-highlight">752</i>&nbsp;                        : -(Math.pow(10, -i) - (Math.pow(10, -i - 1) * j));</b>
+<b class="nc"><i class="no-highlight">753</i>&nbsp;                    if (!zeroTickFlag) {  // did not do zero tick last iteration</b>
+<b class="nc"><i class="no-highlight">754</i>&nbsp;                        if (Math.abs(currentTickValue - 1.0) &lt; 0.0001</b>
+<i class="no-highlight">755</i>&nbsp;                            &amp;&amp; lowerBoundVal &lt;= 0.0 &amp;&amp; upperBoundVal &gt;= 0.0) {
+<i class="no-highlight">756</i>&nbsp;                            //tick value is 1.0 and 0.0 is within data range
+<b class="nc"><i class="no-highlight">757</i>&nbsp;                            currentTickValue = 0.0;     //set tick value to zero</b>
+<b class="nc"><i class="no-highlight">758</i>&nbsp;                            zeroTickFlag = true;        //indicate zero tick</b>
+<i class="no-highlight">759</i>&nbsp;                        }
+<i class="no-highlight">760</i>&nbsp;                    }
+<i class="no-highlight">761</i>&nbsp;                    else {     //did zero tick last iteration
+<b class="nc"><i class="no-highlight">762</i>&nbsp;                        zeroTickFlag = false;         //clear flag</b>
+<i class="no-highlight">763</i>&nbsp;                    }               //create tick label string:
+<i class="no-highlight">764</i>&nbsp;                               //show tick label if &quot;1e#&quot;-style and it&#39;s one
+<i class="no-highlight">765</i>&nbsp;                               // of the first two, if it&#39;s the first or last
+<i class="no-highlight">766</i>&nbsp;                               // in the set, or if it&#39;s 1-5; beyond that
+<i class="no-highlight">767</i>&nbsp;                               // show fewer as the values get larger:
+<b class="nc"><i class="no-highlight">768</i>&nbsp;                    tickLabel = ((this.expTickLabelsFlag &amp;&amp; j &lt; 2)</b>
+<i class="no-highlight">769</i>&nbsp;                                || j &lt; 1
+<i class="no-highlight">770</i>&nbsp;                                || (i &lt; 1 &amp;&amp; j &lt; 5) || (j &lt; 4 - i)
+<i class="no-highlight">771</i>&nbsp;                                || currentTickValue &gt;= upperBoundVal)
+<b class="nc"><i class="no-highlight">772</i>&nbsp;                                   ? makeTickLabel(currentTickValue) : &quot;&quot;;</b>
+<i class="no-highlight">773</i>&nbsp;                }
+<i class="no-highlight">774</i>&nbsp;
+<b class="nc"><i class="no-highlight">775</i>&nbsp;                if (currentTickValue &gt; upperBoundVal) {</b>
+<b class="nc"><i class="no-highlight">776</i>&nbsp;                    return ticks;   // if past highest data value then exit</b>
+<i class="no-highlight">777</i>&nbsp;                                    // method
+<i class="no-highlight">778</i>&nbsp;                }
+<i class="no-highlight">779</i>&nbsp;
+<b class="nc"><i class="no-highlight">780</i>&nbsp;                if (currentTickValue &gt;= lowerBoundVal - SMALL_LOG_VALUE) {</b>
+<i class="no-highlight">781</i>&nbsp;                    //tick value not below lowest data value
+<i class="no-highlight">782</i>&nbsp;                    TextAnchor anchor;
+<i class="no-highlight">783</i>&nbsp;                    TextAnchor rotationAnchor;
+<b class="nc"><i class="no-highlight">784</i>&nbsp;                    double angle = 0.0;</b>
+<b class="nc"><i class="no-highlight">785</i>&nbsp;                    if (isVerticalTickLabels()) {</b>
+<b class="nc"><i class="no-highlight">786</i>&nbsp;                        anchor = TextAnchor.CENTER_RIGHT;</b>
+<b class="nc"><i class="no-highlight">787</i>&nbsp;                        rotationAnchor = TextAnchor.CENTER_RIGHT;</b>
+<b class="nc"><i class="no-highlight">788</i>&nbsp;                        if (edge == RectangleEdge.TOP) {</b>
+<b class="nc"><i class="no-highlight">789</i>&nbsp;                            angle = Math.PI / 2.0;</b>
+<i class="no-highlight">790</i>&nbsp;                        }
+<i class="no-highlight">791</i>&nbsp;                        else {
+<b class="nc"><i class="no-highlight">792</i>&nbsp;                            angle = -Math.PI / 2.0;</b>
+<i class="no-highlight">793</i>&nbsp;                        }
+<i class="no-highlight">794</i>&nbsp;                    }
+<i class="no-highlight">795</i>&nbsp;                    else {
+<b class="nc"><i class="no-highlight">796</i>&nbsp;                        if (edge == RectangleEdge.TOP) {</b>
+<b class="nc"><i class="no-highlight">797</i>&nbsp;                            anchor = TextAnchor.BOTTOM_CENTER;</b>
+<b class="nc"><i class="no-highlight">798</i>&nbsp;                            rotationAnchor = TextAnchor.BOTTOM_CENTER;</b>
+<i class="no-highlight">799</i>&nbsp;                        }
+<i class="no-highlight">800</i>&nbsp;                        else {
+<b class="nc"><i class="no-highlight">801</i>&nbsp;                            anchor = TextAnchor.TOP_CENTER;</b>
+<b class="nc"><i class="no-highlight">802</i>&nbsp;                            rotationAnchor = TextAnchor.TOP_CENTER;</b>
+<i class="no-highlight">803</i>&nbsp;                        }
+<i class="no-highlight">804</i>&nbsp;                    }
+<i class="no-highlight">805</i>&nbsp;
+<b class="nc"><i class="no-highlight">806</i>&nbsp;                    Tick tick = new NumberTick(currentTickValue, tickLabel, </b>
+<i class="no-highlight">807</i>&nbsp;                            anchor, rotationAnchor, angle);
+<b class="nc"><i class="no-highlight">808</i>&nbsp;                    ticks.add(tick);</b>
+<i class="no-highlight">809</i>&nbsp;                }
+<i class="no-highlight">810</i>&nbsp;            }
+<i class="no-highlight">811</i>&nbsp;        }
+<b class="nc"><i class="no-highlight">812</i>&nbsp;        return ticks;</b>
+<i class="no-highlight">813</i>&nbsp;
+<i class="no-highlight">814</i>&nbsp;    }
+<i class="no-highlight">815</i>&nbsp;
+<i class="no-highlight">816</i>&nbsp;    /**
+<i class="no-highlight">817</i>&nbsp;     * Calculates the positions of the tick labels for the axis, storing the
+<i class="no-highlight">818</i>&nbsp;     * results in the tick label list (ready for drawing).
+<i class="no-highlight">819</i>&nbsp;     *
+<i class="no-highlight">820</i>&nbsp;     * @param g2  the graphics device.
+<i class="no-highlight">821</i>&nbsp;     * @param dataArea  the area in which the plot should be drawn.
+<i class="no-highlight">822</i>&nbsp;     * @param edge  the location of the axis.
+<i class="no-highlight">823</i>&nbsp;     *
+<i class="no-highlight">824</i>&nbsp;     * @return A list of ticks.
+<i class="no-highlight">825</i>&nbsp;     */
+<i class="no-highlight">826</i>&nbsp;    @Override
+<i class="no-highlight">827</i>&nbsp;    protected List refreshTicksVertical(Graphics2D g2, Rectangle2D dataArea,
+<i class="no-highlight">828</i>&nbsp;            RectangleEdge edge) {
+<i class="no-highlight">829</i>&nbsp;
+<b class="nc"><i class="no-highlight">830</i>&nbsp;        List ticks = new java.util.ArrayList();</b>
+<i class="no-highlight">831</i>&nbsp;
+<i class="no-highlight">832</i>&nbsp;        //get lower bound value:
+<b class="nc"><i class="no-highlight">833</i>&nbsp;        double lowerBoundVal = getRange().getLowerBound();</b>
+<i class="no-highlight">834</i>&nbsp;        //if small log values and lower bound value too small
+<i class="no-highlight">835</i>&nbsp;        // then set to a small value (don&#39;t allow &lt;= 0):
+<b class="nc"><i class="no-highlight">836</i>&nbsp;        if (this.smallLogFlag &amp;&amp; lowerBoundVal &lt; SMALL_LOG_VALUE) {</b>
+<b class="nc"><i class="no-highlight">837</i>&nbsp;            lowerBoundVal = SMALL_LOG_VALUE;</b>
+<i class="no-highlight">838</i>&nbsp;        }
+<i class="no-highlight">839</i>&nbsp;        //get upper bound value
+<b class="nc"><i class="no-highlight">840</i>&nbsp;        double upperBoundVal = getRange().getUpperBound();</b>
+<i class="no-highlight">841</i>&nbsp;
+<i class="no-highlight">842</i>&nbsp;        //get log10 version of lower bound and round to integer:
+<b class="nc"><i class="no-highlight">843</i>&nbsp;        int iBegCount = (int) Math.rint(switchedLog10(lowerBoundVal));</b>
+<i class="no-highlight">844</i>&nbsp;        //get log10 version of upper bound and round to integer:
+<b class="nc"><i class="no-highlight">845</i>&nbsp;        int iEndCount = (int) Math.rint(switchedLog10(upperBoundVal));</b>
+<i class="no-highlight">846</i>&nbsp;
+<b class="nc"><i class="no-highlight">847</i>&nbsp;        if (iBegCount == iEndCount &amp;&amp; iBegCount &gt; 0</b>
+<b class="nc"><i class="no-highlight">848</i>&nbsp;                &amp;&amp; Math.pow(10, iBegCount) &gt; lowerBoundVal) {</b>
+<i class="no-highlight">849</i>&nbsp;              //only 1 power of 10 value, it&#39;s &gt; 0 and its resulting
+<i class="no-highlight">850</i>&nbsp;              // tick value will be larger than lower bound of data
+<b class="nc"><i class="no-highlight">851</i>&nbsp;            --iBegCount;       //decrement to generate more ticks</b>
+<i class="no-highlight">852</i>&nbsp;        }
+<i class="no-highlight">853</i>&nbsp;
+<i class="no-highlight">854</i>&nbsp;        double tickVal;
+<i class="no-highlight">855</i>&nbsp;        String tickLabel;
+<b class="nc"><i class="no-highlight">856</i>&nbsp;        boolean zeroTickFlag = false;</b>
+<b class="nc"><i class="no-highlight">857</i>&nbsp;        for (int i = iBegCount; i &lt;= iEndCount; i++) {</b>
+<i class="no-highlight">858</i>&nbsp;            //for each tick with a label to be displayed
+<b class="nc"><i class="no-highlight">859</i>&nbsp;            int jEndCount = 10;</b>
+<b class="nc"><i class="no-highlight">860</i>&nbsp;            if (i == iEndCount) {</b>
+<b class="nc"><i class="no-highlight">861</i>&nbsp;                jEndCount = 1;</b>
+<i class="no-highlight">862</i>&nbsp;            }
+<i class="no-highlight">863</i>&nbsp;
+<b class="nc"><i class="no-highlight">864</i>&nbsp;            for (int j = 0; j &lt; jEndCount; j++) {</b>
+<i class="no-highlight">865</i>&nbsp;                //for each tick to be displayed
+<b class="nc"><i class="no-highlight">866</i>&nbsp;                if (this.smallLogFlag) {</b>
+<i class="no-highlight">867</i>&nbsp;                    //small log values in use
+<b class="nc"><i class="no-highlight">868</i>&nbsp;                    tickVal = Math.pow(10, i) + (Math.pow(10, i) * j);</b>
+<b class="nc"><i class="no-highlight">869</i>&nbsp;                    if (j == 0) {</b>
+<i class="no-highlight">870</i>&nbsp;                        //first tick of group; create label text
+<b class="nc"><i class="no-highlight">871</i>&nbsp;                        if (this.log10TickLabelsFlag) {</b>
+<i class="no-highlight">872</i>&nbsp;                            //if flag then
+<b class="nc"><i class="no-highlight">873</i>&nbsp;                            tickLabel = &quot;10^&quot; + i;   //create &quot;log10&quot;-type label</b>
+<i class="no-highlight">874</i>&nbsp;                        }
+<i class="no-highlight">875</i>&nbsp;                        else {    //not &quot;log10&quot;-type label
+<b class="nc"><i class="no-highlight">876</i>&nbsp;                            if (this.expTickLabelsFlag) {</b>
+<i class="no-highlight">877</i>&nbsp;                                //if flag then
+<b class="nc"><i class="no-highlight">878</i>&nbsp;                                tickLabel = &quot;1e&quot; + i;  //create &quot;1e#&quot;-type label</b>
+<i class="no-highlight">879</i>&nbsp;                            }
+<i class="no-highlight">880</i>&nbsp;                            else {    //not &quot;1e#&quot;-type label
+<b class="nc"><i class="no-highlight">881</i>&nbsp;                                if (i &gt;= 0) {   // if positive exponent then</b>
+<i class="no-highlight">882</i>&nbsp;                                                // make integer
+<b class="nc"><i class="no-highlight">883</i>&nbsp;                                    NumberFormat format</b>
+<b class="nc"><i class="no-highlight">884</i>&nbsp;                                        = getNumberFormatOverride();</b>
+<b class="nc"><i class="no-highlight">885</i>&nbsp;                                    if (format != null) {</b>
+<b class="nc"><i class="no-highlight">886</i>&nbsp;                                        tickLabel = format.format(tickVal);</b>
+<i class="no-highlight">887</i>&nbsp;                                    }
+<i class="no-highlight">888</i>&nbsp;                                    else {
+<b class="nc"><i class="no-highlight">889</i>&nbsp;                                        tickLabel = Long.toString((long)</b>
+<b class="nc"><i class="no-highlight">890</i>&nbsp;                                                Math.rint(tickVal));</b>
+<i class="no-highlight">891</i>&nbsp;                                    }
+<b class="nc"><i class="no-highlight">892</i>&nbsp;                                }</b>
+<i class="no-highlight">893</i>&nbsp;                                else {
+<i class="no-highlight">894</i>&nbsp;                                    //negative exponent; create fractional value
+<i class="no-highlight">895</i>&nbsp;                                    //set exact number of fractional digits to
+<i class="no-highlight">896</i>&nbsp;                                    // be shown:
+<b class="nc"><i class="no-highlight">897</i>&nbsp;                                    this.numberFormatterObj</b>
+<b class="nc"><i class="no-highlight">898</i>&nbsp;                                        .setMaximumFractionDigits(-i);</b>
+<i class="no-highlight">899</i>&nbsp;                                    //create tick label:
+<b class="nc"><i class="no-highlight">900</i>&nbsp;                                    tickLabel = this.numberFormatterObj.format(</b>
+<i class="no-highlight">901</i>&nbsp;                                            tickVal);
+<i class="no-highlight">902</i>&nbsp;                                }
+<i class="no-highlight">903</i>&nbsp;                            }
+<i class="no-highlight">904</i>&nbsp;                        }
+<i class="no-highlight">905</i>&nbsp;                    }
+<i class="no-highlight">906</i>&nbsp;                    else {   //not first tick to be displayed
+<b class="nc"><i class="no-highlight">907</i>&nbsp;                        tickLabel = &quot;&quot;;     //no tick label</b>
+<i class="no-highlight">908</i>&nbsp;                    }
+<i class="no-highlight">909</i>&nbsp;                }
+<i class="no-highlight">910</i>&nbsp;                else { //not small log values in use; allow for values &lt;= 0
+<b class="nc"><i class="no-highlight">911</i>&nbsp;                    if (zeroTickFlag) {      //if did zero tick last iter then</b>
+<b class="nc"><i class="no-highlight">912</i>&nbsp;                        --j;</b>
+<i class="no-highlight">913</i>&nbsp;                    }               //decrement to do 1.0 tick now
+<b class="nc"><i class="no-highlight">914</i>&nbsp;                    tickVal = (i &gt;= 0) ? Math.pow(10, i) + (Math.pow(10, i) * j)</b>
+<b class="nc"><i class="no-highlight">915</i>&nbsp;                             : -(Math.pow(10, -i) - (Math.pow(10, -i - 1) * j));</b>
+<b class="nc"><i class="no-highlight">916</i>&nbsp;                    if (j == 0) {  //first tick of group</b>
+<b class="nc"><i class="no-highlight">917</i>&nbsp;                        if (!zeroTickFlag) {     // did not do zero tick last</b>
+<i class="no-highlight">918</i>&nbsp;                                                 // iteration
+<b class="nc"><i class="no-highlight">919</i>&nbsp;                            if (i &gt; iBegCount &amp;&amp; i &lt; iEndCount</b>
+<b class="nc"><i class="no-highlight">920</i>&nbsp;                                    &amp;&amp; Math.abs(tickVal - 1.0) &lt; 0.0001) {</b>
+<i class="no-highlight">921</i>&nbsp;                                // not first or last tick on graph and value
+<i class="no-highlight">922</i>&nbsp;                                // is 1.0
+<b class="nc"><i class="no-highlight">923</i>&nbsp;                                tickVal = 0.0;        //change value to 0.0</b>
+<b class="nc"><i class="no-highlight">924</i>&nbsp;                                zeroTickFlag = true;  //indicate zero tick</b>
+<b class="nc"><i class="no-highlight">925</i>&nbsp;                                tickLabel = &quot;0&quot;;      //create label for tick</b>
+<i class="no-highlight">926</i>&nbsp;                            }
+<i class="no-highlight">927</i>&nbsp;                            else {
+<i class="no-highlight">928</i>&nbsp;                                //first or last tick on graph or value is 1.0
+<i class="no-highlight">929</i>&nbsp;                                //create label for tick:
+<b class="nc"><i class="no-highlight">930</i>&nbsp;                                if (this.log10TickLabelsFlag) {</b>
+<i class="no-highlight">931</i>&nbsp;                                       //create &quot;log10&quot;-type label
+<b class="nc"><i class="no-highlight">932</i>&nbsp;                                    tickLabel = (((i &lt; 0) ? &quot;-&quot; : &quot;&quot;)</b>
+<b class="nc"><i class="no-highlight">933</i>&nbsp;                                            + &quot;10^&quot; + Math.abs(i));</b>
+<i class="no-highlight">934</i>&nbsp;                                }
+<i class="no-highlight">935</i>&nbsp;                                else {
+<b class="nc"><i class="no-highlight">936</i>&nbsp;                                    if (this.expTickLabelsFlag) {</b>
+<i class="no-highlight">937</i>&nbsp;                                           //create &quot;1e#&quot;-type label
+<b class="nc"><i class="no-highlight">938</i>&nbsp;                                        tickLabel = (((i &lt; 0) ? &quot;-&quot; : &quot;&quot;)</b>
+<b class="nc"><i class="no-highlight">939</i>&nbsp;                                                + &quot;1e&quot; + Math.abs(i));</b>
+<i class="no-highlight">940</i>&nbsp;                                    }
+<i class="no-highlight">941</i>&nbsp;                                    else {
+<b class="nc"><i class="no-highlight">942</i>&nbsp;                                        NumberFormat format</b>
+<b class="nc"><i class="no-highlight">943</i>&nbsp;                                            = getNumberFormatOverride();</b>
+<b class="nc"><i class="no-highlight">944</i>&nbsp;                                        if (format != null) {</b>
+<b class="nc"><i class="no-highlight">945</i>&nbsp;                                            tickLabel = format.format(tickVal);</b>
+<i class="no-highlight">946</i>&nbsp;                                        }
+<i class="no-highlight">947</i>&nbsp;                                        else {
+<b class="nc"><i class="no-highlight">948</i>&nbsp;                                            tickLabel =  Long.toString(</b>
+<b class="nc"><i class="no-highlight">949</i>&nbsp;                                                    (long) Math.rint(tickVal));</b>
+<i class="no-highlight">950</i>&nbsp;                                        }
+<b class="nc"><i class="no-highlight">951</i>&nbsp;                                    }</b>
+<i class="no-highlight">952</i>&nbsp;                                }
+<i class="no-highlight">953</i>&nbsp;                            }
+<i class="no-highlight">954</i>&nbsp;                        }
+<i class="no-highlight">955</i>&nbsp;                        else {     // did zero tick last iteration
+<b class="nc"><i class="no-highlight">956</i>&nbsp;                            tickLabel = &quot;&quot;;         //no label</b>
+<b class="nc"><i class="no-highlight">957</i>&nbsp;                            zeroTickFlag = false;   //clear flag</b>
+<i class="no-highlight">958</i>&nbsp;                        }
+<i class="no-highlight">959</i>&nbsp;                    }
+<i class="no-highlight">960</i>&nbsp;                    else {       // not first tick of group
+<b class="nc"><i class="no-highlight">961</i>&nbsp;                        tickLabel = &quot;&quot;;           //no label</b>
+<b class="nc"><i class="no-highlight">962</i>&nbsp;                        zeroTickFlag = false;     //make sure flag cleared</b>
+<i class="no-highlight">963</i>&nbsp;                    }
+<i class="no-highlight">964</i>&nbsp;                }
+<i class="no-highlight">965</i>&nbsp;
+<b class="nc"><i class="no-highlight">966</i>&nbsp;                if (tickVal &gt; upperBoundVal) {</b>
+<b class="nc"><i class="no-highlight">967</i>&nbsp;                    return ticks;  //if past highest data value then exit method</b>
+<i class="no-highlight">968</i>&nbsp;                }
+<i class="no-highlight">969</i>&nbsp;
+<b class="nc"><i class="no-highlight">970</i>&nbsp;                if (tickVal &gt;= lowerBoundVal - SMALL_LOG_VALUE) {</b>
+<i class="no-highlight">971</i>&nbsp;                    //tick value not below lowest data value
+<i class="no-highlight">972</i>&nbsp;                    TextAnchor anchor;
+<i class="no-highlight">973</i>&nbsp;                    TextAnchor rotationAnchor;
+<b class="nc"><i class="no-highlight">974</i>&nbsp;                    double angle = 0.0;</b>
+<b class="nc"><i class="no-highlight">975</i>&nbsp;                    if (isVerticalTickLabels()) {</b>
+<b class="nc"><i class="no-highlight">976</i>&nbsp;                        if (edge == RectangleEdge.LEFT) {</b>
+<b class="nc"><i class="no-highlight">977</i>&nbsp;                            anchor = TextAnchor.BOTTOM_CENTER;</b>
+<b class="nc"><i class="no-highlight">978</i>&nbsp;                            rotationAnchor = TextAnchor.BOTTOM_CENTER;</b>
+<b class="nc"><i class="no-highlight">979</i>&nbsp;                            angle = -Math.PI / 2.0;</b>
+<i class="no-highlight">980</i>&nbsp;                        }
+<i class="no-highlight">981</i>&nbsp;                        else {
+<b class="nc"><i class="no-highlight">982</i>&nbsp;                            anchor = TextAnchor.BOTTOM_CENTER;</b>
+<b class="nc"><i class="no-highlight">983</i>&nbsp;                            rotationAnchor = TextAnchor.BOTTOM_CENTER;</b>
+<b class="nc"><i class="no-highlight">984</i>&nbsp;                            angle = Math.PI / 2.0;</b>
+<i class="no-highlight">985</i>&nbsp;                        }
+<i class="no-highlight">986</i>&nbsp;                    }
+<i class="no-highlight">987</i>&nbsp;                    else {
+<b class="nc"><i class="no-highlight">988</i>&nbsp;                        if (edge == RectangleEdge.LEFT) {</b>
+<b class="nc"><i class="no-highlight">989</i>&nbsp;                            anchor = TextAnchor.CENTER_RIGHT;</b>
+<b class="nc"><i class="no-highlight">990</i>&nbsp;                            rotationAnchor = TextAnchor.CENTER_RIGHT;</b>
+<i class="no-highlight">991</i>&nbsp;                        }
+<i class="no-highlight">992</i>&nbsp;                        else {
+<b class="nc"><i class="no-highlight">993</i>&nbsp;                            anchor = TextAnchor.CENTER_LEFT;</b>
+<b class="nc"><i class="no-highlight">994</i>&nbsp;                            rotationAnchor = TextAnchor.CENTER_LEFT;</b>
+<i class="no-highlight">995</i>&nbsp;                        }
+<i class="no-highlight">996</i>&nbsp;                    }
+<i class="no-highlight">997</i>&nbsp;                    //create tick object and add to list:
+<b class="nc"><i class="no-highlight">998</i>&nbsp;                    ticks.add(new NumberTick(tickVal, tickLabel, anchor, </b>
+<i class="no-highlight">999</i>&nbsp;                            rotationAnchor, angle));
+<i class="no-highlight">1000</i>&nbsp;                }
+<i class="no-highlight">1001</i>&nbsp;            }
+<i class="no-highlight">1002</i>&nbsp;        }
+<b class="nc"><i class="no-highlight">1003</i>&nbsp;        return ticks;</b>
+<i class="no-highlight">1004</i>&nbsp;    }
+<i class="no-highlight">1005</i>&nbsp;
+<i class="no-highlight">1006</i>&nbsp;    /**
+<i class="no-highlight">1007</i>&nbsp;     * Converts the given value to a tick label string.
+<i class="no-highlight">1008</i>&nbsp;     *
+<i class="no-highlight">1009</i>&nbsp;     * @param val the value to convert.
+<i class="no-highlight">1010</i>&nbsp;     * @param forceFmtFlag true to force the number-formatter object
+<i class="no-highlight">1011</i>&nbsp;     * to be used.
+<i class="no-highlight">1012</i>&nbsp;     *
+<i class="no-highlight">1013</i>&nbsp;     * @return The tick label string.
+<i class="no-highlight">1014</i>&nbsp;     */
+<i class="no-highlight">1015</i>&nbsp;    protected String makeTickLabel(double val, boolean forceFmtFlag) {
+<b class="nc"><i class="no-highlight">1016</i>&nbsp;        if (this.expTickLabelsFlag || forceFmtFlag) {</b>
+<i class="no-highlight">1017</i>&nbsp;            //using exponents or force-formatter flag is set
+<i class="no-highlight">1018</i>&nbsp;            // (convert &#39;E&#39; to lower-case &#39;e&#39;):
+<b class="nc"><i class="no-highlight">1019</i>&nbsp;            return this.numberFormatterObj.format(val).toLowerCase();</b>
+<i class="no-highlight">1020</i>&nbsp;        }
+<b class="nc"><i class="no-highlight">1021</i>&nbsp;        return getTickUnit().valueToString(val);</b>
+<i class="no-highlight">1022</i>&nbsp;    }
+<i class="no-highlight">1023</i>&nbsp;
+<i class="no-highlight">1024</i>&nbsp;    /**
+<i class="no-highlight">1025</i>&nbsp;     * Converts the given value to a tick label string.
+<i class="no-highlight">1026</i>&nbsp;     * @param val the value to convert.
+<i class="no-highlight">1027</i>&nbsp;     *
+<i class="no-highlight">1028</i>&nbsp;     * @return The tick label string.
+<i class="no-highlight">1029</i>&nbsp;     */
+<i class="no-highlight">1030</i>&nbsp;    protected String makeTickLabel(double val) {
+<b class="nc"><i class="no-highlight">1031</i>&nbsp;        return makeTickLabel(val, false);</b>
+<i class="no-highlight">1032</i>&nbsp;    }
+<i class="no-highlight">1033</i>&nbsp;
+<i class="no-highlight">1034</i>&nbsp;}
+</div>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+        var codeBlock = document.getElementById('sourceCode');
+
+        if (codeBlock) {
+            hljs.highlightBlock(codeBlock);
+        }
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2022-03-26 17:36</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,460 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > PeriodAxisLabelInfo</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/highlight-idea.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.pack.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.jfree.chart.axis</a>
+</div>
+
+<h1>Coverage Summary for Class: PeriodAxisLabelInfo (org.jfree.chart.axis)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">PeriodAxisLabelInfo</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    52,9%
+  </span>
+  <span class="absValue">
+    (9/17)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    84,7%
+  </span>
+  <span class="absValue">
+    (61/72)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<div class="sourceCode" id="sourceCode"><i class="no-highlight">1</i>&nbsp;/* ===========================================================
+<i class="no-highlight">2</i>&nbsp; * JFreeChart : a free chart library for the Java(tm) platform
+<i class="no-highlight">3</i>&nbsp; * ===========================================================
+<i class="no-highlight">4</i>&nbsp; *
+<i class="no-highlight">5</i>&nbsp; * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+<i class="no-highlight">6</i>&nbsp; *
+<i class="no-highlight">7</i>&nbsp; * Project Info:  http://www.jfree.org/jfreechart/index.html
+<i class="no-highlight">8</i>&nbsp; *
+<i class="no-highlight">9</i>&nbsp; * This library is free software; you can redistribute it and/or modify it
+<i class="no-highlight">10</i>&nbsp; * under the terms of the GNU Lesser General Public License as published by
+<i class="no-highlight">11</i>&nbsp; * the Free Software Foundation; either version 2.1 of the License, or
+<i class="no-highlight">12</i>&nbsp; * (at your option) any later version.
+<i class="no-highlight">13</i>&nbsp; *
+<i class="no-highlight">14</i>&nbsp; * This library is distributed in the hope that it will be useful, but
+<i class="no-highlight">15</i>&nbsp; * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+<i class="no-highlight">16</i>&nbsp; * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+<i class="no-highlight">17</i>&nbsp; * License for more details.
+<i class="no-highlight">18</i>&nbsp; *
+<i class="no-highlight">19</i>&nbsp; * You should have received a copy of the GNU Lesser General Public
+<i class="no-highlight">20</i>&nbsp; * License along with this library; if not, write to the Free Software
+<i class="no-highlight">21</i>&nbsp; * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+<i class="no-highlight">22</i>&nbsp; * USA.
+<i class="no-highlight">23</i>&nbsp; *
+<i class="no-highlight">24</i>&nbsp; * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+<i class="no-highlight">25</i>&nbsp; * Other names may be trademarks of their respective owners.]
+<i class="no-highlight">26</i>&nbsp; *
+<i class="no-highlight">27</i>&nbsp; * ------------------------
+<i class="no-highlight">28</i>&nbsp; * PeriodAxisLabelInfo.java
+<i class="no-highlight">29</i>&nbsp; * ------------------------
+<i class="no-highlight">30</i>&nbsp; * (C) Copyright 2004-2022, by David Gilbert and Contributors.
+<i class="no-highlight">31</i>&nbsp; *
+<i class="no-highlight">32</i>&nbsp; * Original Author:  David Gilbert;
+<i class="no-highlight">33</i>&nbsp; * Contributor(s):   -;
+<i class="no-highlight">34</i>&nbsp; *
+<i class="no-highlight">35</i>&nbsp; */
+<i class="no-highlight">36</i>&nbsp;
+<i class="no-highlight">37</i>&nbsp;package org.jfree.chart.axis;
+<i class="no-highlight">38</i>&nbsp;
+<i class="no-highlight">39</i>&nbsp;import java.awt.BasicStroke;
+<i class="no-highlight">40</i>&nbsp;import java.awt.Color;
+<i class="no-highlight">41</i>&nbsp;import java.awt.Font;
+<i class="no-highlight">42</i>&nbsp;import java.awt.Paint;
+<i class="no-highlight">43</i>&nbsp;import java.awt.Stroke;
+<i class="no-highlight">44</i>&nbsp;import java.io.IOException;
+<i class="no-highlight">45</i>&nbsp;import java.io.ObjectInputStream;
+<i class="no-highlight">46</i>&nbsp;import java.io.ObjectOutputStream;
+<i class="no-highlight">47</i>&nbsp;import java.io.Serializable;
+<i class="no-highlight">48</i>&nbsp;import java.lang.reflect.Constructor;
+<i class="no-highlight">49</i>&nbsp;import java.text.DateFormat;
+<i class="no-highlight">50</i>&nbsp;import java.util.Date;
+<i class="no-highlight">51</i>&nbsp;import java.util.Locale;
+<i class="no-highlight">52</i>&nbsp;import java.util.TimeZone;
+<i class="no-highlight">53</i>&nbsp;import org.jfree.chart.api.RectangleInsets;
+<i class="no-highlight">54</i>&nbsp;import org.jfree.chart.internal.Args;
+<i class="no-highlight">55</i>&nbsp;import org.jfree.chart.internal.SerialUtils;
+<i class="no-highlight">56</i>&nbsp;
+<i class="no-highlight">57</i>&nbsp;import org.jfree.data.time.RegularTimePeriod;
+<i class="no-highlight">58</i>&nbsp;
+<i class="no-highlight">59</i>&nbsp;/**
+<i class="no-highlight">60</i>&nbsp; * A record that contains information for one &quot;band&quot; of date labels in
+<i class="no-highlight">61</i>&nbsp; * a {@link PeriodAxis}.
+<i class="no-highlight">62</i>&nbsp; */
+<i class="no-highlight">63</i>&nbsp;public class PeriodAxisLabelInfo implements Cloneable, Serializable {
+<i class="no-highlight">64</i>&nbsp;
+<i class="no-highlight">65</i>&nbsp;    /** For serialization. */
+<i class="no-highlight">66</i>&nbsp;    private static final long serialVersionUID = 5710451740920277357L;
+<i class="no-highlight">67</i>&nbsp;
+<i class="no-highlight">68</i>&nbsp;    /** The default insets. */
+<b class="fc"><i class="no-highlight">69</i>&nbsp;    public static final RectangleInsets DEFAULT_INSETS</b>
+<i class="no-highlight">70</i>&nbsp;            = new RectangleInsets(2, 2, 2, 2);
+<i class="no-highlight">71</i>&nbsp;
+<i class="no-highlight">72</i>&nbsp;    /** The default font. */
+<b class="fc"><i class="no-highlight">73</i>&nbsp;    public static final Font DEFAULT_FONT</b>
+<i class="no-highlight">74</i>&nbsp;            = new Font(&quot;SansSerif&quot;, Font.PLAIN, 10);
+<i class="no-highlight">75</i>&nbsp;
+<i class="no-highlight">76</i>&nbsp;    /** The default label paint. */
+<b class="fc"><i class="no-highlight">77</i>&nbsp;    public static final Paint DEFAULT_LABEL_PAINT = Color.BLACK;</b>
+<i class="no-highlight">78</i>&nbsp;
+<i class="no-highlight">79</i>&nbsp;    /** The default divider stroke. */
+<b class="fc"><i class="no-highlight">80</i>&nbsp;    public static final Stroke DEFAULT_DIVIDER_STROKE = new BasicStroke(0.5f);</b>
+<i class="no-highlight">81</i>&nbsp;
+<i class="no-highlight">82</i>&nbsp;    /** The default divider paint. */
+<b class="fc"><i class="no-highlight">83</i>&nbsp;    public static final Paint DEFAULT_DIVIDER_PAINT = Color.GRAY;</b>
+<i class="no-highlight">84</i>&nbsp;
+<i class="no-highlight">85</i>&nbsp;    /** The subclass of {@link RegularTimePeriod} to use for this band. */
+<i class="no-highlight">86</i>&nbsp;    private Class periodClass;
+<i class="no-highlight">87</i>&nbsp;
+<i class="no-highlight">88</i>&nbsp;    /** Controls the gaps around the band. */
+<i class="no-highlight">89</i>&nbsp;    private RectangleInsets padding;
+<i class="no-highlight">90</i>&nbsp;
+<i class="no-highlight">91</i>&nbsp;    /** The date formatter. */
+<i class="no-highlight">92</i>&nbsp;    private DateFormat dateFormat;
+<i class="no-highlight">93</i>&nbsp;
+<i class="no-highlight">94</i>&nbsp;    /** The label font. */
+<i class="no-highlight">95</i>&nbsp;    private Font labelFont;
+<i class="no-highlight">96</i>&nbsp;
+<i class="no-highlight">97</i>&nbsp;    /** The label paint. */
+<i class="no-highlight">98</i>&nbsp;    private transient Paint labelPaint;
+<i class="no-highlight">99</i>&nbsp;
+<i class="no-highlight">100</i>&nbsp;    /** A flag that controls whether or not dividers are visible. */
+<i class="no-highlight">101</i>&nbsp;    private boolean drawDividers;
+<i class="no-highlight">102</i>&nbsp;
+<i class="no-highlight">103</i>&nbsp;    /** The stroke used to draw the dividers. */
+<i class="no-highlight">104</i>&nbsp;    private transient Stroke dividerStroke;
+<i class="no-highlight">105</i>&nbsp;
+<i class="no-highlight">106</i>&nbsp;    /** The paint used to draw the dividers. */
+<i class="no-highlight">107</i>&nbsp;    private transient Paint dividerPaint;
+<i class="no-highlight">108</i>&nbsp;
+<i class="no-highlight">109</i>&nbsp;    /**
+<i class="no-highlight">110</i>&nbsp;     * Creates a new instance.
+<i class="no-highlight">111</i>&nbsp;     *
+<i class="no-highlight">112</i>&nbsp;     * @param periodClass  the subclass of {@link RegularTimePeriod} to use
+<i class="no-highlight">113</i>&nbsp;     *                     ({@code null} not permitted).
+<i class="no-highlight">114</i>&nbsp;     * @param dateFormat  the date format ({@code null} not permitted).
+<i class="no-highlight">115</i>&nbsp;     */
+<i class="no-highlight">116</i>&nbsp;    public PeriodAxisLabelInfo(Class periodClass, DateFormat dateFormat) {
+<b class="fc"><i class="no-highlight">117</i>&nbsp;        this(periodClass, dateFormat, DEFAULT_INSETS, DEFAULT_FONT,</b>
+<i class="no-highlight">118</i>&nbsp;            DEFAULT_LABEL_PAINT, true, DEFAULT_DIVIDER_STROKE,
+<i class="no-highlight">119</i>&nbsp;            DEFAULT_DIVIDER_PAINT);
+<i class="no-highlight">120</i>&nbsp;    }
+<i class="no-highlight">121</i>&nbsp;
+<i class="no-highlight">122</i>&nbsp;    /**
+<i class="no-highlight">123</i>&nbsp;     * Creates a new instance.
+<i class="no-highlight">124</i>&nbsp;     *
+<i class="no-highlight">125</i>&nbsp;     * @param periodClass  the subclass of {@link RegularTimePeriod} to use
+<i class="no-highlight">126</i>&nbsp;     *                     ({@code null} not permitted).
+<i class="no-highlight">127</i>&nbsp;     * @param dateFormat  the date format ({@code null} not permitted).
+<i class="no-highlight">128</i>&nbsp;     * @param padding  controls the space around the band ({@code null}
+<i class="no-highlight">129</i>&nbsp;     *                 not permitted).
+<i class="no-highlight">130</i>&nbsp;     * @param labelFont  the label font ({@code null} not permitted).
+<i class="no-highlight">131</i>&nbsp;     * @param labelPaint  the label paint ({@code null} not permitted).
+<i class="no-highlight">132</i>&nbsp;     * @param drawDividers  a flag that controls whether dividers are drawn.
+<i class="no-highlight">133</i>&nbsp;     * @param dividerStroke  the stroke used to draw the dividers
+<i class="no-highlight">134</i>&nbsp;     *                       ({@code null} not permitted).
+<i class="no-highlight">135</i>&nbsp;     * @param dividerPaint  the paint used to draw the dividers
+<i class="no-highlight">136</i>&nbsp;     *                      ({@code null} not permitted).
+<i class="no-highlight">137</i>&nbsp;     */
+<i class="no-highlight">138</i>&nbsp;    public PeriodAxisLabelInfo(Class periodClass, DateFormat dateFormat,
+<i class="no-highlight">139</i>&nbsp;            RectangleInsets padding, Font labelFont, Paint labelPaint,
+<b class="fc"><i class="no-highlight">140</i>&nbsp;            boolean drawDividers, Stroke dividerStroke, Paint dividerPaint) {</b>
+<b class="fc"><i class="no-highlight">141</i>&nbsp;        Args.nullNotPermitted(periodClass, &quot;periodClass&quot;);</b>
+<b class="fc"><i class="no-highlight">142</i>&nbsp;        Args.nullNotPermitted(dateFormat, &quot;dateFormat&quot;);</b>
+<b class="fc"><i class="no-highlight">143</i>&nbsp;        Args.nullNotPermitted(padding, &quot;padding&quot;);</b>
+<b class="fc"><i class="no-highlight">144</i>&nbsp;        Args.nullNotPermitted(labelFont, &quot;labelFont&quot;);</b>
+<b class="fc"><i class="no-highlight">145</i>&nbsp;        Args.nullNotPermitted(labelPaint, &quot;labelPaint&quot;);</b>
+<b class="fc"><i class="no-highlight">146</i>&nbsp;        Args.nullNotPermitted(dividerStroke, &quot;dividerStroke&quot;);</b>
+<b class="fc"><i class="no-highlight">147</i>&nbsp;        Args.nullNotPermitted(dividerPaint, &quot;dividerPaint&quot;);</b>
+<b class="fc"><i class="no-highlight">148</i>&nbsp;        this.periodClass = periodClass;</b>
+<b class="fc"><i class="no-highlight">149</i>&nbsp;        this.dateFormat = (DateFormat) dateFormat.clone();</b>
+<b class="fc"><i class="no-highlight">150</i>&nbsp;        this.padding = padding;</b>
+<b class="fc"><i class="no-highlight">151</i>&nbsp;        this.labelFont = labelFont;</b>
+<b class="fc"><i class="no-highlight">152</i>&nbsp;        this.labelPaint = labelPaint;</b>
+<b class="fc"><i class="no-highlight">153</i>&nbsp;        this.drawDividers = drawDividers;</b>
+<b class="fc"><i class="no-highlight">154</i>&nbsp;        this.dividerStroke = dividerStroke;</b>
+<b class="fc"><i class="no-highlight">155</i>&nbsp;        this.dividerPaint = dividerPaint;</b>
+<i class="no-highlight">156</i>&nbsp;    }
+<i class="no-highlight">157</i>&nbsp;
+<i class="no-highlight">158</i>&nbsp;    /**
+<i class="no-highlight">159</i>&nbsp;     * Returns the subclass of {@link RegularTimePeriod} that should be used
+<i class="no-highlight">160</i>&nbsp;     * to generate the date labels.
+<i class="no-highlight">161</i>&nbsp;     *
+<i class="no-highlight">162</i>&nbsp;     * @return The class.
+<i class="no-highlight">163</i>&nbsp;     */
+<i class="no-highlight">164</i>&nbsp;    public Class getPeriodClass() {
+<b class="nc"><i class="no-highlight">165</i>&nbsp;        return this.periodClass;</b>
+<i class="no-highlight">166</i>&nbsp;    }
+<i class="no-highlight">167</i>&nbsp;
+<i class="no-highlight">168</i>&nbsp;    /**
+<i class="no-highlight">169</i>&nbsp;     * Returns a copy of the date formatter.
+<i class="no-highlight">170</i>&nbsp;     *
+<i class="no-highlight">171</i>&nbsp;     * @return A copy of the date formatter (never {@code null}).
+<i class="no-highlight">172</i>&nbsp;     */
+<i class="no-highlight">173</i>&nbsp;    public DateFormat getDateFormat() {
+<b class="nc"><i class="no-highlight">174</i>&nbsp;        return (DateFormat) this.dateFormat.clone();</b>
+<i class="no-highlight">175</i>&nbsp;    }
+<i class="no-highlight">176</i>&nbsp;
+<i class="no-highlight">177</i>&nbsp;    /**
+<i class="no-highlight">178</i>&nbsp;     * Returns the padding for the band.
+<i class="no-highlight">179</i>&nbsp;     *
+<i class="no-highlight">180</i>&nbsp;     * @return The padding.
+<i class="no-highlight">181</i>&nbsp;     */
+<i class="no-highlight">182</i>&nbsp;    public RectangleInsets getPadding() {
+<b class="nc"><i class="no-highlight">183</i>&nbsp;        return this.padding;</b>
+<i class="no-highlight">184</i>&nbsp;    }
+<i class="no-highlight">185</i>&nbsp;
+<i class="no-highlight">186</i>&nbsp;    /**
+<i class="no-highlight">187</i>&nbsp;     * Returns the label font.
+<i class="no-highlight">188</i>&nbsp;     *
+<i class="no-highlight">189</i>&nbsp;     * @return The label font (never {@code null}).
+<i class="no-highlight">190</i>&nbsp;     */
+<i class="no-highlight">191</i>&nbsp;    public Font getLabelFont() {
+<b class="nc"><i class="no-highlight">192</i>&nbsp;        return this.labelFont;</b>
+<i class="no-highlight">193</i>&nbsp;    }
+<i class="no-highlight">194</i>&nbsp;
+<i class="no-highlight">195</i>&nbsp;    /**
+<i class="no-highlight">196</i>&nbsp;     * Returns the label paint.
+<i class="no-highlight">197</i>&nbsp;     *
+<i class="no-highlight">198</i>&nbsp;     * @return The label paint.
+<i class="no-highlight">199</i>&nbsp;     */
+<i class="no-highlight">200</i>&nbsp;    public Paint getLabelPaint() {
+<b class="nc"><i class="no-highlight">201</i>&nbsp;        return this.labelPaint;</b>
+<i class="no-highlight">202</i>&nbsp;    }
+<i class="no-highlight">203</i>&nbsp;
+<i class="no-highlight">204</i>&nbsp;    /**
+<i class="no-highlight">205</i>&nbsp;     * Returns a flag that controls whether or not dividers are drawn.
+<i class="no-highlight">206</i>&nbsp;     *
+<i class="no-highlight">207</i>&nbsp;     * @return A flag.
+<i class="no-highlight">208</i>&nbsp;     */
+<i class="no-highlight">209</i>&nbsp;    public boolean getDrawDividers() {
+<b class="nc"><i class="no-highlight">210</i>&nbsp;        return this.drawDividers;</b>
+<i class="no-highlight">211</i>&nbsp;    }
+<i class="no-highlight">212</i>&nbsp;
+<i class="no-highlight">213</i>&nbsp;    /**
+<i class="no-highlight">214</i>&nbsp;     * Returns the stroke used to draw the dividers.
+<i class="no-highlight">215</i>&nbsp;     *
+<i class="no-highlight">216</i>&nbsp;     * @return The stroke.
+<i class="no-highlight">217</i>&nbsp;     */
+<i class="no-highlight">218</i>&nbsp;    public Stroke getDividerStroke() {
+<b class="nc"><i class="no-highlight">219</i>&nbsp;        return this.dividerStroke;</b>
+<i class="no-highlight">220</i>&nbsp;    }
+<i class="no-highlight">221</i>&nbsp;
+<i class="no-highlight">222</i>&nbsp;    /**
+<i class="no-highlight">223</i>&nbsp;     * Returns the paint used to draw the dividers.
+<i class="no-highlight">224</i>&nbsp;     *
+<i class="no-highlight">225</i>&nbsp;     * @return The paint.
+<i class="no-highlight">226</i>&nbsp;     */
+<i class="no-highlight">227</i>&nbsp;    public Paint getDividerPaint() {
+<b class="nc"><i class="no-highlight">228</i>&nbsp;        return this.dividerPaint;</b>
+<i class="no-highlight">229</i>&nbsp;    }
+<i class="no-highlight">230</i>&nbsp;
+<i class="no-highlight">231</i>&nbsp;    /**
+<i class="no-highlight">232</i>&nbsp;     * Creates a time period that includes the specified millisecond, assuming
+<i class="no-highlight">233</i>&nbsp;     * the given time zone.
+<i class="no-highlight">234</i>&nbsp;     *
+<i class="no-highlight">235</i>&nbsp;     * @param millisecond  the time.
+<i class="no-highlight">236</i>&nbsp;     * @param zone  the time zone.
+<i class="no-highlight">237</i>&nbsp;     * @param locale  the locale.
+<i class="no-highlight">238</i>&nbsp;     *
+<i class="no-highlight">239</i>&nbsp;     * @return The time period.
+<i class="no-highlight">240</i>&nbsp;     */
+<i class="no-highlight">241</i>&nbsp;    public RegularTimePeriod createInstance(Date millisecond, TimeZone zone,
+<i class="no-highlight">242</i>&nbsp;            Locale locale) {
+<b class="fc"><i class="no-highlight">243</i>&nbsp;        RegularTimePeriod result = null;</b>
+<i class="no-highlight">244</i>&nbsp;        try {
+<b class="fc"><i class="no-highlight">245</i>&nbsp;            Constructor c = this.periodClass.getDeclaredConstructor(</b>
+<i class="no-highlight">246</i>&nbsp;                    new Class[] {Date.class, TimeZone.class, Locale.class});
+<b class="fc"><i class="no-highlight">247</i>&nbsp;            result = (RegularTimePeriod) c.newInstance(new Object[] {</b>
+<i class="no-highlight">248</i>&nbsp;                    millisecond, zone, locale});
+<i class="no-highlight">249</i>&nbsp;        }
+<b class="nc"><i class="no-highlight">250</i>&nbsp;        catch (Exception e) {</b>
+<i class="no-highlight">251</i>&nbsp;            // do nothing
+<b class="fc"><i class="no-highlight">252</i>&nbsp;        }</b>
+<b class="fc"><i class="no-highlight">253</i>&nbsp;        return result;</b>
+<i class="no-highlight">254</i>&nbsp;    }
+<i class="no-highlight">255</i>&nbsp;
+<i class="no-highlight">256</i>&nbsp;    /**
+<i class="no-highlight">257</i>&nbsp;     * Tests this object for equality with an arbitrary object.
+<i class="no-highlight">258</i>&nbsp;     *
+<i class="no-highlight">259</i>&nbsp;     * @param obj  the object to test against ({@code null} permitted).
+<i class="no-highlight">260</i>&nbsp;     *
+<i class="no-highlight">261</i>&nbsp;     * @return A boolean.
+<i class="no-highlight">262</i>&nbsp;     */
+<i class="no-highlight">263</i>&nbsp;    @Override
+<i class="no-highlight">264</i>&nbsp;    public boolean equals(Object obj) {
+<b class="fc"><i class="no-highlight">265</i>&nbsp;        if (obj == this) {</b>
+<b class="nc"><i class="no-highlight">266</i>&nbsp;            return true;</b>
+<i class="no-highlight">267</i>&nbsp;        }
+<b class="fc"><i class="no-highlight">268</i>&nbsp;        if (obj instanceof PeriodAxisLabelInfo) {</b>
+<b class="fc"><i class="no-highlight">269</i>&nbsp;            PeriodAxisLabelInfo info = (PeriodAxisLabelInfo) obj;</b>
+<b class="fc"><i class="no-highlight">270</i>&nbsp;            if (!info.periodClass.equals(this.periodClass)) {</b>
+<b class="fc"><i class="no-highlight">271</i>&nbsp;                return false;</b>
+<i class="no-highlight">272</i>&nbsp;            }
+<b class="fc"><i class="no-highlight">273</i>&nbsp;            if (!info.dateFormat.equals(this.dateFormat)) {</b>
+<b class="fc"><i class="no-highlight">274</i>&nbsp;                return false;</b>
+<i class="no-highlight">275</i>&nbsp;            }
+<b class="fc"><i class="no-highlight">276</i>&nbsp;            if (!info.padding.equals(this.padding)) {</b>
+<b class="fc"><i class="no-highlight">277</i>&nbsp;                return false;</b>
+<i class="no-highlight">278</i>&nbsp;            }
+<b class="fc"><i class="no-highlight">279</i>&nbsp;            if (!info.labelFont.equals(this.labelFont)) {</b>
+<b class="fc"><i class="no-highlight">280</i>&nbsp;                return false;</b>
+<i class="no-highlight">281</i>&nbsp;            }
+<b class="fc"><i class="no-highlight">282</i>&nbsp;            if (!info.labelPaint.equals(this.labelPaint)) {</b>
+<b class="fc"><i class="no-highlight">283</i>&nbsp;                return false;</b>
+<i class="no-highlight">284</i>&nbsp;            }
+<b class="fc"><i class="no-highlight">285</i>&nbsp;            if (info.drawDividers != this.drawDividers) {</b>
+<b class="fc"><i class="no-highlight">286</i>&nbsp;                return false;</b>
+<i class="no-highlight">287</i>&nbsp;            }
+<b class="fc"><i class="no-highlight">288</i>&nbsp;            if (!info.dividerStroke.equals(this.dividerStroke)) {</b>
+<b class="fc"><i class="no-highlight">289</i>&nbsp;                return false;</b>
+<i class="no-highlight">290</i>&nbsp;            }
+<b class="fc"><i class="no-highlight">291</i>&nbsp;            if (!info.dividerPaint.equals(this.dividerPaint)) {</b>
+<b class="fc"><i class="no-highlight">292</i>&nbsp;                return false;</b>
+<i class="no-highlight">293</i>&nbsp;            }
+<b class="fc"><i class="no-highlight">294</i>&nbsp;            return true;</b>
+<i class="no-highlight">295</i>&nbsp;        }
+<b class="nc"><i class="no-highlight">296</i>&nbsp;        return false;</b>
+<i class="no-highlight">297</i>&nbsp;    }
+<i class="no-highlight">298</i>&nbsp;
+<i class="no-highlight">299</i>&nbsp;    /**
+<i class="no-highlight">300</i>&nbsp;     * Returns a hash code for this object.
+<i class="no-highlight">301</i>&nbsp;     *
+<i class="no-highlight">302</i>&nbsp;     * @return A hash code.
+<i class="no-highlight">303</i>&nbsp;     */
+<i class="no-highlight">304</i>&nbsp;    @Override
+<i class="no-highlight">305</i>&nbsp;    public int hashCode() {
+<b class="fc"><i class="no-highlight">306</i>&nbsp;        int result = 41;</b>
+<b class="fc"><i class="no-highlight">307</i>&nbsp;        result = result + 37 * this.periodClass.hashCode();</b>
+<b class="fc"><i class="no-highlight">308</i>&nbsp;        result = result + 37 * this.dateFormat.hashCode();</b>
+<b class="fc"><i class="no-highlight">309</i>&nbsp;        return result;</b>
+<i class="no-highlight">310</i>&nbsp;    }
+<i class="no-highlight">311</i>&nbsp;
+<i class="no-highlight">312</i>&nbsp;    /**
+<i class="no-highlight">313</i>&nbsp;     * Returns a clone of the object.
+<i class="no-highlight">314</i>&nbsp;     *
+<i class="no-highlight">315</i>&nbsp;     * @return A clone.
+<i class="no-highlight">316</i>&nbsp;     *
+<i class="no-highlight">317</i>&nbsp;     * @throws CloneNotSupportedException if cloning is not supported.
+<i class="no-highlight">318</i>&nbsp;     */
+<i class="no-highlight">319</i>&nbsp;    @Override
+<i class="no-highlight">320</i>&nbsp;    public Object clone() throws CloneNotSupportedException {
+<b class="fc"><i class="no-highlight">321</i>&nbsp;        PeriodAxisLabelInfo clone = (PeriodAxisLabelInfo) super.clone();</b>
+<b class="fc"><i class="no-highlight">322</i>&nbsp;        return clone;</b>
+<i class="no-highlight">323</i>&nbsp;    }
+<i class="no-highlight">324</i>&nbsp;
+<i class="no-highlight">325</i>&nbsp;    /**
+<i class="no-highlight">326</i>&nbsp;     * Provides serialization support.
+<i class="no-highlight">327</i>&nbsp;     *
+<i class="no-highlight">328</i>&nbsp;     * @param stream  the output stream.
+<i class="no-highlight">329</i>&nbsp;     *
+<i class="no-highlight">330</i>&nbsp;     * @throws IOException  if there is an I/O error.
+<i class="no-highlight">331</i>&nbsp;     */
+<i class="no-highlight">332</i>&nbsp;    private void writeObject(ObjectOutputStream stream) throws IOException {
+<b class="fc"><i class="no-highlight">333</i>&nbsp;        stream.defaultWriteObject();</b>
+<b class="fc"><i class="no-highlight">334</i>&nbsp;        SerialUtils.writePaint(this.labelPaint, stream);</b>
+<b class="fc"><i class="no-highlight">335</i>&nbsp;        SerialUtils.writeStroke(this.dividerStroke, stream);</b>
+<b class="fc"><i class="no-highlight">336</i>&nbsp;        SerialUtils.writePaint(this.dividerPaint, stream);</b>
+<i class="no-highlight">337</i>&nbsp;    }
+<i class="no-highlight">338</i>&nbsp;
+<i class="no-highlight">339</i>&nbsp;    /**
+<i class="no-highlight">340</i>&nbsp;     * Provides serialization support.
+<i class="no-highlight">341</i>&nbsp;     *
+<i class="no-highlight">342</i>&nbsp;     * @param stream  the input stream.
+<i class="no-highlight">343</i>&nbsp;     *
+<i class="no-highlight">344</i>&nbsp;     * @throws IOException  if there is an I/O error.
+<i class="no-highlight">345</i>&nbsp;     * @throws ClassNotFoundException  if there is a classpath problem.
+<i class="no-highlight">346</i>&nbsp;     */
+<i class="no-highlight">347</i>&nbsp;    private void readObject(ObjectInputStream stream)
+<i class="no-highlight">348</i>&nbsp;        throws IOException, ClassNotFoundException {
+<b class="fc"><i class="no-highlight">349</i>&nbsp;        stream.defaultReadObject();</b>
+<b class="fc"><i class="no-highlight">350</i>&nbsp;        this.labelPaint = SerialUtils.readPaint(stream);</b>
+<b class="fc"><i class="no-highlight">351</i>&nbsp;        this.dividerStroke = SerialUtils.readStroke(stream);</b>
+<b class="fc"><i class="no-highlight">352</i>&nbsp;        this.dividerPaint = SerialUtils.readPaint(stream);</b>
+<i class="no-highlight">353</i>&nbsp;    }
+<i class="no-highlight">354</i>&nbsp;
+<i class="no-highlight">355</i>&nbsp;}
+</div>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+        var codeBlock = document.getElementById('sourceCode');
+
+        if (codeBlock) {
+            hljs.highlightBlock(codeBlock);
+        }
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2022-03-26 17:36</div>
+</div>
+</body>
+</html>

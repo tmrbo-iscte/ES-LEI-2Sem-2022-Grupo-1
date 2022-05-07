@@ -179,6 +179,17 @@ public class XYPolygonAnnotation extends AbstractXYAnnotation
         return this.outlinePaint;
     }
 
+    private void createPath(double x, double y, ValueAxis domainAxis, Rectangle2D dataArea, ValueAxis rangeAxis, RectangleEdge domainEdge,
+                            RectangleEdge rangeEdge, GeneralPath area){
+        for (int i = 2; i < this.polygon.length; i += 2) {
+            x = domainAxis.valueToJava2D(this.polygon[i], dataArea,
+                    domainEdge);
+            y = rangeAxis.valueToJava2D(this.polygon[i + 1], dataArea,
+                    rangeEdge);
+            area.lineTo((float) y, (float) x);
+        }
+    }
+
     /**
      * Draws the annotation.  This method is usually called by the
      * {@link XYPlot} class, you shouldn't need to call it directly.
@@ -211,40 +222,15 @@ public class XYPolygonAnnotation extends AbstractXYAnnotation
                 domainEdge);
         double y = rangeAxis.valueToJava2D(this.polygon[1], dataArea,
                 rangeEdge);
-        if (orientation == PlotOrientation.HORIZONTAL) {
-            area.moveTo((float) y, (float) x);
-            for (int i = 2; i < this.polygon.length; i += 2) {
-                x = domainAxis.valueToJava2D(this.polygon[i], dataArea,
-                        domainEdge);
-                y = rangeAxis.valueToJava2D(this.polygon[i + 1], dataArea,
-                        rangeEdge);
-                area.lineTo((float) y, (float) x);
-            }
-            area.closePath();
-        }
-        else if (orientation == PlotOrientation.VERTICAL) {
-            area.moveTo((float) x, (float) y);
-            for (int i = 2; i < this.polygon.length; i += 2) {
-                x = domainAxis.valueToJava2D(this.polygon[i], dataArea,
-                        domainEdge);
-                y = rangeAxis.valueToJava2D(this.polygon[i + 1], dataArea,
-                        rangeEdge);
-                area.lineTo((float) x, (float) y);
-            }
-            area.closePath();
-       }
+
+        area.moveTo((float) y, (float) x);
+        createPath(x,y,domainAxis, dataArea, rangeAxis, domainEdge, rangeEdge, area);
+        area.closePath();
 
 
-        if (this.fillPaint != null) {
-            g2.setPaint(this.fillPaint);
-            g2.fill(area);
-        }
+        Painter p = new Painter(area, stroke, outlinePaint, fillPaint);
+        p.paintArea(g2);
 
-        if (this.stroke != null && this.outlinePaint != null) {
-            g2.setPaint(this.outlinePaint);
-            g2.setStroke(this.stroke);
-            g2.draw(area);
-        }
         addEntity(info, area, rendererIndex, getToolTipText(), getURL());
 
     }

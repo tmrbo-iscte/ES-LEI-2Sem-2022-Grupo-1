@@ -175,20 +175,16 @@ public class XYImageAnnotation extends AbstractXYAnnotation
         PlotOrientation orientation = plot.getOrientation();
         AxisLocation domainAxisLocation = plot.getDomainAxisLocation();
         AxisLocation rangeAxisLocation = plot.getRangeAxisLocation();
-        RectangleEdge domainEdge
-            = Plot.resolveDomainAxisLocation(domainAxisLocation, orientation);
-        RectangleEdge rangeEdge
-            = Plot.resolveRangeAxisLocation(rangeAxisLocation, orientation);
-        float j2DX
-            = (float) domainAxis.valueToJava2D(this.x, dataArea, domainEdge);
-        float j2DY
-            = (float) rangeAxis.valueToJava2D(this.y, dataArea, rangeEdge);
+        RectangleEdge domainEdge = Plot.resolveDomainAxisLocation(domainAxisLocation, orientation);
+        RectangleEdge rangeEdge = Plot.resolveRangeAxisLocation(rangeAxisLocation, orientation);
+        float j2DX = (float) domainAxis.valueToJava2D(this.x, dataArea, domainEdge);
+        float j2DY = (float) rangeAxis.valueToJava2D(this.y, dataArea, rangeEdge);
         float xx = 0.0f;
         float yy = 0.0f;
         if (orientation == PlotOrientation.HORIZONTAL) {
             xx = j2DY;
             yy = j2DX;
-        } else if (orientation == PlotOrientation.VERTICAL) {
+        } else {
             xx = j2DX;
             yy = j2DY;
         }

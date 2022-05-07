@@ -266,7 +266,7 @@ public class XYTitleAnnotation extends AbstractXYAnnotation
             xx = j2DY;
             yy = j2DX;
         }
-        else if (orientation == PlotOrientation.VERTICAL) {
+        else {
             xx = j2DX;
             yy = j2DY;
         }

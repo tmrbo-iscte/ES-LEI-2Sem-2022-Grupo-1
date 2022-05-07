@@ -1271,23 +1271,7 @@ public class StandardChartTheme implements ChartTheme, Cloneable,
         }
     }
 
-    /**
-     * Applies the attributes of this theme to a {@link XYPlot}.
-     *
-     * @param plot  the plot ({@code null} not permitted).
-     * 
-     * @param <S> the type for the series keys.
-     */
-    protected <S extends Comparable<S>> void applyToXYPlot(XYPlot<S> plot) {
-        plot.setAxisOffset(this.axisOffset);
-        plot.setDomainZeroBaselinePaint(this.baselinePaint);
-        plot.setRangeZeroBaselinePaint(this.baselinePaint);
-        plot.setDomainGridlinePaint(this.domainGridlinePaint);
-        plot.setRangeGridlinePaint(this.rangeGridlinePaint);
-        plot.setDomainCrosshairPaint(this.crosshairPaint);
-        plot.setRangeCrosshairPaint(this.crosshairPaint);
-        plot.setShadowGenerator(this.shadowGenerator);
-
+    public <S extends Comparable<S>> void processAxis(XYPlot<S> plot){
         // process all domain axes
         int domainAxisCount = plot.getDomainAxisCount();
         for (int i = 0; i < domainAxisCount; i++) {
@@ -1305,7 +1289,20 @@ public class StandardChartTheme implements ChartTheme, Cloneable,
                 applyToValueAxis(axis);
             }
         }
+    }
 
+    private <S extends Comparable<S>> void plotSetter(XYPlot<S> plot){
+        plot.setAxisOffset(this.axisOffset);
+        plot.setDomainZeroBaselinePaint(this.baselinePaint);
+        plot.setRangeZeroBaselinePaint(this.baselinePaint);
+        plot.setDomainGridlinePaint(this.domainGridlinePaint);
+        plot.setRangeGridlinePaint(this.rangeGridlinePaint);
+        plot.setDomainCrosshairPaint(this.crosshairPaint);
+        plot.setRangeCrosshairPaint(this.crosshairPaint);
+        plot.setShadowGenerator(this.shadowGenerator);
+    }
+
+    private <S extends Comparable<S>> void processRenderers(XYPlot<S> plot){
         // process all renderers
         int rendererCount = plot.getRendererCount();
         for (int i = 0; i < rendererCount; i++) {
@@ -1314,11 +1311,9 @@ public class StandardChartTheme implements ChartTheme, Cloneable,
                 applyToXYItemRenderer(r);
             }
         }
-        // process all annotations
+    }
 
-        for (XYAnnotation a : plot.getAnnotations()) {
-            applyToXYAnnotation(a);
-        }
+    private <S extends Comparable<S>> void applyToDomainPlot(XYPlot<S> plot){
 
         if (plot instanceof CombinedDomainXYPlot) {
             CombinedDomainXYPlot<S> cp = (CombinedDomainXYPlot) plot;
@@ -1328,6 +1323,9 @@ public class StandardChartTheme implements ChartTheme, Cloneable,
                 }
             }
         }
+    }
+
+    private <S extends Comparable<S>> void applyToRangePlot(XYPlot<S> plot){
         if (plot instanceof CombinedRangeXYPlot) {
             CombinedRangeXYPlot<S> cp = (CombinedRangeXYPlot) plot;
             for (XYPlot subplot : cp.getSubplots()) {
@@ -1336,6 +1334,27 @@ public class StandardChartTheme implements ChartTheme, Cloneable,
                 }
             }
         }
+    }
+
+    /**
+     * Applies the attributes of this theme to a {@link XYPlot}.
+     *
+     * @param plot  the plot ({@code null} not permitted).
+     * 
+     * @param <S> the type for the series keys.
+     */
+    protected <S extends Comparable<S>> void applyToXYPlot(XYPlot<S> plot) {
+        plotSetter(plot);
+        processAxis(plot);
+        processRenderers(plot);
+
+        // process all annotations
+        for (XYAnnotation a : plot.getAnnotations()) {
+            applyToXYAnnotation(a);
+        }
+
+        applyToDomainPlot(plot);
+        applyToRangePlot(plot);
     }
 
     /**

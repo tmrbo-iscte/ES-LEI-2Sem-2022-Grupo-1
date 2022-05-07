@@ -36,7 +36,7 @@
 
 package org.jfree.chart.annotations;
 
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.geom.Rectangle2D;
 
 import org.jfree.chart.axis.ValueAxis;

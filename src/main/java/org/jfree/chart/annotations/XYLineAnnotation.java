@@ -191,6 +191,18 @@ public class XYLineAnnotation extends AbstractXYAnnotation
         return paint;
     }
 
+    private float domainValuesTo2D(double x, Rectangle2D dataArea, ValueAxis domainAxis,
+                            RectangleEdge domainEdge){
+        return (float) domainAxis.valueToJava2D(x, dataArea, domainEdge);
+
+    }
+
+    private float rangeValuesTo2D(double x, Rectangle2D dataArea, ValueAxis rangeAxis,
+                                   RectangleEdge rangeEdge){
+        return (float) rangeAxis.valueToJava2D(x, dataArea, rangeEdge);
+
+    }
+
     /**
      * Draws the annotation.  This method is called by the {@link XYPlot}
      * class, you won't normally need to call it yourself.
@@ -228,7 +240,7 @@ public class XYLineAnnotation extends AbstractXYAnnotation
                     domainEdge);
             j2DY2 = (float) rangeAxis.valueToJava2D(this.y2, dataArea,
                     rangeEdge);
-        } else if (orientation == PlotOrientation.HORIZONTAL) {
+        } else {
             j2DY1 = (float) domainAxis.valueToJava2D(this.x1, dataArea,
                     domainEdge);
             j2DX1 = (float) rangeAxis.valueToJava2D(this.y1, dataArea,

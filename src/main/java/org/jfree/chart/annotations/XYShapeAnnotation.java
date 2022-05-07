@@ -127,6 +127,20 @@ public class XYShapeAnnotation extends AbstractXYAnnotation
         this.fillPaint = fillPaint;
     }
 
+    /*public void paintShape(Graphics2D g2, Shape s, PlotRenderingInfo info, int rendererIndex) {
+        if (this.fillPaint != null) {
+            g2.setPaint(this.fillPaint);
+            g2.fill(s);
+        }
+
+        if (this.stroke != null && this.outlinePaint != null) {
+            g2.setPaint(this.outlinePaint);
+            g2.setStroke(this.stroke);
+            g2.draw(s);
+        }
+        addEntity(info, s, rendererIndex, getToolTipText(), getURL());
+    }*/
+
     /**
      * Draws the annotation.  This method is usually called by the
      * {@link XYPlot} class, you shouldn't need to call it directly.
@@ -169,7 +183,7 @@ public class XYShapeAnnotation extends AbstractXYAnnotation
         double m12 = yy0 - m11 * y0;
 
         //  create transform & transform shape
-        Shape s = null;
+        Shape s;
         if (orientation == PlotOrientation.HORIZONTAL) {
             AffineTransform t1 = new AffineTransform(0.0f, 1.0f, 1.0f, 0.0f,
                     0.0f, 0.0f);
@@ -178,24 +192,17 @@ public class XYShapeAnnotation extends AbstractXYAnnotation
             s = t1.createTransformedShape(this.shape);
             s = t2.createTransformedShape(s);
         }
-        else if (orientation == PlotOrientation.VERTICAL) {
+        else {
             AffineTransform t = new AffineTransform(m00, 0, 0, m11, m02, m12);
             s = t.createTransformedShape(this.shape);
         }
-
-        if (this.fillPaint != null) {
-            g2.setPaint(this.fillPaint);
-            g2.fill(s);
-        }
-
-        if (this.stroke != null && this.outlinePaint != null) {
-            g2.setPaint(this.outlinePaint);
-            g2.setStroke(this.stroke);
-            g2.draw(s);
-        }
+        Painter p = new Painter(shape, stroke, outlinePaint, fillPaint);
+        p.paintShape(g2);
         addEntity(info, s, rendererIndex, getToolTipText(), getURL());
 
+
     }
+
 
     /**
      * Tests this annotation for equality with an arbitrary object.

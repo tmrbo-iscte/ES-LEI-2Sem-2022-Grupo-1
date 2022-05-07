@@ -346,6 +346,39 @@ public class CategoryPointerAnnotation extends CategoryTextAnnotation
         fireAnnotationChanged();
     }
 
+    private void drawLine(Graphics2D g2, double j2DX, double j2DY){
+        double startX = j2DX + Math.cos(this.angle) * this.baseRadius;
+        double startY = j2DY + Math.sin(this.angle) * this.baseRadius;
+
+        double endX = j2DX + Math.cos(this.angle) * this.tipRadius;
+        double endY = j2DY + Math.sin(this.angle) * this.tipRadius;
+
+        double arrowBaseX = endX + Math.cos(this.angle) * this.arrowLength;
+        double arrowBaseY = endY + Math.sin(this.angle) * this.arrowLength;
+
+        double arrowLeftX = arrowBaseX
+                + Math.cos(this.angle + Math.PI / 2.0) * this.arrowWidth;
+        double arrowLeftY = arrowBaseY
+                + Math.sin(this.angle + Math.PI / 2.0) * this.arrowWidth;
+
+        double arrowRightX = arrowBaseX
+                - Math.cos(this.angle + Math.PI / 2.0) * this.arrowWidth;
+        double arrowRightY = arrowBaseY
+                - Math.sin(this.angle + Math.PI / 2.0) * this.arrowWidth;
+
+        GeneralPath arrow = new GeneralPath();
+        arrow.moveTo((float) endX, (float) endY);
+        arrow.lineTo((float) arrowLeftX, (float) arrowLeftY);
+        arrow.lineTo((float) arrowRightX, (float) arrowRightY);
+        arrow.closePath();
+
+        g2.setStroke(this.arrowStroke);
+        g2.setPaint(this.arrowPaint);
+        Line2D line = new Line2D.Double(startX, startY, arrowBaseX, arrowBaseY);
+        g2.draw(line);
+        g2.fill(arrow);
+    }
+
     /**
      * Draws the annotation.
      *
@@ -375,36 +408,8 @@ public class CategoryPointerAnnotation extends CategoryTextAnnotation
             j2DX = j2DY;
             j2DY = temp;
         }
-        double startX = j2DX + Math.cos(this.angle) * this.baseRadius;
-        double startY = j2DY + Math.sin(this.angle) * this.baseRadius;
 
-        double endX = j2DX + Math.cos(this.angle) * this.tipRadius;
-        double endY = j2DY + Math.sin(this.angle) * this.tipRadius;
-
-        double arrowBaseX = endX + Math.cos(this.angle) * this.arrowLength;
-        double arrowBaseY = endY + Math.sin(this.angle) * this.arrowLength;
-
-        double arrowLeftX = arrowBaseX
-            + Math.cos(this.angle + Math.PI / 2.0) * this.arrowWidth;
-        double arrowLeftY = arrowBaseY
-            + Math.sin(this.angle + Math.PI / 2.0) * this.arrowWidth;
-
-        double arrowRightX = arrowBaseX
-            - Math.cos(this.angle + Math.PI / 2.0) * this.arrowWidth;
-        double arrowRightY = arrowBaseY
-            - Math.sin(this.angle + Math.PI / 2.0) * this.arrowWidth;
-
-        GeneralPath arrow = new GeneralPath();
-        arrow.moveTo((float) endX, (float) endY);
-        arrow.lineTo((float) arrowLeftX, (float) arrowLeftY);
-        arrow.lineTo((float) arrowRightX, (float) arrowRightY);
-        arrow.closePath();
-
-        g2.setStroke(this.arrowStroke);
-        g2.setPaint(this.arrowPaint);
-        Line2D line = new Line2D.Double(startX, startY, arrowBaseX, arrowBaseY);
-        g2.draw(line);
-        g2.fill(arrow);
+        drawLine(g2, j2DX, j2DY);
 
         // draw the label
         g2.setFont(getFont());

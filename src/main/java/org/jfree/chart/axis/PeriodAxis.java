@@ -60,6 +60,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import org.jfree.chart.StandardChartTheme;
 import org.jfree.chart.event.AxisChangeEvent;
 import org.jfree.chart.plot.Plot;
 import org.jfree.chart.plot.PlotRenderingInfo;
@@ -1181,6 +1182,19 @@ public class PeriodAxis extends ValueAxis
         stream.defaultReadObject();
         this.minorTickMarkStroke = SerialUtils.readStroke(stream);
         this.minorTickMarkPaint = SerialUtils.readPaint(stream);
+    }
+
+    public void apply(StandardChartTheme theme) {
+        PeriodAxisLabelInfo[] info = getLabelInfo();
+        for (int i = 0; i < info.length; i++) {
+            PeriodAxisLabelInfo e = info[i];
+            PeriodAxisLabelInfo n = new PeriodAxisLabelInfo(e.getPeriodClass(),
+                    e.getDateFormat(), e.getPadding(), theme.getRegularFont(),
+                    theme.getTickLabelPaint(), e.getDrawDividers(),
+                    e.getDividerStroke(), e.getDividerPaint());
+            info[i] = n;
+        }
+        setLabelInfo(info);
     }
 
 }

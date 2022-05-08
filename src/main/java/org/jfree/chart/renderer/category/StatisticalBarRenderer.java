@@ -53,6 +53,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Objects;
 
+import org.jfree.chart.StandardChartTheme;
 import org.jfree.chart.axis.CategoryAxis;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.entity.EntityCollection;
@@ -561,4 +562,7 @@ public class StatisticalBarRenderer extends BarRenderer
         this.errorIndicatorStroke = SerialUtils.readStroke(stream);
     }
 
+    public void apply(StandardChartTheme theme) {
+        setErrorIndicatorPaint(theme.getErrorIndicatorPaint());
+    }
 }

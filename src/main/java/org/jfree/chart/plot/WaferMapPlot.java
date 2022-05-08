@@ -51,6 +51,7 @@ import java.io.Serializable;
 import java.util.ResourceBundle;
 import org.jfree.chart.ChartElementVisitor;
 
+import org.jfree.chart.StandardChartTheme;
 import org.jfree.chart.legend.LegendItemCollection;
 import org.jfree.chart.event.PlotChangeEvent;
 import org.jfree.chart.event.RendererChangeEvent;
@@ -253,6 +254,11 @@ public class WaferMapPlot extends Plot implements RendererChangeListener,
 
         drawChipGrid(g2, area);
         drawWaferEdge(g2, area);
+
+    }
+
+    @Override
+    public void apply(StandardChartTheme theme) {
 
     }
 

@@ -134,17 +134,24 @@ public class CenterArrangement implements Arrangement, Serializable {
      *
      * @return The size.
      */
-    protected Size2D arrangeFN(BlockContainer container, Graphics2D g2,
-                               RectangleConstraint constraint) {
-
-        List<Block> blocks = container.getBlocks();
-        Block b = blocks.get(0);
-        Size2D s = b.arrange(g2, RectangleConstraint.NONE);
+    protected Size2D arrangeFN(BlockContainer container, Graphics2D g2, RectangleConstraint constraint) {
+        Size2D s = container.getFirstBlockArrangementAndSetBounds(g2, constraint);
         double width = constraint.getWidth();
-        Rectangle2D bounds = new Rectangle2D.Double((width - s.width) / 2.0,
-                0.0, s.width, s.height);
-        b.setBounds(bounds);
         return new Size2D((width - s.width) / 2.0, s.height);
+    }
+
+    /**
+     * Arranges the blocks without any constraints.  This puts all blocks
+     * into a single row.
+     *
+     * @param container  the container.
+     * @param g2  the graphics device.
+     *
+     * @return The size after the arrangement.
+     */
+    protected Size2D arrangeNN(BlockContainer container, Graphics2D g2) {
+        Size2D s = container.getFirstBlockArrangementAndSetBounds(g2, null);
+        return new Size2D(s.width, s.height);
     }
 
     /**
@@ -157,8 +164,7 @@ public class CenterArrangement implements Arrangement, Serializable {
      *
      * @return The size following the arrangement.
      */
-    protected Size2D arrangeFR(BlockContainer container, Graphics2D g2,
-                               RectangleConstraint constraint) {
+    protected Size2D arrangeFR(BlockContainer container, Graphics2D g2, RectangleConstraint constraint) {
 
         Size2D s = arrangeFN(container, g2, constraint);
         if (constraint.getHeightRange().contains(s.height)) {
@@ -181,9 +187,7 @@ public class CenterArrangement implements Arrangement, Serializable {
      *
      * @return The size following the arrangement.
      */
-    protected Size2D arrangeFF(BlockContainer container, Graphics2D g2,
-                               RectangleConstraint constraint) {
-
+    protected Size2D arrangeFF(BlockContainer container, Graphics2D g2, RectangleConstraint constraint) {
         // TODO: implement this properly
         return arrangeFN(container, g2, constraint);
     }
@@ -224,16 +228,13 @@ public class CenterArrangement implements Arrangement, Serializable {
      *
      * @return The size following the arrangement.
      */
-    protected Size2D arrangeRF(BlockContainer container, Graphics2D g2,
-                               RectangleConstraint constraint) {
-
+    protected Size2D arrangeRF(BlockContainer container, Graphics2D g2, RectangleConstraint constraint) {
         Size2D s = arrangeNF(container, g2, constraint);
         if (constraint.getWidthRange().contains(s.width)) {
             return s;
         }
         else {
-            RectangleConstraint c = constraint.toFixedWidth(
-                    constraint.getWidthRange().constrain(s.getWidth()));
+            RectangleConstraint c = constraint.toFixedWidth(constraint.getWidthRange().constrain(s.getWidth()));
             return arrangeFF(container, g2, c);
         }
     }
@@ -248,8 +249,7 @@ public class CenterArrangement implements Arrangement, Serializable {
      *
      * @return The size following the arrangement.
      */
-    protected Size2D arrangeRN(BlockContainer container, Graphics2D g2,
-                               RectangleConstraint constraint) {
+    protected Size2D arrangeRN(BlockContainer container, Graphics2D g2, RectangleConstraint constraint) {
         // first arrange without constraints, then see if the width fits
         // within the required range...if not, call arrangeFN() at max width
         Size2D s1 = arrangeNN(container, g2);
@@ -257,27 +257,9 @@ public class CenterArrangement implements Arrangement, Serializable {
             return s1;
         }
         else {
-            RectangleConstraint c = constraint.toFixedWidth(
-                    constraint.getWidthRange().getUpperBound());
+            RectangleConstraint c = constraint.toFixedWidth(constraint.getWidthRange().getUpperBound());
             return arrangeFN(container, g2, c);
         }
-    }
-
-    /**
-     * Arranges the blocks without any constraints.  This puts all blocks
-     * into a single row.
-     *
-     * @param container  the container.
-     * @param g2  the graphics device.
-     *
-     * @return The size after the arrangement.
-     */
-    protected Size2D arrangeNN(BlockContainer container, Graphics2D g2) {
-        List<Block> blocks = container.getBlocks();
-        Block b = blocks.get(0);
-        Size2D s = b.arrange(g2, RectangleConstraint.NONE);
-        b.setBounds(new Rectangle2D.Double(0.0, 0.0, s.width, s.height));
-        return new Size2D(s.width, s.height);
     }
 
     /**

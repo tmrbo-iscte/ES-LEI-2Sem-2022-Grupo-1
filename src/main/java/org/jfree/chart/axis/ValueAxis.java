@@ -40,6 +40,7 @@
 
 package org.jfree.chart.axis;
 
+import org.jfree.chart.StandardChartTheme;
 import org.jfree.chart.api.PublicCloneable;
 import org.jfree.chart.api.RectangleEdge;
 import org.jfree.chart.api.RectangleInsets;
@@ -1667,6 +1668,16 @@ public abstract class ValueAxis extends Axis
         this.downArrow = SerialUtils.readShape(stream);
         this.leftArrow = SerialUtils.readShape(stream);
         this.rightArrow = SerialUtils.readShape(stream);
+    }
+
+    @Override
+    public void apply(StandardChartTheme theme) {
+        setLabelFont(theme.getLargeFont());
+        setLabelPaint(theme.getAxisLabelPaint());
+        setTickLabelFont(theme.getRegularFont());
+        setTickLabelPaint(theme.getTickLabelPaint());
+        if (this instanceof SymbolAxis) this.apply(theme);
+        if (this instanceof PeriodAxis) this.apply(theme);
     }
 
 }

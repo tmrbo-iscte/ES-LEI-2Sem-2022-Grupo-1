@@ -59,6 +59,7 @@ import java.util.Objects;
 import java.util.ResourceBundle;
 import org.jfree.chart.ChartElementVisitor;
 
+import org.jfree.chart.StandardChartTheme;
 import org.jfree.chart.legend.LegendItemCollection;
 import org.jfree.chart.event.PlotChangeEvent;
 import org.jfree.chart.api.RectangleInsets;
@@ -861,6 +862,11 @@ public class CompassPlot extends Plot implements Cloneable, Serializable {
         this.rosePaint = SerialUtils.readPaint(stream);
         this.roseCenterPaint = SerialUtils.readPaint(stream);
         this.roseHighlightPaint = SerialUtils.readPaint(stream);
+    }
+
+    @Override
+    public void apply(StandardChartTheme theme) {
+
     }
 
 }

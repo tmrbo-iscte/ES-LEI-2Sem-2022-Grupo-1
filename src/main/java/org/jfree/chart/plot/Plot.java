@@ -69,6 +69,7 @@ import org.jfree.chart.ChartElement;
 import org.jfree.chart.ChartElementVisitor;
 
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.StandardChartTheme;
 import org.jfree.chart.legend.LegendItemCollection;
 import org.jfree.chart.legend.LegendItemSource;
 import org.jfree.chart.annotations.Annotation;
@@ -1442,4 +1443,9 @@ public abstract class Plot implements ChartElement, AxisChangeListener,
 
     }
 
+    /**
+     * REFACTOR - USADO PARA SIMPLIFICAR VÁRIOS FEATURE ENVIES EM org.jfree.chart.StandardChartTheme
+     * @author Afonso Caniço, Gustavo Ferreira
+     */
+    public abstract void apply(StandardChartTheme theme);
 }

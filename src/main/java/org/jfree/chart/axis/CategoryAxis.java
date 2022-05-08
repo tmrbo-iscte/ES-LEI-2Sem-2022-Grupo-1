@@ -43,7 +43,6 @@ import java.awt.Paint;
 import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.geom.Line2D;
-import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -55,6 +54,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import org.jfree.chart.StandardChartTheme;
 import org.jfree.chart.entity.CategoryLabelEntity;
 import org.jfree.chart.entity.EntityCollection;
 import org.jfree.chart.event.AxisChangeEvent;
@@ -658,8 +658,7 @@ public class CategoryAxis extends Axis implements Cloneable, Serializable {
      * @see #getCategorySeriesMiddle(Comparable, Comparable, CategoryDataset,
      *     double, Rectangle2D, RectangleEdge)
      */
-    public double getCategoryMiddle(Comparable category,
-            List categories, Rectangle2D area, RectangleEdge edge) {
+    public double getCategoryMiddle(Comparable category, List categories, Rectangle2D area, RectangleEdge edge) {
         Args.nullNotPermitted(categories, "categories");
         int categoryIndex = categories.indexOf(category);
         int categoryCount = categories.size();
@@ -922,6 +921,44 @@ public class CategoryAxis extends Axis implements Cloneable, Serializable {
     }
 
     /**
+     * REFACTOR - USADO PARA SIMPLIFICAR CategoryAxis.drawCategoryLabels.
+     * @author Afonso Caniço
+     */
+    private Rectangle2D getRectangle(int categoryIndex, AxisState state, List ticks, Rectangle2D dataArea, RectangleEdge edge) {
+        double x0 = 0.0;
+        double x1 = 0.0;
+        double y0 = 0.0;
+        double y1 = 0.0;
+        switch (edge) {
+            case TOP:
+                x0 = getCategoryStart(categoryIndex, ticks.size(), dataArea, edge);
+                x1 = getCategoryEnd(categoryIndex, ticks.size(), dataArea, edge);
+                y0 = y1 - state.getMax();
+                y1 = state.getCursor() - this.categoryLabelPositionOffset;
+                break;
+            case BOTTOM:
+                x0 = getCategoryStart(categoryIndex, ticks.size(), dataArea, edge);
+                x1 = getCategoryEnd(categoryIndex, ticks.size(), dataArea, edge);
+                y0 = state.getCursor() + this.categoryLabelPositionOffset;
+                y1 = y0 + state.getMax();
+                break;
+            case LEFT:
+                x0 = x1 - state.getMax();
+                x1 = state.getCursor() - this.categoryLabelPositionOffset;
+                y0 = getCategoryStart(categoryIndex, ticks.size(), dataArea, edge);
+                y1 = getCategoryEnd(categoryIndex, ticks.size(), dataArea, edge);
+                break;
+            case RIGHT:
+                x0 = state.getCursor() + this.categoryLabelPositionOffset;
+                x1 = x0 - state.getMax();
+                y0 = getCategoryStart(categoryIndex, ticks.size(), dataArea, edge);
+                y1 = getCategoryEnd(categoryIndex, ticks.size(), dataArea, edge);
+                break;
+        }
+        return new Rectangle2D.Double(x0, y0, (x1 - x0), (y1 - y0));
+    }
+
+    /**
      * Draws the category labels and returns the updated axis state.
      *
      * @param g2  the graphics device ({@code null} not permitted).
@@ -935,10 +972,7 @@ public class CategoryAxis extends Axis implements Cloneable, Serializable {
      *
      * @return The updated axis state (never {@code null}).
      */
-    protected AxisState drawCategoryLabels(Graphics2D g2, Rectangle2D plotArea,
-            Rectangle2D dataArea, RectangleEdge edge, AxisState state,
-            PlotRenderingInfo plotState) {
-
+    protected AxisState drawCategoryLabels(Graphics2D g2, Rectangle2D plotArea, Rectangle2D dataArea, RectangleEdge edge, AxisState state, PlotRenderingInfo plotState) {
         Args.nullNotPermitted(state, "state");
         if (!isTickLabelsVisible()) {
             return state;
@@ -952,86 +986,22 @@ public class CategoryAxis extends Axis implements Cloneable, Serializable {
             g2.setFont(getTickLabelFont(tick.getCategory()));
             g2.setPaint(getTickLabelPaint(tick.getCategory()));
 
-            CategoryLabelPosition position
-                    = this.categoryLabelPositions.getLabelPosition(edge);
-            double x0 = 0.0;
-            double x1 = 0.0;
-            double y0 = 0.0;
-            double y1 = 0.0;
-            if (edge == RectangleEdge.TOP) {
-                x0 = getCategoryStart(categoryIndex, ticks.size(), dataArea, 
-                        edge);
-                x1 = getCategoryEnd(categoryIndex, ticks.size(), dataArea, 
-                        edge);
-                y1 = state.getCursor() - this.categoryLabelPositionOffset;
-                y0 = y1 - state.getMax();
-            }
-            else if (edge == RectangleEdge.BOTTOM) {
-                x0 = getCategoryStart(categoryIndex, ticks.size(), dataArea, 
-                        edge);
-                x1 = getCategoryEnd(categoryIndex, ticks.size(), dataArea, 
-                        edge);
-                y0 = state.getCursor() + this.categoryLabelPositionOffset;
-                y1 = y0 + state.getMax();
-            }
-            else if (edge == RectangleEdge.LEFT) {
-                y0 = getCategoryStart(categoryIndex, ticks.size(), dataArea, 
-                        edge);
-                y1 = getCategoryEnd(categoryIndex, ticks.size(), dataArea,
-                        edge);
-                x1 = state.getCursor() - this.categoryLabelPositionOffset;
-                x0 = x1 - state.getMax();
-            }
-            else if (edge == RectangleEdge.RIGHT) {
-                y0 = getCategoryStart(categoryIndex, ticks.size(), dataArea, 
-                        edge);
-                y1 = getCategoryEnd(categoryIndex, ticks.size(), dataArea,
-                        edge);
-                x0 = state.getCursor() + this.categoryLabelPositionOffset;
-                x1 = x0 - state.getMax();
-            }
-            Rectangle2D area = new Rectangle2D.Double(x0, y0, (x1 - x0),
-                    (y1 - y0));
-            Point2D anchorPoint = position.getCategoryAnchor().getAnchorPoint(area);
+            CategoryLabelPosition position = this.categoryLabelPositions.getLabelPosition(edge);
+            Rectangle2D area = getRectangle(categoryIndex, state, ticks, dataArea, edge); // REFACTORED @ambco
             TextBlock block = tick.getLabel();
-            block.draw(g2, (float) anchorPoint.getX(),
-                    (float) anchorPoint.getY(), position.getLabelAnchor(),
-                    (float) anchorPoint.getX(), (float) anchorPoint.getY(),
-                    position.getAngle());
-            Shape bounds = block.calculateBounds(g2,
-                    (float) anchorPoint.getX(), (float) anchorPoint.getY(),
-                    position.getLabelAnchor(), (float) anchorPoint.getX(),
-                    (float) anchorPoint.getY(), position.getAngle());
+            block.draw(g2, position, area); // REFACTORED @ambco
+            Shape bounds = block.calculateBounds(g2, position, area); // REFACTORED @ambco
             if (plotState != null && plotState.getOwner() != null) {
-                EntityCollection entities = plotState.getOwner()
-                        .getEntityCollection();
+                EntityCollection entities = plotState.getOwner().getEntityCollection();
                 if (entities != null) {
-                    String tooltip = getCategoryLabelToolTip(
-                            tick.getCategory());
+                    String tooltip = getCategoryLabelToolTip(tick.getCategory());
                     String url = getCategoryLabelURL(tick.getCategory());
-                    entities.add(new CategoryLabelEntity(tick.getCategory(),
-                            bounds, tooltip, url));
+                    entities.add(new CategoryLabelEntity(tick.getCategory(), bounds, tooltip, url));
                 }
             }
             categoryIndex++;
         }
-
-        if (edge.equals(RectangleEdge.TOP)) {
-            double h = state.getMax() + this.categoryLabelPositionOffset;
-            state.cursorUp(h);
-        }
-        else if (edge.equals(RectangleEdge.BOTTOM)) {
-            double h = state.getMax() + this.categoryLabelPositionOffset;
-            state.cursorDown(h);
-        }
-        else if (edge == RectangleEdge.LEFT) {
-            double w = state.getMax() + this.categoryLabelPositionOffset;
-            state.cursorLeft(w);
-        }
-        else if (edge == RectangleEdge.RIGHT) {
-            double w = state.getMax() + this.categoryLabelPositionOffset;
-            state.cursorRight(w);
-        }
+        state.moveCursor(state.getMax() + this.categoryLabelPositionOffset, edge); // REFACTORED @ambco
         return state;
     }
 
@@ -1046,8 +1016,7 @@ public class CategoryAxis extends Axis implements Cloneable, Serializable {
      * @return A list of ticks.
      */
     @Override
-    public List refreshTicks(Graphics2D g2, AxisState state, 
-            Rectangle2D dataArea, RectangleEdge edge) {
+    public List refreshTicks(Graphics2D g2, AxisState state, Rectangle2D dataArea, RectangleEdge edge) {
 
         List ticks = new java.util.ArrayList(); // FIXME generics
 
@@ -1115,60 +1084,63 @@ public class CategoryAxis extends Axis implements Cloneable, Serializable {
      * @param edge  the location of the axis.
      * @param state  the axis state.
      */
-    public void drawTickMarks(Graphics2D g2, double cursor,
-            Rectangle2D dataArea, RectangleEdge edge, AxisState state) {
-
+    public void drawTickMarks(Graphics2D g2, double cursor, Rectangle2D dataArea, RectangleEdge edge, AxisState state) {
         Plot p = getPlot();
-        if (p == null) {
-            return;
-        }
+        if (p == null) return;
+
         CategoryPlot plot = (CategoryPlot) p;
-        double il = getTickMarkInsideLength();
-        double ol = getTickMarkOutsideLength();
+        double insideLength = getTickMarkInsideLength();
+        double outsideLength = getTickMarkOutsideLength();
         Line2D line = new Line2D.Double();
         List<Comparable> categories = plot.getCategoriesForAxis(this);
         g2.setPaint(getTickMarkPaint());
         g2.setStroke(getTickMarkStroke());
         Object saved = g2.getRenderingHint(RenderingHints.KEY_STROKE_CONTROL);
-        g2.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, 
-                RenderingHints.VALUE_STROKE_NORMALIZE);
-        if (edge.equals(RectangleEdge.TOP)) {
-            for (Comparable category : categories) {
-                double x = getCategoryMiddle(category, categories, dataArea, edge);
-                line.setLine(x, cursor, x, cursor + il);
-                g2.draw(line);
-                line.setLine(x, cursor, x, cursor - ol);
-                g2.draw(line);
-            }
-            state.cursorUp(ol);
-        } else if (edge.equals(RectangleEdge.BOTTOM)) {
-            for (Comparable category : categories) {
-                double x = getCategoryMiddle(category, categories, dataArea, edge);
-                line.setLine(x, cursor, x, cursor - il);
-                g2.draw(line);
-                line.setLine(x, cursor, x, cursor + ol);
-                g2.draw(line);
-            }
-            state.cursorDown(ol);
-        } else if (edge.equals(RectangleEdge.LEFT)) {
-            for (Comparable category : categories) {
-                double y = getCategoryMiddle(category, categories, dataArea, edge);
-                line.setLine(cursor, y, cursor + il, y);
-                g2.draw(line);
-                line.setLine(cursor, y, cursor - ol, y);
-                g2.draw(line);
-            }
-            state.cursorLeft(ol);
-        } else if (edge.equals(RectangleEdge.RIGHT)) {
-            for (Comparable category : categories) {
-                double y = getCategoryMiddle(category, categories, dataArea, edge);
-                line.setLine(cursor, y, cursor - il, y);
-                g2.draw(line);
-                line.setLine(cursor, y, cursor + ol, y);
-                g2.draw(line);
-            }
-            state.cursorRight(ol);
+        g2.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_NORMALIZE);
+
+        switch (edge) {
+            case TOP:
+                for (Comparable category : categories) {
+                    double x = getCategoryMiddle(category, categories, dataArea, edge);
+                    line.setLine(x, cursor, x, cursor + insideLength);
+                    g2.draw(line);
+                    line.setLine(x, cursor, x, cursor - outsideLength);
+                    g2.draw(line);
+                }
+                state.cursorUp(outsideLength);
+                break;
+            case BOTTOM:
+                for (Comparable category : categories) {
+                    double x = getCategoryMiddle(category, categories, dataArea, edge);
+                    line.setLine(x, cursor, x, cursor - insideLength);
+                    g2.draw(line);
+                    line.setLine(x, cursor, x, cursor + outsideLength);
+                    g2.draw(line);
+                }
+                state.cursorDown(outsideLength);
+                break;
+            case LEFT:
+                for (Comparable category : categories) {
+                    double y = getCategoryMiddle(category, categories, dataArea, edge);
+                    line.setLine(cursor, y, cursor + insideLength, y);
+                    g2.draw(line);
+                    line.setLine(cursor, y, cursor - outsideLength, y);
+                    g2.draw(line);
+                }
+                state.cursorLeft(outsideLength);
+                break;
+            case RIGHT:
+                for (Comparable category : categories) {
+                    double y = getCategoryMiddle(category, categories, dataArea, edge);
+                    line.setLine(cursor, y, cursor - insideLength, y);
+                    g2.draw(line);
+                    line.setLine(cursor, y, cursor + outsideLength, y);
+                    g2.draw(line);
+                }
+                state.cursorRight(outsideLength);
+                break;
         }
+
         g2.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, saved);
     }
 
@@ -1400,4 +1372,16 @@ public class CategoryAxis extends Axis implements Cloneable, Serializable {
         }
     }
 
+    @Override
+    public void apply(StandardChartTheme theme) {
+        setLabelFont(theme.getLargeFont());
+        setLabelPaint(theme.getAxisLabelPaint());
+        setTickLabelFont(theme.getRegularFont());
+        setTickLabelPaint(theme.getTickLabelPaint());
+        if (this instanceof SubCategoryAxis) {
+            SubCategoryAxis sca = (SubCategoryAxis) this;
+            sca.setSubLabelFont(theme.getRegularFont());
+            sca.setSubLabelPaint(theme.getTickLabelPaint());
+        }
+    }
 }

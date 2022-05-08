@@ -32,12 +32,14 @@ import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.awt.Shape;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.jfree.chart.api.HorizontalAlignment;
+import org.jfree.chart.axis.CategoryLabelPosition;
 import org.jfree.chart.block.Size2D;
 import org.jfree.chart.internal.Args;
 import org.jfree.chart.internal.ShapeUtils;
@@ -170,6 +172,16 @@ public class TextBlock implements Serializable {
                 rotateY);
         return rotatedBounds;
     }
+
+    /**
+     * REFACTOR - USADO PARA SIMPLIFICAR CategoryAxis.drawCategoryLabels.
+     * @author Afonso Caniço
+     */
+    public Shape calculateBounds(Graphics2D g2, CategoryLabelPosition position, Rectangle2D area) {
+        Point2D anchorPoint = position.getCategoryAnchor().getAnchorPoint(area);
+        return calculateBounds(g2, (float) anchorPoint.getX(), (float) anchorPoint.getY(), position.getLabelAnchor(),
+                (float) anchorPoint.getX(), (float) anchorPoint.getY(), position.getAngle());
+    }
     
     /**
      * Draws the text block at a specific location.
@@ -218,6 +230,16 @@ public class TextBlock implements Serializable {
             yCursor = yCursor + (float) dimension.getHeight();
         }
         
+    }
+
+    /**
+     * REFACTOR - USADO PARA SIMPLIFICAR CategoryAxis.drawCategoryLabels.
+     * @author Afonso Caniço
+     */
+    public void draw(Graphics2D g2, CategoryLabelPosition position, Rectangle2D area) {
+        Point2D anchorPoint = position.getCategoryAnchor().getAnchorPoint(area);
+        draw(g2, (float) anchorPoint.getX(), (float) anchorPoint.getY(), position.getLabelAnchor(),
+                (float) anchorPoint.getX(), (float) anchorPoint.getY(), position.getAngle());
     }
  
     /**

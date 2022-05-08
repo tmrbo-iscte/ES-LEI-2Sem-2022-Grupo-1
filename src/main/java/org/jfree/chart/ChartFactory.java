@@ -244,6 +244,19 @@ public abstract class ChartFactory {
             boolean legend, boolean tooltips, boolean urls) {
 
         PiePlot plot = new PiePlot(dataset);
+        return createChart(title, legend, tooltips, urls, plot);
+    }
+
+    /**
+     * This was made by Rodrigo Paulo
+     * @param title
+     * @param legend
+     * @param tooltips
+     * @param urls
+     * @param plot
+     * @return
+     */
+    private static JFreeChart createChart(String title, boolean legend, boolean tooltips, boolean urls, PiePlot plot) {
         plot.setLabelGenerator(new StandardPieSectionLabelGenerator());
         plot.setInsets(new RectangleInsets(0.0, 5.0, 5.0, 5.0));
         if (tooltips) {
@@ -322,16 +335,7 @@ public abstract class ChartFactory {
             Number oldValue = previousDataset.getValue(key);
 
             if (oldValue == null) {
-                if (greenForIncrease) {
-                    plot.setSectionPaint(key, Color.GREEN);
-                }
-                else {
-                    plot.setSectionPaint(key, Color.RED);
-                }
-                if (showDifference) {
-                    assert series != null; // suppresses compiler warning
-                    series.setValue(key + " (+100%)", newValue);
-                }
+                sectionPaint(greenForIncrease, plot, key, showDifference, series, newValue);
             }
             else {
                 pieChartSectionPaint(percentDiffForMaxScale, greenForIncrease, showDifference, plot, series, colorPerPercent, key, newValue, oldValue);
@@ -341,11 +345,33 @@ public abstract class ChartFactory {
         return subtitlingPieChart(title, percentDiffForMaxScale, greenForIncrease, legend, subTitle, showDifference, plot, series);
     }
 
+    /**
+     * sectionPaint, pieChartSectionPaint, plotCreator, paintPieChart and subtitlingPieChart were made by Rodrigo Paulo
+     * @param greenForIncrease
+     * @param plot
+     * @param key
+     * @param showDifference
+     * @param series
+     * @param newValue
+     */
+    private static void sectionPaint(boolean greenForIncrease, PiePlot plot, Comparable key, boolean showDifference,
+                                     DefaultPieDataset series, Number newValue){
+        if (greenForIncrease) {
+            plot.setSectionPaint(key, Color.GREEN);
+        }
+        else {
+            plot.setSectionPaint(key, Color.RED);
+        }
+        if (showDifference) {
+            assert series != null; // suppresses compiler warning
+            series.setValue(key + " (+100%)", newValue);
+        }
+    }
+
     private static void pieChartSectionPaint(int percentDiffForMaxScale, boolean greenForIncrease, boolean showDifference, PiePlot plot, DefaultPieDataset series, double colorPerPercent, Comparable key, Number newValue, Number oldValue) {
         double percentChange = (newValue.doubleValue()
                 / oldValue.doubleValue() - 1.0) * 100.0;
-        double shade
-            = (Math.abs(percentChange) >= percentDiffForMaxScale ? 255
+        double shade = (Math.abs(percentChange) >= percentDiffForMaxScale ? 255
             : Math.abs(percentChange) * colorPerPercent);
         if (greenForIncrease
                 && newValue.doubleValue() > oldValue.doubleValue()
@@ -385,6 +411,26 @@ public abstract class ChartFactory {
             plot.setSectionPaint(key, Color.RED);
         }
         if (showDifference && series != null) series.setValue(key + " (+100%)", newValue);
+    }
+
+    private static JFreeChart subtitlingPieChart(String title, int percentDiffForMaxScale, boolean greenForIncrease, boolean legend, boolean subTitle, boolean showDifference, PiePlot plot, DefaultPieDataset series) {
+        if (showDifference) {
+            plot.setDataset(series);
+        }
+
+        JFreeChart chart =  new JFreeChart(title,
+                JFreeChart.DEFAULT_TITLE_FONT, plot, legend);
+
+        if (subTitle) {
+            TextTitle subtitle = new TextTitle("Bright " + (greenForIncrease
+                    ? "red" : "green") + "=change >=-" + percentDiffForMaxScale
+                    + "%, Bright " + (!greenForIncrease ? "red" : "green")
+                    + "=change >=+" + percentDiffForMaxScale + "%",
+                    new Font("SansSerif", Font.PLAIN, 10));
+            chart.addSubtitle(subtitle);
+        }
+        currentTheme.apply(chart);
+        return chart;
     }
 
     /**
@@ -456,25 +502,7 @@ public abstract class ChartFactory {
         return subtitlingPieChart(title, percentDiffForMaxScale, greenForIncrease, legend, subTitle, showDifference, plot, series);
     }
 
-    private static JFreeChart subtitlingPieChart(String title, int percentDiffForMaxScale, boolean greenForIncrease, boolean legend, boolean subTitle, boolean showDifference, PiePlot plot, DefaultPieDataset series) {
-        if (showDifference) {
-            plot.setDataset(series);
-        }
 
-        JFreeChart chart =  new JFreeChart(title,
-                JFreeChart.DEFAULT_TITLE_FONT, plot, legend);
-
-        if (subTitle) {
-            TextTitle subtitle = new TextTitle("Bright " + (greenForIncrease
-                    ? "red" : "green") + "=change >=-" + percentDiffForMaxScale
-                    + "%, Bright " + (!greenForIncrease ? "red" : "green")
-                    + "=change >=+" + percentDiffForMaxScale + "%",
-                    new Font("SansSerif", Font.PLAIN, 10));
-            chart.addSubtitle(subtitle);
-        }
-        currentTheme.apply(chart);
-        return chart;
-    }
 
     /**
      * Creates a ring chart with default settings.
@@ -523,18 +551,7 @@ public abstract class ChartFactory {
             boolean legend, boolean tooltips, boolean urls) {
 
         RingPlot plot = new RingPlot(dataset);
-        plot.setLabelGenerator(new StandardPieSectionLabelGenerator());
-        plot.setInsets(new RectangleInsets(0.0, 5.0, 5.0, 5.0));
-        if (tooltips) {
-            plot.setToolTipGenerator(new StandardPieToolTipGenerator());
-        }
-        if (urls) {
-            plot.setURLGenerator(new StandardPieURLGenerator());
-        }
-        JFreeChart chart = new JFreeChart(title, JFreeChart.DEFAULT_TITLE_FONT,
-                plot, legend);
-        currentTheme.apply(chart);
-        return chart;
+        return createChart(title, legend, tooltips, urls, plot);
 
     }
 
@@ -1032,6 +1049,11 @@ public abstract class ChartFactory {
 
     }
 
+    /**
+     * The three methods made below this were made by Rodrigo Paulo
+     * @param renderer
+     * @param position
+     */
     private static void setItemLabelPosition(AbstractRenderer renderer, ItemLabelPosition position){
         renderer.setDefaultPositiveItemLabelPosition(position);
         renderer.setDefaultNegativeItemLabelPosition(position);
@@ -1041,6 +1063,12 @@ public abstract class ChartFactory {
         plot.clearRangeMarkers();
         plot.addRangeMarker(baseline, Layer.FOREGROUND);
         plot.setOrientation(orientation);
+    }
+
+    private static ItemLabelPosition setPosition(PlotOrientation orientation){
+        return (orientation == PlotOrientation.HORIZONTAL) ? new ItemLabelPosition(ItemLabelAnchor.CENTER,
+                TextAnchor.CENTER, TextAnchor.CENTER, Math.PI / 2.0) :
+                new ItemLabelPosition(ItemLabelAnchor.CENTER, TextAnchor.CENTER, TextAnchor.CENTER, 0.0);
     }
 
     /**
@@ -1072,13 +1100,7 @@ public abstract class ChartFactory {
         ValueAxis valueAxis = new NumberAxis(valueAxisLabel);
 
         WaterfallBarRenderer renderer = new WaterfallBarRenderer();
-        ItemLabelPosition position;
-        if (orientation == PlotOrientation.HORIZONTAL) {
-            position = new ItemLabelPosition(ItemLabelAnchor.CENTER, TextAnchor.CENTER, TextAnchor.CENTER, Math.PI / 2.0);
-        }
-        else {
-            position = new ItemLabelPosition(ItemLabelAnchor.CENTER, TextAnchor.CENTER, TextAnchor.CENTER, 0.0);
-        }
+        ItemLabelPosition position = setPosition(orientation);
         setItemLabelPosition(renderer, position);
         if (tooltips) {
             StandardCategoryToolTipGenerator generator = new StandardCategoryToolTipGenerator();

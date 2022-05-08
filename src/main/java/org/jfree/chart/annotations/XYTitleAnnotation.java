@@ -218,6 +218,54 @@ public class XYTitleAnnotation extends AbstractXYAnnotation
         fireAnnotationChanged();
     }
 
+    private float setXX(ValueAxis domainAxis, Rectangle2D dataArea, double anchorX, double anchorY, RectangleEdge domainEdge,
+                        RectangleEdge rangeEdge, ValueAxis rangeAxis, PlotOrientation orientation){
+        float j2DX = (float) domainAxis.valueToJava2D(anchorX, dataArea,
+                domainEdge);
+        float j2DY = (float) rangeAxis.valueToJava2D(anchorY, dataArea,
+                rangeEdge);
+        return (orientation == PlotOrientation.HORIZONTAL) ? j2DY : j2DX;
+    }
+
+    private float setYY(ValueAxis domainAxis, Rectangle2D dataArea, double anchorX, double anchorY, RectangleEdge domainEdge,
+                        RectangleEdge rangeEdge, ValueAxis rangeAxis, PlotOrientation orientation){
+        float j2DX = (float) domainAxis.valueToJava2D(anchorX, dataArea,
+                domainEdge);
+        float j2DY = (float) rangeAxis.valueToJava2D(anchorY, dataArea,
+                rangeEdge);
+        return (orientation == PlotOrientation.HORIZONTAL) ? j2DX : j2DY;
+    }
+
+    private double setAnchorX(Range xRange, ValueAxis domainAxis, Rectangle2D dataArea, RectangleEdge domainEdge){
+        return ((this.coordinateType == XYCoordinateType.RELATIVE) ? xRange.getLowerBound() + (this.x * xRange.getLength()) :
+                domainAxis.valueToJava2D(this.x, dataArea, domainEdge)) ;
+    }
+
+    private double setAnchorY(Range yRange, Rectangle2D dataArea, RectangleEdge rangeEdge, ValueAxis rangeAxis){
+        return ((this.coordinateType == XYCoordinateType.RELATIVE) ? yRange.getLowerBound() + (this.y * yRange.getLength()) :
+                rangeAxis.valueToJava2D(this.y, dataArea, rangeEdge)) ;
+    }
+
+    private double setMaxW(Rectangle2D dataArea){
+        double maxW = dataArea.getWidth();
+        if (this.coordinateType == XYCoordinateType.RELATIVE && this.maxWidth > 0.0){
+            maxW *= this.maxWidth;
+        }else if(this.coordinateType == XYCoordinateType.DATA){
+            maxW = this.maxWidth;
+        }
+        return maxW;
+    }
+
+    private double setMaxH(Rectangle2D dataArea){
+        double maxH = dataArea.getHeight();
+        if(this.coordinateType == XYCoordinateType.RELATIVE && this.maxHeight > 0.0){
+            maxH *= this.maxHeight;
+        }else if(this.coordinateType == XYCoordinateType.DATA){
+            maxH = this.maxHeight;
+        }
+        return maxH;
+    }
+
     /**
      * Draws the annotation.  This method is called by the drawing code in the
      * {@link XYPlot} class, you don't normally need to call this method
@@ -240,60 +288,27 @@ public class XYTitleAnnotation extends AbstractXYAnnotation
         PlotOrientation orientation = plot.getOrientation();
         AxisLocation domainAxisLocation = plot.getDomainAxisLocation();
         AxisLocation rangeAxisLocation = plot.getRangeAxisLocation();
-        RectangleEdge domainEdge = Plot.resolveDomainAxisLocation(
-                domainAxisLocation, orientation);
-        RectangleEdge rangeEdge = Plot.resolveRangeAxisLocation(
-                rangeAxisLocation, orientation);
+        RectangleEdge domainEdge = Plot.resolveDomainAxisLocation(domainAxisLocation, orientation);
+        RectangleEdge rangeEdge = Plot.resolveRangeAxisLocation(rangeAxisLocation, orientation);
         Range xRange = domainAxis.getRange();
         Range yRange = rangeAxis.getRange();
-        double anchorX, anchorY;
-        if (this.coordinateType == XYCoordinateType.RELATIVE) {
-            anchorX = xRange.getLowerBound() + (this.x * xRange.getLength());
-            anchorY = yRange.getLowerBound() + (this.y * yRange.getLength());
-        }
-        else {
-            anchorX = domainAxis.valueToJava2D(this.x, dataArea, domainEdge);
-            anchorY = rangeAxis.valueToJava2D(this.y, dataArea, rangeEdge);
-        }
 
-        float j2DX = (float) domainAxis.valueToJava2D(anchorX, dataArea,
-                domainEdge);
-        float j2DY = (float) rangeAxis.valueToJava2D(anchorY, dataArea,
-                rangeEdge);
-        float xx = 0.0f;
-        float yy = 0.0f;
-        if (orientation == PlotOrientation.HORIZONTAL) {
-            xx = j2DY;
-            yy = j2DX;
-        }
-        else {
-            xx = j2DX;
-            yy = j2DY;
-        }
+        double anchorX = setAnchorX(xRange, domainAxis, dataArea, domainEdge);
+        double anchorY = setAnchorY(yRange, dataArea, rangeEdge, rangeAxis);
 
-        double maxW = dataArea.getWidth();
-        double maxH = dataArea.getHeight();
-        if (this.coordinateType == XYCoordinateType.RELATIVE) {
-            if (this.maxWidth > 0.0) {
-                maxW = maxW * this.maxWidth;
-            }
-            if (this.maxHeight > 0.0) {
-                maxH = maxH * this.maxHeight;
-            }
-        }
-        if (this.coordinateType == XYCoordinateType.DATA) {
-            maxW = this.maxWidth;
-            maxH = this.maxHeight;
-        }
-        RectangleConstraint rc = new RectangleConstraint(
-                new Range(0, maxW), new Range(0, maxH));
+        float xx = setXX(domainAxis, dataArea, anchorX, anchorY, domainEdge, rangeEdge, rangeAxis, orientation);
+        float yy = setYY(domainAxis, dataArea, anchorX, anchorY, domainEdge, rangeEdge, rangeAxis, orientation);
+
+        double maxW = setMaxW(dataArea);
+        double maxH = setMaxH(dataArea);
+
+        RectangleConstraint rc = new RectangleConstraint(new Range(0, maxW), new Range(0, maxH));
 
         Size2D size = this.title.arrange(g2, rc);
-        Rectangle2D titleRect = new Rectangle2D.Double(0, 0, size.width,
-                size.height);
+        Rectangle2D titleRect = new Rectangle2D.Double(0, 0, size.width, size.height);
         Point2D anchorPoint = this.anchor.getAnchorPoint(titleRect);
-        xx = xx - (float) anchorPoint.getX();
-        yy = yy - (float) anchorPoint.getY();
+        xx -= (float) anchorPoint.getX();
+        yy -= (float) anchorPoint.getY();
         titleRect.setRect(xx, yy, titleRect.getWidth(), titleRect.getHeight());
         BlockParams p = new BlockParams();
         if (info != null) {
@@ -305,15 +320,13 @@ public class XYTitleAnnotation extends AbstractXYAnnotation
         if (info != null) {
             if (result instanceof EntityBlockResult) {
                 EntityBlockResult ebr = (EntityBlockResult) result;
-                info.getOwner().getEntityCollection().addAll(
-                        ebr.getEntityCollection());
+                info.getOwner().getEntityCollection().addAll(ebr.getEntityCollection());
             }
             String toolTip = getToolTipText();
             String url = getURL();
             if (toolTip != null || url != null) {
-                addEntity(info, new Rectangle2D.Float(xx, yy,
-                        (float) size.width, (float) size.height),
-                        rendererIndex, toolTip, url);
+                addEntity(info, new Rectangle2D.Float(xx, yy, (float) size.width, (float) size.height), rendererIndex,
+                        toolTip, url);
             }
         }
     }

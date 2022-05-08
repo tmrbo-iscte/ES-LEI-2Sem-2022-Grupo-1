@@ -308,10 +308,6 @@ public class CategoryLineAnnotation extends AbstractAnnotation
         int catIndex2 = dataset.getColumnIndex(this.category2);
         int catCount = dataset.getColumnCount();
 
-        double lineX1 = 0.0f;
-        double lineY1 = 0.0f;
-        double lineX2 = 0.0f;
-        double lineY2 = 0.0f;
         PlotOrientation orientation = plot.getOrientation();
         RectangleEdge domainEdge = Plot.resolveDomainAxisLocation(
             plot.getDomainAxisLocation(), orientation);

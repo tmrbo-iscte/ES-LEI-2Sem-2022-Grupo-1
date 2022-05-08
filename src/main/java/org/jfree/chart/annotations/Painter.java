@@ -7,6 +7,10 @@ import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
 
 public class Painter {
+    /**
+     * This class exists in order to make it easier to paint shapes across all XY..Annotation
+     */
+
     /** The shape. */
     private transient Shape shape;
 

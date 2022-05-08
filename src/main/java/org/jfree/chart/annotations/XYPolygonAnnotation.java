@@ -179,6 +179,17 @@ public class XYPolygonAnnotation extends AbstractXYAnnotation
         return this.outlinePaint;
     }
 
+    /**
+     * Made by Rodrigo Paulo
+     * @param x
+     * @param y
+     * @param domainAxis
+     * @param dataArea
+     * @param rangeAxis
+     * @param domainEdge
+     * @param rangeEdge
+     * @param area
+     */
     private void createPath(double x, double y, ValueAxis domainAxis, Rectangle2D dataArea, ValueAxis rangeAxis, RectangleEdge domainEdge,
                             RectangleEdge rangeEdge, GeneralPath area){
         for (int i = 2; i < this.polygon.length; i += 2) {
@@ -212,10 +223,8 @@ public class XYPolygonAnnotation extends AbstractXYAnnotation
             return;
         }
         PlotOrientation orientation = plot.getOrientation();
-        RectangleEdge domainEdge = Plot.resolveDomainAxisLocation(
-                plot.getDomainAxisLocation(), orientation);
-        RectangleEdge rangeEdge = Plot.resolveRangeAxisLocation(
-                plot.getRangeAxisLocation(), orientation);
+        RectangleEdge domainEdge = Plot.resolveDomainAxisLocation(plot.getDomainAxisLocation(), orientation);
+        RectangleEdge rangeEdge = Plot.resolveRangeAxisLocation(plot.getRangeAxisLocation(), orientation);
 
         GeneralPath area = new GeneralPath();
         double x = domainAxis.valueToJava2D(this.polygon[0], dataArea,
@@ -226,7 +235,6 @@ public class XYPolygonAnnotation extends AbstractXYAnnotation
         area.moveTo((float) y, (float) x);
         createPath(x,y,domainAxis, dataArea, rangeAxis, domainEdge, rangeEdge, area);
         area.closePath();
-
 
         Painter p = new Painter(area, stroke, outlinePaint, fillPaint);
         p.paintArea(g2);

@@ -194,7 +194,7 @@ public class CategoryTextAnnotation extends TextAnnotation
             anchorX = (float) rangeAxis.valueToJava2D(this.value, dataArea,
                     rangeEdge);
         }
-        else if (orientation == PlotOrientation.VERTICAL) {
+        else {
             anchorX = (float) domainAxis.getCategoryJava2DCoordinate(
                     this.categoryAnchor, catIndex, catCount, dataArea,
                     domainEdge);

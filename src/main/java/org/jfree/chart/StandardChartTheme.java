@@ -1291,6 +1291,11 @@ public class StandardChartTheme implements ChartTheme, Cloneable,
         }
     }
 
+    /**
+     * The four methods below this were made by Rodrigo Paulo
+     * @param plot
+     * @param <S>
+     */
     private <S extends Comparable<S>> void plotSetter(XYPlot<S> plot){
         plot.setAxisOffset(this.axisOffset);
         plot.setDomainZeroBaselinePaint(this.baselinePaint);

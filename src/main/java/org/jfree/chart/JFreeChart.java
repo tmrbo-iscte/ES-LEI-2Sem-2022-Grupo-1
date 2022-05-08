@@ -1008,35 +1008,10 @@ public class JFreeChart implements Drawable, TitleChangeListener,
         draw(g2, area, null, info);
     }
 
-
-    /*public void drawHelper(Graphics2D g2, Rectangle2D chartArea){
-        Composite originalComposite = g2.getComposite();
-        g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,
-                this.backgroundImageAlpha));
-        Rectangle2D dest = new Rectangle2D.Double(0.0, 0.0,
-                this.backgroundImage.getWidth(null),
-                this.backgroundImage.getHeight(null));
-        this.backgroundImageAlignment.align(dest, chartArea);
-        g2.drawImage(this.backgroundImage, (int) dest.getX(),
-                (int) dest.getY(), (int) dest.getWidth(),
-                (int) dest.getHeight(), null);
-        g2.setComposite(originalComposite);
-    }
-
-    public void paintBorder(Graphics2D g2, Rectangle2D chartArea){
-        Paint paint = getBorderPaint();
-        Stroke stroke = getBorderStroke();
-        if (paint != null && stroke != null) {
-            Rectangle2D borderArea = new Rectangle2D.Double(
-                    chartArea.getX(), chartArea.getY(),
-                    chartArea.getWidth() - 1.0, chartArea.getHeight()
-                    - 1.0);
-            g2.setPaint(paint);
-            g2.setStroke(stroke);
-            g2.draw(borderArea);
-        }
-    }*/
-
+    /**
+     * The seven methods below this were made by Rodrigo Paulo
+     * @param g2
+     */
     public void hasher(Graphics2D g2){
         Map<String, String> m = new HashMap<>();
         if (this.id != null) {
@@ -1046,12 +1021,7 @@ public class JFreeChart implements Drawable, TitleChangeListener,
         g2.setRenderingHint(ChartHints.KEY_BEGIN_ELEMENT, m);
     }
 
-    public Rectangle2D drawingHelper(Graphics2D g2, Rectangle2D chartArea){
-        if (this.backgroundPaint != null) {
-            g2.setPaint(this.backgroundPaint);
-            g2.fill(chartArea);
-        }
-
+    private void compositeHelper(Graphics2D g2, Rectangle2D chartArea){
         if (this.backgroundImage != null) {
             Composite originalComposite = g2.getComposite();
             g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,
@@ -1065,7 +1035,9 @@ public class JFreeChart implements Drawable, TitleChangeListener,
                     (int) dest.getHeight(), null);
             g2.setComposite(originalComposite);
         }
+    }
 
+    private void borderPainter(Graphics2D g2, Rectangle2D chartArea){
         if (isBorderVisible()) {
             Paint paint = getBorderPaint();
             Stroke stroke = getBorderStroke();
@@ -1079,6 +1051,15 @@ public class JFreeChart implements Drawable, TitleChangeListener,
                 g2.draw(borderArea);
             }
         }
+    }
+
+    public Rectangle2D drawingHelper(Graphics2D g2, Rectangle2D chartArea){
+        if (this.backgroundPaint != null) {
+            g2.setPaint(this.backgroundPaint);
+            g2.fill(chartArea);
+        }
+        compositeHelper(g2, chartArea);
+        borderPainter(g2, chartArea);
         Rectangle2D nonTitleArea = new Rectangle2D.Double();
         nonTitleArea.setRect(chartArea);
         this.padding.trim(nonTitleArea);
@@ -1097,46 +1078,17 @@ public class JFreeChart implements Drawable, TitleChangeListener,
         }
     }
 
-
-    /**
-     * Draws the chart on a Java 2D graphics device (such as the screen or a
-     * printer).
-     * <P>
-     * This method is the focus of the entire JFreeChart library.
-     *
-     * @param g2  the graphics device.
-     * @param chartArea  the area within which the chart should be drawn.
-     * @param anchor  the anchor point (in Java2D space) for the chart
-     *                ({@code null} permitted).
-     * @param info  records info about the drawing (null means collect no info).
-     */
-    public void draw(Graphics2D g2, Rectangle2D chartArea, Point2D anchor,
-             ChartRenderingInfo info) {
-        notifyListeners(new ChartProgressEvent(this, this,
-                ChartProgressEventType.DRAWING_STARTED, 0));
-        if (this.elementHinting) {
-            hasher(g2);
-        }
+    private EntityCollection setEntities(ChartRenderingInfo info, Rectangle2D chartArea){
         EntityCollection entities = null;
-        // record the chart area, if info is requested...
         if (info != null) {
             info.clear();
             info.setChartArea(chartArea);
             entities = info.getEntityCollection();
         }
-        if (entities != null) {
-            entities.add(new JFreeChartEntity((Rectangle2D) chartArea.clone(),
-                    this));
-        }
+        return entities;
+    }
 
-        // ensure no drawing occurs outside chart area...
-        Shape savedClip = g2.getClip();
-        g2.clip(chartArea);
-        g2.addRenderingHints(this.renderingHints);
-
-        // draw the chart background, the title and the subtitles...
-        Rectangle2D nonTitleArea = drawingHelper(g2, chartArea);
-
+    private void addToEntities(EntityCollection entities, Graphics2D g2, Rectangle2D nonTitleArea){
         if (this.title != null && this.title.isVisible()) {
             EntityCollection e = drawTitle(this.title, g2, nonTitleArea, (entities != null));
             if (e != null && entities != null) {
@@ -1152,6 +1104,41 @@ public class JFreeChart implements Drawable, TitleChangeListener,
                 }
             }
         }
+    }
+
+
+    /**
+     * Draws the chart on a Java 2D graphics device (such as the screen or a
+     * printer).
+     * <P>
+     * This method is the focus of the entire JFreeChart library.
+     *
+     * @param g2  the graphics device.
+     * @param chartArea  the area within which the chart should be drawn.
+     * @param anchor  the anchor point (in Java2D space) for the chart
+     *                ({@code null} permitted).
+     * @param info  records info about the drawing (null means collect no info).
+     */
+    public void draw(Graphics2D g2, Rectangle2D chartArea, Point2D anchor,
+             ChartRenderingInfo info) {
+        notifyListeners(new ChartProgressEvent(this, this, ChartProgressEventType.DRAWING_STARTED, 
+                0));
+        if (this.elementHinting) hasher(g2);
+        
+        EntityCollection entities = setEntities(info, chartArea);
+        // record the chart area, if info is requested...
+        if (entities != null) entities.add(new JFreeChartEntity((Rectangle2D) chartArea.clone(), this));
+
+        // ensure no drawing occurs outside chart area...
+        Shape savedClip = g2.getClip();
+        g2.clip(chartArea);
+        g2.addRenderingHints(this.renderingHints);
+
+        // draw the chart background, the title and the subtitles...
+        Rectangle2D nonTitleArea = drawingHelper(g2, chartArea);
+
+        addToEntities(entities, g2, nonTitleArea);
+
         // draw the plot (axes and data visualisation)
         plotDrawing(g2, nonTitleArea, savedClip, info, anchor);
 
@@ -1207,6 +1194,15 @@ public class JFreeChart implements Drawable, TitleChangeListener,
                 dimensions.height);
     }
 
+    /**
+     * The five methods below this were made by Rodrigo Paulo
+     * @param t
+     * @param g2
+     * @param area
+     * @param p
+     * @param size
+     * @return
+     */
     private Object drawTitleHelperTop(Title t, Graphics2D g2, Rectangle2D area, BlockParams p, Size2D size){
         Rectangle2D titleArea = createAlignedRectangle2D(size, area, t.getHorizontalAlignment(), VerticalAlignment.TOP);
         Object retValue = t.draw(g2, titleArea, p);
@@ -1240,6 +1236,33 @@ public class JFreeChart implements Drawable, TitleChangeListener,
         return retValue;
     }
 
+    private Object setRetValue(RectangleEdge position, Title t, Graphics2D g2, Rectangle2D area, BlockParams p,
+                               Size2D size) {
+        Object retValue;
+        switch (position) {
+            case TOP: {
+                retValue = drawTitleHelperTop(t, g2, area, p, size);
+                break;
+            }
+            case BOTTOM: {
+                retValue = drawTitleHelperBottom(t, g2, area, p, size);
+                break;
+            }
+            case RIGHT: {
+                retValue = drawTitleHelperRight(t, g2, area, p, size);
+                break;
+            }
+            case LEFT: {
+                retValue = drawTitleHelperLeft(t, g2, area, p, size);
+                break;
+            }
+            default: {
+                throw new RuntimeException("Unrecognised title position.");
+            }
+        }
+        return retValue;
+    }
+
 
     /**
      * Draws a title.  The title should be drawn at the top, bottom, left or
@@ -1265,31 +1288,10 @@ public class JFreeChart implements Drawable, TitleChangeListener,
             return null;
         }
         RectangleConstraint constraint = new RectangleConstraint(ww, new Range(0.0, ww), LengthConstraintType.RANGE, hh, new Range(0.0, hh), LengthConstraintType.RANGE);
-        Object retValue = null;
         BlockParams p = new BlockParams();
         p.setGenerateEntities(entities);
         Size2D size = t.arrange(g2, constraint);
-        switch (position) {
-            case TOP: {
-                retValue = drawTitleHelperTop(t, g2, area, p, size);
-                break;
-            }
-            case BOTTOM: {
-                retValue = drawTitleHelperBottom(t, g2, area, p, size);
-                break;
-            }
-            case RIGHT: {
-                retValue = drawTitleHelperRight(t, g2, area, p, size);
-                break;
-            }
-            case LEFT: {
-                retValue = drawTitleHelperLeft(t, g2, area, p, size);
-                break;
-            }
-            default: {
-                throw new RuntimeException("Unrecognised title position.");
-            }
-        }
+        Object retValue = setRetValue(position, t, g2, area, p, size);
         EntityCollection result = null;
         if (retValue instanceof EntityBlockResult) {
             EntityBlockResult ebr = (EntityBlockResult) retValue;

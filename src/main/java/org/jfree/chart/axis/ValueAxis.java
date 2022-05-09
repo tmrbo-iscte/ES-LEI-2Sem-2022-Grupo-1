@@ -69,8 +69,7 @@ import java.util.Objects;
  * using the {@code double} primitive.  The two key subclasses are
  * {@link DateAxis} and {@link NumberAxis}.
  */
-public abstract class ValueAxis extends Axis
-        implements Cloneable, PublicCloneable, Serializable {
+public abstract class ValueAxis extends Axis implements Cloneable, PublicCloneable, Serializable {
 
     /** For serialization. */
     private static final long serialVersionUID = 3698345477322391456L;
@@ -758,9 +757,7 @@ public abstract class ValueAxis extends Axis
      *
      * @return The height of the tallest tick label.
      */
-    protected double findMaximumTickLabelHeight(List ticks, Graphics2D g2,
-            Rectangle2D drawArea, boolean vertical) {
-
+    protected double findMaximumTickLabelHeight(List ticks, Graphics2D g2, Rectangle2D drawArea, boolean vertical) {
         RectangleInsets insets = getTickLabelInsets();
         Font font = getTickLabelFont();
         g2.setFont(font);
@@ -768,29 +765,14 @@ public abstract class ValueAxis extends Axis
         if (vertical) {
             FontMetrics fm = g2.getFontMetrics(font);
             for (Object o : ticks) {
-                Tick tick = (Tick) o;
-                Rectangle2D labelBounds = null;
-                if (tick instanceof LogTick) {
-                    LogTick lt = (LogTick) tick;
-                    if (lt.getAttributedLabel() != null) {
-                        labelBounds = AttrStringUtils.getTextBounds(
-                                lt.getAttributedLabel(), g2);
-                    }
-                } else if (tick.getText() != null) {
-                    labelBounds = TextUtils.getTextBounds(
-                            tick.getText(), g2, fm);
-                }
-                if (labelBounds != null && labelBounds.getWidth()
-                        + insets.getTop() + insets.getBottom() > maxHeight) {
-                    maxHeight = labelBounds.getWidth()
-                            + insets.getTop() + insets.getBottom();
+                Rectangle2D labelBounds = getLabelBounds(g2, fm, (Tick) o);
+                if (labelBounds != null && labelBounds.getWidth() + insets.getTop() + insets.getBottom() > maxHeight) {
+                    maxHeight = labelBounds.getWidth() + insets.getTop() + insets.getBottom();
                 }
             }
         } else {
-            LineMetrics metrics = font.getLineMetrics("ABCxyz",
-                    g2.getFontRenderContext());
-            maxHeight = metrics.getHeight()
-                        + insets.getTop() + insets.getBottom();
+            LineMetrics metrics = font.getLineMetrics("ABCxyz", g2.getFontRenderContext());
+            maxHeight = metrics.getHeight() + insets.getTop() + insets.getBottom();
         }
         return maxHeight;
 
@@ -807,42 +789,40 @@ public abstract class ValueAxis extends Axis
      *
      * @return The width of the tallest tick label.
      */
-    protected double findMaximumTickLabelWidth(List ticks, Graphics2D g2,
-            Rectangle2D drawArea, boolean vertical) {
-
+    protected double findMaximumTickLabelWidth(List ticks, Graphics2D g2, Rectangle2D drawArea, boolean vertical) {
         RectangleInsets insets = getTickLabelInsets();
         Font font = getTickLabelFont();
         double maxWidth = 0.0;
         if (!vertical) {
             FontMetrics fm = g2.getFontMetrics(font);
             for (Object o : ticks) {
-                Tick tick = (Tick) o;
-                Rectangle2D labelBounds = null;
-                if (tick instanceof LogTick) {
-                    LogTick lt = (LogTick) tick;
-                    if (lt.getAttributedLabel() != null) {
-                        labelBounds = AttrStringUtils.getTextBounds(
-                                lt.getAttributedLabel(), g2);
-                    }
-                } else if (tick.getText() != null) {
-                    labelBounds = TextUtils.getTextBounds(tick.getText(),
-                            g2, fm);
-                }
-                if (labelBounds != null
-                        && labelBounds.getWidth() + insets.getLeft()
-                        + insets.getRight() > maxWidth) {
-                    maxWidth = labelBounds.getWidth()
-                            + insets.getLeft() + insets.getRight();
+                Rectangle2D labelBounds = getLabelBounds(g2, fm, (Tick) o);
+                if (labelBounds != null && labelBounds.getWidth() + insets.getLeft() + insets.getRight() > maxWidth) {
+                    maxWidth = labelBounds.getWidth() + insets.getLeft() + insets.getRight();
                 }
             }
         } else {
-            LineMetrics metrics = font.getLineMetrics("ABCxyz",
-                    g2.getFontRenderContext());
-            maxWidth = metrics.getHeight()
-                       + insets.getTop() + insets.getBottom();
+            LineMetrics metrics = font.getLineMetrics("ABCxyz", g2.getFontRenderContext());
+            maxWidth = metrics.getHeight() + insets.getTop() + insets.getBottom();
         }
         return maxWidth;
 
+    }
+
+    /**
+     * REFACTOR - usado para remover código duplicado entre findMaximumTickLabelWidth e findMaximumTickLabelHeight
+     * @author Afonso Caniço
+     */
+    private Rectangle2D getLabelBounds(Graphics2D g2, FontMetrics fm, Tick tick) {
+        if (tick instanceof LogTick) {
+            LogTick lt = (LogTick) tick;
+            if (lt.getAttributedLabel() != null) {
+                return AttrStringUtils.getTextBounds(lt.getAttributedLabel(), g2);
+            }
+        } else if (tick.getText() != null) {
+            return TextUtils.getTextBounds(tick.getText(), g2, fm);
+        }
+        return null;
     }
 
     /**

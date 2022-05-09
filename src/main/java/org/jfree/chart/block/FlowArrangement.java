@@ -178,37 +178,37 @@ public class FlowArrangement implements Arrangement, Serializable {
         List<Block> itemsInRow = new ArrayList<>();
         for (Block block : blocks) {
             Size2D size = block.arrange(g2, RectangleConstraint.NONE);
-            if (x + size.width <= width) {
+            if (x + size.getWidth() <= width) {
                 itemsInRow.add(block);
                 block.setBounds(
-                    new Rectangle2D.Double(x, y, size.width, size.height)
+                    new Rectangle2D.Double(x, y, size.getWidth(), size.getHeight())
                 );
-                x = x + size.width + this.horizontalGap;
-                maxHeight = Math.max(maxHeight, size.height);
+                x = x + size.getWidth() + this.horizontalGap;
+                maxHeight = Math.max(maxHeight, size.getHeight());
             }
             else {
                 if (itemsInRow.isEmpty()) {
                     // place in this row (truncated) anyway
                     block.setBounds(
                         new Rectangle2D.Double(
-                            x, y, Math.min(size.width, width - x), size.height
+                            x, y, Math.min(size.getWidth(), width - x), size.getHeight()
                         )
                     );
                     x = 0.0;
-                    y = y + size.height + this.verticalGap;
+                    y = y + size.getHeight() + this.verticalGap;
                 }
                 else {
                     // start new row
                     itemsInRow.clear();
                     x = 0.0;
                     y = y + maxHeight + this.verticalGap;
-                    maxHeight = size.height;
+                    maxHeight = size.getHeight();
                     block.setBounds(
                         new Rectangle2D.Double(
-                            x, y, Math.min(size.width, width), size.height
+                            x, y, Math.min(size.getWidth(), width), size.getHeight()
                         )
                     );
-                    x = size.width + this.horizontalGap;
+                    x = size.getWidth() + this.horizontalGap;
                     itemsInRow.add(block);
                 }
             }
@@ -230,7 +230,7 @@ public class FlowArrangement implements Arrangement, Serializable {
                                RectangleConstraint constraint) {
 
         Size2D s = arrangeFN(container, g2, constraint);
-        if (constraint.getHeightRange().contains(s.height)) {
+        if (constraint.getHeightRange().contains(s.getHeight())) {
             return s;
         }
         else {
@@ -274,7 +274,7 @@ public class FlowArrangement implements Arrangement, Serializable {
         // first arrange without constraints, and see if this fits within
         // the required ranges...
         Size2D s1 = arrangeNN(container, g2);
-        if (constraint.getWidthRange().contains(s1.width)) {
+        if (constraint.getWidthRange().contains(s1.getWidth())) {
             return s1;  // TODO: we didn't check the height yet
         }
         else {
@@ -299,7 +299,7 @@ public class FlowArrangement implements Arrangement, Serializable {
                                RectangleConstraint constraint) {
 
         Size2D s = arrangeNF(container, g2, constraint);
-        if (constraint.getWidthRange().contains(s.width)) {
+        if (constraint.getWidthRange().contains(s.getWidth())) {
             return s;
         }
         else {
@@ -325,7 +325,7 @@ public class FlowArrangement implements Arrangement, Serializable {
         // first arrange without constraints, then see if the width fits
         // within the required range...if not, call arrangeFN() at max width
         Size2D s1 = arrangeNN(container, g2);
-        if (constraint.getWidthRange().contains(s1.width)) {
+        if (constraint.getWidthRange().contains(s1.getWidth())) {
             return s1;
         }
         else {
@@ -357,13 +357,13 @@ public class FlowArrangement implements Arrangement, Serializable {
                 Block block = blocks.get(i);
                 sizes[i] = block.arrange(g2, RectangleConstraint.NONE);
                 width = width + sizes[i].getWidth();
-                maxHeight = Math.max(sizes[i].height, maxHeight);
+                maxHeight = Math.max(sizes[i].getHeight(), maxHeight);
                 block.setBounds(
                     new Rectangle2D.Double(
-                        x, 0.0, sizes[i].width, sizes[i].height
+                        x, 0.0, sizes[i].getWidth(), sizes[i].getHeight()
                     )
                 );
-                x = x + sizes[i].width + this.horizontalGap;
+                x = x + sizes[i].getWidth() + this.horizontalGap;
             }
             if (blockCount > 1) {
                 width = width + this.horizontalGap * (blockCount - 1);

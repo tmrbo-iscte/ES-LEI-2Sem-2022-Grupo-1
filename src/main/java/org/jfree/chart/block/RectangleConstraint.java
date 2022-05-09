@@ -309,39 +309,39 @@ public class RectangleConstraint {
     public Size2D calculateConstrainedSize(Size2D base) {
         Size2D result = new Size2D();
         if (this.widthConstraintType == LengthConstraintType.NONE) {
-            result.width = base.width;
+            result.setWidth(base.getWidth());
             if (this.heightConstraintType == LengthConstraintType.NONE) {
-               result.height = base.height;
+               result.setHeight(base.getHeight());
             }
             else if (this.heightConstraintType == LengthConstraintType.RANGE) {
-               result.height = this.heightRange.constrain(base.height);
+               result.setHeight(this.heightRange.constrain(base.getHeight()));
             }
             else if (this.heightConstraintType == LengthConstraintType.FIXED) {
-               result.height = this.height;
+               result.setHeight(this.getHeight());
             }
         }
         else if (this.widthConstraintType == LengthConstraintType.RANGE) {
-            result.width = this.widthRange.constrain(base.width);
+            result.setWidth(this.widthRange.constrain(base.getWidth()));
             if (this.heightConstraintType == LengthConstraintType.NONE) {
-                result.height = base.height;
+                result.setHeight(base.getHeight());
             }
             else if (this.heightConstraintType == LengthConstraintType.RANGE) {
-                result.height = this.heightRange.constrain(base.height);
+                result.setHeight(this.heightRange.constrain(base.getHeight()));
             }
             else if (this.heightConstraintType == LengthConstraintType.FIXED) {
-                result.height = this.height;
+                result.setHeight(this.getHeight());
             }
         }
         else if (this.widthConstraintType == LengthConstraintType.FIXED) {
-            result.width = this.width;
+            result.setWidth(this.getWidth());
             if (this.heightConstraintType == LengthConstraintType.NONE) {
-                result.height = base.height;
+                result.setHeight(base.getHeight());
             }
             else if (this.heightConstraintType == LengthConstraintType.RANGE) {
-                result.height = this.heightRange.constrain(base.height);
+                result.setHeight(this.heightRange.constrain(base.getHeight()));
             }
             else if (this.heightConstraintType == LengthConstraintType.FIXED) {
-                result.height = this.height;
+                result.setHeight(this.getHeight());
             }
         }
         return result;

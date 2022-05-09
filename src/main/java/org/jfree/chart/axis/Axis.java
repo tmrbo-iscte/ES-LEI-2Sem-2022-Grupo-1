@@ -89,6 +89,8 @@ import org.jfree.chart.internal.SerialUtils;
  */
 public abstract class Axis implements ChartElement, Cloneable, Serializable {
 
+    private TickMarks tickMarks = new TickMarks();
+
     /** For serialization. */
     private static final long serialVersionUID = 7719289504573298271L;
 
@@ -125,21 +127,6 @@ public abstract class Axis implements ChartElement, Cloneable, Serializable {
     /** The default tick label insets ({@code RectangleInsets(2.0, 4.0, 2.0, 4.0)}). */
     public static final RectangleInsets DEFAULT_TICK_LABEL_INSETS
             = new RectangleInsets(2.0, 4.0, 2.0, 4.0);
-
-    /** The default tick marks visible ({@code true}). */
-    public static final boolean DEFAULT_TICK_MARKS_VISIBLE = true;
-
-    /** The default tick stroke ({@code BasicStroke(0.5f)}). */
-    public static final Stroke DEFAULT_TICK_MARK_STROKE = new BasicStroke(0.5f);
-
-    /** The default tick paint ({@code Color.GRAY}). */
-    public static final Paint DEFAULT_TICK_MARK_PAINT = Color.GRAY;
-
-    /** The default tick mark inside length ({@code 0.0f}). */
-    public static final float DEFAULT_TICK_MARK_INSIDE_LENGTH = 0.0f;
-
-    /** The default tick mark outside length ({@code 2.0f}). */
-    public static final float DEFAULT_TICK_MARK_OUTSIDE_LENGTH = 2.0f;
 
     /** A flag indicating whether or not the axis is visible. */
     private boolean visible;
@@ -192,46 +179,6 @@ public abstract class Axis implements ChartElement, Cloneable, Serializable {
     /** The blank space around each tick label. */
     private RectangleInsets tickLabelInsets;
 
-    /**
-     * A flag that indicates whether or not major tick marks are visible for
-     * the axis.
-     */
-    private boolean tickMarksVisible;
-
-    /**
-     * The length of the major tick mark inside the data area (zero
-     * permitted).
-     */
-    private float tickMarkInsideLength;
-
-    /**
-     * The length of the major tick mark outside the data area (zero
-     * permitted).
-     */
-    private float tickMarkOutsideLength;
-
-    /**
-     * A flag that indicates whether or not minor tick marks are visible for the
-     * axis.
-     */
-    private boolean minorTickMarksVisible;
-
-    /**
-     * The length of the minor tick mark inside the data area (zero permitted).
-     */
-    private float minorTickMarkInsideLength;
-
-    /**
-     * The length of the minor tick mark outside the data area (zero permitted).
-     */
-    private float minorTickMarkOutsideLength;
-
-    /** The stroke used to draw tick marks. */
-    private transient Stroke tickMarkStroke;
-
-    /** The paint used to draw tick marks. */
-    private transient Paint tickMarkPaint;
-
     /** The fixed (horizontal or vertical) dimension for the axis. */
     private double fixedDimension;
 
@@ -269,15 +216,15 @@ public abstract class Axis implements ChartElement, Cloneable, Serializable {
         this.tickLabelPaint = DEFAULT_TICK_LABEL_PAINT;
         this.tickLabelInsets = DEFAULT_TICK_LABEL_INSETS;
 
-        this.tickMarksVisible = DEFAULT_TICK_MARKS_VISIBLE;
-        this.tickMarkStroke = DEFAULT_TICK_MARK_STROKE;
-        this.tickMarkPaint = DEFAULT_TICK_MARK_PAINT;
-        this.tickMarkInsideLength = DEFAULT_TICK_MARK_INSIDE_LENGTH;
-        this.tickMarkOutsideLength = DEFAULT_TICK_MARK_OUTSIDE_LENGTH;
+        tickMarks.setTickMarksVisible(tickMarks.DEFAULT_TICK_MARKS_VISIBLE,this);
+        tickMarks.setTickMarkStroke(tickMarks.DEFAULT_TICK_MARK_STROKE, this);
+        tickMarks.setTickMarkPaint(tickMarks.DEFAULT_TICK_MARK_PAINT, this);
+        tickMarks.setTickMarkInsideLength(tickMarks.DEFAULT_TICK_MARK_INSIDE_LENGTH, this);
+        tickMarks.setTickMarkOutsideLength(tickMarks.DEFAULT_TICK_MARK_OUTSIDE_LENGTH, this);
 
-        this.minorTickMarksVisible = false;
-        this.minorTickMarkInsideLength = 0.0f;
-        this.minorTickMarkOutsideLength = 2.0f;
+        tickMarks.setMinorTickMarksVisible(false, this);
+        tickMarks.setMinorTickMarkInsideLength(0.0f, this);
+        tickMarks.setMinorTickMarkOutsideLength(2.0f, this);
 
         this.plot = null;
 
@@ -649,35 +596,6 @@ public abstract class Axis implements ChartElement, Cloneable, Serializable {
     }
 
     /**
-     * Returns the flag that indicates whether or not the minor tick marks are
-     * showing.
-     *
-     * @return The flag that indicates whether or not the minor tick marks are
-     *         showing.
-     *
-     * @see #setMinorTickMarksVisible(boolean)
-     */
-    public boolean isMinorTickMarksVisible() {
-        return this.minorTickMarksVisible;
-    }
-
-    /**
-     * Sets the flag that indicates whether or not the minor tick marks are 
-     * showing and sends an {@link AxisChangeEvent} to all registered
-     * listeners.
-     *
-     * @param flag  the flag.
-     *
-     * @see #isMinorTickMarksVisible()
-     */
-    public void setMinorTickMarksVisible(boolean flag) {
-        if (flag != this.minorTickMarksVisible) {
-            this.minorTickMarksVisible = flag;
-            fireChangeEvent();
-        }
-    }
-
-    /**
      * Returns the font used for the tick labels (if showing).
      *
      * @return The font (never {@code null}).
@@ -754,186 +672,6 @@ public abstract class Axis implements ChartElement, Cloneable, Serializable {
             this.tickLabelInsets = insets;
             fireChangeEvent();
         }
-    }
-
-    /**
-     * Returns the flag that indicates whether or not the tick marks are
-     * showing.
-     *
-     * @return The flag that indicates whether or not the tick marks are
-     *         showing.
-     *
-     * @see #setTickMarksVisible(boolean)
-     */
-    public boolean isTickMarksVisible() {
-        return this.tickMarksVisible;
-    }
-
-    /**
-     * Sets the flag that indicates whether or not the tick marks are showing
-     * and sends an {@link AxisChangeEvent} to all registered listeners.
-     *
-     * @param flag  the flag.
-     *
-     * @see #isTickMarksVisible()
-     */
-    public void setTickMarksVisible(boolean flag) {
-        if (flag != this.tickMarksVisible) {
-            this.tickMarksVisible = flag;
-            fireChangeEvent();
-        }
-    }
-
-    /**
-     * Returns the inside length of the tick marks.
-     *
-     * @return The length.
-     *
-     * @see #getTickMarkOutsideLength()
-     * @see #setTickMarkInsideLength(float)
-     */
-    public float getTickMarkInsideLength() {
-        return this.tickMarkInsideLength;
-    }
-
-    /**
-     * Sets the inside length of the tick marks and sends
-     * an {@link AxisChangeEvent} to all registered listeners.
-     *
-     * @param length  the new length.
-     *
-     * @see #getTickMarkInsideLength()
-     */
-    public void setTickMarkInsideLength(float length) {
-        this.tickMarkInsideLength = length;
-        fireChangeEvent();
-    }
-
-    /**
-     * Returns the outside length of the tick marks.
-     *
-     * @return The length.
-     *
-     * @see #getTickMarkInsideLength()
-     * @see #setTickMarkOutsideLength(float)
-     */
-    public float getTickMarkOutsideLength() {
-        return this.tickMarkOutsideLength;
-    }
-
-    /**
-     * Sets the outside length of the tick marks and sends
-     * an {@link AxisChangeEvent} to all registered listeners.
-     *
-     * @param length  the new length.
-     *
-     * @see #getTickMarkInsideLength()
-     */
-    public void setTickMarkOutsideLength(float length) {
-        this.tickMarkOutsideLength = length;
-        fireChangeEvent();
-    }
-
-    /**
-     * Returns the stroke used to draw tick marks.
-     *
-     * @return The stroke (never {@code null}).
-     *
-     * @see #setTickMarkStroke(Stroke)
-     */
-    public Stroke getTickMarkStroke() {
-        return this.tickMarkStroke;
-    }
-
-    /**
-     * Sets the stroke used to draw tick marks and sends
-     * an {@link AxisChangeEvent} to all registered listeners.
-     *
-     * @param stroke  the stroke ({@code null} not permitted).
-     *
-     * @see #getTickMarkStroke()
-     */
-    public void setTickMarkStroke(Stroke stroke) {
-        Args.nullNotPermitted(stroke, "stroke");
-        if (!this.tickMarkStroke.equals(stroke)) {
-            this.tickMarkStroke = stroke;
-            fireChangeEvent();
-        }
-    }
-
-    /**
-     * Returns the paint used to draw tick marks (if they are showing).
-     *
-     * @return The paint (never {@code null}).
-     *
-     * @see #setTickMarkPaint(Paint)
-     */
-    public Paint getTickMarkPaint() {
-        return this.tickMarkPaint;
-    }
-
-    /**
-     * Sets the paint used to draw tick marks and sends an
-     * {@link AxisChangeEvent} to all registered listeners.
-     *
-     * @param paint  the paint ({@code null} not permitted).
-     *
-     * @see #getTickMarkPaint()
-     */
-    public void setTickMarkPaint(Paint paint) {
-        Args.nullNotPermitted(paint, "paint");
-        this.tickMarkPaint = paint;
-        fireChangeEvent();
-    }
-
-    /**
-     * Returns the inside length of the minor tick marks.
-     *
-     * @return The length.
-     *
-     * @see #getMinorTickMarkOutsideLength()
-     * @see #setMinorTickMarkInsideLength(float)
-     */
-    public float getMinorTickMarkInsideLength() {
-        return this.minorTickMarkInsideLength;
-    }
-
-    /**
-     * Sets the inside length of the minor tick marks and sends
-     * an {@link AxisChangeEvent} to all registered listeners.
-     *
-     * @param length  the new length.
-     *
-     * @see #getMinorTickMarkInsideLength()
-     */
-    public void setMinorTickMarkInsideLength(float length) {
-        this.minorTickMarkInsideLength = length;
-        fireChangeEvent();
-    }
-
-    /**
-     * Returns the outside length of the minor tick marks.
-     *
-     * @return The length.
-     *
-     * @see #getMinorTickMarkInsideLength()
-     * @see #setMinorTickMarkOutsideLength(float)
-     */
-    public float getMinorTickMarkOutsideLength() {
-        return this.minorTickMarkOutsideLength;
-    }
-
-    /**
-     * Sets the outside length of the minor tick marks and sends
-     * an {@link AxisChangeEvent} to all registered listeners.
-     *
-     * @param length  the new length.
-     *
-     * @see #getMinorTickMarkInsideLength()
-     */
-    public void setMinorTickMarkOutsideLength(float length) {
-        this.minorTickMarkOutsideLength = length;
-        fireChangeEvent();
     }
 
     /**
@@ -1402,9 +1140,9 @@ public abstract class Axis implements ChartElement, Cloneable, Serializable {
      *
      * @return Information about the axis.
      */
-    protected AxisState drawAttributedLabel(AttributedString label, 
-            Graphics2D g2, Rectangle2D plotArea, Rectangle2D dataArea, 
-            RectangleEdge edge, AxisState state) {
+    protected AxisState drawAttributedLabel(AttributedString label,
+                                            Graphics2D g2, Rectangle2D plotArea, Rectangle2D dataArea,
+                                            RectangleEdge edge, AxisState state) {
 
         // it is unlikely that 'state' will be null, but check anyway...
         Args.nullNotPermitted(state, "state");
@@ -1595,31 +1333,6 @@ public abstract class Axis implements ChartElement, Cloneable, Serializable {
         if (!Objects.equals(this.tickLabelInsets, that.tickLabelInsets)) {
             return false;
         }
-        if (this.tickMarksVisible != that.tickMarksVisible) {
-            return false;
-        }
-        if (this.tickMarkInsideLength != that.tickMarkInsideLength) {
-            return false;
-        }
-        if (this.tickMarkOutsideLength != that.tickMarkOutsideLength) {
-            return false;
-        }
-        if (!PaintUtils.equal(this.tickMarkPaint, that.tickMarkPaint)) {
-            return false;
-        }
-        if (!Objects.equals(this.tickMarkStroke, that.tickMarkStroke)) {
-            return false;
-        }
-        if (this.minorTickMarksVisible != that.minorTickMarksVisible) {
-            return false;
-        }
-        if (this.minorTickMarkInsideLength != that.minorTickMarkInsideLength) {
-            return false;
-        }
-        if (this.minorTickMarkOutsideLength
-                != that.minorTickMarkOutsideLength) {
-            return false;
-        }
         if (this.fixedDimension != that.fixedDimension) {
             return false;
         }
@@ -1654,8 +1367,8 @@ public abstract class Axis implements ChartElement, Cloneable, Serializable {
         SerialUtils.writePaint(this.tickLabelPaint, stream);
         SerialUtils.writeStroke(this.axisLineStroke, stream);
         SerialUtils.writePaint(this.axisLinePaint, stream);
-        SerialUtils.writeStroke(this.tickMarkStroke, stream);
-        SerialUtils.writePaint(this.tickMarkPaint, stream);
+        SerialUtils.writeStroke(tickMarks.getTickMarkStroke(), stream);
+        SerialUtils.writePaint(tickMarks.getTickMarkPaint(), stream);
     }
 
     /**
@@ -1674,8 +1387,8 @@ public abstract class Axis implements ChartElement, Cloneable, Serializable {
         this.tickLabelPaint = SerialUtils.readPaint(stream);
         this.axisLineStroke = SerialUtils.readStroke(stream);
         this.axisLinePaint = SerialUtils.readPaint(stream);
-        this.tickMarkStroke = SerialUtils.readStroke(stream);
-        this.tickMarkPaint = SerialUtils.readPaint(stream);
+        tickMarks.setTickMarkStroke(SerialUtils.readStroke(stream));
+        tickMarks.setTickMarkPaint(SerialUtils.readPaint(stream));
         this.listenerList = new EventListenerList();
     }
 

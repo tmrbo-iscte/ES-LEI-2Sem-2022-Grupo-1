@@ -675,21 +675,18 @@ public class LogarithmicAxis extends NumberAxis {
      * @return A list of ticks.
      */
     @Override
-    protected List refreshTicksHorizontal(Graphics2D g2, Rectangle2D dataArea,
-            RectangleEdge edge) {
-
+    protected List refreshTicksHorizontal(Graphics2D g2, Rectangle2D dataArea, RectangleEdge edge) {
         List ticks = new java.util.ArrayList();
         Range range = getRange();
 
         //get lower bound value:
         double lowerBoundVal = range.getLowerBound();
-              //if small log values and lower bound value too small
-              // then set to a small value (don't allow <= 0):
-        if (this.smallLogFlag && lowerBoundVal < SMALL_LOG_VALUE) {
-            lowerBoundVal = SMALL_LOG_VALUE;
-        }
 
-        //get upper bound value
+        // if small log values and lower bound value too small
+        // then set to a small value (don't allow <= 0):
+        if (this.smallLogFlag && lowerBoundVal < SMALL_LOG_VALUE) lowerBoundVal = SMALL_LOG_VALUE;
+
+        // get upper bound value
         double upperBoundVal = range.getUpperBound();
 
         //get log10 version of lower bound and round to integer:
@@ -697,42 +694,35 @@ public class LogarithmicAxis extends NumberAxis {
         //get log10 version of upper bound and round to integer:
         int iEndCount = (int) Math.rint(switchedLog10(upperBoundVal));
 
-        if (iBegCount == iEndCount && iBegCount > 0
-                && Math.pow(10, iBegCount) > lowerBoundVal) {
+        if (iBegCount == iEndCount && iBegCount > 0 && Math.pow(10, iBegCount) > lowerBoundVal) {
               //only 1 power of 10 value, it's > 0 and its resulting
               // tick value will be larger than lower bound of data
-            --iBegCount;       //decrement to generate more ticks
+            --iBegCount; // decrement to generate more ticks
         }
 
         double currentTickValue;
         String tickLabel;
         boolean zeroTickFlag = false;
         for (int i = iBegCount; i <= iEndCount; i++) {
-            //for each power of 10 value; create ten ticks
+            // for each power of 10 value; create ten ticks
             for (int j = 0; j < 10; ++j) {
-                //for each tick to be displayed
+                // for each tick to be displayed
                 if (this.smallLogFlag) {
-                    //small log values in use; create numeric value for tick
+                    // small log values in use; create numeric value for tick
                     currentTickValue = Math.pow(10, i) + (Math.pow(10, i) * j);
-                    if (this.expTickLabelsFlag
-                        || (i < 0 && currentTickValue > 0.0
-                        && currentTickValue < 1.0)) {
-                        //showing "1e#"-style ticks or negative exponent
+                    if (this.expTickLabelsFlag || (i < 0 && currentTickValue > 0.0 && currentTickValue < 1.0)) {
+                        // showing "1e#"-style ticks or negative exponent
                         // generating tick value between 0 & 1; show fewer
-                        if (j == 0 || (i > -4 && j < 2)
-                                   || currentTickValue >= upperBoundVal) {
-                          //first tick of series, or not too small a value and
+                        if (j == 0 || (i > -4 && j < 2) || currentTickValue >= upperBoundVal) {
+                          // first tick of series, or not too small a value and
                           // one of first 3 ticks, or last tick to be displayed
                             // set exact number of fractional digits to be shown
                             // (no effect if showing "1e#"-style ticks):
-                            this.numberFormatterObj
-                                .setMaximumFractionDigits(-i);
-                               //create tick label (force use of fmt obj):
+                            this.numberFormatterObj.setMaximumFractionDigits(-i);
+                            // create tick label (force use of fmt obj):
                             tickLabel = makeTickLabel(currentTickValue, true);
                         }
-                        else {    //no tick label to be shown
-                            tickLabel = "";
-                        }
+                        else tickLabel = "";
                     }
                     else {     //tick value not between 0 & 1
                                //show tick label if it's the first or last in
@@ -742,75 +732,56 @@ public class LogarithmicAxis extends NumberAxis {
                                          || currentTickValue >= upperBoundVal)
                                          ? makeTickLabel(currentTickValue) : "";
                     }
-                }
-                else { //not small log values in use; allow for values <= 0
-                    if (zeroTickFlag) {   //if did zero tick last iter then
-                        --j;              //decrement to do 1.0 tick now
-                    }     //calculate power-of-ten value for tick:
-                    currentTickValue = (i >= 0)
-                        ? Math.pow(10, i) + (Math.pow(10, i) * j)
-                        : -(Math.pow(10, -i) - (Math.pow(10, -i - 1) * j));
+                } else { // not small log values in use; allow for values <= 0
+                    if (zeroTickFlag) --j; // if did zero tick last iter then decrement to do 1.0 tick now
+
+                    //calculate power-of-ten value for tick:
+                    currentTickValue = (i >= 0) ? Math.pow(10, i) + (Math.pow(10, i) * j) : -(Math.pow(10, -i) - (Math.pow(10, -i - 1) * j));
                     if (!zeroTickFlag) {  // did not do zero tick last iteration
-                        if (Math.abs(currentTickValue - 1.0) < 0.0001
-                            && lowerBoundVal <= 0.0 && upperBoundVal >= 0.0) {
-                            //tick value is 1.0 and 0.0 is within data range
+                        if (Math.abs(currentTickValue - 1.0) < 0.0001 && lowerBoundVal <= 0.0 && upperBoundVal >= 0.0) {
+                            // tick value is 1.0 and 0.0 is within data range
                             currentTickValue = 0.0;     //set tick value to zero
                             zeroTickFlag = true;        //indicate zero tick
                         }
+                    } else { // did zero tick last iteration
+                        zeroTickFlag = false; //clear flag
                     }
-                    else {     //did zero tick last iteration
-                        zeroTickFlag = false;         //clear flag
-                    }               //create tick label string:
-                               //show tick label if "1e#"-style and it's one
-                               // of the first two, if it's the first or last
-                               // in the set, or if it's 1-5; beyond that
-                               // show fewer as the values get larger:
-                    tickLabel = ((this.expTickLabelsFlag && j < 2)
-                                || j < 1
-                                || (i < 1 && j < 5) || (j < 4 - i)
-                                || currentTickValue >= upperBoundVal)
-                                   ? makeTickLabel(currentTickValue) : "";
+                    // create tick label string:
+                    // show tick label if "1e#"-style and it's one
+                    // of the first two, if it's the first or last
+                    // in the set, or if it's 1-5; beyond that
+                    // show fewer as the values get larger:
+                    tickLabel = ((this.expTickLabelsFlag && j < 2) || j < 1 || (i < 1 && j < 5) || (j < 4 - i) || currentTickValue >= upperBoundVal) ? makeTickLabel(currentTickValue) : "";
                 }
 
-                if (currentTickValue > upperBoundVal) {
-                    return ticks;   // if past highest data value then exit
-                                    // method
-                }
+                if (currentTickValue > upperBoundVal) return ticks; // if past highest data value then exit method
 
-                if (currentTickValue >= lowerBoundVal - SMALL_LOG_VALUE) {
-                    //tick value not below lowest data value
-                    TextAnchor anchor;
-                    TextAnchor rotationAnchor;
-                    double angle = 0.0;
-                    if (isVerticalTickLabels()) {
-                        anchor = TextAnchor.CENTER_RIGHT;
-                        rotationAnchor = TextAnchor.CENTER_RIGHT;
-                        if (edge == RectangleEdge.TOP) {
-                            angle = Math.PI / 2.0;
-                        }
-                        else {
-                            angle = -Math.PI / 2.0;
-                        }
-                    }
-                    else {
-                        if (edge == RectangleEdge.TOP) {
-                            anchor = TextAnchor.BOTTOM_CENTER;
-                            rotationAnchor = TextAnchor.BOTTOM_CENTER;
-                        }
-                        else {
-                            anchor = TextAnchor.TOP_CENTER;
-                            rotationAnchor = TextAnchor.TOP_CENTER;
-                        }
-                    }
-
-                    Tick tick = new NumberTick(currentTickValue, tickLabel, 
-                            anchor, rotationAnchor, angle);
-                    ticks.add(tick);
-                }
+                if (currentTickValue >= lowerBoundVal - SMALL_LOG_VALUE) //tick value not below lowest data value
+                    ticks.add(getNumberTick(edge, currentTickValue, tickLabel));
             }
         }
         return ticks;
+    }
 
+    private NumberTick getNumberTick(RectangleEdge edge, double currentTickValue, String tickLabel) {
+        TextAnchor anchor;
+        TextAnchor rotationAnchor;
+        double angle = 0.0;
+        if (isVerticalTickLabels()) {
+            anchor = TextAnchor.CENTER_RIGHT;
+            rotationAnchor = TextAnchor.CENTER_RIGHT;
+            if (edge == RectangleEdge.TOP) angle = Math.PI / 2.0;
+            else angle = -Math.PI / 2.0;
+        } else {
+            if (edge == RectangleEdge.TOP) {
+                anchor = TextAnchor.BOTTOM_CENTER;
+                rotationAnchor = TextAnchor.BOTTOM_CENTER;
+            } else {
+                anchor = TextAnchor.TOP_CENTER;
+                rotationAnchor = TextAnchor.TOP_CENTER;
+            }
+        }
+        return new NumberTick(currentTickValue, tickLabel, anchor, rotationAnchor, angle);
     }
 
     /**
@@ -824,8 +795,7 @@ public class LogarithmicAxis extends NumberAxis {
      * @return A list of ticks.
      */
     @Override
-    protected List refreshTicksVertical(Graphics2D g2, Rectangle2D dataArea,
-            RectangleEdge edge) {
+    protected List refreshTicksVertical(Graphics2D g2, Rectangle2D dataArea, RectangleEdge edge) {
 
         List ticks = new java.util.ArrayList();
 
@@ -967,37 +937,8 @@ public class LogarithmicAxis extends NumberAxis {
                     return ticks;  //if past highest data value then exit method
                 }
 
-                if (tickVal >= lowerBoundVal - SMALL_LOG_VALUE) {
-                    //tick value not below lowest data value
-                    TextAnchor anchor;
-                    TextAnchor rotationAnchor;
-                    double angle = 0.0;
-                    if (isVerticalTickLabels()) {
-                        if (edge == RectangleEdge.LEFT) {
-                            anchor = TextAnchor.BOTTOM_CENTER;
-                            rotationAnchor = TextAnchor.BOTTOM_CENTER;
-                            angle = -Math.PI / 2.0;
-                        }
-                        else {
-                            anchor = TextAnchor.BOTTOM_CENTER;
-                            rotationAnchor = TextAnchor.BOTTOM_CENTER;
-                            angle = Math.PI / 2.0;
-                        }
-                    }
-                    else {
-                        if (edge == RectangleEdge.LEFT) {
-                            anchor = TextAnchor.CENTER_RIGHT;
-                            rotationAnchor = TextAnchor.CENTER_RIGHT;
-                        }
-                        else {
-                            anchor = TextAnchor.CENTER_LEFT;
-                            rotationAnchor = TextAnchor.CENTER_LEFT;
-                        }
-                    }
-                    //create tick object and add to list:
-                    ticks.add(new NumberTick(tickVal, tickLabel, anchor, 
-                            rotationAnchor, angle));
-                }
+                if (tickVal >= lowerBoundVal - SMALL_LOG_VALUE) // tick value not below lowest data value
+                    ticks.add(getNumberTick(edge, tickVal, tickLabel)); // create tick object and add to list:
             }
         }
         return ticks;

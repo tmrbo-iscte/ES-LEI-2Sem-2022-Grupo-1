@@ -52,10 +52,7 @@ import java.awt.font.TextLayout;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import java.io.*;
 import java.text.AttributedString;
 import java.util.Arrays;
 import java.util.EventListener;
@@ -89,9 +86,12 @@ import org.jfree.chart.internal.SerialUtils;
  */
 public abstract class Axis implements ChartElement, Cloneable, Serializable {
 
-    private TickMarks tickMarks = new TickMarks();
+    protected final TickMarks tickMarks = new TickMarks(this);
+
+    protected final TickLabel tickLabel = new TickLabel(this);
 
     /** For serialization. */
+    @Serial
     private static final long serialVersionUID = 7719289504573298271L;
 
     /** The default axis visibility ({@code true}). */
@@ -113,20 +113,6 @@ public abstract class Axis implements ChartElement, Cloneable, Serializable {
 
     /** The default axis line stroke ({@code BasicStroke(0.5f)}). */
     public static final Stroke DEFAULT_AXIS_LINE_STROKE = new BasicStroke(0.5f);
-
-    /** The default tick labels visibility ({@code true}). */
-    public static final boolean DEFAULT_TICK_LABELS_VISIBLE = true;
-
-    /** The default tick label font ({@code Font("SansSerif", Font.PLAIN, 10)}). */
-    public static final Font DEFAULT_TICK_LABEL_FONT = new Font("SansSerif",
-            Font.PLAIN, 10);
-
-    /** The default tick label paint ({@code Color.BLACK}). */
-    public static final Paint DEFAULT_TICK_LABEL_PAINT = Color.BLACK;
-
-    /** The default tick label insets ({@code RectangleInsets(2.0, 4.0, 2.0, 4.0)}). */
-    public static final RectangleInsets DEFAULT_TICK_LABEL_INSETS
-            = new RectangleInsets(2.0, 4.0, 2.0, 4.0);
 
     /** A flag indicating whether or not the axis is visible. */
     private boolean visible;
@@ -164,21 +150,6 @@ public abstract class Axis implements ChartElement, Cloneable, Serializable {
     /** The paint used for the axis line. */
     private transient Paint axisLinePaint;
 
-    /**
-     * A flag that indicates whether or not tick labels are visible for the
-     * axis.
-     */
-    private boolean tickLabelsVisible;
-
-    /** The font used to display the tick labels. */
-    private Font tickLabelFont;
-
-    /** The color used to display the tick labels. */
-    private transient Paint tickLabelPaint;
-
-    /** The blank space around each tick label. */
-    private RectangleInsets tickLabelInsets;
-
     /** The fixed (horizontal or vertical) dimension for the axis. */
     private double fixedDimension;
 
@@ -211,24 +182,32 @@ public abstract class Axis implements ChartElement, Cloneable, Serializable {
         this.axisLinePaint = DEFAULT_AXIS_LINE_PAINT;
         this.axisLineStroke = DEFAULT_AXIS_LINE_STROKE;
 
-        this.tickLabelsVisible = DEFAULT_TICK_LABELS_VISIBLE;
-        this.tickLabelFont = DEFAULT_TICK_LABEL_FONT;
-        this.tickLabelPaint = DEFAULT_TICK_LABEL_PAINT;
-        this.tickLabelInsets = DEFAULT_TICK_LABEL_INSETS;
+        tickLabel.setTickLabelsVisible(TickLabel.DEFAULT_TICK_LABELS_VISIBLE);
+        tickLabel.setTickLabelFont(TickLabel.DEFAULT_TICK_LABEL_FONT);
+        tickLabel.setTickLabelPaint(TickLabel.DEFAULT_TICK_LABEL_PAINT);
+        tickLabel.setTickLabelInsets(TickLabel.DEFAULT_TICK_LABEL_INSETS);
 
-        tickMarks.setTickMarksVisible(tickMarks.DEFAULT_TICK_MARKS_VISIBLE,this);
-        tickMarks.setTickMarkStroke(tickMarks.DEFAULT_TICK_MARK_STROKE, this);
-        tickMarks.setTickMarkPaint(tickMarks.DEFAULT_TICK_MARK_PAINT, this);
-        tickMarks.setTickMarkInsideLength(tickMarks.DEFAULT_TICK_MARK_INSIDE_LENGTH, this);
-        tickMarks.setTickMarkOutsideLength(tickMarks.DEFAULT_TICK_MARK_OUTSIDE_LENGTH, this);
+        tickMarks.setTickMarksVisible(TickMarks.DEFAULT_TICK_MARKS_VISIBLE);
+        tickMarks.setTickMarkStroke(TickMarks.DEFAULT_TICK_MARK_STROKE);
+        tickMarks.setTickMarkPaint(TickMarks.DEFAULT_TICK_MARK_PAINT);
+        tickMarks.setTickMarkInsideLength(TickMarks.DEFAULT_TICK_MARK_INSIDE_LENGTH);
+        tickMarks.setTickMarkOutsideLength(TickMarks.DEFAULT_TICK_MARK_OUTSIDE_LENGTH);
 
-        tickMarks.setMinorTickMarksVisible(false, this);
-        tickMarks.setMinorTickMarkInsideLength(0.0f, this);
-        tickMarks.setMinorTickMarkOutsideLength(2.0f, this);
+        tickMarks.setMinorTickMarksVisible(false);
+        tickMarks.setMinorTickMarkInsideLength(0.0f);
+        tickMarks.setMinorTickMarkOutsideLength(2.0f);
 
         this.plot = null;
 
         this.listenerList = new EventListenerList();
+    }
+
+    public TickMarks getTickMarks() {
+        return tickMarks;
+    }
+
+    public TickLabel getTickLabel() {
+        return tickLabel;
     }
 
     /**
@@ -461,17 +440,7 @@ public abstract class Axis implements ChartElement, Cloneable, Serializable {
         this.labelAngle = angle;
         fireChangeEvent();
     }
-    
-    /**
-     * Returns the location of the axis label.  The default is
-     * {@link AxisLabelLocation#MIDDLE}.
-     * 
-     * @return The location of the axis label (never {@code null}). 
-     */
-    public AxisLabelLocation getLabelLocation() {
-        return this.labelLocation;
-    }
-    
+
     /**
      * Sets the axis label location and sends an {@link AxisChangeEvent} to
      * all registered listeners.
@@ -560,118 +529,6 @@ public abstract class Axis implements ChartElement, Cloneable, Serializable {
         Args.nullNotPermitted(stroke, "stroke");
         this.axisLineStroke = stroke;
         fireChangeEvent();
-    }
-
-    /**
-     * Returns a flag indicating whether or not the tick labels are visible.
-     *
-     * @return The flag.
-     *
-     * @see #getTickLabelFont()
-     * @see #getTickLabelPaint()
-     * @see #setTickLabelsVisible(boolean)
-     */
-    public boolean isTickLabelsVisible() {
-        return this.tickLabelsVisible;
-    }
-
-    /**
-     * Sets the flag that determines whether or not the tick labels are
-     * visible and sends an {@link AxisChangeEvent} to all registered
-     * listeners.
-     *
-     * @param flag  the flag.
-     *
-     * @see #isTickLabelsVisible()
-     * @see #setTickLabelFont(Font)
-     * @see #setTickLabelPaint(Paint)
-     */
-    public void setTickLabelsVisible(boolean flag) {
-
-        if (flag != this.tickLabelsVisible) {
-            this.tickLabelsVisible = flag;
-            fireChangeEvent();
-        }
-
-    }
-
-    /**
-     * Returns the font used for the tick labels (if showing).
-     *
-     * @return The font (never {@code null}).
-     *
-     * @see #setTickLabelFont(Font)
-     */
-    public Font getTickLabelFont() {
-        return this.tickLabelFont;
-    }
-
-    /**
-     * Sets the font for the tick labels and sends an {@link AxisChangeEvent}
-     * to all registered listeners.
-     *
-     * @param font  the font ({@code null} not allowed).
-     *
-     * @see #getTickLabelFont()
-     */
-    public void setTickLabelFont(Font font) {
-        Args.nullNotPermitted(font, "font");
-        if (!this.tickLabelFont.equals(font)) {
-            this.tickLabelFont = font;
-            fireChangeEvent();
-        }
-    }
-
-    /**
-     * Returns the color/shade used for the tick labels.
-     *
-     * @return The paint used for the tick labels.
-     *
-     * @see #setTickLabelPaint(Paint)
-     */
-    public Paint getTickLabelPaint() {
-        return this.tickLabelPaint;
-    }
-
-    /**
-     * Sets the paint used to draw tick labels (if they are showing) and
-     * sends an {@link AxisChangeEvent} to all registered listeners.
-     *
-     * @param paint  the paint ({@code null} not permitted).
-     *
-     * @see #getTickLabelPaint()
-     */
-    public void setTickLabelPaint(Paint paint) {
-        Args.nullNotPermitted(paint, "paint");
-        this.tickLabelPaint = paint;
-        fireChangeEvent();
-    }
-
-    /**
-     * Returns the insets for the tick labels.
-     *
-     * @return The insets (never {@code null}).
-     *
-     * @see #setTickLabelInsets(RectangleInsets)
-     */
-    public RectangleInsets getTickLabelInsets() {
-        return this.tickLabelInsets;
-    }
-
-    /**
-     * Sets the insets for the tick labels and sends an {@link AxisChangeEvent}
-     * to all registered listeners.
-     *
-     * @param insets  the insets ({@code null} not permitted).
-     *
-     * @see #getTickLabelInsets()
-     */
-    public void setTickLabelInsets(RectangleInsets insets) {
-        Args.nullNotPermitted(insets, "insets");
-        if (!this.tickLabelInsets.equals(insets)) {
-            this.tickLabelInsets = insets;
-            fireChangeEvent();
-        }
     }
 
     /**
@@ -817,26 +674,18 @@ public abstract class Axis implements ChartElement, Cloneable, Serializable {
         }
         Rectangle2D hotspot = null;
         switch (edge) {
-            case TOP:
-                hotspot = new Rectangle2D.Double(dataArea.getX(),
-                        state.getCursor(), dataArea.getWidth(),
-                        cursor - state.getCursor());
-                break;
-            case BOTTOM:
-                hotspot = new Rectangle2D.Double(dataArea.getX(), cursor,
-                        dataArea.getWidth(), state.getCursor() - cursor);
-                break;
-            case LEFT:
-                hotspot = new Rectangle2D.Double(state.getCursor(),
-                        dataArea.getY(), cursor - state.getCursor(),
-                        dataArea.getHeight());
-                break;
-            case RIGHT:
-                hotspot = new Rectangle2D.Double(cursor, dataArea.getY(),
-                        state.getCursor() - cursor, dataArea.getHeight());
-                break;
-            default:
-                break;
+            case TOP -> hotspot = new Rectangle2D.Double(dataArea.getX(),
+                    state.getCursor(), dataArea.getWidth(),
+                    cursor - state.getCursor());
+            case BOTTOM -> hotspot = new Rectangle2D.Double(dataArea.getX(), cursor,
+                    dataArea.getWidth(), state.getCursor() - cursor);
+            case LEFT -> hotspot = new Rectangle2D.Double(state.getCursor(),
+                    dataArea.getY(), cursor - state.getCursor(),
+                    dataArea.getHeight());
+            case RIGHT -> hotspot = new Rectangle2D.Double(cursor, dataArea.getY(),
+                    state.getCursor() - cursor, dataArea.getHeight());
+            default -> {
+            }
         }
         EntityCollection e = plotState.getOwner().getEntityCollection();
         if (e != null) {
@@ -876,7 +725,7 @@ public abstract class Axis implements ChartElement, Cloneable, Serializable {
      * @return A boolean.
      */
     public boolean hasListener(EventListener listener) {
-        List list = Arrays.asList(this.listenerList.getListenerList());
+        List<Object> list = Arrays.asList(this.listenerList.getListenerList());
         return list.contains(listener);
     }
 
@@ -988,37 +837,8 @@ public abstract class Axis implements ChartElement, Cloneable, Serializable {
         }
         throw new RuntimeException("Unexpected AxisLabelLocation: " + location);
     }
-    
-    /**
-     * Returns the appropriate horizontal text anchor for the specified axis 
-     * location.
-     * 
-     * @param location  the location ({@code null} not permitted).
-     * 
-     * @return The text anchor (never {@code null}). 
-     */
-    protected TextAnchor labelAnchorH(AxisLabelLocation location) {
-        if (location.equals(AxisLabelLocation.HIGH_END)) {
-            return TextAnchor.CENTER_RIGHT;
-        }
-        if (location.equals(AxisLabelLocation.MIDDLE)) {
-            return TextAnchor.CENTER;
-        }
-        if (location.equals(AxisLabelLocation.LOW_END)) {
-            return TextAnchor.CENTER_LEFT;
-        }
-        throw new RuntimeException("Unexpected AxisLabelLocation: " + location);
-    }
-    
-    /**
-     * Returns the appropriate vertical text anchor for the specified axis 
-     * location.
-     * 
-     * @param location  the location ({@code null} not permitted).
-     * 
-     * @return The text anchor (never {@code null}). 
-     */
-    protected TextAnchor labelAnchorV(AxisLabelLocation location) {
+
+    private TextAnchor getTextAnchor(AxisLabelLocation location) {
         if (location.equals(AxisLabelLocation.HIGH_END)) {
             return TextAnchor.CENTER_RIGHT;
         }
@@ -1032,11 +852,34 @@ public abstract class Axis implements ChartElement, Cloneable, Serializable {
     }
 
     /**
+     * Returns the appropriate horizontal text anchor for the specified axis
+     * location.
+     *
+     * @param location  the location ({@code null} not permitted).
+     *
+     * @return The text anchor (never {@code null}).
+     */
+    protected TextAnchor labelAnchorH(AxisLabelLocation location) {
+        return getTextAnchor(location);
+    }
+
+    /**
+     * Returns the appropriate vertical text anchor for the specified axis 
+     * location.
+     * 
+     * @param location  the location ({@code null} not permitted).
+     * 
+     * @return The text anchor (never {@code null}). 
+     */
+    protected TextAnchor labelAnchorV(AxisLabelLocation location) {
+        return getTextAnchor(location);
+    }
+
+    /**
      * Draws the axis label.
      *
      * @param label  the label text.
      * @param g2  the graphics device.
-     * @param plotArea  the plot area.
      * @param dataArea  the area inside the axes.
      * @param edge  the location of the axis.
      * @param state  the axis state ({@code null} not permitted).
@@ -1044,7 +887,7 @@ public abstract class Axis implements ChartElement, Cloneable, Serializable {
      * @return Information about the axis.
      */
     protected AxisState drawLabel(String label, Graphics2D g2,
-            Rectangle2D plotArea, Rectangle2D dataArea, RectangleEdge edge,
+                                  Rectangle2D dataArea, RectangleEdge edge,
             AxisState state) {
 
         // it is unlikely that 'state' will be null, but check anyway...
@@ -1069,7 +912,7 @@ public abstract class Axis implements ChartElement, Cloneable, Serializable {
             labelBounds = rotatedLabelBounds.getBounds2D();
             double labelx = labelLocationX(this.labelLocation, dataArea);
             double labely = state.getCursor() - insets.getBottom()
-                            - labelBounds.getHeight() / 2.0;
+                    - labelBounds.getHeight() / 2.0;
             TextAnchor anchor = labelAnchorH(this.labelLocation);
             TextUtils.drawRotatedString(label, g2, (float) labelx,
                     (float) labely, anchor, getLabelAngle(), TextAnchor.CENTER);
@@ -1133,7 +976,6 @@ public abstract class Axis implements ChartElement, Cloneable, Serializable {
      *
      * @param label  the label text.
      * @param g2  the graphics device.
-     * @param plotArea  the plot area.
      * @param dataArea  the area inside the axes.
      * @param edge  the location of the axis.
      * @param state  the axis state ({@code null} not permitted).
@@ -1141,7 +983,7 @@ public abstract class Axis implements ChartElement, Cloneable, Serializable {
      * @return Information about the axis.
      */
     protected AxisState drawAttributedLabel(AttributedString label,
-                                            Graphics2D g2, Rectangle2D plotArea, Rectangle2D dataArea,
+                                            Graphics2D g2, Rectangle2D dataArea,
                                             RectangleEdge edge, AxisState state) {
 
         // it is unlikely that 'state' will be null, but check anyway...
@@ -1283,10 +1125,9 @@ public abstract class Axis implements ChartElement, Cloneable, Serializable {
         if (obj == this) {
             return true;
         }
-        if (!(obj instanceof Axis)) {
+        if (!(obj instanceof Axis that)) {
             return false;
         }
-        Axis that = (Axis) obj;
         if (this.visible != that.visible) {
             return false;
         }
@@ -1321,22 +1162,7 @@ public abstract class Axis implements ChartElement, Cloneable, Serializable {
         if (!PaintUtils.equal(this.axisLinePaint, that.axisLinePaint)) {
             return false;
         }
-        if (this.tickLabelsVisible != that.tickLabelsVisible) {
-            return false;
-        }
-        if (!Objects.equals(this.tickLabelFont, that.tickLabelFont)) {
-            return false;
-        }
-        if (!PaintUtils.equal(this.tickLabelPaint, that.tickLabelPaint)) {
-            return false;
-        }
-        if (!Objects.equals(this.tickLabelInsets, that.tickLabelInsets)) {
-            return false;
-        }
-        if (this.fixedDimension != that.fixedDimension) {
-            return false;
-        }
-        return true;
+        return this.fixedDimension == that.fixedDimension;
     }
 
     /**
@@ -1360,11 +1186,12 @@ public abstract class Axis implements ChartElement, Cloneable, Serializable {
      *
      * @throws IOException  if there is an I/O error.
      */
+    @Serial
     private void writeObject(ObjectOutputStream stream) throws IOException {
         stream.defaultWriteObject();
         SerialUtils.writeAttributedString(this.attributedLabel, stream);
         SerialUtils.writePaint(this.labelPaint, stream);
-        SerialUtils.writePaint(this.tickLabelPaint, stream);
+        SerialUtils.writePaint(this.tickLabel.getTickLabelPaint(), stream);
         SerialUtils.writeStroke(this.axisLineStroke, stream);
         SerialUtils.writePaint(this.axisLinePaint, stream);
         SerialUtils.writeStroke(tickMarks.getTickMarkStroke(), stream);
@@ -1379,12 +1206,13 @@ public abstract class Axis implements ChartElement, Cloneable, Serializable {
      * @throws IOException  if there is an I/O error.
      * @throws ClassNotFoundException  if there is a classpath problem.
      */
+    @Serial
     private void readObject(ObjectInputStream stream)
         throws IOException, ClassNotFoundException {
         stream.defaultReadObject();
         this.attributedLabel = SerialUtils.readAttributedString(stream);
         this.labelPaint = SerialUtils.readPaint(stream);
-        this.tickLabelPaint = SerialUtils.readPaint(stream);
+        this.tickLabel.setTickLabelPaint(SerialUtils.readPaint(stream));
         this.axisLineStroke = SerialUtils.readStroke(stream);
         this.axisLinePaint = SerialUtils.readPaint(stream);
         tickMarks.setTickMarkStroke(SerialUtils.readStroke(stream));

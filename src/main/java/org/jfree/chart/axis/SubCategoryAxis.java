@@ -247,10 +247,10 @@ public class SubCategoryAxis extends CategoryAxis
         state = drawCategoryLabels(g2, plotArea, dataArea, edge, state,
                 plotState);
         if (getAttributedLabel() != null) {
-            state = drawAttributedLabel(getAttributedLabel(), g2, plotArea, 
+            state = drawAttributedLabel(getAttributedLabel(), g2,
                     dataArea, edge, state);
         } else {
-            state = drawLabel(getLabel(), g2, plotArea, dataArea, edge, state);
+            state = drawLabel(getLabel(), g2, dataArea, edge, state);
         } 
         return state;
 

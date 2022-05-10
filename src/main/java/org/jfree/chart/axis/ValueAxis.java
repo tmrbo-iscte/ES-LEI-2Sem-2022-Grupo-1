@@ -549,7 +549,7 @@ public abstract class ValueAxis extends Axis
     protected float[] calculateAnchorPoint(ValueTick tick, double cursor,
             Rectangle2D dataArea, RectangleEdge edge) {
 
-        RectangleInsets insets = getTickLabelInsets();
+        RectangleInsets insets = tickLabel.getTickLabelInsets();
         float[] result = new float[2];
         if (edge == RectangleEdge.TOP) {
             result[0] = (float) valueToJava2D(tick.getValue(), dataArea, edge);
@@ -592,14 +592,14 @@ public abstract class ValueAxis extends Axis
         }
         List ticks = refreshTicks(g2, state, dataArea, edge);
         state.setTicks(ticks);
-        g2.setFont(getTickLabelFont());
+        g2.setFont(tickLabel.getTickLabelFont());
         Object saved = g2.getRenderingHint(RenderingHints.KEY_STROKE_CONTROL);
         g2.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, 
                 RenderingHints.VALUE_STROKE_NORMALIZE);
         for (Object o : ticks) {
             ValueTick tick = (ValueTick) o;
-            if (isTickLabelsVisible()) {
-                g2.setPaint(getTickLabelPaint());
+            if (tickLabel.isTickLabelsVisible()) {
+                g2.setPaint(tickLabel.getTickLabelPaint());
                 float[] anchorPoint = calculateAnchorPoint(tick, cursor,
                         dataArea, edge);
                 if (tick instanceof LogTick) {
@@ -622,23 +622,23 @@ public abstract class ValueAxis extends Axis
                 }
             }
 
-            if ((isTickMarksVisible() && tick.getTickType().equals(
-                    TickType.MAJOR)) || (isMinorTickMarksVisible()
+            if ((tickMarks.isTickMarksVisible() && tick.getTickType().equals(
+                    TickType.MAJOR)) || (tickMarks.isMinorTickMarksVisible()
                     && tick.getTickType().equals(TickType.MINOR))) {
 
                 double ol = (tick.getTickType().equals(TickType.MINOR))
-                        ? getMinorTickMarkOutsideLength()
-                        : getTickMarkOutsideLength();
+                        ? tickMarks.getMinorTickMarkOutsideLength()
+                        : tickMarks.getTickMarkOutsideLength();
 
                 double il = (tick.getTickType().equals(TickType.MINOR))
-                        ? getMinorTickMarkInsideLength()
-                        : getTickMarkInsideLength();
+                        ? tickMarks.getMinorTickMarkInsideLength()
+                        : tickMarks.getTickMarkInsideLength();
 
                 float xx = (float) valueToJava2D(tick.getValue(), dataArea,
                         edge);
                 Line2D mark = null;
-                g2.setStroke(getTickMarkStroke());
-                g2.setPaint(getTickMarkPaint());
+                g2.setStroke(tickMarks.getTickMarkStroke());
+                g2.setPaint(tickMarks.getTickMarkPaint());
                 if (edge == RectangleEdge.LEFT) {
                     mark = new Line2D.Double(cursor - ol, xx, cursor + il, xx);
                 }
@@ -659,7 +659,7 @@ public abstract class ValueAxis extends Axis
         // need to work out the space used by the tick labels...
         // so we can update the cursor...
         double used = 0.0;
-        if (isTickLabelsVisible()) {
+        if (tickLabel.isTickLabelsVisible()) {
             if (edge == RectangleEdge.LEFT) {
                 used += findMaximumTickLabelWidth(ticks, g2, plotArea,
                         isVerticalTickLabels());
@@ -718,8 +718,8 @@ public abstract class ValueAxis extends Axis
         // calculate the max size of the tick labels (if visible)...
         double tickLabelHeight = 0.0;
         double tickLabelWidth = 0.0;
-        if (isTickLabelsVisible()) {
-            g2.setFont(getTickLabelFont());
+        if (tickLabel.isTickLabelsVisible()) {
+            g2.setFont(tickLabel.getTickLabelFont());
             List ticks = refreshTicks(g2, new AxisState(), plotArea, edge);
             if (RectangleEdge.isTopOrBottom(edge)) {
                 tickLabelHeight = findMaximumTickLabelHeight(ticks, g2,
@@ -760,8 +760,8 @@ public abstract class ValueAxis extends Axis
     protected double findMaximumTickLabelHeight(List ticks, Graphics2D g2,
             Rectangle2D drawArea, boolean vertical) {
 
-        RectangleInsets insets = getTickLabelInsets();
-        Font font = getTickLabelFont();
+        RectangleInsets insets = tickLabel.getTickLabelInsets();
+        Font font = tickLabel.getTickLabelFont();
         g2.setFont(font);
         double maxHeight = 0.0;
         if (vertical) {
@@ -809,8 +809,8 @@ public abstract class ValueAxis extends Axis
     protected double findMaximumTickLabelWidth(List ticks, Graphics2D g2,
             Rectangle2D drawArea, boolean vertical) {
 
-        RectangleInsets insets = getTickLabelInsets();
-        Font font = getTickLabelFont();
+        RectangleInsets insets = tickLabel.getTickLabelInsets();
+        Font font = tickLabel.getTickLabelFont();
         double maxWidth = 0.0;
         if (!vertical) {
             FontMetrics fm = g2.getFontMetrics(font);

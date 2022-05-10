@@ -503,11 +503,11 @@ public class LogAxis extends ValueAxis {
         }
         state = drawTickMarksAndLabels(g2, cursor, plotArea, dataArea, edge);
         if (getAttributedLabel() != null) {
-            state = drawAttributedLabel(getAttributedLabel(), g2, plotArea, 
+            state = drawAttributedLabel(getAttributedLabel(), g2,
                     dataArea, edge, state);
             
         } else {
-            state = drawLabel(getLabel(), g2, plotArea, dataArea, edge, state);
+            state = drawLabel(getLabel(), g2, dataArea, edge, state);
         }
         createAndAddEntity(cursor, state, dataArea, edge, plotState);
         return state;
@@ -551,7 +551,7 @@ public class LogAxis extends ValueAxis {
 
         Range range = getRange();
         List ticks = new ArrayList();
-        Font tickLabelFont = getTickLabelFont();
+        Font tickLabelFont = tickLabel.getTickLabelFont();
         g2.setFont(tickLabelFont);
         TextAnchor textAnchor;
         if (edge == RectangleEdge.TOP) {
@@ -609,7 +609,7 @@ public class LogAxis extends ValueAxis {
 
         Range range = getRange();
         List ticks = new ArrayList();
-        Font tickLabelFont = getTickLabelFont();
+        Font tickLabelFont = tickLabel.getTickLabelFont();
         g2.setFont(tickLabelFont);
         TextAnchor textAnchor;
         if (edge == RectangleEdge.RIGHT) {
@@ -795,7 +795,7 @@ public class LogAxis extends ValueAxis {
         if (this.numberFormatOverride != null) {
             String text = this.numberFormatOverride.format(value);
             AttributedString as = new AttributedString(text);
-            as.addAttribute(TextAttribute.FONT, getTickLabelFont());
+            as.addAttribute(TextAttribute.FONT, tickLabel.getTickLabelFont());
             return as;
         } else {
             String baseStr = this.baseSymbol;
@@ -805,7 +805,7 @@ public class LogAxis extends ValueAxis {
             double logy = calculateLog(value);
             String exponentStr = getTickUnit().valueToString(logy);
             AttributedString as = new AttributedString(baseStr + exponentStr);
-            as.addAttributes(getTickLabelFont().getAttributes(), 0, (baseStr 
+            as.addAttributes(tickLabel.getTickLabelFont().getAttributes(), 0, (baseStr
                     + exponentStr).length());
             as.addAttribute(TextAttribute.SUPERSCRIPT, 
                     TextAttribute.SUPERSCRIPT_SUPER, baseStr.length(), 
@@ -822,10 +822,10 @@ public class LogAxis extends ValueAxis {
      * @return The maximum height.
      */
     protected double estimateMaximumTickLabelHeight(Graphics2D g2) {
-        RectangleInsets tickLabelInsets = getTickLabelInsets();
+        RectangleInsets tickLabelInsets = tickLabel.getTickLabelInsets();
         double result = tickLabelInsets.getTop() + tickLabelInsets.getBottom();
 
-        Font tickLabelFont = getTickLabelFont();
+        Font tickLabelFont = tickLabel.getTickLabelFont();
         FontRenderContext frc = g2.getFontRenderContext();
         result += tickLabelFont.getLineMetrics("123", frc).getHeight();
         return result;
@@ -847,14 +847,14 @@ public class LogAxis extends ValueAxis {
     protected double estimateMaximumTickLabelWidth(Graphics2D g2, 
             TickUnit unit) {
 
-        RectangleInsets tickLabelInsets = getTickLabelInsets();
+        RectangleInsets tickLabelInsets = tickLabel.getTickLabelInsets();
         double result = tickLabelInsets.getLeft() + tickLabelInsets.getRight();
 
         if (isVerticalTickLabels()) {
             // all tick labels have the same width (equal to the height of the
             // font)...
             FontRenderContext frc = g2.getFontRenderContext();
-            LineMetrics lm = getTickLabelFont().getLineMetrics("0", frc);
+            LineMetrics lm = tickLabel.getTickLabelFont().getLineMetrics("0", frc);
             result += lm.getHeight();
         }
         else {

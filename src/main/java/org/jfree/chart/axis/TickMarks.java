@@ -10,6 +10,8 @@ import java.util.Objects;
 
 public class TickMarks implements Serializable, Cloneable {
 
+    private final Axis axis;
+
     /** The default tick marks visible ({@code true}). */
     public static final boolean DEFAULT_TICK_MARKS_VISIBLE = true;
 
@@ -65,6 +67,33 @@ public class TickMarks implements Serializable, Cloneable {
     /** The paint used to draw tick marks. */
     private transient Paint tickMarkPaint;
 
+    /** The stroke used to draw tick marks. */
+    private transient Stroke minorTickMarkStroke = new BasicStroke(0.5f);
+
+    /** The paint used to draw tick marks. */
+    private transient Paint minorTickMarkPaint = Color.BLACK;
+
+    public TickMarks(Axis axis) {
+        this.axis = axis;
+    }
+
+    public Stroke getMinorTickMarkStroke() {
+        return minorTickMarkStroke;
+    }
+
+    public void setMinorTickMarkStroke(Stroke minorTickMarkStroke) {
+        this.minorTickMarkStroke = minorTickMarkStroke;
+    }
+
+    public Paint getMinorTickMarkPaint() {
+        return minorTickMarkPaint;
+    }
+
+    public void setMinorTickMarkPaint(Paint minorTickMarkPaint) {
+        this.minorTickMarkPaint = minorTickMarkPaint;
+    }
+
+
     /**
      * Returns the flag that indicates whether or not the minor tick marks are
      * showing.
@@ -86,7 +115,7 @@ public class TickMarks implements Serializable, Cloneable {
      *
      * @see #isMinorTickMarksVisible()
      */
-    public void setMinorTickMarksVisible(boolean flag, Axis axis) {
+    public void setMinorTickMarksVisible(boolean flag) {
         if (flag != this.minorTickMarksVisible) {
             this.minorTickMarksVisible = flag;
             axis.fireChangeEvent();
@@ -113,7 +142,7 @@ public class TickMarks implements Serializable, Cloneable {
      *
      * @see #isTickMarksVisible()
      */
-    public void setTickMarksVisible(boolean flag, Axis axis) {
+    public void setTickMarksVisible(boolean flag) {
         if (flag != this.tickMarksVisible) {
             this.tickMarksVisible = flag;
             axis.fireChangeEvent();
@@ -139,7 +168,7 @@ public class TickMarks implements Serializable, Cloneable {
      *
      * @see #getTickMarkInsideLength()
      */
-    public void setTickMarkInsideLength(float length, Axis axis) {
+    public void setTickMarkInsideLength(float length) {
         this.tickMarkInsideLength = length;
         axis.fireChangeEvent();
     }
@@ -163,7 +192,7 @@ public class TickMarks implements Serializable, Cloneable {
      *
      * @see #getTickMarkInsideLength()
      */
-    public void setTickMarkOutsideLength(float length, Axis axis) {
+    public void setTickMarkOutsideLength(float length) {
         this.tickMarkOutsideLength = length;
         axis.fireChangeEvent();
     }
@@ -186,7 +215,7 @@ public class TickMarks implements Serializable, Cloneable {
      *
      * @see #getTickMarkStroke()
      */
-    public void setTickMarkStroke(Stroke stroke, Axis axis) {
+    public void setTickMarkStroke(Stroke stroke) {
         Args.nullNotPermitted(stroke, "stroke");
         if (!this.tickMarkStroke.equals(stroke)) {
             this.tickMarkStroke = stroke;
@@ -212,7 +241,7 @@ public class TickMarks implements Serializable, Cloneable {
      *
      * @see #getTickMarkPaint()
      */
-    public void setTickMarkPaint(Paint paint, Axis axis) {
+    public void setTickMarkPaint(Paint paint) {
         Args.nullNotPermitted(paint, "paint");
         this.tickMarkPaint = paint;
         axis.fireChangeEvent();
@@ -237,7 +266,7 @@ public class TickMarks implements Serializable, Cloneable {
      *
      * @see #getMinorTickMarkInsideLength()
      */
-    public void setMinorTickMarkInsideLength(float length, Axis axis) {
+    public void setMinorTickMarkInsideLength(float length) {
         this.minorTickMarkInsideLength = length;
         axis.fireChangeEvent();
     }
@@ -261,7 +290,7 @@ public class TickMarks implements Serializable, Cloneable {
      *
      * @see #getMinorTickMarkInsideLength()
      */
-    public void setMinorTickMarkOutsideLength(float length, Axis axis) {
+    public void setMinorTickMarkOutsideLength(float length) {
         this.minorTickMarkOutsideLength = length;
         axis.fireChangeEvent();
     }
@@ -271,10 +300,9 @@ public class TickMarks implements Serializable, Cloneable {
         if (obj == this) {
             return true;
         }
-        if (!(obj instanceof TickMarks)) {
+        if (!(obj instanceof TickMarks that)) {
             return false;
         }
-        TickMarks that = (TickMarks) obj;
         if (this.tickMarksVisible != that.tickMarksVisible) {
             return false;
         }
@@ -300,7 +328,18 @@ public class TickMarks implements Serializable, Cloneable {
                 != that.minorTickMarkOutsideLength) {
             return false;
         }
-        return true;
+        if (!this.minorTickMarkPaint.equals(that.minorTickMarkPaint)) {
+            return false;
+        }
+        return this.minorTickMarkStroke.equals(that.minorTickMarkStroke);
     }
 
+    @Override
+    public TickMarks clone() {
+        try {
+            return (TickMarks) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
+    }
 }

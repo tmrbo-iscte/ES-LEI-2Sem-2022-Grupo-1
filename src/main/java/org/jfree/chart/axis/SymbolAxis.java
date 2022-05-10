@@ -490,7 +490,7 @@ public class SymbolAxis extends NumberAxis implements Serializable {
 
         List ticks = new java.util.ArrayList();
 
-        Font tickLabelFont = getTickLabelFont();
+        Font tickLabelFont = tickLabel.getTickLabelFont();
         g2.setFont(tickLabelFont);
 
         double size = getTickUnit().getSize();
@@ -584,7 +584,7 @@ public class SymbolAxis extends NumberAxis implements Serializable {
 
         List ticks = new java.util.ArrayList();
 
-        Font tickLabelFont = getTickLabelFont();
+        Font tickLabelFont = tickLabel.getTickLabelFont();
         g2.setFont(tickLabelFont);
 
         double size = getTickUnit().getSize();

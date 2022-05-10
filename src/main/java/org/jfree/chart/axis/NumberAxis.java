@@ -599,11 +599,11 @@ public class NumberAxis extends ValueAxis implements Cloneable, Serializable {
         state = drawTickMarksAndLabels(g2, cursor, plotArea, dataArea, edge);
 
         if (getAttributedLabel() != null) {
-            state = drawAttributedLabel(getAttributedLabel(), g2, plotArea, 
+            state = drawAttributedLabel(getAttributedLabel(), g2,
                     dataArea, edge, state);
             
         } else {
-            state = drawLabel(getLabel(), g2, plotArea, dataArea, edge, state);
+            state = drawLabel(getLabel(), g2, dataArea, edge, state);
         }
         createAndAddEntity(cursor, state, dataArea, edge, plotState);
         return state;
@@ -681,10 +681,10 @@ public class NumberAxis extends ValueAxis implements Cloneable, Serializable {
      * @return The maximum height.
      */
     protected double estimateMaximumTickLabelHeight(Graphics2D g2) {
-        RectangleInsets tickLabelInsets = getTickLabelInsets();
+        RectangleInsets tickLabelInsets = tickLabel.getTickLabelInsets();
         double result = tickLabelInsets.getTop() + tickLabelInsets.getBottom();
 
-        Font tickLabelFont = getTickLabelFont();
+        Font tickLabelFont = tickLabel.getTickLabelFont();
         FontRenderContext frc = g2.getFontRenderContext();
         result += tickLabelFont.getLineMetrics("123", frc).getHeight();
         return result;
@@ -706,19 +706,19 @@ public class NumberAxis extends ValueAxis implements Cloneable, Serializable {
     protected double estimateMaximumTickLabelWidth(Graphics2D g2,
                                                    TickUnit unit) {
 
-        RectangleInsets tickLabelInsets = getTickLabelInsets();
+        RectangleInsets tickLabelInsets = tickLabel.getTickLabelInsets();
         double result = tickLabelInsets.getLeft() + tickLabelInsets.getRight();
 
         if (isVerticalTickLabels()) {
             // all tick labels have the same width (equal to the height of the
             // font)...
             FontRenderContext frc = g2.getFontRenderContext();
-            LineMetrics lm = getTickLabelFont().getLineMetrics("0", frc);
+            LineMetrics lm = tickLabel.getTickLabelFont().getLineMetrics("0", frc);
             result += lm.getHeight();
         }
         else {
             // look at lower and upper bounds...
-            FontMetrics fm = g2.getFontMetrics(getTickLabelFont());
+            FontMetrics fm = g2.getFontMetrics(tickLabel.getTickLabelFont());
             Range range = getRange();
             double lower = range.getLowerBound();
             double upper = range.getUpperBound();
@@ -887,7 +887,7 @@ public class NumberAxis extends ValueAxis implements Cloneable, Serializable {
 
         List result = new java.util.ArrayList();
 
-        Font tickLabelFont = getTickLabelFont();
+        Font tickLabelFont = tickLabel.getTickLabelFont();
         g2.setFont(tickLabelFont);
 
         if (isAutoTickUnitSelection()) {
@@ -983,7 +983,7 @@ public class NumberAxis extends ValueAxis implements Cloneable, Serializable {
         List result = new java.util.ArrayList();
         result.clear();
 
-        Font tickLabelFont = getTickLabelFont();
+        Font tickLabelFont = tickLabel.getTickLabelFont();
         g2.setFont(tickLabelFont);
         if (isAutoTickUnitSelection()) {
             selectAutoTickUnit(g2, dataArea, edge);

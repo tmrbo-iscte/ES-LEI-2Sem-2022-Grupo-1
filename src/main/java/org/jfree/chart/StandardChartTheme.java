@@ -1423,8 +1423,8 @@ public class StandardChartTheme implements ChartTheme, Cloneable,
     protected void applyToCategoryAxis(CategoryAxis axis) {
         axis.setLabelFont(this.largeFont);
         axis.setLabelPaint(this.axisLabelPaint);
-        axis.setTickLabelFont(this.regularFont);
-        axis.setTickLabelPaint(this.tickLabelPaint);
+        axis.getTickLabel().setTickLabelFont(this.regularFont);
+        axis.getTickLabel().setTickLabelPaint(this.tickLabelPaint);
         if (axis instanceof SubCategoryAxis) {
             SubCategoryAxis sca = (SubCategoryAxis) axis;
             sca.setSubLabelFont(this.regularFont);
@@ -1440,8 +1440,8 @@ public class StandardChartTheme implements ChartTheme, Cloneable,
     protected void applyToValueAxis(ValueAxis axis) {
         axis.setLabelFont(this.largeFont);
         axis.setLabelPaint(this.axisLabelPaint);
-        axis.setTickLabelFont(this.regularFont);
-        axis.setTickLabelPaint(this.tickLabelPaint);
+        axis.getTickLabel().setTickLabelFont(this.regularFont);
+        axis.getTickLabel().setTickLabelPaint(this.tickLabelPaint);
         if (axis instanceof SymbolAxis) {
             applyToSymbolAxis((SymbolAxis) axis);
         }

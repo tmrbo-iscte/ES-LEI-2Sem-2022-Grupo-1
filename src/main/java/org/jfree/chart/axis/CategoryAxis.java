@@ -352,7 +352,7 @@ public class CategoryAxis extends Axis implements Cloneable, Serializable {
         Font result = this.tickLabelFontMap.get(category);
         // if there is no specific font, use the general one...
         if (result == null) {
-            result = getTickLabelFont();
+            result = tickLabel.getTickLabelFont();
         }
         return result;
     }
@@ -383,14 +383,13 @@ public class CategoryAxis extends Axis implements Cloneable, Serializable {
      *
      * @return The paint (never {@code null}).
      *
-     * @see #setTickLabelPaint(Paint)
      */
     public Paint getTickLabelPaint(Comparable category) {
         Args.nullNotPermitted(category, "category");
         Paint result = this.tickLabelPaintMap.get(category);
         // if there is no specific paint, use the general one...
         if (result == null) {
-            result = getTickLabelPaint();
+            result = tickLabel.getTickLabelPaint();
         }
         return result;
     }
@@ -824,8 +823,8 @@ public class CategoryAxis extends Axis implements Cloneable, Serializable {
         // calculate the max size of the tick labels (if visible)...
         double tickLabelHeight = 0.0;
         double tickLabelWidth = 0.0;
-        if (isTickLabelsVisible()) {
-            g2.setFont(getTickLabelFont());
+        if (tickLabel.isTickLabelsVisible()) {
+            g2.setFont(tickLabel.getTickLabelFont());
             AxisState state = new AxisState();
             // we call refresh ticks just to get the maximum width or height
             refreshTicks(g2, state, plotArea, edge);
@@ -901,7 +900,7 @@ public class CategoryAxis extends Axis implements Cloneable, Serializable {
             drawAxisLine(g2, cursor, dataArea, edge);
         }
         AxisState state = new AxisState(cursor);
-        if (isTickMarksVisible()) {
+        if (tickMarks.isTickMarksVisible()) {
             drawTickMarks(g2, cursor, dataArea, edge, state);
         }
 
@@ -911,11 +910,11 @@ public class CategoryAxis extends Axis implements Cloneable, Serializable {
         state = drawCategoryLabels(g2, plotArea, dataArea, edge, state,
                 plotState);
         if (getAttributedLabel() != null) {
-            state = drawAttributedLabel(getAttributedLabel(), g2, plotArea, 
+            state = drawAttributedLabel(getAttributedLabel(), g2,
                     dataArea, edge, state);
             
         } else {
-            state = drawLabel(getLabel(), g2, plotArea, dataArea, edge, state);
+            state = drawLabel(getLabel(), g2, dataArea, edge, state);
         }
         return state;
 
@@ -940,7 +939,7 @@ public class CategoryAxis extends Axis implements Cloneable, Serializable {
             PlotRenderingInfo plotState) {
 
         Args.nullNotPermitted(state, "state");
-        if (!isTickLabelsVisible()) {
+        if (!tickLabel.isTickLabelsVisible()) {
             return state;
         }
  
@@ -1088,11 +1087,11 @@ public class CategoryAxis extends Axis implements Cloneable, Serializable {
                 TextBlock label = createLabel(category, l * r, edge, g2);
                 if (edge == RectangleEdge.TOP || edge == RectangleEdge.BOTTOM) {
                     max = Math.max(max, calculateCategoryLabelHeight(label,
-                            position, getTickLabelInsets(), g2));
+                            position, tickLabel.getTickLabelInsets(), g2));
                 } else if (edge == RectangleEdge.LEFT
                         || edge == RectangleEdge.RIGHT) {
                     max = Math.max(max, calculateCategoryLabelWidth(label,
-                            position, getTickLabelInsets(), g2));
+                            position, tickLabel.getTickLabelInsets(), g2));
                 }
                 Tick tick = new CategoryTick(category, label,
                         position.getLabelAnchor(),
@@ -1123,12 +1122,12 @@ public class CategoryAxis extends Axis implements Cloneable, Serializable {
             return;
         }
         CategoryPlot plot = (CategoryPlot) p;
-        double il = getTickMarkInsideLength();
-        double ol = getTickMarkOutsideLength();
+        double il = tickMarks.getTickMarkInsideLength();
+        double ol = tickMarks.getTickMarkOutsideLength();
         Line2D line = new Line2D.Double();
         List<Comparable> categories = plot.getCategoriesForAxis(this);
-        g2.setPaint(getTickMarkPaint());
-        g2.setStroke(getTickMarkStroke());
+        g2.setPaint(tickMarks.getTickMarkPaint());
+        g2.setStroke(tickMarks.getTickMarkStroke());
         Object saved = g2.getRenderingHint(RenderingHints.KEY_STROKE_CONTROL);
         g2.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, 
                 RenderingHints.VALUE_STROKE_NORMALIZE);

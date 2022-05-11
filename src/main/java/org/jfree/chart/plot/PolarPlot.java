@@ -1495,7 +1495,7 @@ public class PolarPlot extends Plot implements ValueAxisPlot, Zoomable,
     protected List<ValueTick> buildRadialTicks(List<ValueTick> allTicks) {
         List<ValueTick> ticks = new ArrayList<>();
         for (ValueTick tick : allTicks) {
-            if (isRadiusMinorGridlinesVisible() || TickType.MAJOR.equals(tick.getTickType())) {
+            if (isRadiusMinorGridlinesVisible() || tick.isMajor()) {
                 ticks.add(tick);
             }
         }

@@ -53,25 +53,25 @@ public class CategoryLabelPosition implements Serializable {
     private static final long serialVersionUID = 5168681143844183864L;
 
     /** The category anchor point. */
-    private RectangleAnchor categoryAnchor;
+    private final RectangleAnchor categoryAnchor;
 
     /** The text block anchor. */
-    private TextBlockAnchor labelAnchor;
+    private final TextBlockAnchor labelAnchor;
 
     /** The rotation anchor. */
-    private TextAnchor rotationAnchor;
+    private final TextAnchor rotationAnchor;
 
     /** The rotation angle (in radians). */
-    private double angle;
+    private final double angle;
 
     /** The width calculation type. */
-    private CategoryLabelWidthType widthType;
+    private final CategoryLabelWidthType widthType;
 
     /**
      * The maximum label width as a percentage of the category space or the
      * range space.
      */
-    private float widthRatio;
+    private final float widthRatio;
 
     /**
      * Creates a new position record with default settings.
@@ -232,10 +232,7 @@ public class CategoryLabelPosition implements Serializable {
         if (this.widthType != that.widthType) {
             return false;
         }
-        if (this.widthRatio != that.widthRatio) {
-            return false;
-        }
-        return true;
+        return this.widthRatio == that.widthRatio;
     }
 
     /**

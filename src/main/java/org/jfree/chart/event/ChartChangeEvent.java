@@ -126,4 +126,20 @@ public class ChartChangeEvent extends EventObject {
         this.type = type;
     }
 
+    /**
+     * author:Gustavo Ferreira-> moved from JFreeChart
+     * Sends a {@link ChartChangeEvent} to all registered listeners.
+     *
+     */
+    public void notifyListeners(JFreeChart jFreeChart) {
+        if (jFreeChart.isNotify()) {
+            Object[] listeners = jFreeChart.getChangeListeners().getListenerList();
+            for (int i = listeners.length - 2; i >= 0; i -= 2) {
+                if (listeners[i] == ChartChangeListener.class) {
+                    ((ChartChangeListener) listeners[i + 1]).chartChanged(
+                            this);
+                }
+            }
+        }
+    }
 }

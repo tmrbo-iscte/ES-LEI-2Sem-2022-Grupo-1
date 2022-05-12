@@ -300,7 +300,7 @@ public class ThermometerPlot extends Plot implements ValueAxisPlot,
             dataset.addChangeListener(this);
         }
         NumberAxis axis = new NumberAxis(null);
-        axis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
+        axis.getTickUnits().setStandardTickUnits(NumberAxis.createIntegerTickUnits());
         axis.setAxisLineVisible(false);
         axis.setPlot(this);
         axis.addChangeListener(this);

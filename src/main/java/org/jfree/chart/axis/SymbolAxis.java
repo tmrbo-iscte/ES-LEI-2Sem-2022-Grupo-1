@@ -36,33 +36,22 @@
 
 package org.jfree.chart.axis;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Graphics2D;
-import java.awt.Paint;
-import java.awt.Shape;
-import java.awt.Stroke;
+import org.jfree.chart.api.RectangleEdge;
+import org.jfree.chart.plot.Plot;
+import org.jfree.chart.plot.PlotRenderingInfo;
+import org.jfree.chart.plot.ValueAxisPlot;
+import org.jfree.chart.text.TextAnchor;
+import org.jfree.chart.text.TextUtils;
+import org.jfree.data.Range;
+
+import java.awt.*;
 import java.awt.geom.Rectangle2D;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.Serial;
 import java.io.Serializable;
 import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-
-import org.jfree.chart.plot.Plot;
-import org.jfree.chart.plot.PlotRenderingInfo;
-import org.jfree.chart.plot.ValueAxisPlot;
-import org.jfree.chart.text.TextUtils;
-import org.jfree.chart.api.RectangleEdge;
-import org.jfree.chart.text.TextAnchor;
-import org.jfree.chart.internal.PaintUtils;
-import org.jfree.chart.internal.Args;
-import org.jfree.chart.internal.SerialUtils;
-import org.jfree.data.Range;
 
 /**
  * A standard linear value axis that replaces integer values with symbols.
@@ -70,31 +59,17 @@ import org.jfree.data.Range;
 public class SymbolAxis extends NumberAxis implements Serializable {
 
     /** For serialization. */
+    @Serial
     private static final long serialVersionUID = 7216330468770619716L;
 
-    /** The default grid band paint. */
-    public static final Paint DEFAULT_GRID_BAND_PAINT
-            = new Color(232, 234, 232, 128);
+    public GridBand getGridBand() {
+        return gridBand;
+    }
 
-    /**
-     * The default paint for alternate grid bands.
-     */
-    public static final Paint DEFAULT_GRID_BAND_ALTERNATE_PAINT
-            = new Color(0, 0, 0, 0);  // transparent
+    protected final GridBand gridBand = new GridBand(this);
 
     /** The list of symbols to display instead of the numeric values. */
-    private List symbols;
-
-    /** Flag that indicates whether or not grid bands are visible. */
-    private boolean gridBandsVisible;
-
-    /** The paint used to color the grid bands (if the bands are visible). */
-    private transient Paint gridBandPaint;
-
-    /**
-     * The paint used to fill the alternate grid bands.
-     */
-    private transient Paint gridBandAlternatePaint;
+    private final List symbols;
 
     /**
      * Constructs a symbol axis, using default attribute values where
@@ -107,111 +82,11 @@ public class SymbolAxis extends NumberAxis implements Serializable {
     public SymbolAxis(String label, String[] sv) {
         super(label);
         this.symbols = Arrays.asList(sv);
-        this.gridBandsVisible = true;
-        this.gridBandPaint = DEFAULT_GRID_BAND_PAINT;
-        this.gridBandAlternatePaint = DEFAULT_GRID_BAND_ALTERNATE_PAINT;
+        this.gridBand.setGridBandsVisible(true);
+        this.gridBand.setGridBandPaint(GridBand.DEFAULT_GRID_BAND_PAINT);
+        this.gridBand.setGridBandAlternatePaint(GridBand.DEFAULT_GRID_BAND_ALTERNATE_PAINT);
         setAutoTickUnitSelection(false, false);
         setAutoRangeStickyZero(false);
-    }
-
-    /**
-     * Returns an array of the symbols for the axis.
-     *
-     * @return The symbols.
-     */
-    public String[] getSymbols() {
-        String[] result = new String[this.symbols.size()];
-        result = (String[]) this.symbols.toArray(result);
-        return result;
-    }
-
-    /**
-     * Returns the flag that controls whether or not grid bands are drawn for 
-     * the axis.  The default value is {@code true}. 
-     *
-     * @return A boolean.
-     *
-     * @see #setGridBandsVisible(boolean)
-     */
-    public boolean isGridBandsVisible() {
-        return this.gridBandsVisible;
-    }
-
-    /**
-     * Sets the flag that controls whether or not grid bands are drawn for this
-     * axis and notifies registered listeners that the axis has been modified.
-     * Each band is the area between two adjacent gridlines 
-     * running perpendicular to the axis.  When the bands are drawn they are 
-     * filled with the colors {@link #getGridBandPaint()} and 
-     * {@link #getGridBandAlternatePaint()} in an alternating sequence.
-     *
-     * @param flag  the new setting.
-     *
-     * @see #isGridBandsVisible()
-     */
-    public void setGridBandsVisible(boolean flag) {
-        this.gridBandsVisible = flag;
-        fireChangeEvent();
-    }
-
-    /**
-     * Returns the paint used to color grid bands (two colors are used
-     * alternately, the other is returned by 
-     * {@link #getGridBandAlternatePaint()}).  The default value is
-     * {@link #DEFAULT_GRID_BAND_PAINT}.
-     *
-     * @return The paint (never {@code null}).
-     *
-     * @see #setGridBandPaint(Paint)
-     * @see #isGridBandsVisible()
-     */
-    public Paint getGridBandPaint() {
-        return this.gridBandPaint;
-    }
-
-    /**
-     * Sets the grid band paint and notifies registered listeners that the
-     * axis has been changed.  See the {@link #setGridBandsVisible(boolean)}
-     * method for more information about grid bands.
-     *
-     * @param paint  the paint ({@code null} not permitted).
-     *
-     * @see #getGridBandPaint()
-     */
-    public void setGridBandPaint(Paint paint) {
-        Args.nullNotPermitted(paint, "paint");
-        this.gridBandPaint = paint;
-        fireChangeEvent();
-    }
-
-    /**
-     * Returns the second paint used to color grid bands (two colors are used
-     * alternately, the other is returned by {@link #getGridBandPaint()}).  
-     * The default value is {@link #DEFAULT_GRID_BAND_ALTERNATE_PAINT} 
-     * (transparent).
-     *
-     * @return The paint (never {@code null}).
-     *
-     * @see #setGridBandAlternatePaint(Paint)
-     */
-    public Paint getGridBandAlternatePaint() {
-        return this.gridBandAlternatePaint;
-    }
-
-    /**
-     * Sets the grid band paint and notifies registered listeners that the
-     * axis has been changed.  See the {@link #setGridBandsVisible(boolean)}
-     * method for more information about grid bands.
-     *
-     * @param paint  the paint ({@code null} not permitted).
-     *
-     * @see #getGridBandAlternatePaint()
-     * @see #setGridBandPaint(Paint)
-     */
-    public void setGridBandAlternatePaint(Paint paint) {
-        Args.nullNotPermitted(paint, "paint");
-        this.gridBandAlternatePaint = paint;
-        fireChangeEvent();
     }
 
     /**
@@ -252,138 +127,11 @@ public class SymbolAxis extends NumberAxis implements Serializable {
         if (isVisible()) {
             info = super.draw(g2, cursor, plotArea, dataArea, edge, plotState);
         }
-        if (this.gridBandsVisible) {
-            drawGridBands(g2, plotArea, dataArea, edge, info.getTicks());
+        if (this.gridBand.isGridBandsVisible()) {
+            gridBand.drawGridBands(g2, dataArea, edge, info.getTicks());
         }
         return info;
 
-    }
-
-    /**
-     * Draws the grid bands (alternate bands are colored using
-     * {@link #getGridBandPaint()} and {@link #getGridBandAlternatePaint()}.
-     *
-     * @param g2  the graphics target ({@code null} not permitted).
-     * @param plotArea  the area within which the plot is drawn 
-     *     ({@code null} not permitted).
-     * @param dataArea  the data area to which the axes are aligned 
-     *     ({@code null} not permitted).
-     * @param edge  the edge to which the axis is aligned ({@code null} not
-     *     permitted).
-     * @param ticks  the ticks ({@code null} not permitted).
-     */
-    protected void drawGridBands(Graphics2D g2, Rectangle2D plotArea,
-            Rectangle2D dataArea, RectangleEdge edge, List ticks) {
-        Shape savedClip = g2.getClip();
-        g2.clip(dataArea);
-        if (RectangleEdge.isTopOrBottom(edge)) {
-            drawGridBandsHorizontal(g2, plotArea, dataArea, true, ticks);
-        } else if (RectangleEdge.isLeftOrRight(edge)) {
-            drawGridBandsVertical(g2, plotArea, dataArea, true, ticks);
-        }
-        g2.setClip(savedClip);
-    }
-
-    /**
-     * Draws the grid bands for the axis when it is at the top or bottom of
-     * the plot.
-     *
-     * @param g2  the graphics target ({@code null} not permitted).
-     * @param plotArea  the area within which the plot is drawn (not used here).
-     * @param dataArea  the area for the data (to which the axes are aligned,
-     *         {@code null} not permitted).
-     * @param firstGridBandIsDark  True: the first grid band takes the
-     *                             color of {@code gridBandPaint}.
-     *                             False: the second grid band takes the
-     *                             color of {@code gridBandPaint}.
-     * @param ticks  a list of ticks ({@code null} not permitted).
-     */
-    protected void drawGridBandsHorizontal(Graphics2D g2,
-            Rectangle2D plotArea, Rectangle2D dataArea, 
-            boolean firstGridBandIsDark, List ticks) {
-
-        boolean currentGridBandIsDark = firstGridBandIsDark;
-        double yy = dataArea.getY();
-        double xx1, xx2;
-
-        //gets the outline stroke width of the plot
-        double outlineStrokeWidth = 1.0;
-        Stroke outlineStroke = getPlot().getOutlineStroke();
-        if (outlineStroke != null && outlineStroke instanceof BasicStroke) {
-            outlineStrokeWidth = ((BasicStroke) outlineStroke).getLineWidth();
-        }
-
-        Iterator iterator = ticks.iterator();
-        ValueTick tick;
-        Rectangle2D band;
-        while (iterator.hasNext()) {
-            tick = (ValueTick) iterator.next();
-            xx1 = valueToJava2D(tick.getValue() - 0.5d, dataArea,
-                    RectangleEdge.BOTTOM);
-            xx2 = valueToJava2D(tick.getValue() + 0.5d, dataArea,
-                    RectangleEdge.BOTTOM);
-            if (currentGridBandIsDark) {
-                g2.setPaint(this.gridBandPaint);
-            } else {
-                g2.setPaint(this.gridBandAlternatePaint);
-            }
-            band = new Rectangle2D.Double(Math.min(xx1, xx2), 
-                    yy + outlineStrokeWidth, Math.abs(xx2 - xx1), 
-                    dataArea.getMaxY() - yy - outlineStrokeWidth);
-            g2.fill(band);
-            currentGridBandIsDark = !currentGridBandIsDark;
-        }
-    }
-
-    /**
-     * Draws the grid bands for an axis that is aligned to the left or
-     * right of the data area (that is, a vertical axis).
-     *
-     * @param g2  the graphics target ({@code null} not permitted).
-     * @param plotArea  the area within which the plot is drawn (not used here).
-     * @param dataArea  the area for the data (to which the axes are aligned,
-     *         {@code null} not permitted).
-     * @param firstGridBandIsDark  True: the first grid band takes the
-     *                             color of {@code gridBandPaint}.
-     *                             False: the second grid band takes the
-     *                             color of {@code gridBandPaint}.
-     * @param ticks  a list of ticks ({@code null} not permitted).
-     */
-    protected void drawGridBandsVertical(Graphics2D g2, Rectangle2D plotArea,
-            Rectangle2D dataArea, boolean firstGridBandIsDark, 
-            List ticks) {
-
-        boolean currentGridBandIsDark = firstGridBandIsDark;
-        double xx = dataArea.getX();
-        double yy1, yy2;
-
-        //gets the outline stroke width of the plot
-        double outlineStrokeWidth = 1.0;
-        Stroke outlineStroke = getPlot().getOutlineStroke();
-        if (outlineStroke != null && outlineStroke instanceof BasicStroke) {
-            outlineStrokeWidth = ((BasicStroke) outlineStroke).getLineWidth();
-        }
-
-        Iterator iterator = ticks.iterator();
-        ValueTick tick;
-        Rectangle2D band;
-        while (iterator.hasNext()) {
-            tick = (ValueTick) iterator.next();
-            yy1 = valueToJava2D(tick.getValue() + 0.5d, dataArea,
-                    RectangleEdge.LEFT);
-            yy2 = valueToJava2D(tick.getValue() - 0.5d, dataArea,
-                    RectangleEdge.LEFT);
-            if (currentGridBandIsDark) {
-                g2.setPaint(this.gridBandPaint);
-            } else {
-                g2.setPaint(this.gridBandAlternatePaint);
-            }
-            band = new Rectangle2D.Double(xx + outlineStrokeWidth, 
-                    Math.min(yy1, yy2), dataArea.getMaxX() - xx 
-                    - outlineStrokeWidth, Math.abs(yy2 - yy1));
-            g2.fill(band);
-            currentGridBandIsDark = !currentGridBandIsDark;
-        }
     }
 
     /**
@@ -692,52 +440,112 @@ public class SymbolAxis extends NumberAxis implements Serializable {
         if (obj == this) {
             return true;
         }
-        if (!(obj instanceof SymbolAxis)) {
+        if (!(obj instanceof SymbolAxis that)) {
             return false;
         }
-        SymbolAxis that = (SymbolAxis) obj;
         if (!this.symbols.equals(that.symbols)) {
-            return false;
-        }
-        if (this.gridBandsVisible != that.gridBandsVisible) {
-            return false;
-        }
-        if (!PaintUtils.equal(this.gridBandPaint, that.gridBandPaint)) {
-            return false;
-        }
-        if (!PaintUtils.equal(this.gridBandAlternatePaint,
-                that.gridBandAlternatePaint)) {
             return false;
         }
         return super.equals(obj);
     }
 
     /**
-     * Provides serialization support.
+     * Draws the grid bands for the axis when it is at the top or bottom of
+     * the plot.
      *
-     * @param stream  the output stream.
-     *
-     * @throws IOException  if there is an I/O error.
+     * @param g2                  the graphics target ({@code null} not permitted).
+     * @param dataArea            the area for the data (to which the axes are aligned,
+     *                            {@code null} not permitted).
+     * @param firstGridBandIsDark True: the first grid band takes the
+     *                            color of {@code gridBandPaint}.
+     *                            False: the second grid band takes the
+     *                            color of {@code gridBandPaint}.
+     * @param ticks               a list of ticks ({@code null} not permitted).
      */
-    private void writeObject(ObjectOutputStream stream) throws IOException {
-        stream.defaultWriteObject();
-        SerialUtils.writePaint(this.gridBandPaint, stream);
-        SerialUtils.writePaint(this.gridBandAlternatePaint, stream);
+    public void drawGridBandsHorizontal(Graphics2D g2,
+                                        Rectangle2D dataArea,
+                                        boolean firstGridBandIsDark, List ticks, GridBand gridBand) {
+
+        boolean currentGridBandIsDark = firstGridBandIsDark;
+        double yy = dataArea.getY();
+        double xx1, xx2;
+
+        //gets the outline stroke width of the plot
+        double outlineStrokeWidth = 1.0;
+        Stroke outlineStroke = getPlot().getOutlineStroke();
+        if (outlineStroke != null && outlineStroke instanceof BasicStroke) {
+            outlineStrokeWidth = ((BasicStroke) outlineStroke).getLineWidth();
+        }
+
+        Iterator iterator = ticks.iterator();
+        ValueTick tick;
+        Rectangle2D band;
+        while (iterator.hasNext()) {
+            tick = (ValueTick) iterator.next();
+            xx1 = valueToJava2D(tick.getValue() - 0.5d, dataArea,
+                    RectangleEdge.BOTTOM);
+            xx2 = valueToJava2D(tick.getValue() + 0.5d, dataArea,
+                    RectangleEdge.BOTTOM);
+            if (currentGridBandIsDark) {
+                g2.setPaint(gridBand.gridBandPaint);
+            } else {
+                g2.setPaint(gridBand.gridBandAlternatePaint);
+            }
+            band = new Rectangle2D.Double(Math.min(xx1, xx2),
+                    yy + outlineStrokeWidth, Math.abs(xx2 - xx1),
+                    dataArea.getMaxY() - yy - outlineStrokeWidth);
+            g2.fill(band);
+            currentGridBandIsDark = !currentGridBandIsDark;
+        }
     }
 
     /**
-     * Provides serialization support.
+     * Draws the grid bands for an axis that is aligned to the left or
+     * right of the data area (that is, a vertical axis).
      *
-     * @param stream  the input stream.
-     *
-     * @throws IOException  if there is an I/O error.
-     * @throws ClassNotFoundException  if there is a classpath problem.
+     * @param g2                  the graphics target ({@code null} not permitted).
+     * @param dataArea            the area for the data (to which the axes are aligned,
+     *                            {@code null} not permitted).
+     * @param firstGridBandIsDark True: the first grid band takes the
+     *                            color of {@code gridBandPaint}.
+     *                            False: the second grid band takes the
+     *                            color of {@code gridBandPaint}.
+     * @param ticks               a list of ticks ({@code null} not permitted).
      */
-    private void readObject(ObjectInputStream stream)
-        throws IOException, ClassNotFoundException {
-        stream.defaultReadObject();
-        this.gridBandPaint = SerialUtils.readPaint(stream);
-        this.gridBandAlternatePaint = SerialUtils.readPaint(stream);
-    }
+    public void drawGridBandsVertical(Graphics2D g2,
+                                      Rectangle2D dataArea, boolean firstGridBandIsDark,
+                                      List ticks, GridBand gridBand) {
 
+        boolean currentGridBandIsDark = firstGridBandIsDark;
+        double xx = dataArea.getX();
+        double yy1, yy2;
+
+        //gets the outline stroke width of the plot
+        double outlineStrokeWidth = 1.0;
+        Stroke outlineStroke = getPlot().getOutlineStroke();
+        if (outlineStroke != null && outlineStroke instanceof BasicStroke) {
+            outlineStrokeWidth = ((BasicStroke) outlineStroke).getLineWidth();
+        }
+
+        Iterator iterator = ticks.iterator();
+        ValueTick tick;
+        Rectangle2D band;
+        while (iterator.hasNext()) {
+            tick = (ValueTick) iterator.next();
+            yy1 = valueToJava2D(tick.getValue() + 0.5d, dataArea,
+                    RectangleEdge.LEFT);
+            yy2 = valueToJava2D(tick.getValue() - 0.5d, dataArea,
+                    RectangleEdge.LEFT);
+            if (currentGridBandIsDark) {
+                g2.setPaint(gridBand.gridBandPaint);
+            } else {
+                g2.setPaint(gridBand.gridBandAlternatePaint);
+            }
+            band = new Rectangle2D.Double(xx + outlineStrokeWidth,
+                    Math.min(yy1, yy2), dataArea.getMaxX() - xx
+                    - outlineStrokeWidth, Math.abs(yy2 - yy1));
+            g2.fill(band);
+            currentGridBandIsDark = !currentGridBandIsDark;
+        }
+    }
 }

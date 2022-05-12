@@ -302,7 +302,7 @@ public class CyclicNumberAxis extends NumberAxis {
                    * tickLabelWidth / dataArea.getWidth();
 
         setTickUnit(
-                (NumberTickUnit) getStandardTickUnits().getCeilingTickUnit(n),
+                (NumberTickUnit) this.tickUnits.getStandardTickUnits().getCeilingTickUnit(n),
                 false, false);
 
      }
@@ -326,7 +326,7 @@ public class CyclicNumberAxis extends NumberAxis {
                    * tickLabelWidth / dataArea.getHeight();
 
         setTickUnit(
-            (NumberTickUnit) getStandardTickUnits().getCeilingTickUnit(n),
+            (NumberTickUnit) this.tickUnits.getStandardTickUnits().getCeilingTickUnit(n),
             false, false);
      }
 
@@ -810,16 +810,6 @@ public class CyclicNumberAxis extends NumberAxis {
                 return jmax - (vp - value) * (jmax - jmin) / this.period;
             }
         }
-    }
-
-    /**
-     * Centers the range about the given value.
-     *
-     * @param value  the data value.
-     */
-    @Override
-    public void centerRange(double value) {
-        setRange(value - this.period / 2.0, value + this.period / 2.0);
     }
 
     /**

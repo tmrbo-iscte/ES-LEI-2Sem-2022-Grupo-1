@@ -94,15 +94,15 @@ public class ValueAxisTest {
         assertEquals(a1, a2);
 
         // positiveArrowVisible;
-        a1.setPositiveArrowVisible(true);
+        a1.arrow.setPositiveArrowVisible(true);
         assertNotEquals(a1, a2);
-        a2.setPositiveArrowVisible(true);
+        a2.arrow.setPositiveArrowVisible(true);
         assertEquals(a1, a2);
 
         // negativeArrowVisible;
-        a1.setNegativeArrowVisible(true);
+        a1.arrow.setNegativeArrowVisible(true);
         assertNotEquals(a1, a2);
-        a2.setNegativeArrowVisible(true);
+        a2.arrow.setNegativeArrowVisible(true);
         assertEquals(a1, a2);
 
         //private Shape upArrow;
@@ -180,9 +180,9 @@ public class ValueAxisTest {
         assertEquals(a1, a2);
 
         //private TickUnits standardTickUnits;
-        a1.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
+        a1.getTickUnits().setStandardTickUnits(NumberAxis.createIntegerTickUnits());
         assertNotEquals(a1, a2);
-        a2.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
+        a2.getTickUnits().setStandardTickUnits(NumberAxis.createIntegerTickUnits());
         assertEquals(a1, a2);
 
         // verticalTickLabels

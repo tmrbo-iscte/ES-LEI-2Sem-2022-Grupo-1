@@ -1558,7 +1558,7 @@ public abstract class ChartFactory {
         Args.nullNotPermitted(orientation, "orientation");
         DateAxis xAxis = new DateAxis(xAxisLabel);
         NumberAxis yAxis = new NumberAxis(yAxisLabel);
-        yAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
+        yAxis.getTickUnits().setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 
         XYToolTipGenerator toolTipGenerator = null;
         if (tooltips) {

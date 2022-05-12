@@ -43,6 +43,7 @@ import java.awt.Graphics2D;
 import java.awt.font.FontRenderContext;
 import java.awt.font.LineMetrics;
 import java.awt.geom.Rectangle2D;
+import java.io.Serial;
 import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -75,6 +76,7 @@ import org.jfree.data.RangeType;
 public class NumberAxis extends ValueAxis implements Cloneable, Serializable {
 
     /** For serialization. */
+    @Serial
     private static final long serialVersionUID = 2805933088476185789L;
 
     /** The default value for the autoRangeIncludesZero flag. */
@@ -86,9 +88,6 @@ public class NumberAxis extends ValueAxis implements Cloneable, Serializable {
     /** The default tick unit. */
     public static final NumberTickUnit DEFAULT_TICK_UNIT = new NumberTickUnit(
             1.0, new DecimalFormat("0"));
-
-    /** The default setting for the vertical tick labels flag. */
-    public static final boolean DEFAULT_VERTICAL_TICK_LABELS = false;
 
     /**
      * The range type (can be used to force the axis to display only positive
@@ -116,9 +115,6 @@ public class NumberAxis extends ValueAxis implements Cloneable, Serializable {
     /** The override number format. */
     private NumberFormat numberFormatOverride;
 
-    /** An optional band for marking regions on the axis. */
-    private MarkerAxisBand markerBand;
-
     /**
      * Default constructor.
      */
@@ -138,18 +134,6 @@ public class NumberAxis extends ValueAxis implements Cloneable, Serializable {
         this.autoRangeStickyZero = DEFAULT_AUTO_RANGE_STICKY_ZERO;
         this.tickUnit = DEFAULT_TICK_UNIT;
         this.numberFormatOverride = null;
-        this.markerBand = null;
-    }
-
-    /**
-     * Returns the axis range type.
-     *
-     * @return The axis range type (never {@code null}).
-     *
-     * @see #setRangeType(RangeType)
-     */
-    public RangeType getRangeType() {
-        return this.rangeType;
     }
 
     /**
@@ -157,7 +141,6 @@ public class NumberAxis extends ValueAxis implements Cloneable, Serializable {
      *
      * @param rangeType  the range type ({@code null} not permitted).
      *
-     * @see #getRangeType()
      */
     public void setRangeType(RangeType rangeType) {
         Args.nullNotPermitted(rangeType, "rangeType");
@@ -313,32 +296,6 @@ public class NumberAxis extends ValueAxis implements Cloneable, Serializable {
     }
 
     /**
-     * Returns the (optional) marker band for the axis.
-     *
-     * @return The marker band (possibly {@code null}).
-     *
-     * @see #setMarkerBand(MarkerAxisBand)
-     */
-    public MarkerAxisBand getMarkerBand() {
-        return this.markerBand;
-    }
-
-    /**
-     * Sets the marker band for the axis.
-     * <P>
-     * The marker band is optional, leave it set to {@code null} if you
-     * don't require it.
-     *
-     * @param band the new band ({@code null} permitted).
-     *
-     * @see #getMarkerBand()
-     */
-    public void setMarkerBand(MarkerAxisBand band) {
-        this.markerBand = band;
-        notifyListeners(new AxisChangeEvent(this));
-    }
-
-    /**
      * Configures the axis to work with the specified plot.  If the axis has
      * auto-scaling, then sets the maximum and minimum values.
      */
@@ -360,8 +317,7 @@ public class NumberAxis extends ValueAxis implements Cloneable, Serializable {
             return;  // no plot, no data
         }
 
-        if (plot instanceof ValueAxisPlot) {
-            ValueAxisPlot vap = (ValueAxisPlot) plot;
+        if (plot instanceof ValueAxisPlot vap) {
 
             Range r = vap.getDataRange(this);
             if (r == null) {
@@ -530,24 +486,10 @@ public class NumberAxis extends ValueAxis implements Cloneable, Serializable {
      *
      * @return The value of the lowest visible tick on the axis.
      *
-     * @see #calculateHighestVisibleTickValue()
      */
     protected double calculateLowestVisibleTickValue() {
         double unit = getTickUnit().getSize();
         double index = Math.ceil(getRange().getLowerBound() / unit);
-        return index * unit;
-    }
-
-    /**
-     * Calculates the value of the highest visible tick on the axis.
-     *
-     * @return The value of the highest visible tick on the axis.
-     *
-     * @see #calculateLowestVisibleTickValue()
-     */
-    protected double calculateHighestVisibleTickValue() {
-        double unit = getTickUnit().getSize();
-        double index = Math.floor(getRange().getUpperBound() / unit);
         return index * unit;
     }
 
@@ -775,7 +717,7 @@ public class NumberAxis extends ValueAxis implements Cloneable, Serializable {
             Rectangle2D dataArea, RectangleEdge edge) {
 
         TickUnit unit = getTickUnit();
-        TickUnitSource tickUnitSource = getStandardTickUnits();
+        TickUnitSource tickUnitSource = this.tickUnits.getStandardTickUnits();
  
         // we should start with the current tick unit if it gives a count in 
         // the range 3 to 40 otherwise estimate one that will give a count <= 10
@@ -825,7 +767,7 @@ public class NumberAxis extends ValueAxis implements Cloneable, Serializable {
         double tickLabelHeight = estimateMaximumTickLabelHeight(g2);
 
         // start with the current tick unit...
-        TickUnitSource tickUnits = getStandardTickUnits();
+        TickUnitSource tickUnits = this.tickUnits.getStandardTickUnits();
         TickUnit unit1 = tickUnits.getCeilingTickUnit(getTickUnit());
         double unitHeight = lengthToJava2D(unit1.getSize(), dataArea, edge);
         double guess;

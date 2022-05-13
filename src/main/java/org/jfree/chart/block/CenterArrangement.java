@@ -141,10 +141,10 @@ public class CenterArrangement implements Arrangement, Serializable {
         Block b = blocks.get(0);
         Size2D s = b.arrange(g2, RectangleConstraint.NONE);
         double width = constraint.getWidth();
-        Rectangle2D bounds = new Rectangle2D.Double((width - s.width) / 2.0,
-                0.0, s.width, s.height);
+        Rectangle2D bounds = new Rectangle2D.Double((width - s.getWidth()) / 2.0,
+                0.0, s.getWidth(), s.getHeight());
         b.setBounds(bounds);
-        return new Size2D((width - s.width) / 2.0, s.height);
+        return new Size2D((width - s.getWidth()) / 2.0, s.getHeight());
     }
 
     /**
@@ -161,7 +161,7 @@ public class CenterArrangement implements Arrangement, Serializable {
                                RectangleConstraint constraint) {
 
         Size2D s = arrangeFN(container, g2, constraint);
-        if (constraint.getHeightRange().contains(s.height)) {
+        if (constraint.getHeightRange().contains(s.getHeight())) {
             return s;
         }
         else {
@@ -204,7 +204,7 @@ public class CenterArrangement implements Arrangement, Serializable {
         // first arrange without constraints, and see if this fits within
         // the required ranges...
         Size2D s1 = arrangeNN(container, g2);
-        if (constraint.getWidthRange().contains(s1.width)) {
+        if (constraint.getWidthRange().contains(s1.getWidth())) {
             return s1;  // TODO: we didn't check the height yet
         }
         else {
@@ -228,7 +228,7 @@ public class CenterArrangement implements Arrangement, Serializable {
                                RectangleConstraint constraint) {
 
         Size2D s = arrangeNF(container, g2, constraint);
-        if (constraint.getWidthRange().contains(s.width)) {
+        if (constraint.getWidthRange().contains(s.getWidth())) {
             return s;
         }
         else {
@@ -253,7 +253,7 @@ public class CenterArrangement implements Arrangement, Serializable {
         // first arrange without constraints, then see if the width fits
         // within the required range...if not, call arrangeFN() at max width
         Size2D s1 = arrangeNN(container, g2);
-        if (constraint.getWidthRange().contains(s1.width)) {
+        if (constraint.getWidthRange().contains(s1.getWidth())) {
             return s1;
         }
         else {
@@ -276,8 +276,8 @@ public class CenterArrangement implements Arrangement, Serializable {
         List<Block> blocks = container.getBlocks();
         Block b = blocks.get(0);
         Size2D s = b.arrange(g2, RectangleConstraint.NONE);
-        b.setBounds(new Rectangle2D.Double(0.0, 0.0, s.width, s.height));
-        return new Size2D(s.width, s.height);
+        b.setBounds(new Rectangle2D.Double(0.0, 0.0, s.getWidth(), s.getHeight()));
+        return new Size2D(s.getWidth(), s.getHeight());
     }
 
     /**

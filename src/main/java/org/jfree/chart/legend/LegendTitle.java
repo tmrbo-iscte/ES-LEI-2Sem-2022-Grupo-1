@@ -509,8 +509,8 @@ public class LegendTitle extends Title
         }
         RectangleConstraint c = toContentConstraint(constraint);
         Size2D size = container.arrange(g2, c);
-        result.height = calculateTotalHeight(size.height);
-        result.width = calculateTotalWidth(size.width);
+        result.setHeight(calculateTotalHeight(size.getHeight()));
+        result.setWidth(calculateTotalWidth(size.getWidth()));
         return result;
     }
 

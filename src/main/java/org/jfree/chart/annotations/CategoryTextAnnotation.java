@@ -172,9 +172,7 @@ public class CategoryTextAnnotation extends TextAnnotation
      * @param rangeAxis  the range axis.
      */
     @Override
-    public void draw(Graphics2D g2, CategoryPlot plot, Rectangle2D dataArea,
-            CategoryAxis domainAxis, ValueAxis rangeAxis) {
-
+    public void draw(Graphics2D g2, CategoryPlot plot, Rectangle2D dataArea, CategoryAxis domainAxis, ValueAxis rangeAxis) {
         CategoryDataset dataset = plot.getDataset();
         int catIndex = dataset.getColumnIndex(this.category);
         int catCount = dataset.getColumnCount();
@@ -182,30 +180,20 @@ public class CategoryTextAnnotation extends TextAnnotation
         float anchorX = 0.0f;
         float anchorY = 0.0f;
         PlotOrientation orientation = plot.getOrientation();
-        RectangleEdge domainEdge = Plot.resolveDomainAxisLocation(
-                plot.getDomainAxisLocation(), orientation);
-        RectangleEdge rangeEdge = Plot.resolveRangeAxisLocation(
-                plot.getRangeAxisLocation(), orientation);
+        RectangleEdge domainEdge = Plot.resolveDomainAxisLocation(plot.getDomainAxisLocation(), orientation);
+        RectangleEdge rangeEdge = Plot.resolveRangeAxisLocation(plot.getRangeAxisLocation(), orientation);
 
         if (orientation == PlotOrientation.HORIZONTAL) {
-            anchorY = (float) domainAxis.getCategoryJava2DCoordinate(
-                    this.categoryAnchor, catIndex, catCount, dataArea,
-                    domainEdge);
-            anchorX = (float) rangeAxis.valueToJava2D(this.value, dataArea,
-                    rangeEdge);
+            anchorX = (float) rangeAxis.valueToJava2D(this.value, dataArea, rangeEdge);
+            anchorY = (float) domainAxis.getCategoryJava2DCoordinate(this.categoryAnchor, catIndex, catCount, dataArea, domainEdge);
         }
         else if (orientation == PlotOrientation.VERTICAL) {
-            anchorX = (float) domainAxis.getCategoryJava2DCoordinate(
-                    this.categoryAnchor, catIndex, catCount, dataArea,
-                    domainEdge);
-            anchorY = (float) rangeAxis.valueToJava2D(this.value, dataArea,
-                    rangeEdge);
+            anchorX = (float) domainAxis.getCategoryJava2DCoordinate(this.categoryAnchor, catIndex, catCount, dataArea, domainEdge);
+            anchorY = (float) rangeAxis.valueToJava2D(this.value, dataArea, rangeEdge);
         }
         g2.setFont(getFont());
         g2.setPaint(getPaint());
-        TextUtils.drawRotatedString(getText(), g2, anchorX, anchorY,
-                getTextAnchor(), getRotationAngle(), getRotationAnchor());
-
+        TextUtils.drawRotatedString(getText(), g2, anchorX, anchorY, getTextAnchor(), getRotationAngle(), getRotationAnchor());
     }
 
     /**

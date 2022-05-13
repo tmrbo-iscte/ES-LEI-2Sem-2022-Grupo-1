@@ -338,6 +338,22 @@ public class StandardChartTheme implements ChartTheme, Cloneable,
     }
 
     /**
+     * REFACTOR - USADO PARA AUXILIAR NO MOVE METHOD PARA A CLASSE PiePlot.
+     * @author Afonso Caniço, Gustavo Ferreira
+     */
+    public ShadowGenerator getShadowGenerator() {
+        return this.shadowGenerator;
+    }
+
+    /**
+     * REFACTOR
+     * @author Afonso Caniço, Gustavo Ferreira
+     */
+    public boolean getShadowVisible() {
+        return shadowVisible;
+    }
+
+    /**
      * Returns the largest font for this theme.
      *
      * @return The largest font for this theme.
@@ -1089,9 +1105,7 @@ public class StandardChartTheme implements ChartTheme, Cloneable,
             PaintScaleLegend psl = (PaintScaleLegend) title;
             psl.setBackgroundPaint(this.legendBackgroundPaint);
             ValueAxis axis = psl.getAxis();
-            if (axis != null) {
-                applyToValueAxis(axis);
-            }
+            if (axis != null) axis.apply(this);
         }
         else if (title instanceof CompositeTitle) {
             CompositeTitle ct = (CompositeTitle) title;
@@ -1146,63 +1160,8 @@ public class StandardChartTheme implements ChartTheme, Cloneable,
         }
         plot.setOutlinePaint(this.plotOutlinePaint);
 
-        // now handle specific plot types (and yes, I know this is some
-        // really ugly code that has to be manually updated any time a new
-        // plot type is added - I should have written something much cooler,
-        // but I didn't and neither did anyone else).
-        if (plot instanceof PiePlot) {
-            applyToPiePlot((PiePlot) plot);
-        }
-        else if (plot instanceof MultiplePiePlot) {
-            applyToMultiplePiePlot((MultiplePiePlot) plot);
-        }
-        else if (plot instanceof CategoryPlot) {
-            applyToCategoryPlot((CategoryPlot) plot);
-        }
-        else if (plot instanceof XYPlot) {
-            applyToXYPlot((XYPlot) plot);
-        }
-        else if (plot instanceof FastScatterPlot) {
-            applyToFastScatterPlot((FastScatterPlot) plot);
-        }
-        else if (plot instanceof MeterPlot) {
-            applyToMeterPlot((MeterPlot) plot);
-        }
-        else if (plot instanceof ThermometerPlot) {
-            applyToThermometerPlot((ThermometerPlot) plot);
-        }
-        else if (plot instanceof SpiderWebPlot) {
-            applyToSpiderWebPlot((SpiderWebPlot) plot);
-        }
-        else if (plot instanceof PolarPlot) {
-            applyToPolarPlot((PolarPlot) plot);
-        }
-    }
-
-    /**
-     * Applies the attributes of this theme to a {@link PiePlot} instance.
-     * This method also clears any set values for the section paint, outline
-     * etc, so that the theme's {@link DrawingSupplier} will be used.
-     *
-     * @param plot  the plot ({@code null} not permitted).
-     */
-    protected void applyToPiePlot(PiePlot plot) {
-        plot.setLabelLinkPaint(this.labelLinkPaint);
-        plot.setLabelLinkStyle(this.labelLinkStyle);
-        plot.setLabelFont(this.regularFont);
-        plot.setShadowGenerator(this.shadowGenerator);
-
-        // clear the section attributes so that the theme's DrawingSupplier
-        // will be used
-        if (plot.getAutoPopulateSectionPaint()) {
-            plot.clearSectionPaints(false);
-        }
-        if (plot.getAutoPopulateSectionOutlinePaint()) {
-            plot.clearSectionOutlinePaints(false);
-        }
-        if (plot.getAutoPopulateSectionOutlineStroke()) {
-            plot.clearSectionOutlineStrokes(false);
-        }
+        if (plot instanceof MultiplePiePlot) applyToMultiplePiePlot((MultiplePiePlot) plot);
+        else plot.apply(this);
     }
 
     /**
@@ -1212,356 +1171,6 @@ public class StandardChartTheme implements ChartTheme, Cloneable,
      */
     protected void applyToMultiplePiePlot(MultiplePiePlot plot) {
         apply(plot.getPieChart());
-    }
-
-    /**
-     * Applies the attributes of this theme to a {@link CategoryPlot}.
-     *
-     * @param plot  the plot ({@code null} not permitted).
-     */
-    protected void applyToCategoryPlot(CategoryPlot plot) {
-        plot.setAxisOffset(this.axisOffset);
-        plot.setDomainGridlinePaint(this.domainGridlinePaint);
-        plot.setRangeGridlinePaint(this.rangeGridlinePaint);
-        plot.setRangeZeroBaselinePaint(this.baselinePaint);
-        plot.setShadowGenerator(this.shadowGenerator);
-
-        // process all domain axes
-        int domainAxisCount = plot.getDomainAxisCount();
-        for (int i = 0; i < domainAxisCount; i++) {
-            CategoryAxis axis = plot.getDomainAxis(i);
-            if (axis != null) {
-                applyToCategoryAxis(axis);
-            }
-        }
-
-        // process all range axes
-        int rangeAxisCount = plot.getRangeAxisCount();
-        for (int i = 0; i < rangeAxisCount; i++) {
-            ValueAxis axis = plot.getRangeAxis(i);
-            if (axis != null) {
-                applyToValueAxis(axis);
-            }
-        }
-
-        // process all renderers
-        int rendererCount = plot.getRendererCount();
-        for (int i = 0; i < rendererCount; i++) {
-            CategoryItemRenderer r = plot.getRenderer(i);
-            if (r != null) {
-                applyToCategoryItemRenderer(r);
-            }
-        }
-
-        if (plot instanceof CombinedDomainCategoryPlot) {
-            CombinedDomainCategoryPlot cp = (CombinedDomainCategoryPlot) plot;
-            for (CategoryPlot subplot : cp.getSubplots()) {
-                if (subplot != null) {
-                    applyToPlot(subplot);
-                }
-            }
-        }
-        if (plot instanceof CombinedRangeCategoryPlot) {
-            CombinedRangeCategoryPlot cp = (CombinedRangeCategoryPlot) plot;
-            for (CategoryPlot subplot : cp.getSubplots()) {
-                if (subplot != null) {
-                    applyToPlot(subplot);
-                }
-            }
-        }
-    }
-
-    /**
-     * Applies the attributes of this theme to a {@link XYPlot}.
-     *
-     * @param plot  the plot ({@code null} not permitted).
-     * 
-     * @param <S> the type for the series keys.
-     */
-    protected <S extends Comparable<S>> void applyToXYPlot(XYPlot<S> plot) {
-        plot.setAxisOffset(this.axisOffset);
-        plot.setDomainZeroBaselinePaint(this.baselinePaint);
-        plot.setRangeZeroBaselinePaint(this.baselinePaint);
-        plot.setDomainGridlinePaint(this.domainGridlinePaint);
-        plot.setRangeGridlinePaint(this.rangeGridlinePaint);
-        plot.setDomainCrosshairPaint(this.crosshairPaint);
-        plot.setRangeCrosshairPaint(this.crosshairPaint);
-        plot.setShadowGenerator(this.shadowGenerator);
-
-        // process all domain axes
-        int domainAxisCount = plot.getDomainAxisCount();
-        for (int i = 0; i < domainAxisCount; i++) {
-            ValueAxis axis = plot.getDomainAxis(i);
-            if (axis != null) {
-                applyToValueAxis(axis);
-            }
-        }
-
-        // process all range axes
-        int rangeAxisCount = plot.getRangeAxisCount();
-        for (int i = 0; i < rangeAxisCount; i++) {
-            ValueAxis axis = plot.getRangeAxis(i);
-            if (axis != null) {
-                applyToValueAxis(axis);
-            }
-        }
-
-        // process all renderers
-        int rendererCount = plot.getRendererCount();
-        for (int i = 0; i < rendererCount; i++) {
-            XYItemRenderer r = plot.getRenderer(i);
-            if (r != null) {
-                applyToXYItemRenderer(r);
-            }
-        }
-        // process all annotations
-
-        for (XYAnnotation a : plot.getAnnotations()) {
-            applyToXYAnnotation(a);
-        }
-
-        if (plot instanceof CombinedDomainXYPlot) {
-            CombinedDomainXYPlot<S> cp = (CombinedDomainXYPlot) plot;
-            for (XYPlot<S> subplot : cp.getSubplots()) {
-                if (subplot != null) {
-                    applyToPlot(subplot);
-                }
-            }
-        }
-        if (plot instanceof CombinedRangeXYPlot) {
-            CombinedRangeXYPlot<S> cp = (CombinedRangeXYPlot) plot;
-            for (XYPlot subplot : cp.getSubplots()) {
-                if (subplot != null) {
-                    applyToPlot(subplot);
-                }
-            }
-        }
-    }
-
-    /**
-     * Applies the attributes of this theme to a {@link FastScatterPlot}.
-     * 
-     * @param plot  the plot ({@code null} not permitted).
-     */
-    protected void applyToFastScatterPlot(FastScatterPlot plot) {
-        plot.setDomainGridlinePaint(this.domainGridlinePaint);
-        plot.setRangeGridlinePaint(this.rangeGridlinePaint);
-        ValueAxis xAxis = plot.getDomainAxis();
-        if (xAxis != null) {
-            applyToValueAxis(xAxis);
-        }
-        ValueAxis yAxis = plot.getRangeAxis();
-        if (yAxis != null) {
-            applyToValueAxis(yAxis);
-        }
-
-    }
-
-    /**
-     * Applies the attributes of this theme to a {@link PolarPlot}.  This
-     * method is called from the {@link #applyToPlot(Plot)} method.
-     *
-     * @param plot  the plot ({@code null} not permitted).
-     */
-    protected void applyToPolarPlot(PolarPlot plot) {
-        plot.setAngleLabelFont(this.regularFont);
-        plot.setAngleLabelPaint(this.tickLabelPaint);
-        plot.setAngleGridlinePaint(this.domainGridlinePaint);
-        plot.setRadiusGridlinePaint(this.rangeGridlinePaint);
-        ValueAxis axis = plot.getAxis();
-        if (axis != null) {
-            applyToValueAxis(axis);
-        }
-    }
-
-    /**
-     * Applies the attributes of this theme to a {@link SpiderWebPlot}.
-     *
-     * @param plot  the plot ({@code null} not permitted).
-     */
-    protected void applyToSpiderWebPlot(SpiderWebPlot plot) {
-        plot.setLabelFont(this.regularFont);
-        plot.setLabelPaint(this.axisLabelPaint);
-        plot.setAxisLinePaint(this.axisLabelPaint);
-    }
-
-    /**
-     * Applies the attributes of this theme to a {@link MeterPlot}.
-     *
-     * @param plot  the plot ({@code null} not permitted).
-     */
-    protected void applyToMeterPlot(MeterPlot plot) {
-        plot.setDialBackgroundPaint(this.plotBackgroundPaint);
-        plot.setValueFont(this.largeFont);
-        plot.setValuePaint(this.axisLabelPaint);
-        plot.setDialOutlinePaint(this.plotOutlinePaint);
-        plot.setNeedlePaint(this.thermometerPaint);
-        plot.setTickLabelFont(this.regularFont);
-        plot.setTickLabelPaint(this.tickLabelPaint);
-    }
-
-    /**
-     * Applies the attributes for this theme to a {@link ThermometerPlot}.
-     * This method is called from the {@link #applyToPlot(Plot)} method.
-     *
-     * @param plot  the plot.
-     */
-    protected void applyToThermometerPlot(ThermometerPlot plot) {
-        plot.setValueFont(this.largeFont);
-        plot.setThermometerPaint(this.thermometerPaint);
-        ValueAxis axis = plot.getRangeAxis();
-        if (axis != null) {
-            applyToValueAxis(axis);
-        }
-    }
-
-    /**
-     * Applies the attributes for this theme to a {@link CategoryAxis}.
-     *
-     * @param axis  the axis ({@code null} not permitted).
-     */
-    protected void applyToCategoryAxis(CategoryAxis axis) {
-        axis.setLabelFont(this.largeFont);
-        axis.setLabelPaint(this.axisLabelPaint);
-        axis.setTickLabelFont(this.regularFont);
-        axis.setTickLabelPaint(this.tickLabelPaint);
-        if (axis instanceof SubCategoryAxis) {
-            SubCategoryAxis sca = (SubCategoryAxis) axis;
-            sca.setSubLabelFont(this.regularFont);
-            sca.setSubLabelPaint(this.tickLabelPaint);
-        }
-    }
-
-    /**
-     * Applies the attributes for this theme to a {@link ValueAxis}.
-     *
-     * @param axis  the axis ({@code null} not permitted).
-     */
-    protected void applyToValueAxis(ValueAxis axis) {
-        axis.setLabelFont(this.largeFont);
-        axis.setLabelPaint(this.axisLabelPaint);
-        axis.setTickLabelFont(this.regularFont);
-        axis.setTickLabelPaint(this.tickLabelPaint);
-        if (axis instanceof SymbolAxis) {
-            applyToSymbolAxis((SymbolAxis) axis);
-        }
-        if (axis instanceof PeriodAxis) {
-            applyToPeriodAxis((PeriodAxis) axis);
-        }
-    }
-
-    /**
-     * Applies the attributes for this theme to a {@link SymbolAxis}.
-     *
-     * @param axis  the axis ({@code null} not permitted).
-     */
-    protected void applyToSymbolAxis(SymbolAxis axis) {
-        axis.setGridBandPaint(this.gridBandPaint);
-        axis.setGridBandAlternatePaint(this.gridBandAlternatePaint);
-    }
-
-    /**
-     * Applies the attributes for this theme to a {@link PeriodAxis}.
-     *
-     * @param axis  the axis ({@code null} not permitted).
-     */
-    protected void applyToPeriodAxis(PeriodAxis axis) {
-        PeriodAxisLabelInfo[] info = axis.getLabelInfo();
-        for (int i = 0; i < info.length; i++) {
-            PeriodAxisLabelInfo e = info[i];
-            PeriodAxisLabelInfo n = new PeriodAxisLabelInfo(e.getPeriodClass(),
-                    e.getDateFormat(), e.getPadding(), this.regularFont,
-                    this.tickLabelPaint, e.getDrawDividers(),
-                    e.getDividerStroke(), e.getDividerPaint());
-            info[i] = n;
-        }
-        axis.setLabelInfo(info);
-    }
-
-    /**
-     * Applies the attributes for this theme to an {@link AbstractRenderer}.
-     *
-     * @param renderer  the renderer ({@code null} not permitted).
-     */
-    protected void applyToAbstractRenderer(AbstractRenderer renderer) {
-        if (renderer.getAutoPopulateSeriesPaint()) {
-            renderer.clearSeriesPaints(false);
-        }
-        if (renderer.getAutoPopulateSeriesStroke()) {
-            renderer.clearSeriesStrokes(false);
-        }
-    }
-
-    /**
-     * Applies the settings of this theme to the specified renderer.
-     *
-     * @param renderer  the renderer ({@code null} not permitted).
-     */
-    protected void applyToCategoryItemRenderer(CategoryItemRenderer renderer) {
-        Args.nullNotPermitted(renderer, "renderer");
-
-        if (renderer instanceof AbstractRenderer) {
-            applyToAbstractRenderer((AbstractRenderer) renderer);
-        }
-
-        renderer.setDefaultItemLabelFont(this.regularFont);
-        renderer.setDefaultItemLabelPaint(this.itemLabelPaint);
-
-        // now we handle some special cases - yes, UGLY code alert!
-
-        // BarRenderer
-        if (renderer instanceof BarRenderer) {
-            BarRenderer br = (BarRenderer) renderer;
-            br.setBarPainter(this.barPainter);
-            br.setShadowVisible(this.shadowVisible);
-            br.setShadowPaint(this.shadowPaint);
-        }
-
-
-        //  StatisticalBarRenderer
-        if (renderer instanceof StatisticalBarRenderer) {
-            StatisticalBarRenderer sbr = (StatisticalBarRenderer) renderer;
-            sbr.setErrorIndicatorPaint(this.errorIndicatorPaint);
-        }
-
-        // MinMaxCategoryRenderer
-        if (renderer instanceof MinMaxCategoryRenderer) {
-            MinMaxCategoryRenderer mmcr = (MinMaxCategoryRenderer) renderer;
-            mmcr.setGroupPaint(this.errorIndicatorPaint);
-        }
-    }
-
-    /**
-     * Applies the settings of this theme to the specified renderer.
-     *
-     * @param renderer  the renderer ({@code null} not permitted).
-     */
-    protected void applyToXYItemRenderer(XYItemRenderer renderer) {
-        Args.nullNotPermitted(renderer, "renderer");
-        if (renderer instanceof AbstractRenderer) {
-            applyToAbstractRenderer((AbstractRenderer) renderer);
-        }
-        renderer.setDefaultItemLabelFont(this.regularFont);
-        renderer.setDefaultItemLabelPaint(this.itemLabelPaint);
-        if (renderer instanceof XYBarRenderer) {
-            XYBarRenderer br = (XYBarRenderer) renderer;
-            br.setBarPainter(this.xyBarPainter);
-            br.setShadowVisible(this.shadowVisible);
-        }
-    }
-
-    /**
-     * Applies the settings of this theme to the specified annotation.
-     *
-     * @param annotation  the annotation.
-     */
-    protected void applyToXYAnnotation(XYAnnotation annotation) {
-        Args.nullNotPermitted(annotation, "annotation");
-        if (annotation instanceof XYTextAnnotation) {
-            XYTextAnnotation xyta = (XYTextAnnotation) annotation;
-            xyta.setFont(this.smallFont);
-            xyta.setPaint(this.itemLabelPaint);
-        }
     }
 
     /**

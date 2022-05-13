@@ -41,6 +41,11 @@
 
 package org.jfree.chart.axis;
 
+import org.jfree.chart.internal.Args;
+import org.jfree.data.time.RegularTimePeriod;
+
+import java.util.Date;
+
 /**
  * Used to indicate the required position of tick marks on a date axis relative
  * to the underlying time period.
@@ -54,6 +59,15 @@ public enum DateTickMarkPosition {
     MIDDLE,
 
     /** End of period. */
-    END
+    END;
 
+    public Date calculateDate(RegularTimePeriod period) {
+        Args.nullNotPermitted(period, "period");
+        switch (this) {
+            case START: return new Date(period.getFirstMillisecond());
+            case MIDDLE: return new Date(period.getMiddleMillisecond());
+            case END: return new Date(period.getLastMillisecond());
+            default: return null;
+        }
+    }
 }

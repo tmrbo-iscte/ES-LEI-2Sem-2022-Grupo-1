@@ -78,21 +78,21 @@ public class CategoryAxisTest {
         assertEquals(a1, a2);
 
         // maxCategoryLabelWidthRatio
-        a1.setMaximumCategoryLabelWidthRatio(0.98f);
+        a1.getHelper().setMaximumCategoryLabelWidthRatio(0.98f);
         assertNotEquals(a1, a2);
-        a2.setMaximumCategoryLabelWidthRatio(0.98f);
+        a2.getHelper().setMaximumCategoryLabelWidthRatio(0.98f);
         assertEquals(a1, a2);
 
         // categoryLabelPositionOffset
-        a1.setCategoryLabelPositionOffset(11);
+        a1.getHelper().setCategoryLabelPositionOffset(11);
         assertNotEquals(a1, a2);
-        a2.setCategoryLabelPositionOffset(11);
+        a2.getHelper().setCategoryLabelPositionOffset(11);
         assertEquals(a1, a2);
 
         // categoryLabelPositions
-        a1.setCategoryLabelPositions(CategoryLabelPositions.DOWN_45);
+        a1.getHelper().setCategoryLabelPositions(CategoryLabelPositions.DOWN_45);
         assertNotEquals(a1, a2);
-        a2.setCategoryLabelPositions(CategoryLabelPositions.DOWN_45);
+        a2.getHelper().setCategoryLabelPositions(CategoryLabelPositions.DOWN_45);
         assertEquals(a1, a2);
 
         // categoryLabelToolTips

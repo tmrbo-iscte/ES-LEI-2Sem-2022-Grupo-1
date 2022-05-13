@@ -3564,12 +3564,12 @@ public class XYPlot<S extends Comparable<S>> extends Plot
             Paint gridPaint = null;
             for (ValueTick tick : ticks) {
                 boolean paintLine = false;
-                if ((tick.getTickType() == TickType.MINOR)
+                if (tick.isMinor()
                         && isDomainMinorGridlinesVisible()) {
                     gridStroke = getDomainMinorGridlineStroke();
                     gridPaint = getDomainMinorGridlinePaint();
                     paintLine = true;
-                } else if ((tick.getTickType() == TickType.MAJOR)
+                } else if (tick.isMajor()
                         && isDomainGridlinesVisible()) {
                     gridStroke = getDomainGridlineStroke();
                     gridPaint = getDomainGridlinePaint();
@@ -3611,12 +3611,12 @@ public class XYPlot<S extends Comparable<S>> extends Plot
             if (axis != null) {
                 for (ValueTick tick : ticks) {
                      boolean paintLine = false;
-                    if ((tick.getTickType() == TickType.MINOR)
+                    if (tick.isMinor()
                             && isRangeMinorGridlinesVisible()) {
                         gridStroke = getRangeMinorGridlineStroke();
                         gridPaint = getRangeMinorGridlinePaint();
                         paintLine = true;
-                    } else if ((tick.getTickType() == TickType.MAJOR)
+                    } else if (tick.isMajor()
                             && isRangeGridlinesVisible()) {
                         gridStroke = getRangeGridlineStroke();
                         gridPaint = getRangeGridlinePaint();

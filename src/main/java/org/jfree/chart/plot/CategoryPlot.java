@@ -3749,13 +3749,13 @@ public class CategoryPlot<R extends Comparable<R>, C extends Comparable<C>>
         boolean paintLine;
         for (ValueTick tick : ticks) {
             paintLine = false;
-            if ((tick.getTickType() == TickType.MINOR)
+            if (tick.isMinor()
                     && isRangeMinorGridlinesVisible()) {
                 gridStroke = getRangeMinorGridlineStroke();
                 gridPaint = getRangeMinorGridlinePaint();
                 paintLine = true;
             }
-            else if ((tick.getTickType() == TickType.MAJOR)
+            else if (tick.isMajor()
                     && isRangeGridlinesVisible()) {
                 gridStroke = getRangeGridlineStroke();
                 gridPaint = getRangeGridlinePaint();

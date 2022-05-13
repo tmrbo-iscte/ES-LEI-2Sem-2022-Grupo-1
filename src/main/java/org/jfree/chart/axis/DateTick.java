@@ -50,7 +50,7 @@ import org.jfree.chart.internal.Args;
 public class DateTick extends ValueTick {
 
     /** The date. */
-    private Date date;
+    private final Date date;
 
     /**
      * Creates a new date tick.

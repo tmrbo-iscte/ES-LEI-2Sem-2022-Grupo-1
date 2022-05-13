@@ -289,8 +289,8 @@ public class XYTitleAnnotation extends AbstractXYAnnotation
                 new Range(0, maxW), new Range(0, maxH));
 
         Size2D size = this.title.arrange(g2, rc);
-        Rectangle2D titleRect = new Rectangle2D.Double(0, 0, size.width,
-                size.height);
+        Rectangle2D titleRect = new Rectangle2D.Double(0, 0, size.getWidth(),
+                size.getHeight());
         Point2D anchorPoint = this.anchor.getAnchorPoint(titleRect);
         xx = xx - (float) anchorPoint.getX();
         yy = yy - (float) anchorPoint.getY();
@@ -312,7 +312,7 @@ public class XYTitleAnnotation extends AbstractXYAnnotation
             String url = getURL();
             if (toolTip != null || url != null) {
                 addEntity(info, new Rectangle2D.Float(xx, yy,
-                        (float) size.width, (float) size.height),
+                        (float) size.getWidth(), (float) size.getHeight()),
                         rendererIndex, toolTip, url);
             }
         }

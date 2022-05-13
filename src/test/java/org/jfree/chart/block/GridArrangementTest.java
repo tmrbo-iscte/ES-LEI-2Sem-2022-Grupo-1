@@ -97,8 +97,8 @@ public class GridArrangementTest {
     public void testNN() {
         BlockContainer c = createTestContainer1();
         Size2D s = c.arrange(null, RectangleConstraint.NONE);
-        assertEquals(90.0, s.width, EPSILON);
-        assertEquals(33.0, s.height, EPSILON);
+        assertEquals(90.0, s.getWidth(), EPSILON);
+        assertEquals(33.0, s.getHeight(), EPSILON);
     }
 
     /**
@@ -111,8 +111,8 @@ public class GridArrangementTest {
                 LengthConstraintType.FIXED, 0.0, null,
                 LengthConstraintType.NONE);
         Size2D s = c.arrange(null, constraint);
-        assertEquals(100.0, s.width, EPSILON);
-        assertEquals(33.0, s.height, EPSILON);
+        assertEquals(100.0, s.getWidth(), EPSILON);
+        assertEquals(33.0, s.getHeight(), EPSILON);
     }
 
     /**
@@ -124,8 +124,8 @@ public class GridArrangementTest {
         RectangleConstraint constraint = RectangleConstraint.NONE.toFixedHeight(
                 100.0);
         Size2D s = c.arrange(null, constraint);
-        assertEquals(90.0, s.width, EPSILON);
-        assertEquals(100.0, s.height, EPSILON);
+        assertEquals(90.0, s.getWidth(), EPSILON);
+        assertEquals(100.0, s.getHeight(), EPSILON);
     }
 
     /**
@@ -137,8 +137,8 @@ public class GridArrangementTest {
         RectangleConstraint constraint = new RectangleConstraint(new Range(40.0,
                 60.0), 100.0);
         Size2D s = c.arrange(null, constraint);
-        assertEquals(60.0, s.width, EPSILON);
-        assertEquals(100.0, s.height, EPSILON);
+        assertEquals(60.0, s.getWidth(), EPSILON);
+        assertEquals(100.0, s.getHeight(), EPSILON);
     }
 
     /**
@@ -150,8 +150,8 @@ public class GridArrangementTest {
         RectangleConstraint constraint = new RectangleConstraint(new Range(40.0,
                 60.0), new Range(50.0, 70.0));
         Size2D s = c.arrange(null, constraint);
-        assertEquals(60.0, s.width, EPSILON);
-        assertEquals(50.0, s.height, EPSILON);
+        assertEquals(60.0, s.getWidth(), EPSILON);
+        assertEquals(50.0, s.getHeight(), EPSILON);
     }
 
     /**
@@ -163,8 +163,8 @@ public class GridArrangementTest {
         RectangleConstraint constraint = RectangleConstraint.NONE.toRangeWidth(
                 new Range(40.0, 60.0));
         Size2D s = c.arrange(null, constraint);
-        assertEquals(60.0, s.width, EPSILON);
-        assertEquals(33.0, s.height, EPSILON);
+        assertEquals(60.0, s.getWidth(), EPSILON);
+        assertEquals(33.0, s.getHeight(), EPSILON);
     }
 
     /**
@@ -176,8 +176,8 @@ public class GridArrangementTest {
         RectangleConstraint constraint = RectangleConstraint.NONE.toRangeHeight(
                 new Range(40.0, 60.0));
         Size2D s = c.arrange(null, constraint);
-        assertEquals(90.0, s.width, EPSILON);
-        assertEquals(40.0, s.height, EPSILON);
+        assertEquals(90.0, s.getWidth(), EPSILON);
+        assertEquals(40.0, s.getHeight(), EPSILON);
     }
 
     private BlockContainer createTestContainer1() {

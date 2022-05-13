@@ -40,6 +40,7 @@
 
 package org.jfree.chart.axis;
 
+import org.jfree.chart.StandardChartTheme;
 import org.jfree.chart.api.PublicCloneable;
 import org.jfree.chart.api.RectangleEdge;
 import org.jfree.chart.api.RectangleInsets;
@@ -68,8 +69,7 @@ import java.util.Objects;
  * using the {@code double} primitive.  The two key subclasses are
  * {@link DateAxis} and {@link NumberAxis}.
  */
-public abstract class ValueAxis extends Axis
-        implements Cloneable, PublicCloneable, Serializable {
+public abstract class ValueAxis extends Axis implements Cloneable, PublicCloneable, Serializable {
 
     /**
      * For serialization.
@@ -750,9 +750,7 @@ public abstract class ValueAxis extends Axis
      *                 are 'vertical'.
      * @return The height of the tallest tick label.
      */
-    protected double findMaximumTickLabelHeight(List ticks, Graphics2D g2,
-                                                Rectangle2D drawArea, boolean vertical) {
-
+    protected double findMaximumTickLabelHeight(List ticks, Graphics2D g2, Rectangle2D drawArea, boolean vertical) {
         RectangleInsets insets = getTickLabelInsets();
         Font font = getTickLabelFont();
         g2.setFont(font);
@@ -760,19 +758,14 @@ public abstract class ValueAxis extends Axis
         if (vertical) {
             FontMetrics fm = g2.getFontMetrics(font);
             for (Object o : ticks) {
-                Tick tick = (Tick) o;
-                Rectangle2D labelBounds = tick.getLabelBounds(g2, fm);
-                if (labelBounds != null && labelBounds.getWidth()
-                        + insets.getTop() + insets.getBottom() > maxHeight) {
-                    maxHeight = labelBounds.getWidth()
-                            + insets.getTop() + insets.getBottom();
+                Rectangle2D labelBounds = getLabelBounds(g2, fm, (Tick) o);
+                if (labelBounds != null && labelBounds.getWidth() + insets.getTop() + insets.getBottom() > maxHeight) {
+                    maxHeight = labelBounds.getWidth() + insets.getTop() + insets.getBottom();
                 }
             }
         } else {
-            LineMetrics metrics = font.getLineMetrics("ABCxyz",
-                    g2.getFontRenderContext());
-            maxHeight = metrics.getHeight()
-                    + insets.getTop() + insets.getBottom();
+            LineMetrics metrics = font.getLineMetrics("ABCxyz", g2.getFontRenderContext());
+            maxHeight = metrics.getHeight() + insets.getTop() + insets.getBottom();
         }
         return maxHeight;
 
@@ -788,32 +781,40 @@ public abstract class ValueAxis extends Axis
      *                 are 'vertical'.
      * @return The width of the tallest tick label.
      */
-    protected double findMaximumTickLabelWidth(List ticks, Graphics2D g2,
-                                               Rectangle2D drawArea, boolean vertical) {
-
+    protected double findMaximumTickLabelWidth(List ticks, Graphics2D g2, Rectangle2D drawArea, boolean vertical) {
         RectangleInsets insets = getTickLabelInsets();
         Font font = getTickLabelFont();
         double maxWidth = 0.0;
         if (!vertical) {
             FontMetrics fm = g2.getFontMetrics(font);
             for (Object o : ticks) {
-                Tick tick = (Tick) o;
-                Rectangle2D labelBounds = tick.getLabelBounds(g2, fm);
-                if (labelBounds != null
-                        && labelBounds.getWidth() + insets.getLeft()
-                        + insets.getRight() > maxWidth) {
-                    maxWidth = labelBounds.getWidth()
-                            + insets.getLeft() + insets.getRight();
+                Rectangle2D labelBounds = getLabelBounds(g2, fm, (Tick) o);
+                if (labelBounds != null && labelBounds.getWidth() + insets.getLeft() + insets.getRight() > maxWidth) {
+                    maxWidth = labelBounds.getWidth() + insets.getLeft() + insets.getRight();
                 }
             }
         } else {
-            LineMetrics metrics = font.getLineMetrics("ABCxyz",
-                    g2.getFontRenderContext());
-            maxWidth = metrics.getHeight()
-                    + insets.getTop() + insets.getBottom();
+            LineMetrics metrics = font.getLineMetrics("ABCxyz", g2.getFontRenderContext());
+            maxWidth = metrics.getHeight() + insets.getTop() + insets.getBottom();
         }
         return maxWidth;
 
+    }
+
+    /**
+     * REFACTOR - usado para remover código duplicado entre findMaximumTickLabelWidth e findMaximumTickLabelHeight
+     * @author Afonso Caniço
+     */
+    private Rectangle2D getLabelBounds(Graphics2D g2, FontMetrics fm, Tick tick) {
+        if (tick instanceof LogTick) {
+            LogTick lt = (LogTick) tick;
+            if (lt.getAttributedLabel() != null) {
+                return AttrStringUtils.getTextBounds(lt.getAttributedLabel(), g2);
+            }
+        } else if (tick.getText() != null) {
+            return TextUtils.getTextBounds(tick.getText(), g2, fm);
+        }
+        return null;
     }
 
     /**
@@ -1590,6 +1591,16 @@ public abstract class ValueAxis extends Axis
         this.downArrow = SerialUtils.readShape(stream);
         this.leftArrow = SerialUtils.readShape(stream);
         this.rightArrow = SerialUtils.readShape(stream);
+    }
+
+    @Override
+    public void apply(StandardChartTheme theme) {
+        setLabelFont(theme.getLargeFont());
+        setLabelPaint(theme.getAxisLabelPaint());
+        setTickLabelFont(theme.getRegularFont());
+        setTickLabelPaint(theme.getTickLabelPaint());
+        if (this instanceof SymbolAxis) this.apply(theme);
+        if (this instanceof PeriodAxis) this.apply(theme);
     }
 
 }

@@ -72,6 +72,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import org.jfree.chart.ChartElementVisitor;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.StandardChartTheme;
 import org.jfree.chart.legend.LegendItemCollection;
 import org.jfree.chart.annotations.Annotation;
 import org.jfree.chart.annotations.CategoryAnnotation;
@@ -91,8 +92,8 @@ import org.jfree.chart.event.ChartChangeEventType;
 import org.jfree.chart.event.PlotChangeEvent;
 import org.jfree.chart.event.RendererChangeEvent;
 import org.jfree.chart.event.RendererChangeListener;
-import org.jfree.chart.renderer.category.CategoryItemRenderer;
-import org.jfree.chart.renderer.category.CategoryItemRendererState;
+import org.jfree.chart.renderer.AbstractRenderer;
+import org.jfree.chart.renderer.category.*;
 import org.jfree.chart.api.Layer;
 import org.jfree.chart.api.RectangleEdge;
 import org.jfree.chart.api.RectangleInsets;
@@ -4899,4 +4900,69 @@ public class CategoryPlot<R extends Comparable<R>, C extends Comparable<C>>
 
     }
 
+    /**
+     * REFACTOR - USADO PARA CORRIGIR FEATURE ENVY DE org.jfree.chart.StandardChartTheme.applyToCategoryPlot
+     * @author Afonso Caniço, Gustavo Ferreira
+     */
+    @Override
+    public void apply(StandardChartTheme theme) {
+        setAxisOffset(theme.getAxisOffset());
+        setDomainGridlinePaint(theme.getDomainGridlinePaint());
+        setRangeGridlinePaint(theme.getRangeGridlinePaint());
+        setRangeZeroBaselinePaint(theme.getBaselinePaint());
+        setShadowGenerator(theme.getShadowGenerator());
+
+        // process all domain axes
+        int domainAxisCount = getDomainAxisCount();
+        for (int i = 0; i < domainAxisCount; i++) {
+            CategoryAxis axis = getDomainAxis(i);
+            if (axis != null) axis.apply(theme);
+        }
+
+        // process all range axes
+        int rangeAxisCount = getRangeAxisCount();
+        for (int i = 0; i < rangeAxisCount; i++) {
+            ValueAxis axis = getRangeAxis(i);
+            if (axis != null) axis.apply(theme);
+        }
+
+        // process all renderers
+        int rendererCount = getRendererCount();
+        for (int i = 0; i < rendererCount; i++) {
+            CategoryItemRenderer r = getRenderer(i);
+            if (r != null) applyToCategoryItemRenderer(r, theme);
+        }
+
+        if (this instanceof CombinedDomainCategoryPlot) {
+            CombinedDomainCategoryPlot cp = (CombinedDomainCategoryPlot) this;
+            for (CategoryPlot subplot : cp.getSubplots()) {
+                if (subplot != null) subplot.apply(theme);
+            }
+        }
+        if (this instanceof CombinedRangeCategoryPlot) {
+            CombinedRangeCategoryPlot cp = (CombinedRangeCategoryPlot) this;
+            for (CategoryPlot subplot : cp.getSubplots()) {
+                if (subplot != null) subplot.apply(theme);
+            }
+        }
+    }
+
+    // Muito feio, mas não vimos outra maneira de fazer :( - Afonso, Gustavo
+    private void applyToCategoryItemRenderer(CategoryItemRenderer renderer, StandardChartTheme theme) {
+        Args.nullNotPermitted(renderer, "renderer");
+
+        if (renderer instanceof AbstractRenderer) ((AbstractRenderer) renderer).apply();
+
+        renderer.setDefaultItemLabelFont(theme.getRegularFont());
+        renderer.setDefaultItemLabelPaint(theme.getItemLabelPaint());
+
+        // BarRenderer
+        if (renderer instanceof BarRenderer) ((BarRenderer) renderer).apply(theme);
+
+        //  StatisticalBarRenderer
+        if (renderer instanceof StatisticalBarRenderer) ((StatisticalBarRenderer) renderer).apply(theme);
+
+        // MinMaxCategoryRenderer
+        if (renderer instanceof MinMaxCategoryRenderer) ((MinMaxCategoryRenderer) renderer).apply(theme);
+    }
 }

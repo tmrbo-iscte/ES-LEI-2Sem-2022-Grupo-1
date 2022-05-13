@@ -45,6 +45,7 @@
 package org.jfree.chart.plot.pie;
 
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.StandardChartTheme;
 import org.jfree.chart.api.RectangleAnchor;
 import org.jfree.chart.api.RectangleInsets;
 import org.jfree.chart.api.Rotation;
@@ -3215,4 +3216,17 @@ public class PiePlot<K extends Comparable<K>> extends Plot implements Cloneable,
         this.legendItemShape = SerialUtils.readShape(stream);
     }
 
+    @Override
+    public void apply(StandardChartTheme theme) {
+        setLabelLinkPaint(theme.getLabelLinkPaint());
+        setLabelLinkStyle(theme.getLabelLinkStyle());
+        setLabelFont(theme.getRegularFont());
+        setShadowGenerator(theme.getShadowGenerator());
+
+        // clear the section attributes so that the theme's DrawingSupplier
+        // will be used
+        if (getAutoPopulateSectionPaint()) clearSectionPaints(false);
+        if (getAutoPopulateSectionOutlinePaint()) clearSectionOutlinePaints(false);
+        if (getAutoPopulateSectionOutlineStroke()) clearSectionOutlineStrokes(false);
+    }
 }

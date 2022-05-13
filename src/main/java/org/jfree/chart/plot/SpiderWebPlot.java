@@ -39,6 +39,7 @@
 
 package org.jfree.chart.plot;
 
+import org.jfree.chart.StandardChartTheme;
 import org.jfree.chart.api.RectangleInsets;
 import org.jfree.chart.api.Rotation;
 import org.jfree.chart.api.TableOrder;
@@ -1451,4 +1452,14 @@ public class SpiderWebPlot extends Plot implements Cloneable, Serializable {
         }
     }
 
+    /**
+     * REFACTOR - USADO PARA CORRIGIR FEATURE ENVY DE org.jfree.chart.StandardChartTheme.applyToSpiderWebPlot
+     * @author Afonso Caniço, Gustavo Ferreira
+     */
+    @Override
+    public void apply(StandardChartTheme theme) {
+        setLabelFont(theme.getRegularFont());
+        setLabelPaint(theme.getAxisLabelPaint());
+        setAxisLinePaint(theme.getAxisLabelPaint());
+    }
 }

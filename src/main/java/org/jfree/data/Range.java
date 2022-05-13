@@ -173,6 +173,14 @@ public strictfp class Range implements Serializable {
         return value; // covers Double.NaN
     }
 
+    public double mapValue(double value) {
+        double lower = getLowerBound();
+        double length = getLength();
+        double val = ((value - lower) % length);
+        if (value < lower) return lower + length + val;
+        else return lower + val;
+    }
+
     /**
      * Creates a new range by combining two existing ranges.
      * <P>

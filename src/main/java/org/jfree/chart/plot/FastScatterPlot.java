@@ -58,6 +58,7 @@ import java.util.Objects;
 import java.util.ResourceBundle;
 import org.jfree.chart.ChartElementVisitor;
 
+import org.jfree.chart.StandardChartTheme;
 import org.jfree.chart.axis.AxisSpace;
 import org.jfree.chart.axis.AxisState;
 import org.jfree.chart.axis.NumberAxis;
@@ -1079,6 +1080,20 @@ public class FastScatterPlot extends Plot implements ValueAxisPlot, Pannable,
         if (this.rangeAxis != null) {
             this.rangeAxis.addChangeListener(this);
         }
+    }
+
+    /**
+     * REFACTOR
+     * @author Afonso Caniço, Gustavo Ferreira
+     */
+    @Override
+    public void apply(StandardChartTheme theme) {
+        setDomainGridlinePaint(theme.getDomainGridlinePaint());
+        setRangeGridlinePaint(theme.getRangeGridlinePaint());
+        ValueAxis xAxis = getDomainAxis();
+        if (xAxis != null) xAxis.apply(theme);
+        ValueAxis yAxis = getRangeAxis();
+        if (yAxis != null) yAxis.apply(theme);
     }
 
 }

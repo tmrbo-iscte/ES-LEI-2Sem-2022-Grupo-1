@@ -66,6 +66,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import org.jfree.chart.ChartElementVisitor;
 
+import org.jfree.chart.StandardChartTheme;
 import org.jfree.chart.legend.LegendItem;
 import org.jfree.chart.legend.LegendItemCollection;
 import org.jfree.chart.axis.Axis;
@@ -1827,6 +1828,16 @@ public class PolarPlot extends Plot implements ValueAxisPlot, Zoomable,
                 renderer.addChangeListener(this);
             }
         }
+    }
+
+    @Override
+    public void apply(StandardChartTheme theme) {
+        setAngleLabelFont(theme.getRegularFont());
+        setAngleLabelPaint(theme.getTickLabelPaint());
+        setAngleGridlinePaint(theme.getDomainGridlinePaint());
+        setRadiusGridlinePaint(theme.getRangeGridlinePaint());
+        ValueAxis axis = getAxis();
+        if (axis != null) axis.apply(theme);
     }
 
     /**

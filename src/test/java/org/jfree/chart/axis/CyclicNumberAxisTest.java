@@ -86,24 +86,22 @@ public class CyclicNumberAxisTest  {
         assertEquals(a1, a2);
 
         // advance line Paint
-        a1.setAdvanceLinePaint(new GradientPaint(1.0f, 2.0f, Color.RED,
-                3.0f, 4.0f, Color.BLACK));
+        a1.getAdvanceLine().setPaint(new GradientPaint(1.0f, 2.0f, Color.RED, 3.0f, 4.0f, Color.BLACK));
         assertNotEquals(a1, a2);
-        a2.setAdvanceLinePaint(new GradientPaint(1.0f, 2.0f, Color.RED,
-                3.0f, 4.0f, Color.BLACK));
+        a2.getAdvanceLine().setPaint(new GradientPaint(1.0f, 2.0f, Color.RED, 3.0f, 4.0f, Color.BLACK));
         assertEquals(a1, a2);
 
         // advance line Stroke
         Stroke stroke = new BasicStroke(0.2f);
-        a1.setAdvanceLineStroke(stroke);
+        a1.getAdvanceLine().setStroke(stroke);
         assertNotEquals(a1, a2);
-        a2.setAdvanceLineStroke(stroke);
+        a2.getAdvanceLine().setStroke(stroke);
         assertEquals(a1, a2);
 
         // advance line Visible
-        a1.setAdvanceLineVisible(!a1.isAdvanceLineVisible());
+        a1.getAdvanceLine().setVisible(!a1.getAdvanceLine().isVisible());
         assertNotEquals(a1, a2);
-        a2.setAdvanceLineVisible(a1.isAdvanceLineVisible());
+        a2.getAdvanceLine().setVisible(a1.getAdvanceLine().isVisible());
         assertEquals(a1, a2);
 
         // cycle bound mapping

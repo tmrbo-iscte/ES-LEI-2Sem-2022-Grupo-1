@@ -95,29 +95,29 @@ public class PaintScaleLegendTest {
         assertEquals(l1, l2);
 
         // stripWidth
-        l1.setStripWidth(99.0);
+        l1.getStrip().setStripWidth(99.0);
         assertNotEquals(l1, l2);
-        l2.setStripWidth(99.0);
+        l2.getStrip().setStripWidth(99.0);
         assertEquals(l1, l2);
 
         // stripOutlineVisible
-        l1.setStripOutlineVisible(!l1.isStripOutlineVisible());
+        l1.getStrip().setStripOutlineVisible(!l1.getStrip().isStripOutlineVisible());
         assertNotEquals(l1, l2);
-        l2.setStripOutlineVisible(l1.isStripOutlineVisible());
+        l2.getStrip().setStripOutlineVisible(l1.getStrip().isStripOutlineVisible());
         assertEquals(l1, l2);
 
         // stripOutlinePaint
-        l1.setStripOutlinePaint(new GradientPaint(1.0f, 2.0f, Color.RED,
+        l1.getStrip().setStripOutlinePaint(new GradientPaint(1.0f, 2.0f, Color.RED,
                 3.0f, 4.0f, Color.BLUE));
         assertNotEquals(l1, l2);
-        l2.setStripOutlinePaint(new GradientPaint(1.0f, 2.0f, Color.RED,
+        l2.getStrip().setStripOutlinePaint(new GradientPaint(1.0f, 2.0f, Color.RED,
                 3.0f, 4.0f, Color.BLUE));
         assertEquals(l1, l2);
 
         // stripOutlineStroke
-        l1.setStripOutlineStroke(new BasicStroke(1.1f));
+        l1.getStrip().setStripOutlineStroke(new BasicStroke(1.1f));
         assertNotEquals(l1, l2);
-        l2.setStripOutlineStroke(new BasicStroke(1.1f));
+        l2.getStrip().setStripOutlineStroke(new BasicStroke(1.1f));
         assertEquals(l1, l2);
 
         // backgroundPaint
@@ -168,8 +168,7 @@ public class PaintScaleLegendTest {
      */
     @Test
     public void testSerialization() {
-        PaintScaleLegend l1 = new PaintScaleLegend(new GrayPaintScale(),
-                new NumberAxis("X"));
+        PaintScaleLegend l1 = new PaintScaleLegend(new GrayPaintScale(), new NumberAxis("X"));
         PaintScaleLegend l2 = TestUtils.serialised(l1);
         assertEquals(l1, l2);
     }

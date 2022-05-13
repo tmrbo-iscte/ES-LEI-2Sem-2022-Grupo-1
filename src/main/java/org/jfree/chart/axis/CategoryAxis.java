@@ -162,6 +162,10 @@ public class CategoryAxis extends Axis implements Cloneable, Serializable {
         this.categoryLabelURLs = new HashMap<>();
     }
 
+    public CategoryAxisHelper getHelper() {
+        return helper;
+    }
+
     /**
      * Returns the lower margin for the axis.
      *
@@ -254,72 +258,6 @@ public class CategoryAxis extends Axis implements Cloneable, Serializable {
     public void setMaximumCategoryLabelLines(int lines) {
         this.maximumCategoryLabelLines = lines;
         fireChangeEvent();
-    }
-
-    /**
-     * Returns the category label width ratio.
-     *
-     * @return The ratio.
-     * @see #setMaximumCategoryLabelWidthRatio(float)
-     */
-    public float getMaximumCategoryLabelWidthRatio() {
-        return helper.getMaximumCategoryLabelWidthRatio();
-    }
-
-    /**
-     * Sets the maximum category label width ratio and sends an
-     * {@link AxisChangeEvent} to all registered listeners.
-     *
-     * @param ratio the ratio.
-     * @see #getMaximumCategoryLabelWidthRatio()
-     */
-    public void setMaximumCategoryLabelWidthRatio(float ratio) {
-        helper.setMaximumCategoryLabelWidthRatio(ratio);
-    }
-
-    /**
-     * Returns the offset between the axis and the category labels (before
-     * label positioning is taken into account).
-     *
-     * @return The offset (in Java2D units).
-     * @see #setCategoryLabelPositionOffset(int)
-     */
-    public int getCategoryLabelPositionOffset() {
-        return helper.getCategoryLabelPositionOffset();
-    }
-
-    /**
-     * Sets the offset between the axis and the category labels (before label
-     * positioning is taken into account) and sends a change event to all
-     * registered listeners.
-     *
-     * @param offset the offset (in Java2D units).
-     * @see #getCategoryLabelPositionOffset()
-     */
-    public void setCategoryLabelPositionOffset(int offset) {
-        helper.setCategoryLabelPositionOffset(offset);
-    }
-
-    /**
-     * Returns the category label position specification (this contains label
-     * positioning info for all four possible axis locations).
-     *
-     * @return The positions (never {@code null}).
-     * @see #setCategoryLabelPositions(CategoryLabelPositions)
-     */
-    public CategoryLabelPositions getCategoryLabelPositions() {
-        return helper.getCategoryLabelPositions();
-    }
-
-    /**
-     * Sets the category label position specification for the axis and sends an
-     * {@link AxisChangeEvent} to all registered listeners.
-     *
-     * @param positions the positions ({@code null} not permitted).
-     * @see #getCategoryLabelPositions()
-     */
-    public void setCategoryLabelPositions(CategoryLabelPositions positions) {
-        helper.setCategoryLabelPositions(positions);
     }
 
     /**
@@ -1245,8 +1183,8 @@ public class CategoryAxis extends Axis implements Cloneable, Serializable {
         setTickLabelPaint(theme.getTickLabelPaint());
         if (this instanceof SubCategoryAxis) {
             SubCategoryAxis sca = (SubCategoryAxis) this;
-            sca.setSubLabelFont(theme.getRegularFont());
-            sca.setSubLabelPaint(theme.getTickLabelPaint());
+            sca.getSubHelper().setSubLabelFont(theme.getRegularFont());
+            sca.getSubHelper().setSubLabelPaint(theme.getTickLabelPaint());
         }
     }
 }

@@ -75,16 +75,8 @@ public class SubCategoryAxis extends CategoryAxis implements Cloneable, Serializ
         helper = new SubCategoryAxisHelper(this, new java.util.ArrayList());
     }
 
-    public void addSubCategory(Comparable subCategory) {
-        helper.addSubCategory(subCategory);
-    }
-
-    public void setSubLabelFont(Font font) {
-        helper.setSubLabelFont(font);
-    }
-
-    public void setSubLabelPaint(Paint paint) {
-        helper.setSubLabelPaint(paint);
+    public SubCategoryAxisHelper getSubHelper() {
+        return helper;
     }
 
     /**

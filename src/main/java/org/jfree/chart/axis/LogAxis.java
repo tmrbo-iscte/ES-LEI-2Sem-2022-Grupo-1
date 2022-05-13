@@ -21,7 +21,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates.
  * Other names may be trademarks of their respective owners.]
  *
  * ------------
@@ -67,24 +67,14 @@ import org.jfree.data.Range;
  */
 public class LogAxis extends ValueAxis {
 
+    private LogAxisProduct logAxisProduct = new LogAxisProduct();
+
     /** The logarithm base. */
     private double base = 10.0;
 
     /** The logarithm of the base value - cached for performance. */
     private double baseLog = Math.log(10.0);
 
-    /** 
-     * The base symbol to display (if {@code null} then the numerical
-     * value of the base is displayed).
-     */
-    private String baseSymbol = null;
-    
-    /** 
-     * The formatter to use for the base value when the base is displayed
-     * as a numerical value.
-     */
-    private Format baseFormatter = new DecimalFormat("0");
-    
     /**  The smallest value permitted on the axis. */
     private double smallestValue = 1E-100;
 
@@ -143,50 +133,47 @@ public class LogAxis extends ValueAxis {
 
     /**
      * Returns the symbol used to represent the base of the logarithmic scale
-     * for the axis.  If this is {@code null} (the default) then the 
+     * for the axis.  If this is {@code null} (the default) then the
      * numerical value of the base is displayed.
-     * 
+     *
      * @return The base symbol (possibly {@code null}).
      */
     public String getBaseSymbol() {
-        return this.baseSymbol;
+        return this.logAxisProduct.getBaseSymbol();
     }
-    
+
     /**
-     * Sets the symbol used to represent the base value of the logarithmic 
+     * Sets the symbol used to represent the base value of the logarithmic
      * scale and sends a change event to all registered listeners.
-     * 
+     *
      * @param symbol  the symbol ({@code null} permitted).
      */
     public void setBaseSymbol(String symbol) {
-        this.baseSymbol = symbol;
-        fireChangeEvent();
+        logAxisProduct.setBaseSymbol(symbol, this);
     }
-    
+
     /**
      * Returns the formatter used to format the base value of the logarithmic
      * scale when it is displayed numerically.  The default value is
      * {@code new DecimalFormat("0")}.
-     * 
+     *
      * @return The base formatter (never {@code null}).
      */
     public Format getBaseFormatter() {
-        return this.baseFormatter;
+        return this.logAxisProduct.getBaseFormatter();
     }
-    
+
     /**
-     * Sets the formatter used to format the base value of the logarithmic 
+     * Sets the formatter used to format the base value of the logarithmic
      * scale when it is displayed numerically and sends a change event to all
      * registered listeners.
-     * 
+     *
      * @param formatter  the formatter ({@code null} not permitted).
      */
     public void setBaseFormatter(Format formatter) {
-        Args.nullNotPermitted(formatter, "formatter");
-        this.baseFormatter = formatter;
-        fireChangeEvent();
+        logAxisProduct.setBaseFormatter(formatter, this);
     }
-    
+
     /**
      * Returns the smallest value represented by the axis.
      *
@@ -255,7 +242,7 @@ public class LogAxis extends ValueAxis {
      * @see #getTickUnit()
      */
     public void setTickUnit(NumberTickUnit unit, boolean notify,
-            boolean turnOffAutoSelect) {
+                            boolean turnOffAutoSelect) {
         Args.nullNotPermitted(unit, "unit");
         this.tickUnit = unit;
         if (turnOffAutoSelect) {
@@ -267,7 +254,7 @@ public class LogAxis extends ValueAxis {
     }
 
     /**
-     * Returns the number format override.  If this is non-{@code null}, 
+     * Returns the number format override.  If this is non-{@code null},
      * then it will be used to format the numbers on the axis.
      *
      * @return The number formatter (possibly {@code null}).
@@ -279,7 +266,7 @@ public class LogAxis extends ValueAxis {
     }
 
     /**
-     * Sets the number format override and sends a change event to all 
+     * Sets the number format override and sends a change event to all
      * registered listeners.  If this is non-{@code null}, then it will be
      * used to format the numbers on the axis.
      *
@@ -319,7 +306,7 @@ public class LogAxis extends ValueAxis {
     public double calculateValue(double log) {
         return Math.pow(this.base, log);
     }
-    
+
     private double calculateValueNoINF(double log) {
         double result = calculateValue(log);
         if (Double.isInfinite(result)) {
@@ -336,7 +323,7 @@ public class LogAxis extends ValueAxis {
      * axis is aligned to the specified {@code edge} of the {@code area}.
      *
      * @param java2DValue  the Java2D coordinate.
-     * @param area  the area for plotting data ({@code null} not 
+     * @param area  the area for plotting data ({@code null} not
      *     permitted).
      * @param edge  the edge that the axis is aligned to ({@code null} not
      *     permitted).
@@ -345,10 +332,10 @@ public class LogAxis extends ValueAxis {
      */
     @Override
     public double java2DToValue(double java2DValue, Rectangle2D area,
-            RectangleEdge edge) {
+                                RectangleEdge edge) {
 
         Range range = getRange();
-        double axisMin = calculateLog(Math.max(this.smallestValue, 
+        double axisMin = calculateLog(Math.max(this.smallestValue,
                 range.getLowerBound()));
         double axisMax = calculateLog(range.getUpperBound());
 
@@ -385,7 +372,7 @@ public class LogAxis extends ValueAxis {
      */
     @Override
     public double valueToJava2D(double value, Rectangle2D area,
-            RectangleEdge edge) {
+                                RectangleEdge edge) {
 
         Range range = getRange();
         double axisMin = calculateLog(range.getLowerBound());
@@ -403,10 +390,10 @@ public class LogAxis extends ValueAxis {
         }
         if (isInverted()) {
             return max
-                   - ((value - axisMin) / (axisMax - axisMin)) * (max - min);
+                    - ((value - axisMin) / (axisMax - axisMin)) * (max - min);
         } else {
             return min
-                   + ((value - axisMin) / (axisMax - axisMin)) * (max - min);
+                    + ((value - axisMin) / (axisMax - axisMin)) * (max - min);
         }
     }
 
@@ -481,15 +468,15 @@ public class LogAxis extends ValueAxis {
      * @param plotArea  the area within which the axes and plot should be drawn.
      * @param dataArea  the area within which the data should be drawn.
      * @param edge  the axis location ({@code null} not permitted).
-     * @param plotState  collects information about the plot ({@code null} 
+     * @param plotState  collects information about the plot ({@code null}
      *         permitted).
      *
      * @return The axis state (never {@code null}).
      */
     @Override
     public AxisState draw(Graphics2D g2, double cursor, Rectangle2D plotArea,
-            Rectangle2D dataArea, RectangleEdge edge,
-            PlotRenderingInfo plotState) {
+                          Rectangle2D dataArea, RectangleEdge edge,
+                          PlotRenderingInfo plotState) {
 
         AxisState state;
         // if the axis is not visible, don't draw it...
@@ -503,9 +490,9 @@ public class LogAxis extends ValueAxis {
         }
         state = drawTickMarksAndLabels(g2, cursor, plotArea, dataArea, edge);
         if (getAttributedLabel() != null) {
-            state = drawAttributedLabel(getAttributedLabel(), g2, plotArea, 
+            state = drawAttributedLabel(getAttributedLabel(), g2, plotArea,
                     dataArea, edge, state);
-            
+
         } else {
             state = drawLabel(getLabel(), g2, plotArea, dataArea, edge, state);
         }
@@ -526,7 +513,7 @@ public class LogAxis extends ValueAxis {
      */
     @Override
     public List refreshTicks(Graphics2D g2, AxisState state,
-            Rectangle2D dataArea, RectangleEdge edge) {
+                             Rectangle2D dataArea, RectangleEdge edge) {
         List result = new java.util.ArrayList();
         if (RectangleEdge.isTopOrBottom(edge)) {
             result = refreshTicksHorizontal(g2, dataArea, edge);
@@ -536,7 +523,7 @@ public class LogAxis extends ValueAxis {
         }
         return result;
     }
-    
+
     /**
      * Returns a list of ticks for an axis at the top or bottom of the chart.
      *
@@ -547,7 +534,7 @@ public class LogAxis extends ValueAxis {
      * @return A list of ticks.
      */
     protected List refreshTicksHorizontal(Graphics2D g2, Rectangle2D dataArea,
-            RectangleEdge edge) {
+                                          RectangleEdge edge) {
 
         Range range = getRange();
         List ticks = new ArrayList();
@@ -566,13 +553,13 @@ public class LogAxis extends ValueAxis {
         }
         int minorTickCount = this.tickUnit.getMinorTickCount();
         double unit = getTickUnit().getSize();
-        double index = Math.ceil(calculateLog(getRange().getLowerBound()) 
+        double index = Math.ceil(calculateLog(getRange().getLowerBound())
                 / unit);
         double start = index * unit;
         double end = calculateLog(getUpperBound());
         double current = start;
         boolean hasTicks = (this.tickUnit.getSize() > 0.0)
-                           && !Double.isInfinite(start);
+                && !Double.isInfinite(start);
         while (hasTicks && current <= end) {
             double v = calculateValueNoINF(current);
             if (range.contains(v)) {
@@ -599,13 +586,13 @@ public class LogAxis extends ValueAxis {
      *
      * @param g2  the graphics device ({@code null} not permitted).
      * @param dataArea  the data area ({@code null} not permitted).
-     * @param edge  the edge that the axis is aligned to ({@code null} 
+     * @param edge  the edge that the axis is aligned to ({@code null}
      *     not permitted).
      *
      * @return A list of ticks.
      */
     protected List refreshTicksVertical(Graphics2D g2, Rectangle2D dataArea,
-            RectangleEdge edge) {
+                                        RectangleEdge edge) {
 
         Range range = getRange();
         List ticks = new ArrayList();
@@ -624,13 +611,13 @@ public class LogAxis extends ValueAxis {
         }
         int minorTickCount = this.tickUnit.getMinorTickCount();
         double unit = getTickUnit().getSize();
-        double index = Math.ceil(calculateLog(getRange().getLowerBound()) 
+        double index = Math.ceil(calculateLog(getRange().getLowerBound())
                 / unit);
         double start = index * unit;
         double end = calculateLog(getUpperBound());
         double current = start;
         boolean hasTicks = (this.tickUnit.getSize() > 0.0)
-                           && !Double.isInfinite(start);
+                && !Double.isInfinite(start);
         while (hasTicks && current <= end) {
             double v = calculateValueNoINF(current);
             if (range.contains(v)) {
@@ -658,12 +645,12 @@ public class LogAxis extends ValueAxis {
      * tick units) without the labels overlapping.
      *
      * @param g2  the graphics device ({@code null} not permitted).
-     * @param dataArea  the area defined by the axes ({@code null} not 
+     * @param dataArea  the area defined by the axes ({@code null} not
      *     permitted).
      * @param edge  the axis location ({@code null} not permitted).
      */
     protected void selectAutoTickUnit(Graphics2D g2, Rectangle2D dataArea,
-            RectangleEdge edge) {
+                                      RectangleEdge edge) {
         if (RectangleEdge.isTopOrBottom(edge)) {
             selectHorizontalAutoTickUnit(g2, dataArea, edge);
         }
@@ -696,11 +683,14 @@ public class LogAxis extends ValueAxis {
         boolean found = false;
 
         while (!found) {
+            // while the tick labels overlap and there are more tick sizes available,
+            // choose the next bigger label
             this.tickUnit = (NumberTickUnit) candidate;
             double tickLabelSize;
             if (width) tickLabelSize = estimateMaximumTickLabelWidth(g2, candidate);
             else tickLabelSize = estimateMaximumTickLabelHeight(g2);
 
+            // what is the available space for one unit?
             double candidateSize = exponentLengthToJava2D(candidate.getSize(), dataArea, edge);
             if (tickLabelSize < candidateSize) {
                 found = true;
@@ -743,7 +733,7 @@ public class LogAxis extends ValueAxis {
      * @return The length in Java2D coordinates.
      */
     public double exponentLengthToJava2D(double length, Rectangle2D area,
-                                RectangleEdge edge) {
+                                         RectangleEdge edge) {
         double one = valueToJava2D(calculateValueNoINF(1.0), area, edge);
         double l = valueToJava2D(calculateValueNoINF(length + 1.0), area, edge);
         return Math.abs(l - one);
@@ -778,17 +768,17 @@ public class LogAxis extends ValueAxis {
             as.addAttribute(TextAttribute.FONT, getTickLabelFont());
             return as;
         } else {
-            String baseStr = this.baseSymbol;
+            String baseStr = this.logAxisProduct.getBaseSymbol();
             if (baseStr == null) {
-                baseStr = this.baseFormatter.format(this.base);
+                baseStr = this.logAxisProduct.getBaseFormatter().format(this.base);
             }
             double logy = calculateLog(value);
             String exponentStr = getTickUnit().valueToString(logy);
             AttributedString as = new AttributedString(baseStr + exponentStr);
-            as.addAttributes(getTickLabelFont().getAttributes(), 0, (baseStr 
+            as.addAttributes(getTickLabelFont().getAttributes(), 0, (baseStr
                     + exponentStr).length());
-            as.addAttribute(TextAttribute.SUPERSCRIPT, 
-                    TextAttribute.SUPERSCRIPT_SUPER, baseStr.length(), 
+            as.addAttribute(TextAttribute.SUPERSCRIPT,
+                    TextAttribute.SUPERSCRIPT_SUPER, baseStr.length(),
                     baseStr.length() + exponentStr.length());
             return as;
         }
@@ -824,7 +814,8 @@ public class LogAxis extends ValueAxis {
      *
      * @return The estimated maximum width of the tick labels.
      */
-    protected double estimateMaximumTickLabelWidth(Graphics2D g2, TickUnit unit) {
+    protected double estimateMaximumTickLabelWidth(Graphics2D g2,
+                                                   TickUnit unit) {
 
         RectangleInsets tickLabelInsets = getTickLabelInsets();
         double result = tickLabelInsets.getLeft() + tickLabelInsets.getRight();
@@ -868,13 +859,13 @@ public class LogAxis extends ValueAxis {
         if (isInverted()) {
             double logA = log1 + length * (1 - upperPercent);
             double logB = log1 + length * (1 - lowerPercent);
-            adjusted = new Range(calculateValueNoINF(logA), 
+            adjusted = new Range(calculateValueNoINF(logA),
                     calculateValueNoINF(logB));
         }
         else {
             double logA = log1 + length * lowerPercent;
             double logB = log1 + length * upperPercent;
-            adjusted = new Range(calculateValueNoINF(logA), 
+            adjusted = new Range(calculateValueNoINF(logA),
                     calculateValueNoINF(logB));
         }
         setRange(adjusted);
@@ -898,7 +889,7 @@ public class LogAxis extends ValueAxis {
         log2 = log2 + adj;
         setRange(calculateValueNoINF(log1), calculateValueNoINF(log2));
     }
-    
+
     /**
      * Increases or decreases the axis range by the specified percentage about
      * the central value and sends an {@link AxisChangeEvent} to all registered
@@ -927,17 +918,17 @@ public class LogAxis extends ValueAxis {
 
     /**
      * Resizes the axis length to the specified percentage of the current
-     * range and sends a change event to all registered listeners.  If 
+     * range and sends a change event to all registered listeners.  If
      * {@code percent} is greater than 1.0 (100 percent) then the axis
      * range is increased (which has the effect of zooming out), while if the
-     * {@code percent} is less than 1.0 the axis range is decreased 
-     * (which has the effect of zooming in).  The resize occurs around an 
+     * {@code percent} is less than 1.0 the axis range is decreased
+     * (which has the effect of zooming in).  The resize occurs around an
      * anchor value (which may not be in the center of the axis).  This is used
      * to support mouse wheel zooming around an arbitrary point on the plot.
      * <br><br>
      * This method is overridden to perform the percentage calculations on the
      * log values (which are linear for this axis).
-     * 
+     *
      * @param percent  the percentage (must be greater than zero).
      * @param anchorValue  the anchor value.
      */
@@ -951,7 +942,7 @@ public class LogAxis extends ValueAxis {
 
             double left = percent * (logAnchorValue - logAxisMin);
             double right = percent * (logAxisMax - logAnchorValue);
-            
+
             double upperBound = calculateValueNoINF(logAnchorValue + right);
             Range adjusted = new Range(calculateValueNoINF(
                     logAnchorValue - left), upperBound);
@@ -981,10 +972,10 @@ public class LogAxis extends ValueAxis {
         if (this.base != that.base) {
             return false;
         }
-        if (!Objects.equals(this.baseSymbol, that.baseSymbol)) {
+        if (!Objects.equals(this.logAxisProduct.getBaseSymbol(), that.logAxisProduct.getBaseSymbol())) {
             return false;
         }
-        if (!this.baseFormatter.equals(that.baseFormatter)) {
+        if (!this.logAxisProduct.getBaseFormatter().equals(that.logAxisProduct.getBaseFormatter())) {
             return false;
         }
         if (this.smallestValue != that.smallestValue) {
@@ -1013,6 +1004,12 @@ public class LogAxis extends ValueAxis {
         }
         result = 37 * result + this.tickUnit.hashCode();
         return result;
+    }
+
+    public Object clone() throws java.lang.CloneNotSupportedException {
+        LogAxis clone = (LogAxis) super.clone();
+        clone.logAxisProduct = (LogAxisProduct) this.logAxisProduct.clone();
+        return clone;
     }
 
 }

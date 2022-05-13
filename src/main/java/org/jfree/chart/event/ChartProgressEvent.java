@@ -126,4 +126,17 @@ public class ChartProgressEvent extends java.util.EventObject {
         this.percent = percent;
     }
 
+    /**
+     *  author:Gustavo Ferreira -> moved from JFreeChart
+     * Sends a {@link ChartProgressEvent} to all registered listeners.
+     *
+     */
+    public void notifyListeners(JFreeChart jFreeChart) {
+        Object[] listeners = jFreeChart.getProgressListeners().getListenerList();
+        for (int i = listeners.length - 2; i >= 0; i -= 2) {
+            if (listeners[i] == ChartProgressListener.class) {
+                ((ChartProgressListener) listeners[i + 1]).chartProgress(this);
+            }
+        }
+    }
 }

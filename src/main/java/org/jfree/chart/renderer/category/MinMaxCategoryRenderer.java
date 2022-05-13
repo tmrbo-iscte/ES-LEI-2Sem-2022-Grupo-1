@@ -57,6 +57,7 @@ import java.io.ObjectOutputStream;
 
 import javax.swing.Icon;
 
+import org.jfree.chart.StandardChartTheme;
 import org.jfree.chart.axis.CategoryAxis;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.entity.EntityCollection;
@@ -537,6 +538,10 @@ public class MinMaxCategoryRenderer extends AbstractCategoryItemRenderer {
         this.maxIcon = getIcon(new Arc2D.Double(-4, -4, 8, 8, 0, 360,
                 Arc2D.OPEN), null, Color.BLACK);
         this.objectIcon = getIcon(new Line2D.Double(-4, 0, 4, 0), false, true);
+    }
+
+    public void apply(StandardChartTheme theme) {
+        setGroupPaint(theme.getErrorIndicatorPaint());
     }
 
 }

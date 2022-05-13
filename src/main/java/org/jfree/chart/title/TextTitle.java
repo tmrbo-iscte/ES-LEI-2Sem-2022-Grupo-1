@@ -512,7 +512,7 @@ public class TextTitle extends Title implements Serializable, Cloneable,
                 return new Size2D(contentSize.getHeight(), maxWidth);
             }
             else {
-                return new Size2D(contentSize.height, contentSize.width);
+                return new Size2D(contentSize.getHeight(), contentSize.getWidth());
             }
         }
         else {
@@ -584,7 +584,7 @@ public class TextTitle extends Title implements Serializable, Cloneable,
                 return new Size2D(contentSize.getHeight(), maxWidth);
             }
             else {
-                return new Size2D(contentSize.height, contentSize.width);
+                return new Size2D(contentSize.getHeight(), contentSize.getWidth());
             }
         }
         else {

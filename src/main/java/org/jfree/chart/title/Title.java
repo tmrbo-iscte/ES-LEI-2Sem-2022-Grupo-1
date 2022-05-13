@@ -66,8 +66,7 @@ import org.jfree.chart.internal.Args;
  * Concrete implementations of this class will render text and images, and
  * hence do the actual work of drawing titles.
  */
-public abstract class Title extends AbstractBlock
-            implements ChartElement, Block, Cloneable, Serializable {
+public abstract class Title extends AbstractBlock implements ChartElement, Block, Cloneable, Serializable {
 
     /** For serialization. */
     private static final long serialVersionUID = -6675162505277817221L;
@@ -354,8 +353,7 @@ public abstract class Title extends AbstractBlock
             Object[] listeners = this.listenerList.getListenerList();
             for (int i = listeners.length - 2; i >= 0; i -= 2) {
                 if (listeners[i] == TitleChangeListener.class) {
-                    ((TitleChangeListener) listeners[i + 1]).titleChanged(
-                            event);
+                    ((TitleChangeListener) listeners[i + 1]).titleChanged(event);
                 }
             }
         }

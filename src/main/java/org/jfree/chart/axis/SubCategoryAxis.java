@@ -53,25 +53,17 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.util.List;
 
 /**
  * A specialised category axis that can display sub-categories.
  */
-public class SubCategoryAxis extends CategoryAxis
-        implements Cloneable, Serializable {
+public class SubCategoryAxis extends CategoryAxis implements Cloneable, Serializable {
 
     /** For serialization. */
     private static final long serialVersionUID = -1279463299793228344L;
 
     /** Storage for the sub-categories (these need to be set manually). */
-    private List subCategories;
-
-    /** The font for the sub-category labels. */
-    private Font subLabelFont = new Font("SansSerif", Font.PLAIN, 10);
-
-    /** The paint for the sub-category labels. */
-    private transient Paint subLabelPaint = Color.BLACK;
+    private SubCategoryAxisHelper helper;
 
     /**
      * Creates a new axis.
@@ -80,69 +72,11 @@ public class SubCategoryAxis extends CategoryAxis
      */
     public SubCategoryAxis(String label) {
         super(label);
-        this.subCategories = new java.util.ArrayList();
+        helper = new SubCategoryAxisHelper(this, new java.util.ArrayList());
     }
 
-    /**
-     * Adds a sub-category to the axis and sends an {@link AxisChangeEvent} to
-     * all registered listeners.
-     *
-     * @param subCategory  the sub-category ({@code null} not permitted).
-     */
-    public void addSubCategory(Comparable subCategory) {
-        Args.nullNotPermitted(subCategory, "subCategory");
-        this.subCategories.add(subCategory);
-        notifyListeners(new AxisChangeEvent(this));
-    }
-
-    /**
-     * Returns the font used to display the sub-category labels.
-     *
-     * @return The font (never {@code null}).
-     *
-     * @see #setSubLabelFont(Font)
-     */
-    public Font getSubLabelFont() {
-        return this.subLabelFont;
-    }
-
-    /**
-     * Sets the font used to display the sub-category labels and sends an
-     * {@link AxisChangeEvent} to all registered listeners.
-     *
-     * @param font  the font ({@code null} not permitted).
-     *
-     * @see #getSubLabelFont()
-     */
-    public void setSubLabelFont(Font font) {
-        Args.nullNotPermitted(font, "font");
-        this.subLabelFont = font;
-        notifyListeners(new AxisChangeEvent(this));
-    }
-
-    /**
-     * Returns the paint used to display the sub-category labels.
-     *
-     * @return The paint (never {@code null}).
-     *
-     * @see #setSubLabelPaint(Paint)
-     */
-    public Paint getSubLabelPaint() {
-        return this.subLabelPaint;
-    }
-
-    /**
-     * Sets the paint used to display the sub-category labels and sends an
-     * {@link AxisChangeEvent} to all registered listeners.
-     *
-     * @param paint  the paint ({@code null} not permitted).
-     *
-     * @see #getSubLabelPaint()
-     */
-    public void setSubLabelPaint(Paint paint) {
-        Args.nullNotPermitted(paint, "paint");
-        this.subLabelPaint = paint;
-        notifyListeners(new AxisChangeEvent(this));
+    public SubCategoryAxisHelper getSubHelper() {
+        return helper;
     }
 
     /**
@@ -192,9 +126,9 @@ public class SubCategoryAxis extends CategoryAxis
      */
     private double getMaxDim(Graphics2D g2, RectangleEdge edge) {
         double result = 0.0;
-        g2.setFont(this.subLabelFont);
+        g2.setFont(helper.getSubLabelFont());
         FontMetrics fm = g2.getFontMetrics();
-        for (Object subCategory : this.subCategories) {
+        for (Object subCategory : helper.getSubCategories()) {
             Comparable subcategory = (Comparable) subCategory;
             String label = subcategory.toString();
             Rectangle2D bounds = TextUtils.getTextBounds(label, g2, fm);
@@ -242,16 +176,10 @@ public class SubCategoryAxis extends CategoryAxis
 
         // draw the category labels and axis label
         AxisState state = new AxisState(cursor);
-        state = drawSubCategoryLabels(g2, plotArea, dataArea, edge, state, 
-                plotState);
-        state = drawCategoryLabels(g2, plotArea, dataArea, edge, state,
-                plotState);
-        if (getAttributedLabel() != null) {
-            state = drawAttributedLabel(getAttributedLabel(), g2, plotArea, 
-                    dataArea, edge, state);
-        } else {
-            state = drawLabel(getLabel(), g2, plotArea, dataArea, edge, state);
-        } 
+        state = drawSubCategoryLabels(g2, dataArea, edge, state);
+        state = drawCategoryLabels(g2, plotArea, dataArea, edge, state, plotState);
+        if (getAttributedLabel() != null) state = drawAttributedLabel(getAttributedLabel(), g2, plotArea, dataArea, edge, state);
+        else state = drawLabel(getLabel(), g2, plotArea, dataArea, edge, state);
         return state;
 
     }
@@ -260,74 +188,54 @@ public class SubCategoryAxis extends CategoryAxis
      * Draws the category labels and returns the updated axis state.
      *
      * @param g2  the graphics device ({@code null} not permitted).
-     * @param plotArea  the plot area ({@code null} not permitted).
      * @param dataArea  the area inside the axes ({@code null} not
      *                  permitted).
      * @param edge  the axis location ({@code null} not permitted).
      * @param state  the axis state ({@code null} not permitted).
-     * @param plotState  collects information about the plot ({@code null}
-     *                   permitted).
-     *
      * @return The updated axis state (never {@code null}).
      */
-    protected AxisState drawSubCategoryLabels(Graphics2D g2,
-            Rectangle2D plotArea, Rectangle2D dataArea, RectangleEdge edge,
-            AxisState state, PlotRenderingInfo plotState) {
-
+    protected AxisState drawSubCategoryLabels(Graphics2D g2, Rectangle2D dataArea, RectangleEdge edge, AxisState state) {
         Args.nullNotPermitted(state, "state");
 
-        g2.setFont(this.subLabelFont);
-        g2.setPaint(this.subLabelPaint);
+        g2.setFont(helper.getSubLabelFont());
+        g2.setPaint(helper.getSubLabelPaint());
         CategoryPlot plot = (CategoryPlot) getPlot();
         int categoryCount = 0;
         CategoryDataset dataset = plot.getDataset();
-        if (dataset != null) {
-            categoryCount = dataset.getColumnCount();
-        }
+        if (dataset != null) categoryCount = dataset.getColumnCount();
 
         double maxdim = getMaxDim(g2, edge);
-        for (int categoryIndex = 0; categoryIndex < categoryCount;
-             categoryIndex++) {
-
+        for (int categoryIndex = 0; categoryIndex < categoryCount; categoryIndex++) {
             double x0 = 0.0;
             double x1 = 0.0;
             double y0 = 0.0;
             double y1 = 0.0;
             if (edge == RectangleEdge.TOP) {
-                x0 = getCategoryStart(categoryIndex, categoryCount, dataArea,
-                        edge);
-                x1 = getCategoryEnd(categoryIndex, categoryCount, dataArea,
-                        edge);
+                x0 = getCategoryStart(categoryIndex, categoryCount, dataArea, edge);
+                x1 = getCategoryEnd(categoryIndex, categoryCount, dataArea, edge);
                 y1 = state.getCursor();
                 y0 = y1 - maxdim;
             }
             else if (edge == RectangleEdge.BOTTOM) {
-                x0 = getCategoryStart(categoryIndex, categoryCount, dataArea,
-                        edge);
-                x1 = getCategoryEnd(categoryIndex, categoryCount, dataArea,
-                        edge);
+                x0 = getCategoryStart(categoryIndex, categoryCount, dataArea, edge);
+                x1 = getCategoryEnd(categoryIndex, categoryCount, dataArea, edge);
                 y0 = state.getCursor();
                 y1 = y0 + maxdim;
             }
             else if (edge == RectangleEdge.LEFT) {
-                y0 = getCategoryStart(categoryIndex, categoryCount, dataArea,
-                        edge);
-                y1 = getCategoryEnd(categoryIndex, categoryCount, dataArea,
-                        edge);
+                y0 = getCategoryStart(categoryIndex, categoryCount, dataArea, edge);
+                y1 = getCategoryEnd(categoryIndex, categoryCount, dataArea, edge);
                 x1 = state.getCursor();
                 x0 = x1 - maxdim;
             }
             else if (edge == RectangleEdge.RIGHT) {
-                y0 = getCategoryStart(categoryIndex, categoryCount, dataArea,
-                        edge);
-                y1 = getCategoryEnd(categoryIndex, categoryCount, dataArea,
-                        edge);
+                y0 = getCategoryStart(categoryIndex, categoryCount, dataArea, edge);
+                y1 = getCategoryEnd(categoryIndex, categoryCount, dataArea, edge);
                 x0 = state.getCursor();
                 x1 = x0 + maxdim;
             }
-            Rectangle2D area = new Rectangle2D.Double(x0, y0, (x1 - x0),
-                    (y1 - y0));
-            int subCategoryCount = this.subCategories.size();
+            Rectangle2D area = new Rectangle2D.Double(x0, y0, (x1 - x0), (y1 - y0));
+            int subCategoryCount = helper.getSubCategories().size();
             float width = (float) ((x1 - x0) / subCategoryCount);
             float height = (float) ((y1 - y0) / subCategoryCount);
             float xx, yy;
@@ -340,9 +248,8 @@ public class SubCategoryAxis extends CategoryAxis
                     xx = (float) area.getCenterX();
                     yy = (float) (y0 + (i + 0.5) * height);
                 }
-                String label = this.subCategories.get(i).toString();
-                TextUtils.drawRotatedString(label, g2, xx, yy,
-                        TextAnchor.CENTER, 0.0, TextAnchor.CENTER);
+                String label = helper.getSubCategory(i).toString();
+                TextUtils.drawRotatedString(label, g2, xx, yy, TextAnchor.CENTER, 0.0, TextAnchor.CENTER);
             }
         }
 
@@ -374,21 +281,11 @@ public class SubCategoryAxis extends CategoryAxis
      */
     @Override
     public boolean equals(Object obj) {
-        if (obj == this) {
-            return true;
-        }
+        if (obj == this) return true;
+
         if (obj instanceof SubCategoryAxis && super.equals(obj)) {
-            SubCategoryAxis axis = (SubCategoryAxis) obj;
-            if (!this.subCategories.equals(axis.subCategories)) {
-                return false;
-            }
-            if (!this.subLabelFont.equals(axis.subLabelFont)) {
-                return false;
-            }
-            if (!this.subLabelPaint.equals(axis.subLabelPaint)) {
-                return false;
-            }
-            return true;
+            SubCategoryAxis other = (SubCategoryAxis) obj;
+            return helper.equals(other.helper);
         }
         return false;
     }
@@ -412,7 +309,7 @@ public class SubCategoryAxis extends CategoryAxis
      */
     private void writeObject(ObjectOutputStream stream) throws IOException {
         stream.defaultWriteObject();
-        SerialUtils.writePaint(this.subLabelPaint, stream);
+        SerialUtils.writePaint(helper.getSubLabelPaint(), stream);
     }
 
     /**
@@ -426,7 +323,7 @@ public class SubCategoryAxis extends CategoryAxis
     private void readObject(ObjectInputStream stream)
         throws IOException, ClassNotFoundException {
         stream.defaultReadObject();
-        this.subLabelPaint = SerialUtils.readPaint(stream);
+        helper.setSubLabelPaint(SerialUtils.readPaint(stream));
     }
 
 }

@@ -45,6 +45,7 @@ import java.awt.Stroke;
 import java.awt.geom.Rectangle2D;
 import org.jfree.chart.ChartElement;
 
+import org.jfree.chart.StandardChartTheme;
 import org.jfree.chart.legend.LegendItem;
 import org.jfree.chart.legend.LegendItemSource;
 import org.jfree.chart.axis.CategoryAxis;

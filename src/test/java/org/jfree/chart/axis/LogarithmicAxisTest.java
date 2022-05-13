@@ -67,7 +67,7 @@ public class LogarithmicAxisTest {
          */
         @Override
         protected double switchedLog10(double val) {
-            return super.switchedLog10(val);
+            return super.getMathHelper().switchedLog10(val);
         }
 
     }
@@ -85,7 +85,7 @@ public class LogarithmicAxisTest {
     @BeforeEach
     public void setUp() throws Exception {
         this.axis = new MyLogarithmicAxis("Value (log)");
-        this.axis.setAllowNegativesFlag(false);
+        this.axis.getMathHelper().setAllowNegativesFlag(false);
         this.axis.setLog10TickLabelsFlag(false);
         this.axis.setLowerMargin(0.0);
         this.axis.setUpperMargin(0.0);
@@ -120,9 +120,9 @@ public class LogarithmicAxisTest {
     }
 
     private void checkLogPowRoundTrip(double value) {
-        assertEquals(value, this.axis.adjustedLog10(this.axis.adjustedPow10(value)), 
+        assertEquals(value, this.axis.getMathHelper().adjustedLog10(this.axis.getMathHelper().adjustedPow10(value)),
                 EPSILON, "log(pow(x)) = x");
-        assertEquals(value, this.axis.adjustedPow10(this.axis.adjustedLog10(value)), 
+        assertEquals(value, this.axis.getMathHelper().adjustedPow10(this.axis.getMathHelper().adjustedLog10(value)),
                 EPSILON, "pow(log(x)) = x");
     }
 
@@ -131,9 +131,9 @@ public class LogarithmicAxisTest {
      */
     @Test
     public void testSwitchedLog10() {
-         assertFalse(this.axis.getAllowNegativesFlag(), "Axis should not allow negative values");
+         assertFalse(this.axis.getMathHelper().allowsNegatives(), "Axis should not allow negative values");
 
-         assertEquals(Math.log(0.5) / LogarithmicAxis.LOG10_VALUE,
+         assertEquals(Math.log(0.5) / LogarithmicAxisMathHelper.LOG10,
                  this.axis.switchedLog10(0.5), EPSILON);
          checkSwitchedLogPowRoundTrip(20);
          checkSwitchedLogPowRoundTrip(10);
@@ -146,10 +146,8 @@ public class LogarithmicAxisTest {
      }
 
      private void checkSwitchedLogPowRoundTrip(double value) {
-         assertEquals(value, this.axis.switchedLog10(
-                 this.axis.switchedPow10(value)), EPSILON, "log(pow(x)) = x");
-         assertEquals(value, this.axis.switchedPow10(
-                 this.axis.switchedLog10(value)), EPSILON, "pow(log(x)) = x");
+         assertEquals(value, this.axis.switchedLog10(this.axis.getMathHelper().switchedPow10(value)), EPSILON, "log(pow(x)) = x");
+         assertEquals(value, this.axis.getMathHelper().switchedPow10(this.axis.switchedLog10(value)), EPSILON, "pow(log(x)) = x");
      }
 
      /**

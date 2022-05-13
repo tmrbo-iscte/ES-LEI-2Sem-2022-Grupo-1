@@ -53,6 +53,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import org.jfree.chart.StandardChartTheme;
 import org.jfree.chart.plot.Plot;
 import org.jfree.chart.plot.PlotRenderingInfo;
 import org.jfree.chart.plot.ValueAxisPlot;
@@ -738,6 +739,11 @@ public class SymbolAxis extends NumberAxis implements Serializable {
         stream.defaultReadObject();
         this.gridBandPaint = SerialUtils.readPaint(stream);
         this.gridBandAlternatePaint = SerialUtils.readPaint(stream);
+    }
+
+    public void apply(StandardChartTheme theme) {
+        setGridBandPaint(theme.getGridBandPaint());
+        setGridBandAlternatePaint(theme.getGridBandAlternatePaint());
     }
 
 }

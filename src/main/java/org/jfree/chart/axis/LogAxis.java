@@ -668,32 +668,33 @@ public class LogAxis extends ValueAxis {
      * @param dataArea  the area defined by the axes.
      * @param edge  the axis location.
      */
-    protected void selectHorizontalAutoTickUnit(Graphics2D g2,
-                                                Rectangle2D dataArea, RectangleEdge edge) {
-
-        // select a tick unit that is the next one bigger than the current
-        // (log) range divided by 50
-        Range range = getRange();
-        double logAxisMin = calculateLog(Math.max(this.smallestValue,
-                range.getLowerBound()));
-        double logAxisMax = calculateLog(range.getUpperBound());
-        double size = (logAxisMax - logAxisMin) / 50;
+    protected void selectHorizontalAutoTickUnit(Graphics2D g2, Rectangle2D dataArea, RectangleEdge edge) { // REFACTOR @ambco
         TickUnitSource tickUnits = getStandardTickUnits();
-        TickUnit candidate = tickUnits.getCeilingTickUnit(size);
+        setTickUnit(findBestNumberTickUnit(g2, tickUnits, dataArea, edge, true), false, false);
+    }
+
+    /**
+     * REFACTOR - USADO PARA SIMPLIFICAR O CÓDIGO DUPLICADO ENTRE selectHorizontalAutoTickUnit e selectVerticalAutoTickUnit.
+     * @author Afonso Caniço
+     */
+    private NumberTickUnit findBestNumberTickUnit(Graphics2D g2, TickUnitSource tickUnits, Rectangle2D dataArea, RectangleEdge edge, boolean width) {
+        TickUnit candidate = getCeilingTickUnit(tickUnits);
         TickUnit prevCandidate = candidate;
         boolean found = false;
+
         while (!found) {
             // while the tick labels overlap and there are more tick sizes available,
             // choose the next bigger label
             this.tickUnit = (NumberTickUnit) candidate;
-            double tickLabelWidth = estimateMaximumTickLabelWidth(g2,
-                    candidate);
+            double tickLabelSize;
+            if (width) tickLabelSize = estimateMaximumTickLabelWidth(g2, candidate);
+            else tickLabelSize = estimateMaximumTickLabelHeight(g2);
+
             // what is the available space for one unit?
-            double candidateWidth = exponentLengthToJava2D(candidate.getSize(),
-                    dataArea, edge);
-            if (tickLabelWidth < candidateWidth) {
+            double candidateSize = exponentLengthToJava2D(candidate.getSize(), dataArea, edge);
+            if (tickLabelSize < candidateSize) {
                 found = true;
-            } else if (Double.isNaN(candidateWidth)) {
+            } else if (Double.isNaN(candidateSize)) {
                 candidate = prevCandidate;
                 found = true;
             } else {
@@ -704,7 +705,21 @@ public class LogAxis extends ValueAxis {
                 }
             }
         }
-        setTickUnit((NumberTickUnit) candidate, false, false);
+        return (NumberTickUnit) candidate;
+    }
+
+    /**
+     * REFACTOR - USADO PARA SIMPLIFICAR CÓDIGO DUPLICADO ENTRE selectHorizontalAutoTickUnit e selectVerticalAutoTickUnit.
+     * @author Afonso Caniço
+     */
+    private TickUnit getCeilingTickUnit(TickUnitSource tickUnits) {
+        // select a tick unit that is the next one bigger than the current
+        // (log) range divided by 50
+        Range range = getRange();
+        double logAxisMin = calculateLog(Math.max(this.smallestValue, range.getLowerBound()));
+        double logAxisMax = calculateLog(range.getUpperBound());
+        double size = (logAxisMax - logAxisMin) / 50;
+        return tickUnits.getCeilingTickUnit(size);
     }
 
     /**
@@ -733,41 +748,9 @@ public class LogAxis extends ValueAxis {
      * @param dataArea  the area in which the plot should be drawn.
      * @param edge  the axis location.
      */
-    protected void selectVerticalAutoTickUnit(Graphics2D g2,
-                                              Rectangle2D dataArea, RectangleEdge edge) {
-        // select a tick unit that is the next one bigger than the current
-        // (log) range divided by 50
-        Range range = getRange();
-        double logAxisMin = calculateLog(Math.max(this.smallestValue,
-                range.getLowerBound()));
-        double logAxisMax = calculateLog(range.getUpperBound());
-        double size = (logAxisMax - logAxisMin) / 50;
+    protected void selectVerticalAutoTickUnit(Graphics2D g2, Rectangle2D dataArea, RectangleEdge edge) {  // REFACTOR @ambco
         TickUnitSource tickUnits = getStandardTickUnits();
-        TickUnit candidate = tickUnits.getCeilingTickUnit(size);
-        TickUnit prevCandidate = candidate;
-        boolean found = false;
-        while (!found) {
-            // while the tick labels overlap and there are more tick sizes available,
-            // choose the next bigger label
-            this.tickUnit = (NumberTickUnit) candidate;
-            double tickLabelHeight = estimateMaximumTickLabelHeight(g2);
-            // what is the available space for one unit?
-            double candidateHeight = exponentLengthToJava2D(candidate.getSize(),
-                    dataArea, edge);
-            if (tickLabelHeight < candidateHeight) {
-                found = true;
-            } else if (Double.isNaN(candidateHeight)) {
-                candidate = prevCandidate;
-                found = true;
-            } else {
-                prevCandidate = candidate;
-                candidate = tickUnits.getLargerTickUnit(prevCandidate);
-                if (candidate.equals(prevCandidate)) {
-                    found = true;  // there are no more candidates
-                }
-            }
-        }
-        setTickUnit((NumberTickUnit) candidate, false, false);
+        setTickUnit(findBestNumberTickUnit(g2, tickUnits, dataArea, edge, false), false, false);
     }
 
     /**

@@ -83,8 +83,7 @@ public class TestUtils {
             out = new ObjectOutputStream(buffer);
             out.writeObject(original);
             out.close();
-            ObjectInput in = new ObjectInputStream(
-                    new ByteArrayInputStream(buffer.toByteArray()));
+            ObjectInput in = new ObjectInputStream(new ByteArrayInputStream(buffer.toByteArray()));
             result = (K) in.readObject();
             in.close();
         } catch (IOException e) {

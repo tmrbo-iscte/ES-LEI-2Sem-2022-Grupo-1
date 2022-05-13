@@ -63,6 +63,7 @@ import java.util.Objects;
 import java.util.ResourceBundle;
 import org.jfree.chart.ChartElementVisitor;
 
+import org.jfree.chart.StandardChartTheme;
 import org.jfree.chart.legend.LegendItemCollection;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.axis.ValueAxis;
@@ -1507,6 +1508,18 @@ public class ThermometerPlot extends Plot implements ValueAxisPlot,
         if (this.rangeAxis != null) {
             this.rangeAxis.addChangeListener(this);
         }
+    }
+
+    /**
+     * REFACTOR
+     * @author Afonso Caniço, Gustavo Ferreira
+     */
+    @Override
+    public void apply(StandardChartTheme theme) {
+        setValueFont(theme.getLargeFont());
+        setThermometerPaint(theme.getThermometerPaint());
+        ValueAxis axis = getRangeAxis();
+        if (axis != null) axis.apply(theme);
     }
 
     /**

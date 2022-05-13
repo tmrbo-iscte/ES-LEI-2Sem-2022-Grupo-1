@@ -1157,10 +1157,10 @@ public class JFreeChart implements Drawable, TitleChangeListener,
                 x = frame.getX();
                 break;
             case CENTER:
-                x = frame.getCenterX() - (dimensions.width / 2.0);
+                x = frame.getCenterX() - (dimensions.getWidth() / 2.0);
                 break;
             case RIGHT:
-                x = frame.getMaxX() - dimensions.width;
+                x = frame.getMaxX() - dimensions.getWidth();
                 break;
             default:
                 throw new IllegalStateException("Unexpected enum value " + hAlign);
@@ -1170,17 +1170,17 @@ public class JFreeChart implements Drawable, TitleChangeListener,
                 y = frame.getY();
                 break;
             case CENTER:
-                y = frame.getCenterY() - (dimensions.height / 2.0);
+                y = frame.getCenterY() - (dimensions.getHeight() / 2.0);
                 break;
             case BOTTOM:
-                y = frame.getMaxY() - dimensions.height;
+                y = frame.getMaxY() - dimensions.getHeight();
                 break;
             default:
                 throw new IllegalStateException("Unexpected enum value " + hAlign);
         }
 
-        return new Rectangle2D.Double(x, y, dimensions.width,
-                dimensions.height);
+        return new Rectangle2D.Double(x, y, dimensions.getWidth(),
+                dimensions.getHeight());
     }
 
     /**
@@ -1224,9 +1224,9 @@ public class JFreeChart implements Drawable, TitleChangeListener,
                 titleArea = createAlignedRectangle2D(size, area,
                         t.getHorizontalAlignment(), VerticalAlignment.TOP);
                 retValue = t.draw(g2, titleArea, p);
-                area.setRect(area.getX(), Math.min(area.getY() + size.height,
+                area.setRect(area.getX(), Math.min(area.getY() + size.getHeight(),
                         area.getMaxY()), area.getWidth(), Math.max(area.getHeight()
-                        - size.height, 0));
+                        - size.getHeight(), 0));
                 break;
             }
             case BOTTOM: {
@@ -1235,7 +1235,7 @@ public class JFreeChart implements Drawable, TitleChangeListener,
                         t.getHorizontalAlignment(), VerticalAlignment.BOTTOM);
                 retValue = t.draw(g2, titleArea, p);
                 area.setRect(area.getX(), area.getY(), area.getWidth(),
-                        area.getHeight() - size.height);
+                        area.getHeight() - size.getHeight());
                 break;
             }
             case RIGHT: {
@@ -1244,7 +1244,7 @@ public class JFreeChart implements Drawable, TitleChangeListener,
                         HorizontalAlignment.RIGHT, t.getVerticalAlignment());
                 retValue = t.draw(g2, titleArea, p);
                 area.setRect(area.getX(), area.getY(), area.getWidth()
-                        - size.width, area.getHeight());
+                        - size.getWidth(), area.getHeight());
                 break;
             }
             case LEFT: {
@@ -1252,8 +1252,8 @@ public class JFreeChart implements Drawable, TitleChangeListener,
                 titleArea = createAlignedRectangle2D(size, area,
                         HorizontalAlignment.LEFT, t.getVerticalAlignment());
                 retValue = t.draw(g2, titleArea, p);
-                area.setRect(area.getX() + size.width, area.getY(), area.getWidth()
-                        - size.width, area.getHeight());
+                area.setRect(area.getX() + size.getWidth(), area.getY(), area.getWidth()
+                        - size.getWidth(), area.getHeight());
                 break;
             }
             default: {

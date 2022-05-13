@@ -117,7 +117,7 @@ public class ShortTextTitle extends TextTitle {
             }
         }
         assert contentSize != null;
-        if (contentSize.width <= 0.0 || contentSize.height <= 0.0) {
+        if (contentSize.getWidth() <= 0.0 || contentSize.getHeight() <= 0.0) {
             return new Size2D(0.0, 0.0);
         }
         else {

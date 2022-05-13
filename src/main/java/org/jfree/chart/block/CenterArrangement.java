@@ -151,7 +151,7 @@ public class CenterArrangement implements Arrangement, Serializable {
      */
     protected Size2D arrangeNN(BlockContainer container, Graphics2D g2) {
         Size2D s = container.getFirstBlockArrangementAndSetBounds(g2, null);
-        return new Size2D(s.width, s.height);
+        return new Size2D(s.getWidth(), s.getHeight());
     }
 
     /**
@@ -260,23 +260,6 @@ public class CenterArrangement implements Arrangement, Serializable {
             RectangleConstraint c = constraint.toFixedWidth(constraint.getWidthRange().getUpperBound());
             return arrangeFN(container, g2, c);
         }
-    }
-
-    /**
-     * Arranges the blocks without any constraints.  This puts all blocks
-     * into a single row.
-     *
-     * @param container  the container.
-     * @param g2  the graphics device.
-     *
-     * @return The size after the arrangement.
-     */
-    protected Size2D arrangeNN(BlockContainer container, Graphics2D g2) {
-        List<Block> blocks = container.getBlocks();
-        Block b = blocks.get(0);
-        Size2D s = b.arrange(g2, RectangleConstraint.NONE);
-        b.setBounds(new Rectangle2D.Double(0.0, 0.0, s.getWidth(), s.getHeight()));
-        return new Size2D(s.getWidth(), s.getHeight());
     }
 
     /**

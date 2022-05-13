@@ -278,8 +278,8 @@ public class BlockContainer extends AbstractBlock
         Block first = getBlocks().get(0);
         Size2D size = first.arrange(g2, RectangleConstraint.NONE);
         if (constraint != null)
-            first.setBounds(new Rectangle2D.Double((constraint.getWidth() - size.width) / 2.0, 0.0, size.width, size.height));
-        else first.setBounds(new Rectangle2D.Double(0.0, 0.0, size.width, size.height));
+            first.setBounds(new Rectangle2D.Double((constraint.getWidth() - size.getWidth()) / 2.0, 0.0, size.getWidth(), size.getHeight()));
+        else first.setBounds(new Rectangle2D.Double(0.0, 0.0, size.getWidth(), size.getHeight()));
         return size;
     }
 }

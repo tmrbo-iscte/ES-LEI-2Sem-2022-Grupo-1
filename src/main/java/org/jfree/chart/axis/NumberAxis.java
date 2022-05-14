@@ -37,30 +37,27 @@
 
 package org.jfree.chart.axis;
 
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics2D;
+import org.jfree.chart.api.RectangleEdge;
+import org.jfree.chart.api.RectangleInsets;
+import org.jfree.chart.event.AxisChangeEvent;
+import org.jfree.chart.internal.Args;
+import org.jfree.chart.plot.Plot;
+import org.jfree.chart.plot.PlotRenderingInfo;
+import org.jfree.chart.plot.ValueAxisPlot;
+import org.jfree.chart.text.TextAnchor;
+import org.jfree.data.Range;
+import org.jfree.data.RangeType;
+
+import java.awt.*;
 import java.awt.font.FontRenderContext;
 import java.awt.font.LineMetrics;
 import java.awt.geom.Rectangle2D;
-import java.io.Serial;
 import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
-
-import org.jfree.chart.event.AxisChangeEvent;
-import org.jfree.chart.plot.Plot;
-import org.jfree.chart.plot.PlotRenderingInfo;
-import org.jfree.chart.plot.ValueAxisPlot;
-import org.jfree.chart.api.RectangleEdge;
-import org.jfree.chart.api.RectangleInsets;
-import org.jfree.chart.text.TextAnchor;
-import org.jfree.chart.internal.Args;
-import org.jfree.data.Range;
-import org.jfree.data.RangeType;
 
 /**
  * An axis for displaying numerical data.
@@ -76,7 +73,6 @@ import org.jfree.data.RangeType;
 public class NumberAxis extends ValueAxis implements Cloneable, Serializable {
 
     /** For serialization. */
-    @Serial
     private static final long serialVersionUID = 2805933088476185789L;
 
     /** The default value for the autoRangeIncludesZero flag. */
@@ -317,8 +313,8 @@ public class NumberAxis extends ValueAxis implements Cloneable, Serializable {
             return;  // no plot, no data
         }
 
-        if (plot instanceof ValueAxisPlot vap) {
-
+        if (plot instanceof ValueAxisPlot) {
+            ValueAxisPlot vap = (ValueAxisPlot) plot;
             Range r = vap.getDataRange(this);
             if (r == null) {
                 r = getDefaultAutoRange();
@@ -561,7 +557,6 @@ public class NumberAxis extends ValueAxis implements Cloneable, Serializable {
      *
      * @return The standard tick units.
      *
-     * @see #setStandardTickUnits(TickUnitSource)
      * @see #createIntegerTickUnits()
      */
     public static TickUnitSource createStandardTickUnits() {
@@ -573,7 +568,6 @@ public class NumberAxis extends ValueAxis implements Cloneable, Serializable {
      *
      * @return A collection of tick units for integer values.
      *
-     * @see #setStandardTickUnits(TickUnitSource)
      * @see #createStandardTickUnits()
      */
     public static TickUnitSource createIntegerTickUnits() {
@@ -593,7 +587,6 @@ public class NumberAxis extends ValueAxis implements Cloneable, Serializable {
      *
      * @return A tick unit collection.
      *
-     * @see #setStandardTickUnits(TickUnitSource)
      */
     public static TickUnitSource createStandardTickUnits(Locale locale) {
         NumberFormat numberFormat = NumberFormat.getNumberInstance(locale);
@@ -608,7 +601,6 @@ public class NumberAxis extends ValueAxis implements Cloneable, Serializable {
      *
      * @return A collection of tick units for integer values.
      *
-     * @see #setStandardTickUnits(TickUnitSource)
      */
     public static TickUnitSource createIntegerTickUnits(Locale locale) {
         NumberFormat numberFormat = NumberFormat.getNumberInstance(locale);
@@ -717,7 +709,7 @@ public class NumberAxis extends ValueAxis implements Cloneable, Serializable {
             Rectangle2D dataArea, RectangleEdge edge) {
 
         TickUnit unit = getTickUnit();
-        TickUnitSource tickUnitSource = this.tickUnits.getStandardTickUnits();
+        TickUnitSource tickUnitSource = getStandardTickUnits();
  
         // we should start with the current tick unit if it gives a count in 
         // the range 3 to 40 otherwise estimate one that will give a count <= 10
@@ -767,7 +759,7 @@ public class NumberAxis extends ValueAxis implements Cloneable, Serializable {
         double tickLabelHeight = estimateMaximumTickLabelHeight(g2);
 
         // start with the current tick unit...
-        TickUnitSource tickUnits = this.tickUnits.getStandardTickUnits();
+        TickUnitSource tickUnits = getStandardTickUnits();
         TickUnit unit1 = tickUnits.getCeilingTickUnit(getTickUnit());
         double unitHeight = lengthToJava2D(unit1.getSize(), dataArea, edge);
         double guess;
@@ -1057,6 +1049,9 @@ public class NumberAxis extends ValueAxis implements Cloneable, Serializable {
             return false;
         }
         if (!this.rangeType.equals(that.rangeType)) {
+            return false;
+        }
+        if (!arrow.equals(that.arrow)) {
             return false;
         }
         return super.equals(obj);

@@ -302,7 +302,7 @@ public class CyclicNumberAxis extends NumberAxis {
                    * tickLabelWidth / dataArea.getWidth();
 
         setTickUnit(
-                (NumberTickUnit) this.tickUnits.getStandardTickUnits().getCeilingTickUnit(n),
+                (NumberTickUnit) getStandardTickUnits().getCeilingTickUnit(n),
                 false, false);
 
      }
@@ -326,7 +326,7 @@ public class CyclicNumberAxis extends NumberAxis {
                    * tickLabelWidth / dataArea.getHeight();
 
         setTickUnit(
-            (NumberTickUnit) this.tickUnits.getStandardTickUnits().getCeilingTickUnit(n),
+            (NumberTickUnit) getStandardTickUnits().getCeilingTickUnit(n),
             false, false);
      }
 

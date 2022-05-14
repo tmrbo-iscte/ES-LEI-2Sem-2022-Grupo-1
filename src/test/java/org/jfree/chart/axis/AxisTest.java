@@ -164,7 +164,7 @@ public class AxisTest  {
         // tick labels visible flag...
         a1.tickLabel.setTickLabelsVisible(false);
         assertNotEquals(a1, a2);
-        a1.tickLabel.setTickLabelsVisible(false);
+        a2.tickLabel.setTickLabelsVisible(false);
         assertEquals(a1, a2);
 
         // tick label font...
@@ -212,7 +212,7 @@ public class AxisTest  {
         assertEquals(a1, a2);
 
         // tick mark paint...
-        a2.getTickMarks().setTickMarkPaint(new GradientPaint(1.0f, 2.0f, Color.CYAN,
+        a1.getTickMarks().setTickMarkPaint(new GradientPaint(1.0f, 2.0f, Color.CYAN,
                 3.0f, 4.0f, Color.BLACK));
         assertNotEquals(a1, a2);
         a2.getTickMarks().setTickMarkPaint(new GradientPaint(1.0f, 2.0f, Color.CYAN,

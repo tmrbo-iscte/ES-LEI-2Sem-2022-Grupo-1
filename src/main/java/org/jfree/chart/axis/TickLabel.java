@@ -4,8 +4,13 @@ import org.jfree.chart.api.RectangleInsets;
 import org.jfree.chart.event.AxisChangeEvent;
 import org.jfree.chart.internal.Args;
 import org.jfree.chart.internal.PaintUtils;
+import org.jfree.chart.internal.SerialUtils;
 
+import javax.swing.event.EventListenerList;
 import java.awt.*;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -32,22 +37,26 @@ public class TickLabel implements Serializable {
      * A flag that indicates whether or not tick labels are visible for the
      * axis.
      */
-    boolean tickLabelsVisible;
+    private boolean tickLabelsVisible;
     /**
      * The font used to display the tick labels.
      */
-    Font tickLabelFont;
+    private Font tickLabelFont;
     /**
      * The color used to display the tick labels.
      */
-    transient Paint tickLabelPaint;
+    private transient Paint tickLabelPaint;
     /**
      * The blank space around each tick label.
      */
-    RectangleInsets tickLabelInsets;
+    private RectangleInsets tickLabelInsets;
 
     public TickLabel(Axis axis) {
         this.axis = axis;
+        this.tickLabelsVisible = DEFAULT_TICK_LABELS_VISIBLE;
+        this.tickLabelFont = DEFAULT_TICK_LABEL_FONT;
+        this.tickLabelPaint = DEFAULT_TICK_LABEL_PAINT;
+        this.tickLabelInsets = DEFAULT_TICK_LABEL_INSETS;
     }
 
     /**
@@ -73,7 +82,6 @@ public class TickLabel implements Serializable {
      * @see #setTickLabelPaint(Paint)
      */
     public void setTickLabelsVisible(boolean flag) {
-
         if (flag != this.tickLabelsVisible) {
             this.tickLabelsVisible = flag;
             axis.fireChangeEvent();
@@ -159,18 +167,48 @@ public class TickLabel implements Serializable {
         if (obj == this) {
             return true;
         }
-        if (!(obj instanceof TickLabel that)) {
+        if (!(obj instanceof TickLabel)) {
             return false;
         }
+        TickLabel that = (TickLabel) obj;
         if (isTickLabelsVisible() != that.isTickLabelsVisible()) {
             return false;
         }
-        if (!Objects.equals(getTickLabelFont(), that.getTickLabelFont())) {
+        if (!Objects.equals(this.tickLabelFont, that.tickLabelFont)) {
             return false;
         }
-        if (!PaintUtils.equal(getTickLabelPaint(), that.getTickLabelPaint())) {
+        if (!PaintUtils.equal(tickLabelPaint, that.tickLabelPaint)) {
             return false;
         }
-        return Objects.equals(getTickLabelInsets(), that.getTickLabelInsets());
+        return tickLabelInsets.equals(that.tickLabelInsets);
     }
+
+    /**
+     * Provides serialization support.
+     *
+     * @param stream  the output stream.
+     *
+     * @throws IOException  if there is an I/O error.
+     */
+
+    private void writeObject(ObjectOutputStream stream) throws IOException {
+        stream.defaultWriteObject();
+        SerialUtils.writePaint(tickLabelPaint, stream);
+    }
+
+    /**
+     * Provides serialization support.
+     *
+     * @param stream  the input stream.
+     *
+     * @throws IOException  if there is an I/O error.
+     * @throws ClassNotFoundException  if there is a classpath problem.
+     */
+
+    private void readObject(ObjectInputStream stream)
+            throws IOException, ClassNotFoundException {
+        stream.defaultReadObject();
+        tickLabelPaint = SerialUtils.readPaint(stream);
+    }
+
 }

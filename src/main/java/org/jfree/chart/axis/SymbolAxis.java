@@ -37,6 +37,7 @@
 package org.jfree.chart.axis;
 
 import org.jfree.chart.api.RectangleEdge;
+import org.jfree.chart.internal.SerialUtils;
 import org.jfree.chart.plot.Plot;
 import org.jfree.chart.plot.PlotRenderingInfo;
 import org.jfree.chart.plot.ValueAxisPlot;
@@ -46,7 +47,9 @@ import org.jfree.data.Range;
 
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
-import java.io.Serial;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.text.NumberFormat;
 import java.util.Arrays;
@@ -59,7 +62,6 @@ import java.util.List;
 public class SymbolAxis extends NumberAxis implements Serializable {
 
     /** For serialization. */
-    @Serial
     private static final long serialVersionUID = 7216330468770619716L;
 
     public GridBand getGridBand() {
@@ -440,14 +442,20 @@ public class SymbolAxis extends NumberAxis implements Serializable {
         if (obj == this) {
             return true;
         }
-        if (!(obj instanceof SymbolAxis that)) {
+        if (!(obj instanceof SymbolAxis)) {
             return false;
         }
+        SymbolAxis that = (SymbolAxis) obj;
         if (!this.symbols.equals(that.symbols)) {
+            return false;
+        }
+        if (!gridBand.equals(that.gridBand)) {
             return false;
         }
         return super.equals(obj);
     }
+
+
 
     /**
      * Draws the grid bands for the axis when it is at the top or bottom of

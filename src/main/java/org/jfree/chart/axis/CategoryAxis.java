@@ -1302,6 +1302,7 @@ public class CategoryAxis extends Axis implements Cloneable, Serializable {
         if (!PaintUtils.equal(this.tickLabelPaintMap, that.tickLabelPaintMap)) {
             return false;
         }
+
         return true;
     }
 

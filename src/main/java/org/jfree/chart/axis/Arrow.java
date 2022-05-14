@@ -12,24 +12,24 @@ public class Arrow implements Serializable {
      * A flag that controls whether an arrow is drawn at the positive end of
      * the axis line.
      */
-    boolean positiveArrowVisible;
+    private boolean positiveArrowVisible;
     /**
      * A flag that controls whether an arrow is drawn at the negative end of
      * the axis line.
      */
-    boolean negativeArrowVisible;
+    private boolean negativeArrowVisible;
     /**
      * The shape used for an up arrow.
      */
-    transient Shape upArrow;
+    private transient Shape upArrow;
     /**
      * The shape used for a down arrow.
      */
-    transient Shape downArrow;
+    private transient Shape downArrow;
     /**
      * The shape used for a left arrow.
      */
-    transient Shape leftArrow;
+    private transient Shape leftArrow;
     /**
      * The shape used for a right arrow.
      */
@@ -39,6 +39,8 @@ public class Arrow implements Serializable {
 
     public Arrow(ValueAxis vaxis) {
         this.vaxis = vaxis;
+        positiveArrowVisible = false;
+        negativeArrowVisible = false;
     }
 
     /**
@@ -194,16 +196,17 @@ public class Arrow implements Serializable {
         if (obj == this) {
             return true;
         }
-        if (!(obj instanceof Arrow that)) {
+        if (!(obj instanceof Arrow)) {
             return false;
         }
-        if (isPositiveArrowVisible() != that.isPositiveArrowVisible()) {
+        Arrow that = (Arrow) obj;
+        if (positiveArrowVisible != that.positiveArrowVisible) {
             return false;
         }
-        if (isNegativeArrowVisible() != that.isNegativeArrowVisible()) {
+        if (negativeArrowVisible != that.negativeArrowVisible) {
             return false;
         }
-        return super.equals(obj);
+        return true;
     }
 
     /**
@@ -213,13 +216,12 @@ public class Arrow implements Serializable {
      *
      * @throws IOException  if there is an I/O error.
      */
-    @Serial
     private void writeObject(ObjectOutputStream stream) throws IOException {
         stream.defaultWriteObject();
-        SerialUtils.writeShape(getUpArrow(), stream);
-        SerialUtils.writeShape(getDownArrow(), stream);
-        SerialUtils.writeShape(getLeftArrow(), stream);
-        SerialUtils.writeShape(getRightArrow(), stream);
+        SerialUtils.writeShape(upArrow, stream);
+        SerialUtils.writeShape(downArrow, stream);
+        SerialUtils.writeShape(leftArrow, stream);
+        SerialUtils.writeShape(rightArrow, stream);
     }
 
     /**
@@ -230,14 +232,13 @@ public class Arrow implements Serializable {
      * @throws IOException  if there is an I/O error.
      * @throws ClassNotFoundException  if there is a classpath problem.
      */
-    @Serial
     private void readObject(ObjectInputStream stream)
             throws IOException, ClassNotFoundException {
-
         stream.defaultReadObject();
-        setUpArrow(SerialUtils.readShape(stream));
-        setDownArrow(SerialUtils.readShape(stream));
-        setLeftArrow(SerialUtils.readShape(stream));
-        setRightArrow(SerialUtils.readShape(stream));
+        upArrow = SerialUtils.readShape(stream);
+        downArrow = SerialUtils.readShape(stream);
+        leftArrow = SerialUtils.readShape(stream);
+        rightArrow = SerialUtils.readShape(stream);
     }
+
 }

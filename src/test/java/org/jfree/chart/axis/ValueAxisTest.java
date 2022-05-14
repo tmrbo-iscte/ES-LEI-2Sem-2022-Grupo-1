@@ -180,9 +180,9 @@ public class ValueAxisTest {
         assertEquals(a1, a2);
 
         //private TickUnits standardTickUnits;
-        a1.getTickUnits().setStandardTickUnits(NumberAxis.createIntegerTickUnits());
+        a1.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
         assertNotEquals(a1, a2);
-        a2.getTickUnits().setStandardTickUnits(NumberAxis.createIntegerTickUnits());
+        a2.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
         assertEquals(a1, a2);
 
         // verticalTickLabels

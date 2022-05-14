@@ -247,7 +247,7 @@ public class CombinedDomainCategoryPlotTest implements ChartChangeListener {
 
         CategoryDataset<String, String> dataset1 = createDataset1();
         NumberAxis rangeAxis1 = new NumberAxis("Value");
-        rangeAxis1.getTickUnits().setStandardTickUnits(NumberAxis.createIntegerTickUnits());
+        rangeAxis1.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
         LineAndShapeRenderer renderer1 = new LineAndShapeRenderer();
         renderer1.setDefaultToolTipGenerator(
                 new StandardCategoryToolTipGenerator());
@@ -257,7 +257,7 @@ public class CombinedDomainCategoryPlotTest implements ChartChangeListener {
 
         CategoryDataset<String, String> dataset2 = createDataset2();
         NumberAxis rangeAxis2 = new NumberAxis("Value");
-        rangeAxis2.getTickUnits().setStandardTickUnits(NumberAxis.createIntegerTickUnits());
+        rangeAxis2.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
         BarRenderer renderer2 = new BarRenderer();
         renderer2.setDefaultToolTipGenerator(
                 new StandardCategoryToolTipGenerator());

@@ -45,6 +45,7 @@ import org.jfree.chart.api.RectangleEdge;
 import org.jfree.chart.api.RectangleInsets;
 import org.jfree.chart.event.AxisChangeEvent;
 import org.jfree.chart.internal.Args;
+import org.jfree.chart.internal.SerialUtils;
 import org.jfree.chart.plot.Plot;
 import org.jfree.chart.text.TextUtils;
 import org.jfree.chart.util.AttrStringUtils;
@@ -55,6 +56,9 @@ import java.awt.font.LineMetrics;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.List;
 import java.util.Objects;
 
@@ -90,9 +94,12 @@ public abstract class ValueAxis extends Axis
     /** The maximum tick count. */
     public static final int MAXIMUM_TICK_COUNT = 500;
 
-    protected final Arrow arrow = new Arrow(this);
+    protected Arrow arrow;
 
-    protected final TickUnits tickUnits = new TickUnits(this);
+    /**
+     * The standard tick units for the axis.
+     */
+    private TickUnitSource standardTickUnits;
 
     /** A flag that affects the orientation of the values on the axis. */
     private boolean inverted;
@@ -162,9 +169,7 @@ public abstract class ValueAxis extends Axis
     protected ValueAxis(String label, TickUnitSource standardTickUnits) {
 
         super(label);
-
-        this.arrow.setPositiveArrowVisible(false);
-        this.arrow.setNegativeArrowVisible(false);
+        arrow = new Arrow(this);
 
         this.range = DEFAULT_RANGE;
         this.autoRange = DEFAULT_AUTO_RANGE;
@@ -179,7 +184,7 @@ public abstract class ValueAxis extends Axis
         this.fixedAutoRange = 0.0;
 
         this.autoTickUnitSelection = DEFAULT_AUTO_TICK_UNIT_SELECTION;
-        this.tickUnits.setStandardTickUnits(standardTickUnits);
+        this.standardTickUnits = standardTickUnits;
 
         Polygon p1 = new Polygon();
         p1.addPoint(0, 0);
@@ -214,8 +219,29 @@ public abstract class ValueAxis extends Axis
 
     }
 
-    public TickUnits getTickUnits() {
-        return tickUnits;
+    /**
+     * Returns the source for obtaining standard tick units for the axis.
+     *
+     * @return The source (possibly {@code null}).
+     * @see #setStandardTickUnits(TickUnitSource)
+     */
+    public TickUnitSource getStandardTickUnits() {
+        return standardTickUnits;
+    }
+
+    /**
+     * Sets the source for obtaining standard tick units for the axis and sends
+     * an {@link AxisChangeEvent} to all registered listeners.  The axis will
+     * try to select the smallest tick unit from the source that does not cause
+     * the tick labels to overlap (see also the
+     *
+     * @param source the source for standard tick units ({@code null}
+     *               permitted).
+     * @see #getStandardTickUnits()
+     */
+    public void setStandardTickUnits(TickUnitSource source) {
+        this.standardTickUnits = source;
+        fireChangeEvent();
     }
 
     /**
@@ -411,7 +437,8 @@ public abstract class ValueAxis extends Axis
                 g2.setPaint(tickLabel.getTickLabelPaint());
                 float[] anchorPoint = calculateAnchorPoint(tick, cursor,
                         dataArea, edge);
-                if (tick instanceof LogTick lt) {
+                if (tick instanceof LogTick) {
+                    LogTick lt = (LogTick) tick;
                     if (lt.getAttributedLabel() == null) {
                         continue;
                     }
@@ -556,7 +583,8 @@ public abstract class ValueAxis extends Axis
 
     private Rectangle2D setLabelBounds(Graphics2D g2, FontMetrics fm, Tick o) {
         Rectangle2D labelBounds;
-        if (o instanceof LogTick lt) {
+        if (o instanceof LogTick) {
+            LogTick lt = (LogTick) o;
             if (lt.getAttributedLabel() != null) {
                 labelBounds = AttrStringUtils.getTextBounds(
                         lt.getAttributedLabel(), g2);
@@ -1255,9 +1283,10 @@ public abstract class ValueAxis extends Axis
         if (obj == this) {
             return true;
         }
-        if (!(obj instanceof ValueAxis that)) {
+        if (!(obj instanceof ValueAxis)) {
             return false;
         }
+        ValueAxis that = (ValueAxis) obj;
         if (this.inverted != that.inverted) {
             return false;
         }
@@ -1286,11 +1315,16 @@ public abstract class ValueAxis extends Axis
         if (this.autoTickUnitSelection != that.autoTickUnitSelection) {
             return false;
         }
-
+        if (!Objects.equals(this.standardTickUnits, that.standardTickUnits)) {
+            return false;
+        }
         if (this.verticalTickLabels != that.verticalTickLabels) {
             return false;
         }
         if (this.minorTickCount != that.minorTickCount) {
+            return false;
+        }
+        if (!arrow.equals(that.arrow)) {
             return false;
         }
         return super.equals(obj);

@@ -691,7 +691,7 @@ public class LogAxis extends ValueAxis {
                 range.getLowerBound()));
         double logAxisMax = calculateLog(range.getUpperBound());
         double size = (logAxisMax - logAxisMin) / 50;
-        TickUnitSource tickUnits = this.tickUnits.getStandardTickUnits();
+        TickUnitSource tickUnits = getStandardTickUnits();
         TickUnit candidate = tickUnits.getCeilingTickUnit(size);
         TickUnit prevCandidate = candidate;
         boolean found = false;
@@ -755,7 +755,7 @@ public class LogAxis extends ValueAxis {
                 range.getLowerBound()));
         double logAxisMax = calculateLog(range.getUpperBound());
         double size = (logAxisMax - logAxisMin) / 50;
-        TickUnitSource tickUnits = this.tickUnits.getStandardTickUnits();
+        TickUnitSource tickUnits = getStandardTickUnits();
         TickUnit candidate = tickUnits.getCeilingTickUnit(size);
         TickUnit prevCandidate = candidate;
         boolean found = false;

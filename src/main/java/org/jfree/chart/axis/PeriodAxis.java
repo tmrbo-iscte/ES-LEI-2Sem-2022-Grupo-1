@@ -72,7 +72,6 @@ public class PeriodAxis extends ValueAxis
         implements Cloneable, PublicCloneable, Serializable {
 
     /** For serialization. */
-    @Serial
     private static final long serialVersionUID = 8353295532075872069L;
 
     /** The first time period in the overall range. */
@@ -846,8 +845,8 @@ public class PeriodAxis extends ValueAxis
             return;  // no plot, no data
         }
 
-        if (plot instanceof ValueAxisPlot vap) {
-
+        if (plot instanceof ValueAxisPlot) {
+            ValueAxisPlot vap = (ValueAxisPlot) plot;
             Range r = vap.getDataRange(this);
             if (r == null) {
                 r = getDefaultAutoRange();
@@ -876,9 +875,10 @@ public class PeriodAxis extends ValueAxis
         if (obj == this) {
             return true;
         }
-        if (!(obj instanceof PeriodAxis that)) {
+        if (!(obj instanceof PeriodAxis)) {
             return false;
         }
+        PeriodAxis that = (PeriodAxis) obj;
         if (!this.first.equals(that.first)) {
             return false;
         }
@@ -967,36 +967,6 @@ public class PeriodAxis extends ValueAxis
             }
         }
         return result;
-    }
-
-    /**
-     * Provides serialization support.
-     *
-     * @param stream  the output stream.
-     *
-     * @throws IOException  if there is an I/O error.
-     */
-    @Serial
-    private void writeObject(ObjectOutputStream stream) throws IOException {
-        stream.defaultWriteObject();
-        SerialUtils.writeStroke(tickMarks.getMinorTickMarkStroke(), stream);
-        SerialUtils.writePaint(tickMarks.getMinorTickMarkPaint(), stream);
-    }
-
-    /**
-     * Provides serialization support.
-     *
-     * @param stream  the input stream.
-     *
-     * @throws IOException  if there is an I/O error.
-     * @throws ClassNotFoundException  if there is a classpath problem.
-     */
-    @Serial
-    private void readObject(ObjectInputStream stream)
-        throws IOException, ClassNotFoundException {
-        stream.defaultReadObject();
-        tickMarks.setMinorTickMarkStroke(SerialUtils.readStroke(stream));
-        tickMarks.setMinorTickMarkPaint(SerialUtils.readPaint(stream));
     }
 
 }

@@ -86,12 +86,11 @@ import org.jfree.chart.internal.SerialUtils;
  */
 public abstract class Axis implements ChartElement, Cloneable, Serializable {
 
-    protected final TickMarks tickMarks = new TickMarks(this);
+    protected TickMarks tickMarks;
 
-    protected final TickLabel tickLabel = new TickLabel(this);
+    protected TickLabel tickLabel;
 
     /** For serialization. */
-    @Serial
     private static final long serialVersionUID = 7719289504573298271L;
 
     /** The default axis visibility ({@code true}). */
@@ -170,6 +169,9 @@ public abstract class Axis implements ChartElement, Cloneable, Serializable {
      */
     protected Axis(String label) {
 
+        tickLabel = new TickLabel(this);
+        tickMarks = new TickMarks(this);
+
         this.label = label;
         this.visible = DEFAULT_AXIS_VISIBLE;
         this.labelFont = DEFAULT_AXIS_LABEL_FONT;
@@ -182,23 +184,7 @@ public abstract class Axis implements ChartElement, Cloneable, Serializable {
         this.axisLinePaint = DEFAULT_AXIS_LINE_PAINT;
         this.axisLineStroke = DEFAULT_AXIS_LINE_STROKE;
 
-        tickLabel.setTickLabelsVisible(TickLabel.DEFAULT_TICK_LABELS_VISIBLE);
-        tickLabel.setTickLabelFont(TickLabel.DEFAULT_TICK_LABEL_FONT);
-        tickLabel.setTickLabelPaint(TickLabel.DEFAULT_TICK_LABEL_PAINT);
-        tickLabel.setTickLabelInsets(TickLabel.DEFAULT_TICK_LABEL_INSETS);
-
-        tickMarks.setTickMarksVisible(TickMarks.DEFAULT_TICK_MARKS_VISIBLE);
-        tickMarks.setTickMarkStroke(TickMarks.DEFAULT_TICK_MARK_STROKE);
-        tickMarks.setTickMarkPaint(TickMarks.DEFAULT_TICK_MARK_PAINT);
-        tickMarks.setTickMarkInsideLength(TickMarks.DEFAULT_TICK_MARK_INSIDE_LENGTH);
-        tickMarks.setTickMarkOutsideLength(TickMarks.DEFAULT_TICK_MARK_OUTSIDE_LENGTH);
-
-        tickMarks.setMinorTickMarksVisible(false);
-        tickMarks.setMinorTickMarkInsideLength(0.0f);
-        tickMarks.setMinorTickMarkOutsideLength(2.0f);
-
         this.plot = null;
-
         this.listenerList = new EventListenerList();
     }
 
@@ -282,18 +268,6 @@ public abstract class Axis implements ChartElement, Cloneable, Serializable {
     
     /**
      * Sets the attributed label for the axis and sends an 
-     * {@link AxisChangeEvent} to all registered listeners.  This is a 
-     * convenience method that converts the string into an 
-     * {@code AttributedString} using the current font attributes.
-     * 
-     * @param label  the label ({@code null} permitted).
-     */
-    public void setAttributedLabel(String label) {
-        setAttributedLabel(createAttributedLabel(label));    
-    }
-    
-    /**
-     * Sets the attributed label for the axis and sends an 
      * {@link AxisChangeEvent} to all registered listeners.
      * 
      * @param label  the label ({@code null} permitted).
@@ -305,23 +279,6 @@ public abstract class Axis implements ChartElement, Cloneable, Serializable {
             this.attributedLabel = null;
         }
         fireChangeEvent();
-    }
-    
-    /**
-     * Creates and returns an {@code AttributedString} with the specified
-     * text and the labelFont and labelPaint applied as attributes.
-     * 
-     * @param label  the label ({@code null} permitted).
-     * 
-     * @return An attributed string or {@code null}.
-     */
-    public AttributedString createAttributedLabel(String label) {
-        if (label == null) {
-            return null;
-        }
-        AttributedString s = new AttributedString(label);
-        s.addAttributes(this.labelFont.getAttributes(), 0, label.length());
-        return s;
     }
     
     /**
@@ -674,18 +631,24 @@ public abstract class Axis implements ChartElement, Cloneable, Serializable {
         }
         Rectangle2D hotspot = null;
         switch (edge) {
-            case TOP -> hotspot = new Rectangle2D.Double(dataArea.getX(),
+            case TOP:
+                hotspot = new Rectangle2D.Double(dataArea.getX(),
                     state.getCursor(), dataArea.getWidth(),
                     cursor - state.getCursor());
-            case BOTTOM -> hotspot = new Rectangle2D.Double(dataArea.getX(), cursor,
+                break;
+            case BOTTOM:
+                hotspot = new Rectangle2D.Double(dataArea.getX(), cursor,
                     dataArea.getWidth(), state.getCursor() - cursor);
-            case LEFT -> hotspot = new Rectangle2D.Double(state.getCursor(),
+                break;
+            case LEFT: hotspot = new Rectangle2D.Double(state.getCursor(),
                     dataArea.getY(), cursor - state.getCursor(),
                     dataArea.getHeight());
-            case RIGHT -> hotspot = new Rectangle2D.Double(cursor, dataArea.getY(),
+                break;
+            case RIGHT: hotspot = new Rectangle2D.Double(cursor, dataArea.getY(),
                     state.getCursor() - cursor, dataArea.getHeight());
-            default -> {
-            }
+                break;
+            default:
+                break;
         }
         EntityCollection e = plotState.getOwner().getEntityCollection();
         if (e != null) {
@@ -1125,9 +1088,10 @@ public abstract class Axis implements ChartElement, Cloneable, Serializable {
         if (obj == this) {
             return true;
         }
-        if (!(obj instanceof Axis that)) {
+        if (!(obj instanceof Axis)) {
             return false;
         }
+        Axis that = (Axis) obj;
         if (this.visible != that.visible) {
             return false;
         }
@@ -1162,6 +1126,12 @@ public abstract class Axis implements ChartElement, Cloneable, Serializable {
         if (!PaintUtils.equal(this.axisLinePaint, that.axisLinePaint)) {
             return false;
         }
+        if (!tickMarks.equals(that.tickMarks)) {
+            return false;
+        }
+        if (!tickLabel.equals(that.tickLabel)) {
+            return false;
+        }
         return this.fixedDimension == that.fixedDimension;
     }
 
@@ -1186,16 +1156,13 @@ public abstract class Axis implements ChartElement, Cloneable, Serializable {
      *
      * @throws IOException  if there is an I/O error.
      */
-    @Serial
+
     private void writeObject(ObjectOutputStream stream) throws IOException {
         stream.defaultWriteObject();
         SerialUtils.writeAttributedString(this.attributedLabel, stream);
         SerialUtils.writePaint(this.labelPaint, stream);
-        SerialUtils.writePaint(this.tickLabel.getTickLabelPaint(), stream);
         SerialUtils.writeStroke(this.axisLineStroke, stream);
         SerialUtils.writePaint(this.axisLinePaint, stream);
-        SerialUtils.writeStroke(tickMarks.getTickMarkStroke(), stream);
-        SerialUtils.writePaint(tickMarks.getTickMarkPaint(), stream);
     }
 
     /**
@@ -1206,18 +1173,15 @@ public abstract class Axis implements ChartElement, Cloneable, Serializable {
      * @throws IOException  if there is an I/O error.
      * @throws ClassNotFoundException  if there is a classpath problem.
      */
-    @Serial
+
     private void readObject(ObjectInputStream stream)
         throws IOException, ClassNotFoundException {
         stream.defaultReadObject();
+        this.listenerList = new EventListenerList();
         this.attributedLabel = SerialUtils.readAttributedString(stream);
         this.labelPaint = SerialUtils.readPaint(stream);
-        this.tickLabel.setTickLabelPaint(SerialUtils.readPaint(stream));
         this.axisLineStroke = SerialUtils.readStroke(stream);
         this.axisLinePaint = SerialUtils.readPaint(stream);
-        tickMarks.setTickMarkStroke(SerialUtils.readStroke(stream));
-        tickMarks.setTickMarkPaint(SerialUtils.readPaint(stream));
-        this.listenerList = new EventListenerList();
     }
 
 }

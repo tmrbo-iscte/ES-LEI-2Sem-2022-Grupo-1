@@ -73,25 +73,15 @@ public class TickUnits implements TickUnitSource, Cloneable, Serializable {
     /** For serialization. */
     private static final long serialVersionUID = 1134174035901467545L;
 
-    /**
-     * The standard tick units for the axis.
-     */
-    TickUnitSource standardTickUnits;
-
     /** Storage for the tick units. */
     private List tickUnits;
 
-    private ValueAxis vaxis;
 
     /**
      * Constructs a new collection of tick units.
      */
     public TickUnits() {
         this.tickUnits = new ArrayList();
-    }
-    public TickUnits(ValueAxis vaxis) {
-        this.tickUnits = new ArrayList();
-        this.vaxis = vaxis;
     }
 
     /**
@@ -130,32 +120,6 @@ public class TickUnits implements TickUnitSource, Cloneable, Serializable {
      */
     public TickUnit get(int pos) {
         return (TickUnit) this.tickUnits.get(pos);
-    }
-
-
-    /**
-     * Returns the source for obtaining standard tick units for the axis.
-     *
-     * @return The source (possibly {@code null}).
-     * @see #setStandardTickUnits(TickUnitSource)
-     */
-    public TickUnitSource getStandardTickUnits() {
-        return standardTickUnits;
-    }
-
-    /**
-     * Sets the source for obtaining standard tick units for the axis and sends
-     * an {@link AxisChangeEvent} to all registered listeners.  The axis will
-     * try to select the smallest tick unit from the source that does not cause
-     * the tick labels to overlap (see also the
-     *
-     * @param source the source for standard tick units ({@code null}
-     *               permitted).
-     * @see #getStandardTickUnits()
-     */
-    public void setStandardTickUnits(TickUnitSource source) {
-        this.standardTickUnits = source;
-        vaxis.fireChangeEvent();
     }
 
     /**
@@ -241,13 +205,10 @@ public class TickUnits implements TickUnitSource, Cloneable, Serializable {
         if (obj == this) {
             return true;
         }
-        if (!(obj instanceof TickUnits that)) {
+        if (!(obj instanceof TickUnits)) {
             return false;
         }
-
-        if (!Objects.equals(getStandardTickUnits(), that.getStandardTickUnits())) {
-            return false;
-        }
+        TickUnits that = (TickUnits) obj;
         return that.tickUnits.equals(this.tickUnits);
     }
 

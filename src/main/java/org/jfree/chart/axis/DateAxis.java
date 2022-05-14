@@ -306,7 +306,7 @@ public class DateAxis extends ValueAxis implements Cloneable, Serializable {
     public void setTimeZone(TimeZone zone) {
         Args.nullNotPermitted(zone, "zone");
         this.timeZone = zone;
-        this.tickUnits.setStandardTickUnits(createStandardDateTickUnits(zone, this.locale));
+        this.setStandardTickUnits(createStandardDateTickUnits(zone, this.locale));
         fireChangeEvent();
     }
     
@@ -328,7 +328,7 @@ public class DateAxis extends ValueAxis implements Cloneable, Serializable {
     public void setLocale(Locale locale) {
         Args.nullNotPermitted(locale, "locale");
         this.locale = locale;
-        this.tickUnits.setStandardTickUnits(createStandardDateTickUnits(this.timeZone,
+        this.setStandardTickUnits(createStandardDateTickUnits(this.timeZone,
                 this.locale));
         fireChangeEvent();
     }
@@ -1224,7 +1224,7 @@ public class DateAxis extends ValueAxis implements Cloneable, Serializable {
                 getTickUnit());
 
         // start with the current tick unit...
-        TickUnitSource tickUnits = this.tickUnits.getStandardTickUnits();
+        TickUnitSource tickUnits = getStandardTickUnits();
         TickUnit unit1 = tickUnits.getCeilingTickUnit(getTickUnit());
         double x1 = valueToJava2D(unit1.getSize(), dataArea, edge);
         double unit1Width = Math.abs(x1 - zero);
@@ -1254,7 +1254,7 @@ public class DateAxis extends ValueAxis implements Cloneable, Serializable {
             Rectangle2D dataArea, RectangleEdge edge) {
 
         // start with the current tick unit...
-        TickUnitSource tickUnits = this.tickUnits.getStandardTickUnits();
+        TickUnitSource tickUnits = getStandardTickUnits();
         double zero = valueToJava2D(0.0, dataArea, edge);
 
         // start with a unit that is at least 1/10th of the axis length

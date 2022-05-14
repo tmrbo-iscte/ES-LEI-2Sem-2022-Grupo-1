@@ -3,9 +3,11 @@ package org.jfree.chart.axis;
 import org.jfree.chart.event.AxisChangeEvent;
 import org.jfree.chart.internal.Args;
 import org.jfree.chart.internal.PaintUtils;
+import org.jfree.chart.internal.SerialUtils;
 
+import javax.swing.event.EventListenerList;
 import java.awt.*;
-import java.io.Serializable;
+import java.io.*;
 import java.util.Objects;
 
 public class TickMarks implements Serializable, Cloneable {
@@ -75,6 +77,14 @@ public class TickMarks implements Serializable, Cloneable {
 
     public TickMarks(Axis axis) {
         this.axis = axis;
+        this.tickMarksVisible = DEFAULT_TICK_MARKS_VISIBLE;
+        this.tickMarkStroke = DEFAULT_TICK_MARK_STROKE;
+        this.tickMarkPaint = DEFAULT_TICK_MARK_PAINT;
+        this.tickMarkInsideLength = DEFAULT_TICK_MARK_INSIDE_LENGTH;
+        this.tickMarkOutsideLength = DEFAULT_TICK_MARK_OUTSIDE_LENGTH;
+        this.minorTickMarksVisible = false;
+        this.minorTickMarkInsideLength = 0.0f;
+        this.minorTickMarkOutsideLength = 2.0f;
     }
 
     public Stroke getMinorTickMarkStroke() {
@@ -300,9 +310,10 @@ public class TickMarks implements Serializable, Cloneable {
         if (obj == this) {
             return true;
         }
-        if (!(obj instanceof TickMarks that)) {
+        if (!(obj instanceof TickMarks)) {
             return false;
         }
+        TickMarks that = (TickMarks) obj;
         if (this.tickMarksVisible != that.tickMarksVisible) {
             return false;
         }
@@ -324,11 +335,10 @@ public class TickMarks implements Serializable, Cloneable {
         if (this.minorTickMarkInsideLength != that.minorTickMarkInsideLength) {
             return false;
         }
-        if (this.minorTickMarkOutsideLength
-                != that.minorTickMarkOutsideLength) {
+        if (this.minorTickMarkOutsideLength != that.minorTickMarkOutsideLength) {
             return false;
         }
-        if (!this.minorTickMarkPaint.equals(that.minorTickMarkPaint)) {
+        if (!PaintUtils.equal(this.minorTickMarkPaint, that.minorTickMarkPaint)) {
             return false;
         }
         return this.minorTickMarkStroke.equals(that.minorTickMarkStroke);
@@ -342,4 +352,39 @@ public class TickMarks implements Serializable, Cloneable {
             throw new AssertionError();
         }
     }
+
+    /**
+     * Provides serialization support.
+     *
+     * @param stream  the output stream.
+     *
+     * @throws IOException  if there is an I/O error.
+     */
+
+    private void writeObject(ObjectOutputStream stream) throws IOException {
+        stream.defaultWriteObject();
+        SerialUtils.writeStroke(tickMarkStroke, stream);
+        SerialUtils.writePaint(tickMarkPaint, stream);
+        SerialUtils.writePaint(minorTickMarkPaint, stream);
+        SerialUtils.writeStroke(minorTickMarkStroke, stream);
+    }
+
+    /**
+     * Provides serialization support.
+     *
+     * @param stream  the input stream.
+     *
+     * @throws IOException  if there is an I/O error.
+     * @throws ClassNotFoundException  if there is a classpath problem.
+     */
+
+    private void readObject(ObjectInputStream stream)
+            throws IOException, ClassNotFoundException {
+        stream.defaultReadObject();
+        tickMarkStroke = SerialUtils.readStroke(stream);
+        tickMarkPaint = SerialUtils.readPaint(stream);
+        minorTickMarkPaint = SerialUtils.readPaint(stream);
+        minorTickMarkStroke = SerialUtils.readStroke(stream);
+    }
+
 }

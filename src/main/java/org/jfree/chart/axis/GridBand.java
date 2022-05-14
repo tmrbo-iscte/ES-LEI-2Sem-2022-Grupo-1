@@ -159,7 +159,7 @@ public class GridBand implements Serializable, Cloneable {
      *
      * @throws IOException  if there is an I/O error.
      */
-    @Serial
+
     private void writeObject(ObjectOutputStream stream) throws IOException {
         stream.defaultWriteObject();
         SerialUtils.writePaint(getGridBandPaint(), stream);
@@ -174,7 +174,7 @@ public class GridBand implements Serializable, Cloneable {
      * @throws IOException  if there is an I/O error.
      * @throws ClassNotFoundException  if there is a classpath problem.
      */
-    @Serial
+
     private void readObject(ObjectInputStream stream)
             throws IOException, ClassNotFoundException {
         stream.defaultReadObject();
@@ -187,9 +187,10 @@ public class GridBand implements Serializable, Cloneable {
         if (obj == this) {
             return true;
         }
-        if (!(obj instanceof GridBand that)) {
+        if (!(obj instanceof GridBand)) {
             return false;
         }
+        GridBand that = (GridBand) obj;
         if (isGridBandsVisible() != that.isGridBandsVisible()) {
             return false;
         }
@@ -200,6 +201,6 @@ public class GridBand implements Serializable, Cloneable {
                 that.getGridBandAlternatePaint())) {
             return false;
         }
-        return super.equals(obj);
+        return true;
     }
 }

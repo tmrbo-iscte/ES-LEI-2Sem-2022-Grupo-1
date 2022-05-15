@@ -1,0 +1,534 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DefaultDrawingSupplier.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.chart.plot</a> &gt; <span class="el_source">DefaultDrawingSupplier.java</span></div><h1>DefaultDrawingSupplier.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * ---------------------------
+ * DefaultDrawingSupplier.java
+ * ---------------------------
+ * (C) Copyright 2003-2022, by David Gilbert.
+ *
+ * Original Author:  David Gilbert;
+ * Contributor(s):   Jeremy Bowman;
+ *
+ */
+
+ package org.jfree.chart.plot;
+
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Paint;
+import java.awt.Polygon;
+import java.awt.Shape;
+import java.awt.Stroke;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Rectangle2D;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.util.Arrays;
+import org.jfree.chart.ChartColor;
+import org.jfree.chart.api.PublicCloneable;
+import org.jfree.chart.internal.SerialUtils;
+import org.jfree.chart.internal.ShapeUtils;
+
+
+/**
+ * A default implementation of the {@link DrawingSupplier} interface.  All
+ * {@link Plot} instances have a new instance of this class installed by
+ * default.
+ */
+public class DefaultDrawingSupplier implements DrawingSupplier, Cloneable,
+        PublicCloneable, Serializable {
+
+    /** For serialization. */
+    private static final long serialVersionUID = -7339847061039422538L;
+
+    /** The default fill paint sequence. */
+    public static final Paint[] DEFAULT_PAINT_SEQUENCE
+<span class="fc" id="L71">            = ChartColor.createDefaultPaintArray();</span>
+
+    /** The default outline paint sequence. */
+<span class="fc" id="L74">    public static final Paint[] DEFAULT_OUTLINE_PAINT_SEQUENCE = new Paint[] {</span>
+            Color.LIGHT_GRAY};
+
+    /** The default fill paint sequence. */
+<span class="fc" id="L78">    public static final Paint[] DEFAULT_FILL_PAINT_SEQUENCE = new Paint[] {</span>
+            Color.WHITE};
+
+    /** The default stroke sequence. */
+<span class="fc" id="L82">    public static final Stroke[] DEFAULT_STROKE_SEQUENCE = new Stroke[] {</span>
+            new BasicStroke(1.0f, BasicStroke.CAP_SQUARE,
+                    BasicStroke.JOIN_BEVEL)};
+
+    /** The default outline stroke sequence. */
+<span class="fc" id="L87">    public static final Stroke[] DEFAULT_OUTLINE_STROKE_SEQUENCE</span>
+            = new Stroke[] {new BasicStroke(1.0f, BasicStroke.CAP_SQUARE,
+                    BasicStroke.JOIN_BEVEL)};
+
+    /** The default shape sequence. */
+<span class="fc" id="L92">    public static final Shape[] DEFAULT_SHAPE_SEQUENCE</span>
+<span class="fc" id="L93">            = createStandardSeriesShapes();</span>
+
+    /** The paint sequence. */
+    private transient Paint[] paintSequence;
+
+    /** The current paint index. */
+    private int paintIndex;
+
+    /** The outline paint sequence. */
+    private transient Paint[] outlinePaintSequence;
+
+    /** The current outline paint index. */
+    private int outlinePaintIndex;
+
+    /** The fill paint sequence. */
+    private final transient Paint[] fillPaintSequence;
+
+    /** The current fill paint index. */
+    private int fillPaintIndex;
+
+    /** The stroke sequence. */
+    private transient Stroke[] strokeSequence;
+
+    /** The current stroke index. */
+    private int strokeIndex;
+
+    /** The outline stroke sequence. */
+    private transient Stroke[] outlineStrokeSequence;
+
+    /** The current outline stroke index. */
+    private int outlineStrokeIndex;
+
+    /** The shape sequence. */
+    private transient Shape[] shapeSequence;
+
+    /** The current shape index. */
+    private int shapeIndex;
+
+    /**
+     * Creates a new supplier, with default sequences for fill paint, outline
+     * paint, stroke and shapes.
+     */
+    public DefaultDrawingSupplier() {
+
+<span class="fc" id="L137">        this(DEFAULT_PAINT_SEQUENCE, DEFAULT_FILL_PAINT_SEQUENCE,</span>
+             DEFAULT_OUTLINE_PAINT_SEQUENCE,
+             DEFAULT_STROKE_SEQUENCE,
+             DEFAULT_OUTLINE_STROKE_SEQUENCE,
+             DEFAULT_SHAPE_SEQUENCE);
+
+<span class="fc" id="L143">    }</span>
+
+    /**
+     * Creates a new supplier.
+     *
+     * @param paintSequence  the fill paint sequence.
+     * @param outlinePaintSequence  the outline paint sequence.
+     * @param strokeSequence  the stroke sequence.
+     * @param outlineStrokeSequence  the outline stroke sequence.
+     * @param shapeSequence  the shape sequence.
+     */
+    public DefaultDrawingSupplier(Paint[] paintSequence,
+                                  Paint[] outlinePaintSequence,
+                                  Stroke[] strokeSequence,
+                                  Stroke[] outlineStrokeSequence,
+<span class="fc" id="L158">                                  Shape[] shapeSequence) {</span>
+
+<span class="fc" id="L160">        this.paintSequence = paintSequence;</span>
+<span class="fc" id="L161">        this.fillPaintSequence = DEFAULT_FILL_PAINT_SEQUENCE;</span>
+<span class="fc" id="L162">        this.outlinePaintSequence = outlinePaintSequence;</span>
+<span class="fc" id="L163">        this.strokeSequence = strokeSequence;</span>
+<span class="fc" id="L164">        this.outlineStrokeSequence = outlineStrokeSequence;</span>
+<span class="fc" id="L165">        this.shapeSequence = shapeSequence;</span>
+
+<span class="fc" id="L167">    }</span>
+
+    /**
+     * Creates a new supplier.
+     *
+     * @param paintSequence  the paint sequence.
+     * @param fillPaintSequence  the fill paint sequence.
+     * @param outlinePaintSequence  the outline paint sequence.
+     * @param strokeSequence  the stroke sequence.
+     * @param outlineStrokeSequence  the outline stroke sequence.
+     * @param shapeSequence  the shape sequence.
+     */
+    public DefaultDrawingSupplier(Paint[] paintSequence,
+            Paint[] fillPaintSequence, Paint[] outlinePaintSequence,
+            Stroke[] strokeSequence, Stroke[] outlineStrokeSequence,
+<span class="fc" id="L182">            Shape[] shapeSequence) {</span>
+
+<span class="fc" id="L184">        this.paintSequence = paintSequence;</span>
+<span class="fc" id="L185">        this.fillPaintSequence = fillPaintSequence;</span>
+<span class="fc" id="L186">        this.outlinePaintSequence = outlinePaintSequence;</span>
+<span class="fc" id="L187">        this.strokeSequence = strokeSequence;</span>
+<span class="fc" id="L188">        this.outlineStrokeSequence = outlineStrokeSequence;</span>
+<span class="fc" id="L189">        this.shapeSequence = shapeSequence;</span>
+<span class="fc" id="L190">    }</span>
+
+    /**
+     * Returns the next paint in the sequence.
+     *
+     * @return The paint.
+     */
+    @Override
+    public Paint getNextPaint() {
+<span class="fc" id="L199">        Paint result</span>
+            = this.paintSequence[this.paintIndex % this.paintSequence.length];
+<span class="fc" id="L201">        this.paintIndex++;</span>
+<span class="fc" id="L202">        return result;</span>
+    }
+
+    /**
+     * Returns the next outline paint in the sequence.
+     *
+     * @return The paint.
+     */
+    @Override
+    public Paint getNextOutlinePaint() {
+<span class="fc" id="L212">        Paint result = this.outlinePaintSequence[</span>
+                this.outlinePaintIndex % this.outlinePaintSequence.length];
+<span class="fc" id="L214">        this.outlinePaintIndex++;</span>
+<span class="fc" id="L215">        return result;</span>
+    }
+
+    /**
+     * Returns the next fill paint in the sequence.
+     *
+     * @return The paint.
+     */
+    @Override
+    public Paint getNextFillPaint() {
+<span class="fc" id="L225">        Paint result = this.fillPaintSequence[this.fillPaintIndex</span>
+                % this.fillPaintSequence.length];
+<span class="fc" id="L227">        this.fillPaintIndex++;</span>
+<span class="fc" id="L228">        return result;</span>
+    }
+
+    /**
+     * Returns the next stroke in the sequence.
+     *
+     * @return The stroke.
+     */
+    @Override
+    public Stroke getNextStroke() {
+<span class="fc" id="L238">        Stroke result = this.strokeSequence[</span>
+                this.strokeIndex % this.strokeSequence.length];
+<span class="fc" id="L240">        this.strokeIndex++;</span>
+<span class="fc" id="L241">        return result;</span>
+    }
+
+    /**
+     * Returns the next outline stroke in the sequence.
+     *
+     * @return The stroke.
+     */
+    @Override
+    public Stroke getNextOutlineStroke() {
+<span class="fc" id="L251">        Stroke result = this.outlineStrokeSequence[</span>
+                this.outlineStrokeIndex % this.outlineStrokeSequence.length];
+<span class="fc" id="L253">        this.outlineStrokeIndex++;</span>
+<span class="fc" id="L254">        return result;</span>
+    }
+
+    /**
+     * Returns the next shape in the sequence.
+     *
+     * @return The shape.
+     */
+    @Override
+    public Shape getNextShape() {
+<span class="fc" id="L264">        Shape result = this.shapeSequence[</span>
+                this.shapeIndex % this.shapeSequence.length];
+<span class="fc" id="L266">        this.shapeIndex++;</span>
+<span class="fc" id="L267">        return result;</span>
+    }
+
+    /**
+     * Creates an array of standard shapes to display for the items in series
+     * on charts.
+     *
+     * @return The array of shapes.
+     */
+    public static Shape[] createStandardSeriesShapes() {
+
+<span class="fc" id="L278">        Shape[] result = new Shape[10];</span>
+
+<span class="fc" id="L280">        double size = 6.0;</span>
+<span class="fc" id="L281">        double delta = size / 2.0;</span>
+        int[] xpoints;
+        int[] ypoints;
+
+        // square
+<span class="fc" id="L286">        result[0] = new Rectangle2D.Double(-delta, -delta, size, size);</span>
+        // circle
+<span class="fc" id="L288">        result[1] = new Ellipse2D.Double(-delta, -delta, size, size);</span>
+
+        // up-pointing triangle
+<span class="fc" id="L291">        xpoints = intArray(0.0, delta, -delta);</span>
+<span class="fc" id="L292">        ypoints = intArray(-delta, delta, delta);</span>
+<span class="fc" id="L293">        result[2] = new Polygon(xpoints, ypoints, 3);</span>
+
+        // diamond
+<span class="fc" id="L296">        xpoints = intArray(0.0, delta, 0.0, -delta);</span>
+<span class="fc" id="L297">        ypoints = intArray(-delta, 0.0, delta, 0.0);</span>
+<span class="fc" id="L298">        result[3] = new Polygon(xpoints, ypoints, 4);</span>
+
+        // horizontal rectangle
+<span class="fc" id="L301">        result[4] = new Rectangle2D.Double(-delta, -delta / 2, size, size / 2);</span>
+
+        // down-pointing triangle
+<span class="fc" id="L304">        xpoints = intArray(-delta, +delta, 0.0);</span>
+<span class="fc" id="L305">        ypoints = intArray(-delta, -delta, delta);</span>
+<span class="fc" id="L306">        result[5] = new Polygon(xpoints, ypoints, 3);</span>
+
+        // horizontal ellipse
+<span class="fc" id="L309">        result[6] = new Ellipse2D.Double(-delta, -delta / 2, size, size / 2);</span>
+
+        // right-pointing triangle
+<span class="fc" id="L312">        xpoints = intArray(-delta, delta, -delta);</span>
+<span class="fc" id="L313">        ypoints = intArray(-delta, 0.0, delta);</span>
+<span class="fc" id="L314">        result[7] = new Polygon(xpoints, ypoints, 3);</span>
+
+        // vertical rectangle
+<span class="fc" id="L317">        result[8] = new Rectangle2D.Double(-delta / 2, -delta, size / 2, size);</span>
+
+        // left-pointing triangle
+<span class="fc" id="L320">        xpoints = intArray(-delta, delta, delta);</span>
+<span class="fc" id="L321">        ypoints = intArray(0.0, -delta, +delta);</span>
+<span class="fc" id="L322">        result[9] = new Polygon(xpoints, ypoints, 3);</span>
+
+<span class="fc" id="L324">        return result;</span>
+
+    }
+
+    /**
+     * Tests this object for equality with another object.
+     *
+     * @param obj  the object ({@code null} permitted).
+     *
+     * @return A boolean.
+     */
+    @Override
+    public boolean equals(Object obj) {
+<span class="fc bfc" id="L337" title="All 2 branches covered.">        if (obj == this) {</span>
+<span class="fc" id="L338">            return true;</span>
+        }
+<span class="pc bpc" id="L340" title="1 of 2 branches missed.">        if (!(obj instanceof DefaultDrawingSupplier)) {</span>
+<span class="nc" id="L341">            return false;</span>
+        }
+<span class="fc" id="L343">        DefaultDrawingSupplier that = (DefaultDrawingSupplier) obj;</span>
+<span class="fc bfc" id="L344" title="All 2 branches covered.">        if (!Arrays.equals(this.paintSequence, that.paintSequence)) {</span>
+<span class="fc" id="L345">            return false;</span>
+        }
+<span class="fc bfc" id="L347" title="All 2 branches covered.">        if (this.paintIndex != that.paintIndex) {</span>
+<span class="fc" id="L348">            return false;</span>
+        }
+<span class="fc bfc" id="L350" title="All 2 branches covered.">        if (!Arrays.equals(this.outlinePaintSequence,</span>
+                that.outlinePaintSequence)) {
+<span class="fc" id="L352">            return false;</span>
+        }
+<span class="fc bfc" id="L354" title="All 2 branches covered.">        if (this.outlinePaintIndex != that.outlinePaintIndex) {</span>
+<span class="fc" id="L355">            return false;</span>
+        }
+<span class="fc bfc" id="L357" title="All 2 branches covered.">        if (!Arrays.equals(this.strokeSequence, that.strokeSequence)) {</span>
+<span class="fc" id="L358">            return false;</span>
+        }
+<span class="fc bfc" id="L360" title="All 2 branches covered.">        if (this.strokeIndex != that.strokeIndex) {</span>
+<span class="fc" id="L361">            return false;</span>
+        }
+<span class="fc bfc" id="L363" title="All 2 branches covered.">        if (!Arrays.equals(this.outlineStrokeSequence,</span>
+                that.outlineStrokeSequence)) {
+<span class="fc" id="L365">            return false;</span>
+        }
+<span class="fc bfc" id="L367" title="All 2 branches covered.">        if (this.outlineStrokeIndex != that.outlineStrokeIndex) {</span>
+<span class="fc" id="L368">            return false;</span>
+        }
+<span class="fc bfc" id="L370" title="All 2 branches covered.">        if (!equalShapes(this.shapeSequence, that.shapeSequence)) {</span>
+<span class="fc" id="L371">            return false;</span>
+        }
+<span class="fc bfc" id="L373" title="All 2 branches covered.">        if (this.shapeIndex != that.shapeIndex) {</span>
+<span class="fc" id="L374">            return false;</span>
+        }
+<span class="fc" id="L376">        return true;</span>
+    }
+
+    /**
+     * A utility method for testing the equality of two arrays of shapes.
+     *
+     * @param s1  the first array ({@code null} permitted).
+     * @param s2  the second array ({@code null} permitted).
+     *
+     * @return A boolean.
+     */
+    private boolean equalShapes(Shape[] s1, Shape[] s2) {
+<span class="pc bpc" id="L388" title="1 of 2 branches missed.">        if (s1 == null) {</span>
+<span class="nc bnc" id="L389" title="All 2 branches missed.">            return s2 == null;</span>
+        }
+<span class="pc bpc" id="L391" title="1 of 2 branches missed.">        if (s2 == null) {</span>
+<span class="nc" id="L392">            return false;</span>
+        }
+<span class="fc bfc" id="L394" title="All 2 branches covered.">        if (s1.length != s2.length) {</span>
+<span class="fc" id="L395">            return false;</span>
+        }
+<span class="fc bfc" id="L397" title="All 2 branches covered.">        for (int i = 0; i &lt; s1.length; i++) {</span>
+<span class="pc bpc" id="L398" title="1 of 2 branches missed.">            if (!ShapeUtils.equal(s1[i], s2[i])) {</span>
+<span class="nc" id="L399">                return false;</span>
+            }
+        }
+<span class="fc" id="L402">        return true;</span>
+    }
+
+    /**
+     * Handles serialization.
+     *
+     * @param stream  the output stream.
+     *
+     * @throws IOException if there is an I/O problem.
+     */
+    private void writeObject(ObjectOutputStream stream) throws IOException {
+<span class="fc" id="L413">        stream.defaultWriteObject();</span>
+
+<span class="fc" id="L415">        int paintCount = this.paintSequence.length;</span>
+<span class="fc" id="L416">        stream.writeInt(paintCount);</span>
+<span class="fc bfc" id="L417" title="All 2 branches covered.">        for (int i = 0; i &lt; paintCount; i++) {</span>
+<span class="fc" id="L418">            SerialUtils.writePaint(this.paintSequence[i], stream);</span>
+        }
+
+<span class="fc" id="L421">        int outlinePaintCount = this.outlinePaintSequence.length;</span>
+<span class="fc" id="L422">        stream.writeInt(outlinePaintCount);</span>
+<span class="fc bfc" id="L423" title="All 2 branches covered.">        for (int i = 0; i &lt; outlinePaintCount; i++) {</span>
+<span class="fc" id="L424">            SerialUtils.writePaint(this.outlinePaintSequence[i], stream);</span>
+        }
+
+<span class="fc" id="L427">        int strokeCount = this.strokeSequence.length;</span>
+<span class="fc" id="L428">        stream.writeInt(strokeCount);</span>
+<span class="fc bfc" id="L429" title="All 2 branches covered.">        for (int i = 0; i &lt; strokeCount; i++) {</span>
+<span class="fc" id="L430">            SerialUtils.writeStroke(this.strokeSequence[i], stream);</span>
+        }
+
+<span class="fc" id="L433">        int outlineStrokeCount = this.outlineStrokeSequence.length;</span>
+<span class="fc" id="L434">        stream.writeInt(outlineStrokeCount);</span>
+<span class="fc bfc" id="L435" title="All 2 branches covered.">        for (int i = 0; i &lt; outlineStrokeCount; i++) {</span>
+<span class="fc" id="L436">            SerialUtils.writeStroke(this.outlineStrokeSequence[i], stream);</span>
+        }
+
+<span class="fc" id="L439">        int shapeCount = this.shapeSequence.length;</span>
+<span class="fc" id="L440">        stream.writeInt(shapeCount);</span>
+<span class="fc bfc" id="L441" title="All 2 branches covered.">        for (int i = 0; i &lt; shapeCount; i++) {</span>
+<span class="fc" id="L442">            SerialUtils.writeShape(this.shapeSequence[i], stream);</span>
+        }
+
+<span class="fc" id="L445">    }</span>
+
+    /**
+     * Restores a serialized object.
+     *
+     * @param stream  the input stream.
+     *
+     * @throws IOException if there is an I/O problem.
+     * @throws ClassNotFoundException if there is a problem loading a class.
+     */
+    private void readObject(ObjectInputStream stream)
+        throws IOException, ClassNotFoundException {
+<span class="fc" id="L457">        stream.defaultReadObject();</span>
+
+<span class="fc" id="L459">        int paintCount = stream.readInt();</span>
+<span class="fc" id="L460">        this.paintSequence = new Paint[paintCount];</span>
+<span class="fc bfc" id="L461" title="All 2 branches covered.">        for (int i = 0; i &lt; paintCount; i++) {</span>
+<span class="fc" id="L462">            this.paintSequence[i] = SerialUtils.readPaint(stream);</span>
+        }
+
+<span class="fc" id="L465">        int outlinePaintCount = stream.readInt();</span>
+<span class="fc" id="L466">        this.outlinePaintSequence = new Paint[outlinePaintCount];</span>
+<span class="fc bfc" id="L467" title="All 2 branches covered.">        for (int i = 0; i &lt; outlinePaintCount; i++) {</span>
+<span class="fc" id="L468">            this.outlinePaintSequence[i] = SerialUtils.readPaint(stream);</span>
+        }
+
+<span class="fc" id="L471">        int strokeCount = stream.readInt();</span>
+<span class="fc" id="L472">        this.strokeSequence = new Stroke[strokeCount];</span>
+<span class="fc bfc" id="L473" title="All 2 branches covered.">        for (int i = 0; i &lt; strokeCount; i++) {</span>
+<span class="fc" id="L474">            this.strokeSequence[i] = SerialUtils.readStroke(stream);</span>
+        }
+
+<span class="fc" id="L477">        int outlineStrokeCount = stream.readInt();</span>
+<span class="fc" id="L478">        this.outlineStrokeSequence = new Stroke[outlineStrokeCount];</span>
+<span class="fc bfc" id="L479" title="All 2 branches covered.">        for (int i = 0; i &lt; outlineStrokeCount; i++) {</span>
+<span class="fc" id="L480">            this.outlineStrokeSequence[i] = SerialUtils.readStroke(stream);</span>
+        }
+
+<span class="fc" id="L483">        int shapeCount = stream.readInt();</span>
+<span class="fc" id="L484">        this.shapeSequence = new Shape[shapeCount];</span>
+<span class="fc bfc" id="L485" title="All 2 branches covered.">        for (int i = 0; i &lt; shapeCount; i++) {</span>
+<span class="fc" id="L486">            this.shapeSequence[i] = SerialUtils.readShape(stream);</span>
+        }
+
+<span class="fc" id="L489">    }</span>
+
+    /**
+     * Helper method to avoid lots of explicit casts in getShape().  Returns
+     * an array containing the provided doubles cast to ints.
+     *
+     * @param a  x
+     * @param b  y
+     * @param c  z
+     *
+     * @return int[3] with converted params.
+     */
+    private static int[] intArray(double a, double b, double c) {
+<span class="fc" id="L502">        return new int[] {(int) a, (int) b, (int) c};</span>
+    }
+
+    /**
+     * Helper method to avoid lots of explicit casts in getShape().  Returns
+     * an array containing the provided doubles cast to ints.
+     *
+     * @param a  x
+     * @param b  y
+     * @param c  z
+     * @param d  t
+     *
+     * @return int[4] with converted params.
+     */
+    private static int[] intArray(double a, double b, double c, double d) {
+<span class="fc" id="L517">        return new int[] {(int) a, (int) b, (int) c, (int) d};</span>
+    }
+
+    /**
+     * Returns a clone.
+     *
+     * @return A clone.
+     *
+     * @throws CloneNotSupportedException if a component of the supplier does
+     *                                    not support cloning.
+     */
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+<span class="fc" id="L530">        DefaultDrawingSupplier clone = (DefaultDrawingSupplier) super.clone();</span>
+<span class="fc" id="L531">        return clone;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

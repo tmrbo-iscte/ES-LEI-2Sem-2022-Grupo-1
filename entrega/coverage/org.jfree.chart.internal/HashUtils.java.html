@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>HashUtils.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.chart.internal</a> &gt; <span class="el_source">HashUtils.java</span></div><h1>HashUtils.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it 
+ * under the terms of the GNU Lesser General Public License as published by 
+ * the Free Software Foundation; either version 2.1 of the License, or 
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but 
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public 
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, 
+ * USA.  
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * --------------
+ * HashUtils.java
+ * --------------
+ * (C) Copyright 2006-2022, by David Gilbert;
+ *
+ * Original Author:  David Gilbert;
+ * Contributor(s):   -;
+ *
+ */
+
+package org.jfree.chart.internal;
+
+import java.awt.GradientPaint;
+import java.awt.Paint;
+import java.awt.Stroke;
+
+/**
+ * Some utility methods for calculating hash codes.  
+ */
+<span class="nc" id="L46">public class HashUtils {</span>
+    
+    /**
+     * Returns a hash code for a {@code Paint} instance.  If 
+     * {@code p} is {@code null}, this method returns zero.
+     * 
+     * @param p  the paint ({@code null} permitted).
+     * 
+     * @return The hash code.
+     */
+    public static int hashCodeForPaint(Paint p) {
+<span class="fc bfc" id="L57" title="All 2 branches covered.">        if (p == null) {</span>
+<span class="fc" id="L58">            return 0;</span>
+        }
+        int result;
+        // handle GradientPaint as a special case
+<span class="pc bpc" id="L62" title="1 of 2 branches missed.">        if (p instanceof GradientPaint) {</span>
+<span class="nc" id="L63">            GradientPaint gp = (GradientPaint) p;</span>
+<span class="nc" id="L64">            result = 193;</span>
+<span class="nc" id="L65">            result = 37 * result + gp.getColor1().hashCode();</span>
+<span class="nc" id="L66">            result = 37 * result + gp.getPoint1().hashCode();</span>
+<span class="nc" id="L67">            result = 37 * result + gp.getColor2().hashCode();</span>
+<span class="nc" id="L68">            result = 37 * result + gp.getPoint2().hashCode();</span>
+<span class="nc" id="L69">        }</span>
+        else {
+            // we assume that all other Paint instances implement equals() and
+            // hashCode()...of course that might not be true, but what can we
+            // do about it?
+<span class="fc" id="L74">            result = p.hashCode();</span>
+        }
+<span class="fc" id="L76">        return result;</span>
+    }
+    
+    /**
+     * Returns a hash code for a {@code double[]} instance.  If the array
+     * is {@code null}, this method returns zero.
+     * 
+     * @param a  the array ({@code null} permitted).
+     * 
+     * @return The hash code.
+     */
+    public static int hashCodeForDoubleArray(double[] a) {
+<span class="pc bpc" id="L88" title="1 of 2 branches missed.">        if (a == null) { </span>
+<span class="nc" id="L89">            return 0;</span>
+        }
+<span class="fc" id="L91">        int result = 193;</span>
+        long temp;
+<span class="fc bfc" id="L93" title="All 2 branches covered.">        for (double v : a) {</span>
+<span class="fc" id="L94">            temp = Double.doubleToLongBits(v);</span>
+<span class="fc" id="L95">            result = 29 * result + (int) (temp ^ (temp &gt;&gt;&gt; 32));</span>
+        }
+<span class="fc" id="L97">        return result;</span>
+    }
+    
+    /**
+     * Returns a hash value based on a seed value and the value of a boolean
+     * primitive.
+     * 
+     * @param pre  the seed value.
+     * @param b  the boolean value.
+     * 
+     * @return A hash value.
+     */
+    public static int hashCode(int pre, boolean b) {
+<span class="fc bfc" id="L110" title="All 2 branches covered.">        return 37 * pre + (b ? 0 : 1);</span>
+    }
+    
+    /**
+     * Returns a hash value based on a seed value and the value of an int
+     * primitive.
+     * 
+     * @param pre  the seed value.
+     * @param i  the int value.
+     * 
+     * @return A hash value.
+     */
+    public static int hashCode(int pre, int i) {
+<span class="nc" id="L123">        return 37 * pre + i;</span>
+    }
+
+    /**
+     * Returns a hash value based on a seed value and the value of a double
+     * primitive.
+     * 
+     * @param pre  the seed value.
+     * @param d  the double value.
+     * 
+     * @return A hash value.
+     */
+    public static int hashCode(int pre, double d) {
+<span class="fc" id="L136">        long l = Double.doubleToLongBits(d);</span>
+<span class="fc" id="L137">        return 37 * pre + (int) (l ^ (l &gt;&gt;&gt; 32));</span>
+    }
+    
+    /**
+     * Returns a hash value based on a seed value and a paint instance.
+     * 
+     * @param pre  the seed value.
+     * @param p  the paint ({@code null} permitted).
+     * 
+     * @return A hash value.
+     */
+    public static int hashCode(int pre, Paint p) {
+<span class="fc" id="L149">        return 37 * pre + hashCodeForPaint(p);</span>
+    }
+
+    /**
+     * Returns a hash value based on a seed value and a stroke instance.
+     * 
+     * @param pre  the seed value.
+     * @param s  the stroke ({@code null} permitted).
+     * 
+     * @return A hash value.
+     */
+    public static int hashCode(int pre, Stroke s) {
+<span class="pc bpc" id="L161" title="1 of 2 branches missed.">        int h = (s != null ? s.hashCode() : 0);</span>
+<span class="fc" id="L162">        return 37 * pre + h;</span>
+    }
+
+    /**
+     * Returns a hash value based on a seed value and a string instance.
+     * 
+     * @param pre  the seed value.
+     * @param s  the string ({@code null} permitted).
+     * 
+     * @return A hash value.
+     */
+    public static int hashCode(int pre, String s) {
+<span class="pc bpc" id="L174" title="1 of 2 branches missed.">        int h = (s != null ? s.hashCode() : 0);</span>
+<span class="fc" id="L175">        return 37 * pre + h;</span>
+    }
+
+    /**
+     * Returns a hash value based on a seed value and a {@code Comparable}
+     * instance.
+     * 
+     * @param pre  the seed value.
+     * @param c  the comparable ({@code null} permitted).
+     * 
+     * @return A hash value.
+     */
+    public static int hashCode(int pre, Comparable&lt;?&gt; c) {
+<span class="pc bpc" id="L188" title="1 of 2 branches missed.">        int h = (c != null ? c.hashCode() : 0);</span>
+<span class="fc" id="L189">        return 37 * pre + h;</span>
+    }
+
+    /**
+     * Returns a hash value based on a seed value and an {@code Object}
+     * instance.
+     * 
+     * @param pre  the seed value.
+     * @param obj  the object ({@code null} permitted).
+     * 
+     * @return A hash value.
+     */
+    public static int hashCode(int pre, Object obj) {
+<span class="fc bfc" id="L202" title="All 2 branches covered.">        int h = (obj != null ? obj.hashCode() : 0);</span>
+<span class="fc" id="L203">        return 37 * pre + h;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

@@ -1,0 +1,354 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StandardDialFrame.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.chart.plot.dial</a> &gt; <span class="el_source">StandardDialFrame.java</span></div><h1>StandardDialFrame.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * ----------------------
+ * StandardDialFrame.java
+ * ----------------------
+ * (C) Copyright 2006-2022, by David Gilbert.
+ *
+ * Original Author:  David Gilbert;
+ * Contributor(s):   -;
+ *
+ */
+
+package org.jfree.chart.plot.dial;
+
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Paint;
+import java.awt.Shape;
+import java.awt.Stroke;
+import java.awt.geom.Area;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Rectangle2D;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+
+import org.jfree.chart.internal.HashUtils;
+import org.jfree.chart.internal.PaintUtils;
+import org.jfree.chart.internal.Args;
+import org.jfree.chart.api.PublicCloneable;
+import org.jfree.chart.internal.SerialUtils;
+
+/**
+ * A simple circular frame for the {@link DialPlot} class.
+ */
+public class StandardDialFrame extends AbstractDialLayer implements DialFrame,
+        Cloneable, PublicCloneable, Serializable {
+
+    /** For serialization. */
+    static final long serialVersionUID = 1016585407507121596L;
+
+    /** The outer radius, relative to the framing rectangle. */
+    private double radius;
+
+    /**
+     * The color used for the front of the panel.  This field is transient
+     * because it requires special handling for serialization.
+     */
+    private transient Paint backgroundPaint;
+
+    /**
+     * The color used for the border around the window. This field is transient
+     * because it requires special handling for serialization.
+     */
+    private transient Paint foregroundPaint;
+
+    /**
+     * The stroke for drawing the frame outline.  This field is transient
+     * because it requires special handling for serialization.
+     */
+    private transient Stroke stroke;
+
+    /**
+     * Creates a new instance of {@code StandardDialFrame}.
+     */
+<span class="fc" id="L92">    public StandardDialFrame() {</span>
+<span class="fc" id="L93">        this.backgroundPaint = Color.GRAY;</span>
+<span class="fc" id="L94">        this.foregroundPaint = Color.BLACK;</span>
+<span class="fc" id="L95">        this.stroke = new BasicStroke(2.0f);</span>
+<span class="fc" id="L96">        this.radius = 0.95;</span>
+<span class="fc" id="L97">    }</span>
+
+    /**
+     * Returns the radius, relative to the framing rectangle.
+     *
+     * @return The radius.
+     *
+     * @see #setRadius(double)
+     */
+    public double getRadius() {
+<span class="nc" id="L107">        return this.radius;</span>
+    }
+
+    /**
+     * Sets the radius and sends a {@link DialLayerChangeEvent} to all
+     * registered listeners.
+     *
+     * @param radius  the radius (must be positive).
+     *
+     * @see #getRadius()
+     */
+    public void setRadius(double radius) {
+<span class="pc bpc" id="L119" title="1 of 2 branches missed.">        if (radius &lt;= 0) {</span>
+<span class="nc" id="L120">            throw new IllegalArgumentException(</span>
+                    &quot;The 'radius' must be positive.&quot;);
+        }
+<span class="fc" id="L123">        this.radius = radius;</span>
+<span class="fc" id="L124">        notifyListeners(new DialLayerChangeEvent(this));</span>
+<span class="fc" id="L125">    }</span>
+
+    /**
+     * Returns the background paint.
+     *
+     * @return The background paint (never {@code null}).
+     *
+     * @see #setBackgroundPaint(Paint)
+     */
+    public Paint getBackgroundPaint() {
+<span class="nc" id="L135">        return this.backgroundPaint;</span>
+    }
+
+    /**
+     * Sets the background paint and sends a {@link DialLayerChangeEvent} to
+     * all registered listeners.
+     *
+     * @param paint  the paint ({@code null} not permitted).
+     *
+     * @see #getBackgroundPaint()
+     */
+    public void setBackgroundPaint(Paint paint) {
+<span class="fc" id="L147">        Args.nullNotPermitted(paint, &quot;paint&quot;);</span>
+<span class="fc" id="L148">        this.backgroundPaint = paint;</span>
+<span class="fc" id="L149">        notifyListeners(new DialLayerChangeEvent(this));</span>
+<span class="fc" id="L150">    }</span>
+
+    /**
+     * Returns the foreground paint.
+     *
+     * @return The foreground paint (never {@code null}).
+     *
+     * @see #setForegroundPaint(Paint)
+     */
+    public Paint getForegroundPaint() {
+<span class="nc" id="L160">        return this.foregroundPaint;</span>
+    }
+
+    /**
+     * Sets the foreground paint and sends a {@link DialLayerChangeEvent} to
+     * all registered listeners.
+     *
+     * @param paint  the paint ({@code null} not permitted).
+     *
+     * @see #getForegroundPaint()
+     */
+    public void setForegroundPaint(Paint paint) {
+<span class="fc" id="L172">        Args.nullNotPermitted(paint, &quot;paint&quot;);</span>
+<span class="fc" id="L173">        this.foregroundPaint = paint;</span>
+<span class="fc" id="L174">        notifyListeners(new DialLayerChangeEvent(this));</span>
+<span class="fc" id="L175">    }</span>
+
+    /**
+     * Returns the stroke for the frame.
+     *
+     * @return The stroke (never {@code null}).
+     *
+     * @see #setStroke(Stroke)
+     */
+    public Stroke getStroke() {
+<span class="nc" id="L185">        return this.stroke;</span>
+    }
+
+    /**
+     * Sets the stroke and sends a {@link DialLayerChangeEvent} to all
+     * registered listeners.
+     *
+     * @param stroke  the stroke ({@code null} not permitted).
+     *
+     * @see #getStroke()
+     */
+    public void setStroke(Stroke stroke) {
+<span class="fc" id="L197">        Args.nullNotPermitted(stroke, &quot;stroke&quot;);</span>
+<span class="fc" id="L198">        this.stroke = stroke;</span>
+<span class="fc" id="L199">        notifyListeners(new DialLayerChangeEvent(this));</span>
+<span class="fc" id="L200">    }</span>
+
+    /**
+     * Returns the shape for the window for this dial.  Some dial layers will
+     * request that their drawing be clipped within this window.
+     *
+     * @param frame  the reference frame ({@code null} not permitted).
+     *
+     * @return The shape of the dial's window.
+     */
+    @Override
+    public Shape getWindow(Rectangle2D frame) {
+<span class="nc" id="L212">        Rectangle2D f = DialPlot.rectangleByRadius(frame, this.radius,</span>
+                this.radius);
+<span class="nc" id="L214">        return new Ellipse2D.Double(f.getX(), f.getY(), f.getWidth(),</span>
+<span class="nc" id="L215">                f.getHeight());</span>
+    }
+
+    /**
+     * Returns {@code false} to indicate that this dial layer is not
+     * clipped to the dial window.
+     *
+     * @return A boolean.
+     */
+    @Override
+    public boolean isClippedToWindow() {
+<span class="nc" id="L226">        return false;</span>
+    }
+
+    /**
+     * Draws the frame.  This method is called by the {@link DialPlot} class,
+     * you shouldn't need to call it directly.
+     *
+     * @param g2  the graphics target ({@code null} not permitted).
+     * @param plot  the plot ({@code null} not permitted).
+     * @param frame  the frame ({@code null} not permitted).
+     * @param view  the view ({@code null} not permitted).
+     */
+    @Override
+    public void draw(Graphics2D g2, DialPlot plot, Rectangle2D frame,
+            Rectangle2D view) {
+
+<span class="nc" id="L242">        Shape window = getWindow(frame);</span>
+
+<span class="nc" id="L244">        Rectangle2D f = DialPlot.rectangleByRadius(frame, this.radius + 0.02,</span>
+                this.radius + 0.02);
+<span class="nc" id="L246">        Ellipse2D e = new Ellipse2D.Double(f.getX(), f.getY(), f.getWidth(),</span>
+<span class="nc" id="L247">                f.getHeight());</span>
+
+<span class="nc" id="L249">        Area area = new Area(e);</span>
+<span class="nc" id="L250">        Area area2 = new Area(window);</span>
+<span class="nc" id="L251">        area.subtract(area2);</span>
+<span class="nc" id="L252">        g2.setPaint(this.backgroundPaint);</span>
+<span class="nc" id="L253">        g2.fill(area);</span>
+
+<span class="nc" id="L255">        g2.setStroke(this.stroke);</span>
+<span class="nc" id="L256">        g2.setPaint(this.foregroundPaint);</span>
+<span class="nc" id="L257">        g2.draw(window);</span>
+<span class="nc" id="L258">        g2.draw(e);</span>
+<span class="nc" id="L259">    }</span>
+
+    /**
+     * Tests this instance for equality with an arbitrary object.
+     *
+     * @param obj  the object ({@code null} permitted).
+     *
+     * @return A boolean.
+     */
+    @Override
+    public boolean equals(Object obj) {
+<span class="pc bpc" id="L270" title="1 of 2 branches missed.">        if (obj == this) {</span>
+<span class="nc" id="L271">            return true;</span>
+        }
+<span class="fc bfc" id="L273" title="All 2 branches covered.">        if (!(obj instanceof StandardDialFrame)) {</span>
+<span class="fc" id="L274">            return false;</span>
+        }
+<span class="fc" id="L276">        StandardDialFrame that = (StandardDialFrame) obj;</span>
+<span class="fc bfc" id="L277" title="All 2 branches covered.">        if (!PaintUtils.equal(this.backgroundPaint, that.backgroundPaint)) {</span>
+<span class="fc" id="L278">            return false;</span>
+        }
+<span class="fc bfc" id="L280" title="All 2 branches covered.">        if (!PaintUtils.equal(this.foregroundPaint, that.foregroundPaint)) {</span>
+<span class="fc" id="L281">            return false;</span>
+        }
+<span class="fc bfc" id="L283" title="All 2 branches covered.">        if (this.radius != that.radius) {</span>
+<span class="fc" id="L284">            return false;</span>
+        }
+<span class="fc bfc" id="L286" title="All 2 branches covered.">        if (!this.stroke.equals(that.stroke)) {</span>
+<span class="fc" id="L287">            return false;</span>
+        }
+<span class="fc" id="L289">        return super.equals(obj);</span>
+    }
+
+    /**
+     * Returns a hash code for this instance.
+     *
+     * @return The hash code.
+     */
+    @Override
+    public int hashCode() {
+<span class="fc" id="L299">        int result = 193;</span>
+<span class="fc" id="L300">        long temp = Double.doubleToLongBits(this.radius);</span>
+<span class="fc" id="L301">        result = 37 * result + (int) (temp ^ (temp &gt;&gt;&gt; 32));</span>
+<span class="fc" id="L302">        result = 37 * result + HashUtils.hashCodeForPaint(</span>
+                this.backgroundPaint);
+<span class="fc" id="L304">        result = 37 * result + HashUtils.hashCodeForPaint(</span>
+                this.foregroundPaint);
+<span class="fc" id="L306">        result = 37 * result + this.stroke.hashCode();</span>
+<span class="fc" id="L307">        return result;</span>
+    }
+
+    /**
+     * Returns a clone of this instance.
+     *
+     * @return A clone.
+     *
+     * @throws CloneNotSupportedException if any of the frame's attributes
+     *     cannot be cloned.
+     */
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+<span class="fc" id="L320">        return super.clone();</span>
+    }
+
+    /**
+     * Provides serialization support.
+     *
+     * @param stream  the output stream.
+     *
+     * @throws IOException  if there is an I/O error.
+     */
+    private void writeObject(ObjectOutputStream stream) throws IOException {
+<span class="fc" id="L331">        stream.defaultWriteObject();</span>
+<span class="fc" id="L332">        SerialUtils.writePaint(this.backgroundPaint, stream);</span>
+<span class="fc" id="L333">        SerialUtils.writePaint(this.foregroundPaint, stream);</span>
+<span class="fc" id="L334">        SerialUtils.writeStroke(this.stroke, stream);</span>
+<span class="fc" id="L335">    }</span>
+
+    /**
+     * Provides serialization support.
+     *
+     * @param stream  the input stream.
+     *
+     * @throws IOException  if there is an I/O error.
+     * @throws ClassNotFoundException  if there is a classpath problem.
+     */
+    private void readObject(ObjectInputStream stream)
+            throws IOException, ClassNotFoundException {
+<span class="fc" id="L347">        stream.defaultReadObject();</span>
+<span class="fc" id="L348">        this.backgroundPaint = SerialUtils.readPaint(stream);</span>
+<span class="fc" id="L349">        this.foregroundPaint = SerialUtils.readPaint(stream);</span>
+<span class="fc" id="L350">        this.stroke = SerialUtils.readStroke(stream);</span>
+<span class="fc" id="L351">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

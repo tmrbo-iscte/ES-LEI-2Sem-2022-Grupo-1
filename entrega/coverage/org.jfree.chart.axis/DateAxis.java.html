@@ -1,0 +1,1844 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DateAxis.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.chart.axis</a> &gt; <span class="el_source">DateAxis.java</span></div><h1>DateAxis.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * -------------
+ * DateAxis.java
+ * -------------
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Original Author:  David Gilbert;
+ * Contributor(s):   Jonathan Nash;
+ *                   David Li;
+ *                   Michael Rauch;
+ *                   Bill Kelemen;
+ *                   Pawel Pabis;
+ *                   Chris Boek;
+ *                   Peter Kolb (patches 1934255 and 2603321);
+ *                   Andrew Mickish (patch 1870189);
+ *                   Fawad Halim (bug 2201869);
+ *
+ */
+
+package org.jfree.chart.axis;
+
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics2D;
+import java.awt.font.FontRenderContext;
+import java.awt.font.LineMetrics;
+import java.awt.geom.Rectangle2D;
+import java.io.Serializable;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
+import java.util.TimeZone;
+
+import org.jfree.chart.event.AxisChangeEvent;
+import org.jfree.chart.plot.Plot;
+import org.jfree.chart.plot.PlotRenderingInfo;
+import org.jfree.chart.plot.ValueAxisPlot;
+import org.jfree.chart.api.RectangleEdge;
+import org.jfree.chart.api.RectangleInsets;
+import org.jfree.chart.text.TextAnchor;
+import org.jfree.chart.internal.Args;
+import org.jfree.data.Range;
+import org.jfree.data.time.DateRange;
+import org.jfree.data.time.Month;
+import org.jfree.data.time.RegularTimePeriod;
+import org.jfree.data.time.Year;
+
+/**
+ * The base class for axes that display dates.  You will find it easier to
+ * understand how this axis works if you bear in mind that it really
+ * displays/measures integer (or long) data, where the integers are
+ * milliseconds since midnight, 1-Jan-1970.  When displaying tick labels, the
+ * millisecond values are converted back to dates using a {@code DateFormat} 
+ * instance.
+ * &lt;P&gt;
+ * You can also create a {@link org.jfree.chart.axis.Timeline} and supply in
+ * the constructor to create an axis that only contains certain domain values.
+ * For example, this allows you to create a date axis that only contains
+ * working days.
+ */
+public class DateAxis extends ValueAxis implements Cloneable, Serializable {
+
+    /** For serialization. */
+    private static final long serialVersionUID = -1013460999649007604L;
+
+    /** The default axis range. */
+<span class="fc" id="L97">    public static final DateRange DEFAULT_DATE_RANGE = new DateRange();</span>
+
+    /** The default minimum auto range size. */
+    public static final double
+            DEFAULT_AUTO_RANGE_MINIMUM_SIZE_IN_MILLISECONDS = 2.0;
+
+    /** The default anchor date. */
+<span class="fc" id="L104">    public static final Date DEFAULT_ANCHOR_DATE = new Date();</span>
+
+    /** The current tick unit. */
+    private DateTickUnit tickUnit;
+
+    /** The override date format. */
+    private DateFormat dateFormatOverride;
+
+    /**
+     * Tick marks can be displayed at the start or the middle of the time
+     * period.
+     */
+<span class="fc" id="L116">    private DateTickMarkPosition tickMarkPosition = DateTickMarkPosition.START;</span>
+
+    /**
+     * A timeline that includes all milliseconds (as defined by
+     * {@code java.util.Date}) in the real time line.
+     */
+    private static class DefaultTimeline implements Timeline, Serializable {
+
+        /**
+         * Converts a millisecond into a timeline value.
+         *
+         * @param millisecond  the millisecond.
+         *
+         * @return The timeline value.
+         */
+        @Override
+        public long toTimelineValue(long millisecond) {
+<span class="fc" id="L133">            return millisecond;</span>
+        }
+
+        /**
+         * Converts a date into a timeline value.
+         *
+         * @param date  the domain value.
+         *
+         * @return The timeline value.
+         */
+        @Override
+        public long toTimelineValue(Date date) {
+<span class="nc" id="L145">            return date.getTime();</span>
+        }
+
+        /**
+         * Converts a timeline value into a millisecond (as encoded by
+         * {@code java.util.Date}).
+         *
+         * @param value  the value.
+         *
+         * @return The millisecond.
+         */
+        @Override
+        public long toMillisecond(long value) {
+<span class="fc" id="L158">            return value;</span>
+        }
+
+        /**
+         * Returns {@code true} if the timeline includes the specified
+         * domain value.
+         *
+         * @param millisecond  the millisecond.
+         *
+         * @return {@code true}.
+         */
+        @Override
+        public boolean containsDomainValue(long millisecond) {
+<span class="nc" id="L171">            return true;</span>
+        }
+
+        /**
+         * Returns {@code true} if the timeline includes the specified
+         * domain value.
+         *
+         * @param date  the date.
+         *
+         * @return {@code true}.
+         */
+        @Override
+        public boolean containsDomainValue(Date date) {
+<span class="fc" id="L184">            return true;</span>
+        }
+
+        /**
+         * Returns {@code true} if the timeline includes the specified
+         * domain value range.
+         *
+         * @param from  the start value.
+         * @param to  the end value.
+         *
+         * @return {@code true}.
+         */
+        @Override
+        public boolean containsDomainRange(long from, long to) {
+<span class="nc" id="L198">            return true;</span>
+        }
+
+        /**
+         * Returns {@code true} if the timeline includes the specified
+         * domain value range.
+         *
+         * @param from  the start date.
+         * @param to  the end date.
+         *
+         * @return {@code true}.
+         */
+        @Override
+        public boolean containsDomainRange(Date from, Date to) {
+<span class="nc" id="L212">            return true;</span>
+        }
+
+        /**
+         * Tests an object for equality with this instance.
+         *
+         * @param object  the object.
+         *
+         * @return A boolean.
+         */
+        @Override
+        public boolean equals(Object object) {
+<span class="pc bpc" id="L224" title="1 of 2 branches missed.">            if (object == null) {</span>
+<span class="nc" id="L225">                return false;</span>
+            }
+<span class="pc bpc" id="L227" title="1 of 2 branches missed.">            if (object == this) {</span>
+<span class="nc" id="L228">                return true;</span>
+            }
+<span class="pc bpc" id="L230" title="1 of 2 branches missed.">            if (object instanceof DefaultTimeline) {</span>
+<span class="fc" id="L231">                return true;</span>
+            }
+<span class="nc" id="L233">            return false;</span>
+        }
+    }
+
+    /** A static default timeline shared by all standard DateAxis */
+<span class="fc" id="L238">    private static final Timeline DEFAULT_TIMELINE = new DefaultTimeline();</span>
+
+    /** The time zone for the axis. */
+    private TimeZone timeZone;
+
+    /**
+     * The locale for the axis ({@code null} is not permitted).
+     */
+    private Locale locale;
+
+    /** Our underlying timeline. */
+    private Timeline timeline;
+
+    /**
+     * Creates a date axis with no label.
+     */
+    public DateAxis() {
+<span class="fc" id="L255">        this(null);</span>
+<span class="fc" id="L256">    }</span>
+
+    /**
+     * Creates a date axis with the specified label.
+     *
+     * @param label  the axis label ({@code null} permitted).
+     */
+    public DateAxis(String label) {
+<span class="fc" id="L264">        this(label, TimeZone.getDefault(), Locale.getDefault());</span>
+<span class="fc" id="L265">    }</span>
+
+    /**
+     * Creates a date axis.
+     *
+     * @param label  the axis label ({@code null} permitted).
+     * @param zone  the time zone.
+     * @param locale  the locale ({@code null} not permitted).
+     */
+    public DateAxis(String label, TimeZone zone, Locale locale) {
+<span class="fc" id="L275">        super(label, DateAxis.createStandardDateTickUnits(zone, locale));</span>
+<span class="fc" id="L276">        this.tickUnit = new DateTickUnit(DateTickUnitType.DAY, 1, </span>
+                new SimpleDateFormat());
+<span class="fc" id="L278">        setAutoRangeMinimumSize(</span>
+                DEFAULT_AUTO_RANGE_MINIMUM_SIZE_IN_MILLISECONDS);
+<span class="fc" id="L280">        setRange(DEFAULT_DATE_RANGE, false, false);</span>
+<span class="fc" id="L281">        this.dateFormatOverride = null;</span>
+<span class="fc" id="L282">        this.timeZone = zone;</span>
+<span class="fc" id="L283">        this.locale = locale;</span>
+<span class="fc" id="L284">        this.timeline = DEFAULT_TIMELINE;</span>
+<span class="fc" id="L285">    }</span>
+
+    /**
+     * Returns the time zone for the axis.
+     *
+     * @return The time zone (never {@code null}).
+     *
+     * @see #setTimeZone(TimeZone)
+     */
+    public TimeZone getTimeZone() {
+<span class="nc" id="L295">        return this.timeZone;</span>
+    }
+
+    /**
+     * Sets the time zone for the axis and sends an {@link AxisChangeEvent} to
+     * all registered listeners.
+     *
+     * @param zone  the time zone ({@code null} not permitted).
+     *
+     * @see #getTimeZone()
+     */
+    public void setTimeZone(TimeZone zone) {
+<span class="fc" id="L307">        Args.nullNotPermitted(zone, &quot;zone&quot;);</span>
+<span class="fc" id="L308">        this.timeZone = zone;</span>
+<span class="fc" id="L309">        this.setStandardTickUnits(createStandardDateTickUnits(zone, this.locale));</span>
+<span class="fc" id="L310">        fireChangeEvent();</span>
+<span class="fc" id="L311">    }</span>
+    
+    /**
+     * Returns the locale for this axis.
+     * 
+     * @return The locale (never {@code null}).
+     */
+    public Locale getLocale() {
+<span class="nc" id="L319">        return this.locale;</span>
+    }
+    
+    /**
+     * Sets the locale for the axis and sends a change event to all registered 
+     * listeners.
+     * 
+     * @param locale  the new locale ({@code null} not permitted).
+     */
+    public void setLocale(Locale locale) {
+<span class="nc" id="L329">        Args.nullNotPermitted(locale, &quot;locale&quot;);</span>
+<span class="nc" id="L330">        this.locale = locale;</span>
+<span class="nc" id="L331">        this.setStandardTickUnits(createStandardDateTickUnits(this.timeZone,</span>
+                this.locale));
+<span class="nc" id="L333">        fireChangeEvent();</span>
+<span class="nc" id="L334">    }</span>
+
+    /**
+     * Returns the underlying timeline used by this axis.
+     *
+     * @return The timeline.
+     */
+    public Timeline getTimeline() {
+<span class="nc" id="L342">        return this.timeline;</span>
+    }
+
+    /**
+     * Sets the underlying timeline to use for this axis.  If the timeline is 
+     * changed, an {@link AxisChangeEvent} is sent to all registered listeners.
+     *
+     * @param timeline  the timeline.
+     */
+    public void setTimeline(Timeline timeline) {
+<span class="nc bnc" id="L352" title="All 2 branches missed.">        if (this.timeline != timeline) {</span>
+<span class="nc" id="L353">            this.timeline = timeline;</span>
+<span class="nc" id="L354">            fireChangeEvent();</span>
+        }
+<span class="nc" id="L356">    }</span>
+
+    /**
+     * Returns the tick unit for the axis.
+     * &lt;p&gt;
+     * Note: if the {@code autoTickUnitSelection} flag is
+     * {@code true} the tick unit may be changed while the axis is being
+     * drawn, so in that case the return value from this method may be
+     * irrelevant if the method is called before the axis has been drawn.
+     *
+     * @return The tick unit (possibly {@code null}).
+     *
+     * @see #setTickUnit(DateTickUnit)
+     * @see ValueAxis#isAutoTickUnitSelection()
+     */
+    public DateTickUnit getTickUnit() {
+<span class="fc" id="L372">        return this.tickUnit;</span>
+    }
+
+    /**
+     * Sets the tick unit for the axis.  The auto-tick-unit-selection flag is
+     * set to {@code false}, and registered listeners are notified that
+     * the axis has been changed.
+     *
+     * @param unit  the tick unit.
+     *
+     * @see #getTickUnit()
+     * @see #setTickUnit(DateTickUnit, boolean, boolean)
+     */
+    public void setTickUnit(DateTickUnit unit) {
+<span class="fc" id="L386">        setTickUnit(unit, true, true);</span>
+<span class="fc" id="L387">    }</span>
+
+    /**
+     * Sets the tick unit attribute and, if requested, sends an 
+     * {@link AxisChangeEvent} to all registered listeners.
+     *
+     * @param unit  the new tick unit.
+     * @param notify  notify registered listeners?
+     * @param turnOffAutoSelection  turn off auto selection?
+     *
+     * @see #getTickUnit()
+     */
+    public void setTickUnit(DateTickUnit unit, boolean notify,
+                            boolean turnOffAutoSelection) {
+
+<span class="fc" id="L402">        this.tickUnit = unit;</span>
+<span class="fc bfc" id="L403" title="All 2 branches covered.">        if (turnOffAutoSelection) {</span>
+<span class="fc" id="L404">            setAutoTickUnitSelection(false, false);</span>
+        }
+<span class="fc bfc" id="L406" title="All 2 branches covered.">        if (notify) {</span>
+<span class="fc" id="L407">            fireChangeEvent();</span>
+        }
+
+<span class="fc" id="L410">    }</span>
+
+    /**
+     * Returns the date format override.  If this is non-null, then it will be
+     * used to format the dates on the axis.
+     *
+     * @return The formatter (possibly {@code null}).
+     */
+    public DateFormat getDateFormatOverride() {
+<span class="fc" id="L419">        return this.dateFormatOverride;</span>
+    }
+
+    /**
+     * Sets the date format override and sends an {@link AxisChangeEvent} to 
+     * all registered listeners.  If this is non-null, then it will be
+     * used to format the dates on the axis.
+     *
+     * @param formatter  the date formatter ({@code null} permitted).
+     */
+    public void setDateFormatOverride(DateFormat formatter) {
+<span class="fc" id="L430">        this.dateFormatOverride = formatter;</span>
+<span class="fc" id="L431">        fireChangeEvent();</span>
+<span class="fc" id="L432">    }</span>
+
+    /**
+     * Sets the upper and lower bounds for the axis and sends an
+     * {@link AxisChangeEvent} to all registered listeners.  As a side-effect,
+     * the auto-range flag is set to false.
+     *
+     * @param range  the new range ({@code null} not permitted).
+     */
+    @Override
+    public void setRange(Range range) {
+<span class="fc" id="L443">        setRange(range, true, true);</span>
+<span class="fc" id="L444">    }</span>
+
+    /**
+     * Sets the range for the axis, if requested, sends an
+     * {@link AxisChangeEvent} to all registered listeners.  As a side-effect,
+     * the auto-range flag is set to {@code false} (optional).
+     *
+     * @param range  the range ({@code null} not permitted).
+     * @param turnOffAutoRange  a flag that controls whether or not the auto
+     *                          range is turned off.
+     * @param notify  a flag that controls whether or not listeners are
+     *                notified.
+     */
+    @Override
+    public void setRange(Range range, boolean turnOffAutoRange,
+                         boolean notify) {
+<span class="fc" id="L460">        Args.nullNotPermitted(range, &quot;range&quot;);</span>
+        // usually the range will be a DateRange, but if it isn't do a
+        // conversion...
+<span class="pc bpc" id="L463" title="1 of 2 branches missed.">        if (!(range instanceof DateRange)) {</span>
+<span class="nc" id="L464">            range = new DateRange(range);</span>
+        }
+<span class="fc" id="L466">        super.setRange(range, turnOffAutoRange, notify);</span>
+<span class="fc" id="L467">    }</span>
+
+    /**
+     * Sets the axis range and sends an {@link AxisChangeEvent} to all
+     * registered listeners.
+     *
+     * @param lower  the lower bound for the axis.
+     * @param upper  the upper bound for the axis.
+     */
+    public void setRange(Date lower, Date upper) {
+<span class="pc bpc" id="L477" title="1 of 2 branches missed.">        if (lower.getTime() &gt;= upper.getTime()) {</span>
+<span class="nc" id="L478">            throw new IllegalArgumentException(&quot;Requires 'lower' &lt; 'upper'.&quot;);</span>
+        }
+<span class="fc" id="L480">        setRange(new DateRange(lower, upper));</span>
+<span class="fc" id="L481">    }</span>
+
+    /**
+     * Sets the axis range and sends an {@link AxisChangeEvent} to all
+     * registered listeners.
+     *
+     * @param lower  the lower bound for the axis.
+     * @param upper  the upper bound for the axis.
+     */
+    @Override
+    public void setRange(double lower, double upper) {
+<span class="pc bpc" id="L492" title="1 of 2 branches missed.">        if (lower &gt;= upper) {</span>
+<span class="nc" id="L493">            throw new IllegalArgumentException(&quot;Requires 'lower' &lt; 'upper'.&quot;);</span>
+        }
+<span class="fc" id="L495">        setRange(new DateRange(lower, upper));</span>
+<span class="fc" id="L496">    }</span>
+
+    /**
+     * Returns the earliest date visible on the axis.
+     *
+     * @return The date.
+     *
+     * @see #setMinimumDate(Date)
+     * @see #getMaximumDate()
+     */
+    public Date getMinimumDate() {
+        Date result;
+<span class="fc" id="L508">        Range range = getRange();</span>
+<span class="pc bpc" id="L509" title="1 of 2 branches missed.">        if (range instanceof DateRange) {</span>
+<span class="fc" id="L510">            DateRange r = (DateRange) range;</span>
+<span class="fc" id="L511">            result = r.getLowerDate();</span>
+<span class="fc" id="L512">        }</span>
+        else {
+<span class="nc" id="L514">            result = new Date((long) range.getLowerBound());</span>
+        }
+<span class="fc" id="L516">        return result;</span>
+    }
+
+    /**
+     * Sets the minimum date visible on the axis and sends an
+     * {@link AxisChangeEvent} to all registered listeners.  If
+     * {@code date} is on or after the current maximum date for
+     * the axis, the maximum date will be shifted to preserve the current
+     * length of the axis.
+     *
+     * @param date  the date ({@code null} not permitted).
+     *
+     * @see #getMinimumDate()
+     * @see #setMaximumDate(Date)
+     */
+    public void setMinimumDate(Date date) {
+<span class="fc" id="L532">        Args.nullNotPermitted(date, &quot;date&quot;);</span>
+        // check the new minimum date relative to the current maximum date
+<span class="fc" id="L534">        Date maxDate = getMaximumDate();</span>
+<span class="fc" id="L535">        long maxMillis = maxDate.getTime();</span>
+<span class="fc" id="L536">        long newMinMillis = date.getTime();</span>
+<span class="fc bfc" id="L537" title="All 2 branches covered.">        if (maxMillis &lt;= newMinMillis) {</span>
+<span class="fc" id="L538">            Date oldMin = getMinimumDate();</span>
+<span class="fc" id="L539">            long length = maxMillis - oldMin.getTime();</span>
+<span class="fc" id="L540">            maxDate = new Date(newMinMillis + length);</span>
+        }
+<span class="fc" id="L542">        setRange(new DateRange(date, maxDate), true, false);</span>
+<span class="fc" id="L543">        fireChangeEvent();</span>
+<span class="fc" id="L544">    }</span>
+
+    /**
+     * Returns the latest date visible on the axis.
+     *
+     * @return The date.
+     *
+     * @see #setMaximumDate(Date)
+     * @see #getMinimumDate()
+     */
+    public Date getMaximumDate() {
+        Date result;
+<span class="fc" id="L556">        Range range = getRange();</span>
+<span class="pc bpc" id="L557" title="1 of 2 branches missed.">        if (range instanceof DateRange) {</span>
+<span class="fc" id="L558">            DateRange r = (DateRange) range;</span>
+<span class="fc" id="L559">            result = r.getUpperDate();</span>
+<span class="fc" id="L560">        }</span>
+        else {
+<span class="nc" id="L562">            result = new Date((long) range.getUpperBound());</span>
+        }
+<span class="fc" id="L564">        return result;</span>
+    }
+
+    /**
+     * Sets the maximum date visible on the axis and sends an
+     * {@link AxisChangeEvent} to all registered listeners.  If
+     * {@code maximumDate} is on or before the current minimum date for
+     * the axis, the minimum date will be shifted to preserve the current
+     * length of the axis.
+     *
+     * @param maximumDate  the date ({@code null} not permitted).
+     *
+     * @see #getMinimumDate()
+     * @see #setMinimumDate(Date)
+     */
+    public void setMaximumDate(Date maximumDate) {
+<span class="fc" id="L580">        Args.nullNotPermitted(maximumDate, &quot;maximumDate&quot;);</span>
+        // check the new maximum date relative to the current minimum date
+<span class="fc" id="L582">        Date minDate = getMinimumDate();</span>
+<span class="fc" id="L583">        long minMillis = minDate.getTime();</span>
+<span class="fc" id="L584">        long newMaxMillis = maximumDate.getTime();</span>
+<span class="fc bfc" id="L585" title="All 2 branches covered.">        if (minMillis &gt;= newMaxMillis) {</span>
+<span class="fc" id="L586">            Date oldMax = getMaximumDate();</span>
+<span class="fc" id="L587">            long length = oldMax.getTime() - minMillis;</span>
+<span class="fc" id="L588">            minDate = new Date(newMaxMillis - length);</span>
+        }
+<span class="fc" id="L590">        setRange(new DateRange(minDate, maximumDate), true, false);</span>
+<span class="fc" id="L591">        fireChangeEvent();</span>
+<span class="fc" id="L592">    }</span>
+
+    /**
+     * Returns the tick mark position (start, middle or end of the time period).
+     *
+     * @return The position (never {@code null}).
+     */
+    public DateTickMarkPosition getTickMarkPosition() {
+<span class="nc" id="L600">        return this.tickMarkPosition;</span>
+    }
+
+    /**
+     * Sets the tick mark position (start, middle or end of the time period)
+     * and sends an {@link AxisChangeEvent} to all registered listeners.
+     *
+     * @param position  the position ({@code null} not permitted).
+     */
+    public void setTickMarkPosition(DateTickMarkPosition position) {
+<span class="fc" id="L610">        Args.nullNotPermitted(position, &quot;position&quot;);</span>
+<span class="fc" id="L611">        this.tickMarkPosition = position;</span>
+<span class="fc" id="L612">        fireChangeEvent();</span>
+<span class="fc" id="L613">    }</span>
+
+    /**
+     * Configures the axis to work with the specified plot.  If the axis has
+     * auto-scaling, then sets the maximum and minimum values.
+     */
+    @Override
+    public void configure() {
+<span class="pc bpc" id="L621" title="1 of 2 branches missed.">        if (isAutoRange()) {</span>
+<span class="fc" id="L622">            autoAdjustRange();</span>
+        }
+<span class="fc" id="L624">    }</span>
+
+    /**
+     * Returns {@code true} if the axis hides this value, and
+     * {@code false} otherwise.
+     *
+     * @param millis  the data value.
+     *
+     * @return A value.
+     */
+    public boolean isHiddenValue(long millis) {
+<span class="pc bpc" id="L635" title="1 of 2 branches missed.">        return (!this.timeline.containsDomainValue(new Date(millis)));</span>
+    }
+
+    /**
+     * Translates the data value to the display coordinates (Java 2D User Space)
+     * of the chart.
+     *
+     * @param value  the date to be plotted.
+     * @param area  the rectangle (in Java2D space) where the data is to be
+     *              plotted.
+     * @param edge  the axis location.
+     *
+     * @return The coordinate corresponding to the supplied data value.
+     */
+    @Override
+    public double valueToJava2D(double value, Rectangle2D area,
+            RectangleEdge edge) {
+
+<span class="fc" id="L653">        value = this.timeline.toTimelineValue((long) value);</span>
+
+<span class="fc" id="L655">        DateRange range = (DateRange) getRange();</span>
+<span class="fc" id="L656">        double axisMin = this.timeline.toTimelineValue(range.getLowerMillis());</span>
+<span class="fc" id="L657">        double axisMax = this.timeline.toTimelineValue(range.getUpperMillis());</span>
+<span class="fc" id="L658">        double result = 0.0;</span>
+<span class="pc bpc" id="L659" title="1 of 2 branches missed.">        if (RectangleEdge.isTopOrBottom(edge)) {</span>
+<span class="fc" id="L660">            double minX = area.getX();</span>
+<span class="fc" id="L661">            double maxX = area.getMaxX();</span>
+<span class="pc bpc" id="L662" title="1 of 2 branches missed.">            if (isInverted()) {</span>
+<span class="nc" id="L663">                result = maxX + ((value - axisMin) / (axisMax - axisMin))</span>
+                         * (minX - maxX);
+            }
+            else {
+<span class="fc" id="L667">                result = minX + ((value - axisMin) / (axisMax - axisMin))</span>
+                         * (maxX - minX);
+            }
+<span class="fc" id="L670">        }</span>
+<span class="nc bnc" id="L671" title="All 2 branches missed.">        else if (RectangleEdge.isLeftOrRight(edge)) {</span>
+<span class="nc" id="L672">            double minY = area.getMinY();</span>
+<span class="nc" id="L673">            double maxY = area.getMaxY();</span>
+<span class="nc bnc" id="L674" title="All 2 branches missed.">            if (isInverted()) {</span>
+<span class="nc" id="L675">                result = minY + (((value - axisMin) / (axisMax - axisMin))</span>
+                         * (maxY - minY));
+            }
+            else {
+<span class="nc" id="L679">                result = maxY - (((value - axisMin) / (axisMax - axisMin))</span>
+                         * (maxY - minY));
+            }
+        }
+<span class="fc" id="L683">        return result;</span>
+    }
+
+    /**
+     * Translates a date to Java2D coordinates, based on the range displayed by
+     * this axis for the specified data area.
+     *
+     * @param date  the date.
+     * @param area  the rectangle (in Java2D space) where the data is to be
+     *              plotted.
+     * @param edge  the axis location.
+     *
+     * @return The coordinate corresponding to the supplied date.
+     */
+    public double dateToJava2D(Date date, Rectangle2D area, 
+            RectangleEdge edge) {
+<span class="nc" id="L699">        double value = date.getTime();</span>
+<span class="nc" id="L700">        return valueToJava2D(value, area, edge);</span>
+    }
+
+    private double setMin(RectangleEdge edge, Rectangle2D area){
+<span class="fc" id="L704">        double min=0.0;</span>
+<span class="fc bfc" id="L705" title="All 2 branches covered.">        if (RectangleEdge.isTopOrBottom(edge)){</span>
+<span class="fc" id="L706">            min = area.getX();</span>
+<span class="pc bpc" id="L707" title="1 of 2 branches missed.">        }else if(RectangleEdge.isLeftOrRight(edge)){</span>
+<span class="fc" id="L708">            min = area.getMaxY();</span>
+        }
+<span class="fc" id="L710">        return min;</span>
+    }
+
+    private double setMax(RectangleEdge edge, Rectangle2D area){
+<span class="fc" id="L714">        double max=0.0;</span>
+<span class="fc bfc" id="L715" title="All 2 branches covered.">        if (RectangleEdge.isTopOrBottom(edge)){</span>
+<span class="fc" id="L716">            max = area.getMaxX();</span>
+<span class="pc bpc" id="L717" title="1 of 2 branches missed.">        }else if(RectangleEdge.isLeftOrRight(edge)){</span>
+<span class="fc" id="L718">            max = area.getY();</span>
+        }
+<span class="fc" id="L720">        return max;</span>
+    }
+
+    /**
+     * Translates a Java2D coordinate into the corresponding data value.  To
+     * perform this translation, you need to know the area used for plotting
+     * data, and which edge the axis is located on.
+     *
+     * @param java2DValue  the coordinate in Java2D space.
+     * @param area  the rectangle (in Java2D space) where the data is to be
+     *              plotted.
+     * @param edge  the axis location.
+     *
+     * @return A data value.
+     */
+    @Override
+    public double java2DToValue(double java2DValue, Rectangle2D area, 
+            RectangleEdge edge) {
+
+<span class="fc" id="L739">        DateRange range = (DateRange) getRange();</span>
+<span class="fc" id="L740">        double axisMin = this.timeline.toTimelineValue(range.getLowerMillis());</span>
+<span class="fc" id="L741">        double axisMax = this.timeline.toTimelineValue(range.getUpperMillis());</span>
+
+<span class="fc" id="L743">        double min = setMin(edge, area);</span>
+<span class="fc" id="L744">        double max = setMax(edge, area);</span>
+
+        double result;
+<span class="fc" id="L747">        double mean = (java2DValue - min) / (max - min)</span>
+                * (axisMax - axisMin);
+<span class="fc bfc" id="L749" title="All 2 branches covered.">        if (isInverted()) {</span>
+<span class="fc" id="L750">             result = axisMax - mean;</span>
+        }
+        else {
+<span class="fc" id="L753">             result = axisMin + mean;</span>
+        }
+
+<span class="fc" id="L756">        return this.timeline.toMillisecond((long) result);</span>
+    }
+
+    /**
+     * Calculates the value of the lowest visible tick on the axis.
+     *
+     * @param unit  date unit to use.
+     *
+     * @return The value of the lowest visible tick on the axis.
+     */
+    public Date calculateLowestVisibleTickValue(DateTickUnit unit) {
+<span class="fc" id="L767">        return nextStandardDate(getMinimumDate(), unit);</span>
+    }
+
+    /**
+     * Calculates the value of the highest visible tick on the axis.
+     *
+     * @param unit  date unit to use.
+     *
+     * @return The value of the highest visible tick on the axis.
+     */
+    public Date calculateHighestVisibleTickValue(DateTickUnit unit) {
+<span class="nc" id="L778">        return previousStandardDate(getMaximumDate(), unit);</span>
+    }
+
+    /**
+     * Returns the previous &quot;standard&quot; date, for a given date and tick unit.
+     *
+     * @param date  the reference date.
+     * @param unit  the tick unit.
+     *
+     * @return The previous &quot;standard&quot; date.
+     */
+    protected Date previousStandardDate(Date date, DateTickUnit unit) {
+
+        int milliseconds;
+        int seconds;
+        int minutes;
+        int hours;
+        int days;
+        int months;
+        int years;
+
+<span class="fc" id="L799">        Calendar calendar = Calendar.getInstance(this.timeZone, this.locale);</span>
+<span class="fc" id="L800">        calendar.setTime(date);</span>
+<span class="fc" id="L801">        int count = unit.getMultiple();</span>
+<span class="fc" id="L802">        int current = calendar.get(unit.getCalendarField());</span>
+<span class="fc" id="L803">        int value = count * (current / count);</span>
+
+<span class="fc bfc" id="L805" title="All 2 branches covered.">        if (DateTickUnitType.MILLISECOND.equals(unit.getUnitType())) {</span>
+<span class="fc" id="L806">            years = calendar.get(Calendar.YEAR);</span>
+<span class="fc" id="L807">            months = calendar.get(Calendar.MONTH);</span>
+<span class="fc" id="L808">            days = calendar.get(Calendar.DATE);</span>
+<span class="fc" id="L809">            hours = calendar.get(Calendar.HOUR_OF_DAY);</span>
+<span class="fc" id="L810">            minutes = calendar.get(Calendar.MINUTE);</span>
+<span class="fc" id="L811">            seconds = calendar.get(Calendar.SECOND);</span>
+<span class="fc" id="L812">            calendar.set(years, months, days, hours, minutes, seconds);</span>
+<span class="fc" id="L813">            calendar.set(Calendar.MILLISECOND, value);</span>
+<span class="fc" id="L814">            Date mm = calendar.getTime();</span>
+<span class="fc bfc" id="L815" title="All 2 branches covered.">            if (mm.getTime() &gt;= date.getTime()) {</span>
+<span class="fc" id="L816">                calendar.set(Calendar.MILLISECOND, value - count);</span>
+<span class="fc" id="L817">                mm = calendar.getTime();</span>
+            }
+<span class="fc" id="L819">            return mm;</span>
+        }
+<span class="fc bfc" id="L821" title="All 2 branches covered.">        else if (DateTickUnitType.SECOND.equals(unit.getUnitType())) {</span>
+<span class="fc" id="L822">            years = calendar.get(Calendar.YEAR);</span>
+<span class="fc" id="L823">            months = calendar.get(Calendar.MONTH);</span>
+<span class="fc" id="L824">            days = calendar.get(Calendar.DATE);</span>
+<span class="fc" id="L825">            hours = calendar.get(Calendar.HOUR_OF_DAY);</span>
+<span class="fc" id="L826">            minutes = calendar.get(Calendar.MINUTE);</span>
+<span class="fc bfc" id="L827" title="All 2 branches covered.">            if (this.tickMarkPosition == DateTickMarkPosition.START) {</span>
+<span class="fc" id="L828">                milliseconds = 0;</span>
+            }
+<span class="fc bfc" id="L830" title="All 2 branches covered.">            else if (this.tickMarkPosition == DateTickMarkPosition.MIDDLE) {</span>
+<span class="fc" id="L831">                milliseconds = 500;</span>
+            }
+            else {
+<span class="fc" id="L834">                milliseconds = 999;</span>
+            }
+<span class="fc" id="L836">            calendar.set(Calendar.MILLISECOND, milliseconds);</span>
+<span class="fc" id="L837">            calendar.set(years, months, days, hours, minutes, value);</span>
+<span class="fc" id="L838">            Date dd = calendar.getTime();</span>
+<span class="fc bfc" id="L839" title="All 2 branches covered.">            if (dd.getTime() &gt;= date.getTime()) {</span>
+<span class="fc" id="L840">                calendar.set(Calendar.SECOND, value - count);</span>
+<span class="fc" id="L841">                dd = calendar.getTime();</span>
+            }
+<span class="fc" id="L843">            return dd;</span>
+        }
+<span class="fc bfc" id="L845" title="All 2 branches covered.">        else if (DateTickUnitType.MINUTE.equals(unit.getUnitType())) {</span>
+<span class="fc" id="L846">            years = calendar.get(Calendar.YEAR);</span>
+<span class="fc" id="L847">            months = calendar.get(Calendar.MONTH);</span>
+<span class="fc" id="L848">            days = calendar.get(Calendar.DATE);</span>
+<span class="fc" id="L849">            hours = calendar.get(Calendar.HOUR_OF_DAY);</span>
+<span class="pc bpc" id="L850" title="1 of 2 branches missed.">            if (this.tickMarkPosition == DateTickMarkPosition.START) {</span>
+<span class="fc" id="L851">                seconds = 0;</span>
+            }
+<span class="nc bnc" id="L853" title="All 2 branches missed.">            else if (this.tickMarkPosition == DateTickMarkPosition.MIDDLE) {</span>
+<span class="nc" id="L854">                seconds = 30;</span>
+            }
+            else {
+<span class="nc" id="L857">                seconds = 59;</span>
+            }
+<span class="fc" id="L859">            calendar.clear(Calendar.MILLISECOND);</span>
+<span class="fc" id="L860">            calendar.set(years, months, days, hours, value, seconds);</span>
+<span class="fc" id="L861">            Date d0 = calendar.getTime();</span>
+<span class="pc bpc" id="L862" title="1 of 2 branches missed.">            if (d0.getTime() &gt;= date.getTime()) {</span>
+<span class="fc" id="L863">                calendar.set(Calendar.MINUTE, value - count);</span>
+<span class="fc" id="L864">                d0 = calendar.getTime();</span>
+            }
+<span class="fc" id="L866">            return d0;</span>
+        }
+<span class="fc bfc" id="L868" title="All 2 branches covered.">        else if (DateTickUnitType.HOUR.equals(unit.getUnitType())) {</span>
+<span class="fc" id="L869">            years = calendar.get(Calendar.YEAR);</span>
+<span class="fc" id="L870">            months = calendar.get(Calendar.MONTH);</span>
+<span class="fc" id="L871">            days = calendar.get(Calendar.DATE);</span>
+<span class="fc bfc" id="L872" title="All 2 branches covered.">            if (this.tickMarkPosition == DateTickMarkPosition.START) {</span>
+<span class="fc" id="L873">                minutes = 0;</span>
+<span class="fc" id="L874">                seconds = 0;</span>
+            }
+<span class="fc bfc" id="L876" title="All 2 branches covered.">            else if (this.tickMarkPosition == DateTickMarkPosition.MIDDLE) {</span>
+<span class="fc" id="L877">                minutes = 30;</span>
+<span class="fc" id="L878">                seconds = 0;</span>
+            }
+            else {
+<span class="fc" id="L881">                minutes = 59;</span>
+<span class="fc" id="L882">                seconds = 59;</span>
+            }
+<span class="fc" id="L884">            calendar.clear(Calendar.MILLISECOND);</span>
+<span class="fc" id="L885">            calendar.set(years, months, days, value, minutes, seconds);</span>
+<span class="fc" id="L886">            Date d1 = calendar.getTime();</span>
+<span class="fc bfc" id="L887" title="All 2 branches covered.">            if (d1.getTime() &gt;= date.getTime()) {</span>
+<span class="fc" id="L888">                calendar.set(Calendar.HOUR_OF_DAY, value - count);</span>
+<span class="fc" id="L889">                d1 = calendar.getTime();</span>
+            }
+<span class="fc" id="L891">            return d1;</span>
+        }
+<span class="fc bfc" id="L893" title="All 2 branches covered.">        else if (DateTickUnitType.DAY.equals(unit.getUnitType())) {</span>
+<span class="fc" id="L894">            years = calendar.get(Calendar.YEAR);</span>
+<span class="fc" id="L895">            months = calendar.get(Calendar.MONTH);</span>
+<span class="fc bfc" id="L896" title="All 2 branches covered.">            if (this.tickMarkPosition == DateTickMarkPosition.START) {</span>
+<span class="fc" id="L897">                hours = 0;</span>
+            }
+<span class="fc bfc" id="L899" title="All 2 branches covered.">            else if (this.tickMarkPosition == DateTickMarkPosition.MIDDLE) {</span>
+<span class="fc" id="L900">                hours = 12;</span>
+            }
+            else {
+<span class="fc" id="L903">                hours = 23;</span>
+            }
+<span class="fc" id="L905">            calendar.clear(Calendar.MILLISECOND);</span>
+<span class="fc" id="L906">            calendar.set(years, months, value, hours, 0, 0);</span>
+            // long result = calendar.getTimeInMillis();
+                // won't work with JDK 1.3
+<span class="fc" id="L909">            Date d2 = calendar.getTime();</span>
+<span class="fc bfc" id="L910" title="All 2 branches covered.">            if (d2.getTime() &gt;= date.getTime()) {</span>
+<span class="fc" id="L911">                calendar.set(Calendar.DATE, value - count);</span>
+<span class="fc" id="L912">                d2 = calendar.getTime();</span>
+            }
+<span class="fc" id="L914">            return d2;</span>
+        }
+<span class="fc bfc" id="L916" title="All 2 branches covered.">        else if (DateTickUnitType.MONTH.equals(unit.getUnitType())) {</span>
+<span class="fc" id="L917">            value = count * ((current + 1) / count) - 1;</span>
+<span class="fc" id="L918">            years = calendar.get(Calendar.YEAR);</span>
+<span class="fc" id="L919">            calendar.clear(Calendar.MILLISECOND);</span>
+<span class="fc" id="L920">            calendar.set(years, value, 1, 0, 0, 0);</span>
+<span class="fc" id="L921">            Month month = new Month(calendar.getTime(), this.timeZone,</span>
+                    this.locale);
+<span class="fc" id="L923">            Date standardDate = tickMarkPosition.calculateDate(month);</span>
+<span class="fc" id="L924">            long millis = standardDate.getTime();</span>
+<span class="fc bfc" id="L925" title="All 2 branches covered.">            if (millis &gt;= date.getTime()) {</span>
+<span class="fc bfc" id="L926" title="All 2 branches covered.">                for (int i = 0; i &lt; count; i++) {</span>
+<span class="fc" id="L927">                    month = (Month) month.previous();</span>
+                }
+                // need to peg the month in case the time zone isn't the
+                // default - see bug 2078057
+<span class="fc" id="L931">                month.peg(Calendar.getInstance(this.timeZone));</span>
+<span class="fc" id="L932">                standardDate = tickMarkPosition.calculateDate(month);</span>
+            }
+<span class="fc" id="L934">            return standardDate;</span>
+        }
+<span class="pc bpc" id="L936" title="1 of 2 branches missed.">        else if (DateTickUnitType.YEAR.equals(unit.getUnitType())) {</span>
+<span class="fc bfc" id="L937" title="All 2 branches covered.">            if (this.tickMarkPosition == DateTickMarkPosition.START) {</span>
+<span class="fc" id="L938">                months = 0;</span>
+<span class="fc" id="L939">                days = 1;</span>
+            }
+<span class="fc bfc" id="L941" title="All 2 branches covered.">            else if (this.tickMarkPosition == DateTickMarkPosition.MIDDLE) {</span>
+<span class="fc" id="L942">                months = 6;</span>
+<span class="fc" id="L943">                days = 1;</span>
+            }
+            else {
+<span class="fc" id="L946">                months = 11;</span>
+<span class="fc" id="L947">                days = 31;</span>
+            }
+<span class="fc" id="L949">            calendar.clear(Calendar.MILLISECOND);</span>
+<span class="fc" id="L950">            calendar.set(value, months, days, 0, 0, 0);</span>
+<span class="fc" id="L951">            Date d3 = calendar.getTime();</span>
+<span class="fc bfc" id="L952" title="All 2 branches covered.">            if (d3.getTime() &gt;= date.getTime()) {</span>
+<span class="fc" id="L953">                calendar.set(Calendar.YEAR, value - count);</span>
+<span class="fc" id="L954">                d3 = calendar.getTime();</span>
+            }
+<span class="fc" id="L956">            return d3;</span>
+        }
+<span class="nc" id="L958">        return null;</span>
+    }
+
+    /**
+     * Returns the first &quot;standard&quot; date (based on the specified field and
+     * units).
+     *
+     * @param date  the reference date.
+     * @param unit  the date tick unit.
+     *
+     * @return The next &quot;standard&quot; date.
+     */
+    protected Date nextStandardDate(Date date, DateTickUnit unit) {
+<span class="fc" id="L971">        Date previous = previousStandardDate(date, unit);</span>
+<span class="fc" id="L972">        Calendar calendar = Calendar.getInstance(this.timeZone, this.locale);</span>
+<span class="fc" id="L973">        calendar.setTime(previous);</span>
+<span class="fc" id="L974">        calendar.add(unit.getCalendarField(), unit.getMultiple());</span>
+<span class="fc" id="L975">        return calendar.getTime();</span>
+    }
+
+    /**
+     * Returns a collection of standard date tick units that uses the default
+     * time zone.  This collection will be used by default, but you are free
+     * to create your own collection if you want to (see the
+     * {@link ValueAxis#setStandardTickUnits(TickUnitSource)} method inherited
+     * from the {@link ValueAxis} class).
+     *
+     * @return A collection of standard date tick units.
+     */
+    public static TickUnitSource createStandardDateTickUnits() {
+<span class="nc" id="L988">        return createStandardDateTickUnits(TimeZone.getDefault(),</span>
+<span class="nc" id="L989">                Locale.getDefault());</span>
+    }
+
+    private static void addMiliseconds(TickUnits units, DateFormat f1){
+<span class="fc" id="L993">        units.add(new DateTickUnit(DateTickUnitType.MILLISECOND, 1, f1));</span>
+<span class="fc" id="L994">        units.add(new DateTickUnit(DateTickUnitType.MILLISECOND, 5,</span>
+                DateTickUnitType.MILLISECOND, 1, f1));
+<span class="fc" id="L996">        units.add(new DateTickUnit(DateTickUnitType.MILLISECOND, 10,</span>
+                DateTickUnitType.MILLISECOND, 1, f1));
+<span class="fc" id="L998">        units.add(new DateTickUnit(DateTickUnitType.MILLISECOND, 25,</span>
+                DateTickUnitType.MILLISECOND, 5, f1));
+<span class="fc" id="L1000">        units.add(new DateTickUnit(DateTickUnitType.MILLISECOND, 50,</span>
+                DateTickUnitType.MILLISECOND, 10, f1));
+<span class="fc" id="L1002">        units.add(new DateTickUnit(DateTickUnitType.MILLISECOND, 100,</span>
+                DateTickUnitType.MILLISECOND, 10, f1));
+<span class="fc" id="L1004">        units.add(new DateTickUnit(DateTickUnitType.MILLISECOND, 250,</span>
+                DateTickUnitType.MILLISECOND, 10, f1));
+<span class="fc" id="L1006">        units.add(new DateTickUnit(DateTickUnitType.MILLISECOND, 500,</span>
+                DateTickUnitType.MILLISECOND, 50, f1));
+<span class="fc" id="L1008">    }</span>
+
+    private static void addSeconds(TickUnits units, DateFormat f2) {
+<span class="fc" id="L1011">        units.add(new DateTickUnit(DateTickUnitType.SECOND, 1,</span>
+                DateTickUnitType.MILLISECOND, 50, f2));
+<span class="fc" id="L1013">        units.add(new DateTickUnit(DateTickUnitType.SECOND, 5,</span>
+                DateTickUnitType.SECOND, 1, f2));
+<span class="fc" id="L1015">        units.add(new DateTickUnit(DateTickUnitType.SECOND, 10,</span>
+                DateTickUnitType.SECOND, 1, f2));
+<span class="fc" id="L1017">        units.add(new DateTickUnit(DateTickUnitType.SECOND, 30,</span>
+                DateTickUnitType.SECOND, 5, f2));
+<span class="fc" id="L1019">    }</span>
+
+    private static void addMinutes(TickUnits units, DateFormat f3) {
+<span class="fc" id="L1022">        units.add(new DateTickUnit(DateTickUnitType.MINUTE, 1,</span>
+                DateTickUnitType.SECOND, 5, f3));
+<span class="fc" id="L1024">        units.add(new DateTickUnit(DateTickUnitType.MINUTE, 2,</span>
+                DateTickUnitType.SECOND, 10, f3));
+<span class="fc" id="L1026">        units.add(new DateTickUnit(DateTickUnitType.MINUTE, 5,</span>
+                DateTickUnitType.MINUTE, 1, f3));
+<span class="fc" id="L1028">        units.add(new DateTickUnit(DateTickUnitType.MINUTE, 10,</span>
+                DateTickUnitType.MINUTE, 1, f3));
+<span class="fc" id="L1030">        units.add(new DateTickUnit(DateTickUnitType.MINUTE, 15,</span>
+                DateTickUnitType.MINUTE, 5, f3));
+<span class="fc" id="L1032">        units.add(new DateTickUnit(DateTickUnitType.MINUTE, 20,</span>
+                DateTickUnitType.MINUTE, 5, f3));
+<span class="fc" id="L1034">        units.add(new DateTickUnit(DateTickUnitType.MINUTE, 30,</span>
+                DateTickUnitType.MINUTE, 5, f3));
+<span class="fc" id="L1036">    }</span>
+
+    private static void addYears(TickUnits units, DateFormat f7) {
+<span class="fc" id="L1039">        units.add(new DateTickUnit(DateTickUnitType.YEAR, 1,</span>
+                DateTickUnitType.MONTH, 1, f7));
+<span class="fc" id="L1041">        units.add(new DateTickUnit(DateTickUnitType.YEAR, 2,</span>
+                DateTickUnitType.MONTH, 3, f7));
+<span class="fc" id="L1043">        units.add(new DateTickUnit(DateTickUnitType.YEAR, 5,</span>
+                DateTickUnitType.YEAR, 1, f7));
+<span class="fc" id="L1045">        units.add(new DateTickUnit(DateTickUnitType.YEAR, 10,</span>
+                DateTickUnitType.YEAR, 1, f7));
+<span class="fc" id="L1047">        units.add(new DateTickUnit(DateTickUnitType.YEAR, 25,</span>
+                DateTickUnitType.YEAR, 5, f7));
+<span class="fc" id="L1049">        units.add(new DateTickUnit(DateTickUnitType.YEAR, 50,</span>
+                DateTickUnitType.YEAR, 10, f7));
+<span class="fc" id="L1051">        units.add(new DateTickUnit(DateTickUnitType.YEAR, 100,</span>
+                DateTickUnitType.YEAR, 20, f7));
+<span class="fc" id="L1053">    }</span>
+
+    private static void addMonths(TickUnits units, DateFormat f6) {
+<span class="fc" id="L1056">        units.add(new DateTickUnit(DateTickUnitType.MONTH, 1,</span>
+                DateTickUnitType.DAY, 1, f6));
+<span class="fc" id="L1058">        units.add(new DateTickUnit(DateTickUnitType.MONTH, 2,</span>
+                DateTickUnitType.DAY, 1, f6));
+<span class="fc" id="L1060">        units.add(new DateTickUnit(DateTickUnitType.MONTH, 3,</span>
+                DateTickUnitType.MONTH, 1, f6));
+<span class="fc" id="L1062">        units.add(new DateTickUnit(DateTickUnitType.MONTH, 4,</span>
+                DateTickUnitType.MONTH, 1, f6));
+<span class="fc" id="L1064">        units.add(new DateTickUnit(DateTickUnitType.MONTH, 6,</span>
+                DateTickUnitType.MONTH, 1, f6));
+<span class="fc" id="L1066">    }</span>
+
+    private static void addDays(TickUnits units, DateFormat f5) {
+<span class="fc" id="L1069">        units.add(new DateTickUnit(DateTickUnitType.DAY, 1,</span>
+                DateTickUnitType.HOUR, 1, f5));
+<span class="fc" id="L1071">        units.add(new DateTickUnit(DateTickUnitType.DAY, 2,</span>
+                DateTickUnitType.HOUR, 1, f5));
+<span class="fc" id="L1073">        units.add(new DateTickUnit(DateTickUnitType.DAY, 7,</span>
+                DateTickUnitType.DAY, 1, f5));
+<span class="fc" id="L1075">        units.add(new DateTickUnit(DateTickUnitType.DAY, 15,</span>
+                DateTickUnitType.DAY, 1, f5));
+<span class="fc" id="L1077">    }</span>
+
+    private static void addHours(TickUnits units, DateFormat f3, DateFormat f4) {
+<span class="fc" id="L1080">        units.add(new DateTickUnit(DateTickUnitType.HOUR, 1,</span>
+                DateTickUnitType.MINUTE, 5, f3));
+<span class="fc" id="L1082">        units.add(new DateTickUnit(DateTickUnitType.HOUR, 2,</span>
+                DateTickUnitType.MINUTE, 10, f3));
+<span class="fc" id="L1084">        units.add(new DateTickUnit(DateTickUnitType.HOUR, 4,</span>
+                DateTickUnitType.MINUTE, 30, f3));
+<span class="fc" id="L1086">        units.add(new DateTickUnit(DateTickUnitType.HOUR, 6,</span>
+                DateTickUnitType.HOUR, 1, f3));
+<span class="fc" id="L1088">        units.add(new DateTickUnit(DateTickUnitType.HOUR, 12,</span>
+                DateTickUnitType.HOUR, 1, f4));
+<span class="fc" id="L1090">    }</span>
+
+    /**
+     * Returns a collection of standard date tick units.  This collection will
+     * be used by default, but you are free to create your own collection if
+     * you want to (see the
+     * {@link ValueAxis#setStandardTickUnits(TickUnitSource)} method inherited
+     * from the {@link ValueAxis} class).
+     *
+     * @param zone  the time zone ({@code null} not permitted).
+     * @param locale  the locale ({@code null} not permitted).
+     *
+     * @return A collection of standard date tick units.
+     */
+    public static TickUnitSource createStandardDateTickUnits(TimeZone zone,
+            Locale locale) {
+
+<span class="fc" id="L1107">        Args.nullNotPermitted(zone, &quot;zone&quot;);</span>
+<span class="fc" id="L1108">        Args.nullNotPermitted(locale, &quot;locale&quot;);</span>
+<span class="fc" id="L1109">        TickUnits units = new TickUnits();</span>
+
+        // date formatters
+<span class="fc" id="L1112">        DateFormat f1 = new SimpleDateFormat(&quot;HH:mm:ss.SSS&quot;, locale);</span>
+<span class="fc" id="L1113">        DateFormat f2 = new SimpleDateFormat(&quot;HH:mm:ss&quot;, locale);</span>
+<span class="fc" id="L1114">        DateFormat f3 = new SimpleDateFormat(&quot;HH:mm&quot;, locale);</span>
+<span class="fc" id="L1115">        DateFormat f4 = new SimpleDateFormat(&quot;d-MMM, HH:mm&quot;, locale);</span>
+<span class="fc" id="L1116">        DateFormat f5 = new SimpleDateFormat(&quot;d-MMM&quot;, locale);</span>
+<span class="fc" id="L1117">        DateFormat f6 = new SimpleDateFormat(&quot;MMM-yyyy&quot;, locale);</span>
+<span class="fc" id="L1118">        DateFormat f7 = new SimpleDateFormat(&quot;yyyy&quot;, locale);</span>
+
+<span class="fc" id="L1120">        f1.setTimeZone(zone);</span>
+<span class="fc" id="L1121">        f2.setTimeZone(zone);</span>
+<span class="fc" id="L1122">        f3.setTimeZone(zone);</span>
+<span class="fc" id="L1123">        f4.setTimeZone(zone);</span>
+<span class="fc" id="L1124">        f5.setTimeZone(zone);</span>
+<span class="fc" id="L1125">        f6.setTimeZone(zone);</span>
+<span class="fc" id="L1126">        f7.setTimeZone(zone);</span>
+
+        // milliseconds
+<span class="fc" id="L1129">        addMiliseconds(units, f1);</span>
+
+        // seconds
+<span class="fc" id="L1132">        addSeconds(units, f2);</span>
+
+        // minutes
+<span class="fc" id="L1135">        addMinutes(units, f3);</span>
+
+        // hours
+<span class="fc" id="L1138">        addHours(units, f3, f4);</span>
+
+        // days
+<span class="fc" id="L1141">        addDays(units, f5);</span>
+
+        // months
+<span class="fc" id="L1144">        addMonths(units, f6);</span>
+
+        // years
+<span class="fc" id="L1147">        addYears(units, f7);</span>
+
+<span class="fc" id="L1149">        return units;</span>
+
+    }
+
+
+
+    /**
+     * Rescales the axis to ensure that all data is visible.
+     */
+    @Override
+    protected void autoAdjustRange() {
+
+<span class="fc" id="L1161">        Plot plot = getPlot();</span>
+
+<span class="fc bfc" id="L1163" title="All 2 branches covered.">        if (plot == null) {</span>
+<span class="fc" id="L1164">            return;  // no plot, no data</span>
+        }
+
+<span class="pc bpc" id="L1167" title="1 of 2 branches missed.">        if (plot instanceof ValueAxisPlot) {</span>
+<span class="fc" id="L1168">            ValueAxisPlot vap = (ValueAxisPlot) plot;</span>
+
+<span class="fc" id="L1170">            Range r = vap.getDataRange(this);</span>
+<span class="fc bfc" id="L1171" title="All 2 branches covered.">            if (r == null) {</span>
+<span class="fc" id="L1172">                r = new DateRange();</span>
+            }
+
+<span class="fc" id="L1175">            long upper = this.timeline.toTimelineValue(</span>
+<span class="fc" id="L1176">                    (long) r.getUpperBound());</span>
+            long lower;
+<span class="fc" id="L1178">            long fixedAutoRange = (long) getFixedAutoRange();</span>
+<span class="pc bpc" id="L1179" title="1 of 2 branches missed.">            if (fixedAutoRange &gt; 0.0) {</span>
+<span class="nc" id="L1180">                lower = upper - fixedAutoRange;</span>
+            }
+            else {
+<span class="fc" id="L1183">                lower = this.timeline.toTimelineValue((long) r.getLowerBound());</span>
+<span class="fc" id="L1184">                double range = upper - lower;</span>
+<span class="fc" id="L1185">                long minRange = (long) getAutoRangeMinimumSize();</span>
+<span class="fc bfc" id="L1186" title="All 2 branches covered.">                if (range &lt; minRange) {</span>
+<span class="fc" id="L1187">                    long expand = (long) (minRange - range) / 2;</span>
+<span class="fc" id="L1188">                    upper = upper + expand;</span>
+<span class="fc" id="L1189">                    lower = lower - expand;</span>
+                }
+<span class="fc" id="L1191">                upper = upper + (long) (range * getUpperMargin());</span>
+<span class="fc" id="L1192">                lower = lower - (long) (range * getLowerMargin());</span>
+            }
+
+<span class="fc" id="L1195">            upper = this.timeline.toMillisecond(upper);</span>
+<span class="fc" id="L1196">            lower = this.timeline.toMillisecond(lower);</span>
+<span class="fc" id="L1197">            DateRange dr = new DateRange(new Date(lower), new Date(upper));</span>
+<span class="fc" id="L1198">            setRange(dr, false, false);</span>
+        }
+
+<span class="fc" id="L1201">    }</span>
+
+    /**
+     * Selects an appropriate tick value for the axis.  The strategy is to
+     * display as many ticks as possible (selected from an array of 'standard'
+     * tick units) without the labels overlapping.
+     *
+     * @param g2  the graphics device.
+     * @param dataArea  the area defined by the axes.
+     * @param edge  the axis location.
+     */
+    protected void selectAutoTickUnit(Graphics2D g2, Rectangle2D dataArea,
+            RectangleEdge edge) {
+
+<span class="pc bpc" id="L1215" title="1 of 2 branches missed.">        if (RectangleEdge.isTopOrBottom(edge)) {</span>
+<span class="fc" id="L1216">            selectHorizontalAutoTickUnit(g2, dataArea, edge);</span>
+        }
+<span class="nc bnc" id="L1218" title="All 2 branches missed.">        else if (RectangleEdge.isLeftOrRight(edge)) {</span>
+<span class="nc" id="L1219">            selectVerticalAutoTickUnit(g2, dataArea, edge);</span>
+        }
+
+<span class="fc" id="L1222">    }</span>
+
+    /**
+     * Selects an appropriate tick size for the axis.  The strategy is to
+     * display as many ticks as possible (selected from a collection of
+     * 'standard' tick units) without the labels overlapping.
+     *
+     * @param g2  the graphics device.
+     * @param dataArea  the area defined by the axes.
+     * @param edge  the axis location.
+     */
+    protected void selectHorizontalAutoTickUnit(Graphics2D g2,
+            Rectangle2D dataArea, RectangleEdge edge) {
+
+<span class="fc" id="L1236">        double zero = valueToJava2D(0.0, dataArea, edge);</span>
+<span class="fc" id="L1237">        double tickLabelWidth = estimateMaximumTickLabelWidth(g2,</span>
+<span class="fc" id="L1238">                getTickUnit());</span>
+
+        // start with the current tick unit...
+<span class="fc" id="L1241">        TickUnitSource tickUnits = getStandardTickUnits();</span>
+<span class="fc" id="L1242">        TickUnit unit1 = tickUnits.getCeilingTickUnit(getTickUnit());</span>
+<span class="fc" id="L1243">        double x1 = valueToJava2D(unit1.getSize(), dataArea, edge);</span>
+<span class="fc" id="L1244">        double unit1Width = Math.abs(x1 - zero);</span>
+
+        // then extrapolate...
+<span class="fc" id="L1247">        double guess = (tickLabelWidth / unit1Width) * unit1.getSize();</span>
+<span class="fc" id="L1248">        DateTickUnit unit2 = (DateTickUnit) tickUnits.getCeilingTickUnit(guess);</span>
+<span class="fc" id="L1249">        double x2 = valueToJava2D(unit2.getSize(), dataArea, edge);</span>
+<span class="fc" id="L1250">        double unit2Width = Math.abs(x2 - zero);</span>
+<span class="fc" id="L1251">        tickLabelWidth = estimateMaximumTickLabelWidth(g2, unit2);</span>
+<span class="pc bpc" id="L1252" title="1 of 2 branches missed.">        if (tickLabelWidth &gt; unit2Width) {</span>
+<span class="nc" id="L1253">            unit2 = (DateTickUnit) tickUnits.getLargerTickUnit(unit2);</span>
+        }
+<span class="fc" id="L1255">        setTickUnit(unit2, false, false);</span>
+<span class="fc" id="L1256">    }</span>
+
+    /**
+     * Selects an appropriate tick size for the axis.  The strategy is to
+     * display as many ticks as possible (selected from a collection of
+     * 'standard' tick units) without the labels overlapping.
+     *
+     * @param g2  the graphics device.
+     * @param dataArea  the area in which the plot should be drawn.
+     * @param edge  the axis location.
+     */
+    protected void selectVerticalAutoTickUnit(Graphics2D g2,
+            Rectangle2D dataArea, RectangleEdge edge) {
+
+        // start with the current tick unit...
+<span class="nc" id="L1271">        TickUnitSource tickUnits = getStandardTickUnits();</span>
+<span class="nc" id="L1272">        double zero = valueToJava2D(0.0, dataArea, edge);</span>
+
+        // start with a unit that is at least 1/10th of the axis length
+<span class="nc" id="L1275">        double estimate1 = getRange().getLength() / 10.0;</span>
+<span class="nc" id="L1276">        DateTickUnit candidate1</span>
+<span class="nc" id="L1277">            = (DateTickUnit) tickUnits.getCeilingTickUnit(estimate1);</span>
+<span class="nc" id="L1278">        double labelHeight1 = estimateMaximumTickLabelHeight(g2, candidate1);</span>
+<span class="nc" id="L1279">        double y1 = valueToJava2D(candidate1.getSize(), dataArea, edge);</span>
+<span class="nc" id="L1280">        double candidate1UnitHeight = Math.abs(y1 - zero);</span>
+
+        // now extrapolate based on label height and unit height...
+<span class="nc" id="L1283">        double estimate2</span>
+<span class="nc" id="L1284">            = (labelHeight1 / candidate1UnitHeight) * candidate1.getSize();</span>
+<span class="nc" id="L1285">        DateTickUnit candidate2</span>
+<span class="nc" id="L1286">            = (DateTickUnit) tickUnits.getCeilingTickUnit(estimate2);</span>
+<span class="nc" id="L1287">        double labelHeight2 = estimateMaximumTickLabelHeight(g2, candidate2);</span>
+<span class="nc" id="L1288">        double y2 = valueToJava2D(candidate2.getSize(), dataArea, edge);</span>
+<span class="nc" id="L1289">        double unit2Height = Math.abs(y2 - zero);</span>
+
+       // make final selection...
+       DateTickUnit finalUnit;
+<span class="nc bnc" id="L1293" title="All 2 branches missed.">       if (labelHeight2 &lt; unit2Height) {</span>
+<span class="nc" id="L1294">           finalUnit = candidate2;</span>
+       }
+       else {
+<span class="nc" id="L1297">           finalUnit = (DateTickUnit) tickUnits.getLargerTickUnit(candidate2);</span>
+       }
+<span class="nc" id="L1299">       setTickUnit(finalUnit, false, false);</span>
+
+<span class="nc" id="L1301">    }</span>
+
+    /**
+     * Estimates the maximum width of the tick labels, assuming the specified
+     * tick unit is used.
+     * &lt;P&gt;
+     * Rather than computing the string bounds of every tick on the axis, we
+     * just look at two values: the lower bound and the upper bound for the
+     * axis.  These two values will usually be representative.
+     *
+     * @param g2  the graphics device.
+     * @param unit  the tick unit to use for calculation.
+     *
+     * @return The estimated maximum width of the tick labels.
+     */
+    private double estimateMaximumTickLabelWidth(Graphics2D g2, 
+            DateTickUnit unit) {
+
+<span class="fc" id="L1319">        RectangleInsets tickLabelInsets = tickLabel.getTickLabelInsets();</span>
+<span class="fc" id="L1320">        double result = tickLabelInsets.getLeft() + tickLabelInsets.getRight();</span>
+
+<span class="fc" id="L1322">        Font tickLabelFont = tickLabel.getTickLabelFont();</span>
+<span class="fc" id="L1323">        FontRenderContext frc = g2.getFontRenderContext();</span>
+<span class="fc" id="L1324">        LineMetrics lm = tickLabelFont.getLineMetrics(&quot;ABCxyz&quot;, frc);</span>
+<span class="pc bpc" id="L1325" title="1 of 2 branches missed.">        if (isVerticalTickLabels()) {</span>
+            // all tick labels have the same width (equal to the height of
+            // the font)...
+<span class="nc" id="L1328">            result += lm.getHeight();</span>
+        }
+        else {
+            // look at lower and upper bounds...
+<span class="fc" id="L1332">            DateRange range = (DateRange) getRange();</span>
+<span class="fc" id="L1333">            Date lower = range.getLowerDate();</span>
+<span class="fc" id="L1334">            Date upper = range.getUpperDate();</span>
+            String lowerStr, upperStr;
+<span class="fc" id="L1336">            DateFormat formatter = getDateFormatOverride();</span>
+<span class="pc bpc" id="L1337" title="1 of 2 branches missed.">            if (formatter != null) {</span>
+<span class="nc" id="L1338">                lowerStr = formatter.format(lower);</span>
+<span class="nc" id="L1339">                upperStr = formatter.format(upper);</span>
+            }
+            else {
+<span class="fc" id="L1342">                lowerStr = unit.dateToString(lower);</span>
+<span class="fc" id="L1343">                upperStr = unit.dateToString(upper);</span>
+            }
+<span class="fc" id="L1345">            FontMetrics fm = g2.getFontMetrics(tickLabelFont);</span>
+<span class="fc" id="L1346">            double w1 = fm.stringWidth(lowerStr);</span>
+<span class="fc" id="L1347">            double w2 = fm.stringWidth(upperStr);</span>
+<span class="fc" id="L1348">            result += Math.max(w1, w2);</span>
+        }
+
+<span class="fc" id="L1351">        return result;</span>
+
+    }
+
+    /**
+     * Estimates the maximum width of the tick labels, assuming the specified
+     * tick unit is used.
+     * &lt;P&gt;
+     * Rather than computing the string bounds of every tick on the axis, we
+     * just look at two values: the lower bound and the upper bound for the
+     * axis.  These two values will usually be representative.
+     *
+     * @param g2  the graphics device.
+     * @param unit  the tick unit to use for calculation.
+     *
+     * @return The estimated maximum width of the tick labels.
+     */
+    private double estimateMaximumTickLabelHeight(Graphics2D g2,
+            DateTickUnit unit) {
+
+<span class="nc" id="L1371">        RectangleInsets tickLabelInsets = tickLabel.getTickLabelInsets();</span>
+<span class="nc" id="L1372">        double result = tickLabelInsets.getTop() + tickLabelInsets.getBottom();</span>
+
+<span class="nc" id="L1374">        Font tickLabelFont = tickLabel.getTickLabelFont();</span>
+<span class="nc" id="L1375">        FontRenderContext frc = g2.getFontRenderContext();</span>
+<span class="nc" id="L1376">        LineMetrics lm = tickLabelFont.getLineMetrics(&quot;ABCxyz&quot;, frc);</span>
+<span class="nc bnc" id="L1377" title="All 2 branches missed.">        if (!isVerticalTickLabels()) {</span>
+            // all tick labels have the same width (equal to the height of
+            // the font)...
+<span class="nc" id="L1380">            result += lm.getHeight();</span>
+        }
+        else {
+            // look at lower and upper bounds...
+<span class="nc" id="L1384">            DateRange range = (DateRange) getRange();</span>
+<span class="nc" id="L1385">            Date lower = range.getLowerDate();</span>
+<span class="nc" id="L1386">            Date upper = range.getUpperDate();</span>
+            String lowerStr, upperStr;
+<span class="nc" id="L1388">            DateFormat formatter = getDateFormatOverride();</span>
+<span class="nc bnc" id="L1389" title="All 2 branches missed.">            if (formatter != null) {</span>
+<span class="nc" id="L1390">                lowerStr = formatter.format(lower);</span>
+<span class="nc" id="L1391">                upperStr = formatter.format(upper);</span>
+            }
+            else {
+<span class="nc" id="L1394">                lowerStr = unit.dateToString(lower);</span>
+<span class="nc" id="L1395">                upperStr = unit.dateToString(upper);</span>
+            }
+<span class="nc" id="L1397">            FontMetrics fm = g2.getFontMetrics(tickLabelFont);</span>
+<span class="nc" id="L1398">            double w1 = fm.stringWidth(lowerStr);</span>
+<span class="nc" id="L1399">            double w2 = fm.stringWidth(upperStr);</span>
+<span class="nc" id="L1400">            result += Math.max(w1, w2);</span>
+        }
+
+<span class="nc" id="L1403">        return result;</span>
+
+    }
+
+    /**
+     * Calculates the positions of the tick labels for the axis, storing the
+     * results in the tick label list (ready for drawing).
+     *
+     * @param g2  the graphics device.
+     * @param state  the axis state.
+     * @param dataArea  the area in which the plot should be drawn.
+     * @param edge  the location of the axis.
+     *
+     * @return A list of ticks.
+     */
+    @Override
+    public List&lt;? extends Tick&gt; refreshTicks(Graphics2D g2, AxisState state, 
+            Rectangle2D dataArea, RectangleEdge edge) {
+
+<span class="fc" id="L1422">        List&lt;? extends Tick&gt; result = null;</span>
+<span class="fc bfc" id="L1423" title="All 2 branches covered.">        if (RectangleEdge.isTopOrBottom(edge)) {</span>
+<span class="fc" id="L1424">            result = refreshTicksHorizontal(g2, dataArea, edge);</span>
+        }
+<span class="pc bpc" id="L1426" title="1 of 2 branches missed.">        else if (RectangleEdge.isLeftOrRight(edge)) {</span>
+<span class="fc" id="L1427">            result = refreshTicksVertical(g2, dataArea, edge);</span>
+        }
+<span class="fc" id="L1429">        return result;</span>
+
+    }
+
+    /**
+     * Corrects the given tick date for the position setting.
+     *
+     * @param time  the tick date/time.
+     * @param unit  the tick unit.
+     * @param position  the tick position.
+     *
+     * @return The adjusted time.
+     */
+    private Date correctTickDateForPosition(Date time, DateTickUnit unit, DateTickMarkPosition position) {
+<span class="pc bpc" id="L1443" title="1 of 3 branches missed.">        switch (unit.getUnitType()) {</span>
+<span class="fc" id="L1444">            case MONTH: return position.calculateDate(new Month(time, this.timeZone, this.locale));</span>
+<span class="nc" id="L1445">            case YEAR: return position.calculateDate(new Year(time, this.timeZone, this.locale));</span>
+        }
+<span class="fc" id="L1447">        return time;</span>
+    }
+
+    /**
+     * Recalculates the ticks for the date axis.
+     *
+     * @param g2  the graphics device.
+     * @param dataArea  the area in which the data is to be drawn.
+     * @param edge  the location of the axis.
+     *
+     * @return A list of ticks.
+     */
+    protected List&lt;? extends Tick&gt; refreshTicksHorizontal(Graphics2D g2,
+                Rectangle2D dataArea, RectangleEdge edge) {
+
+<span class="fc" id="L1462">        List&lt;DateTick&gt; result = new ArrayList&lt;&gt;();</span>
+
+<span class="fc" id="L1464">        Font tickLabelFont = tickLabel.getTickLabelFont();</span>
+<span class="fc" id="L1465">        g2.setFont(tickLabelFont);</span>
+
+<span class="fc bfc" id="L1467" title="All 2 branches covered.">        if (isAutoTickUnitSelection()) {</span>
+<span class="fc" id="L1468">            selectAutoTickUnit(g2, dataArea, edge);</span>
+        }
+
+<span class="fc" id="L1471">        DateTickUnit unit = getTickUnit();</span>
+<span class="fc" id="L1472">        Date tickDate = calculateLowestVisibleTickValue(unit);</span>
+<span class="fc" id="L1473">        Date upperDate = getMaximumDate();</span>
+
+<span class="fc" id="L1475">        boolean hasRolled = false;</span>
+<span class="fc bfc" id="L1476" title="All 2 branches covered.">        while (tickDate.before(upperDate)) {</span>
+            // could add a flag to make the following correction optional...
+<span class="pc bpc" id="L1478" title="1 of 2 branches missed.">            if (!hasRolled) {</span>
+<span class="fc" id="L1479">                tickDate = correctTickDateForPosition(tickDate, unit,</span>
+                     this.tickMarkPosition);
+            }
+
+<span class="fc" id="L1483">            long lowestTickTime = tickDate.getTime();</span>
+<span class="fc" id="L1484">            long distance = unit.addToDate(tickDate, this.timeZone).getTime()</span>
+                    - lowestTickTime;
+<span class="fc" id="L1486">            int minorTickSpaces = getMinorTickCount();</span>
+<span class="pc bpc" id="L1487" title="1 of 2 branches missed.">            if (minorTickSpaces &lt;= 0) {</span>
+<span class="fc" id="L1488">                minorTickSpaces = unit.getMinorTickCount();</span>
+            }
+<span class="pc bpc" id="L1490" title="1 of 2 branches missed.">            for (int minorTick = 1; minorTick &lt; minorTickSpaces; minorTick++) {</span>
+<span class="nc" id="L1491">                long minorTickTime = lowestTickTime - distance</span>
+                        * minorTick / minorTickSpaces;
+<span class="nc bnc" id="L1493" title="All 4 branches missed.">                if (minorTickTime &gt; 0 &amp;&amp; getRange().contains(minorTickTime)</span>
+<span class="nc bnc" id="L1494" title="All 2 branches missed.">                        &amp;&amp; (!isHiddenValue(minorTickTime))) {</span>
+<span class="nc" id="L1495">                    result.add(new DateTick(TickType.MINOR,</span>
+                            new Date(minorTickTime), &quot;&quot;, TextAnchor.TOP_CENTER,
+                            TextAnchor.CENTER, 0.0));
+                }
+            }
+
+<span class="pc bpc" id="L1501" title="1 of 2 branches missed.">            if (!isHiddenValue(tickDate.getTime())) {</span>
+                // work out the value, label and position
+                String tickLabel;
+<span class="fc" id="L1504">                DateFormat formatter = getDateFormatOverride();</span>
+<span class="pc bpc" id="L1505" title="1 of 2 branches missed.">                if (formatter != null) {</span>
+<span class="nc" id="L1506">                    tickLabel = formatter.format(tickDate);</span>
+                }
+                else {
+<span class="fc" id="L1509">                    tickLabel = this.tickUnit.dateToString(tickDate);</span>
+                }
+                TextAnchor anchor, rotationAnchor;
+<span class="fc" id="L1512">                double angle = 0.0;</span>
+<span class="pc bpc" id="L1513" title="1 of 2 branches missed.">                if (isVerticalTickLabels()) {</span>
+<span class="nc" id="L1514">                    anchor = TextAnchor.CENTER_RIGHT;</span>
+<span class="nc" id="L1515">                    rotationAnchor = TextAnchor.CENTER_RIGHT;</span>
+<span class="nc bnc" id="L1516" title="All 2 branches missed.">                    if (edge == RectangleEdge.TOP) {</span>
+<span class="nc" id="L1517">                        angle = Math.PI / 2.0;</span>
+                    }
+                    else {
+<span class="nc" id="L1520">                        angle = -Math.PI / 2.0;</span>
+                    }
+                }
+                else {
+<span class="fc bfc" id="L1524" title="All 2 branches covered.">                    if (edge == RectangleEdge.TOP) {</span>
+<span class="fc" id="L1525">                        anchor = TextAnchor.BOTTOM_CENTER;</span>
+<span class="fc" id="L1526">                        rotationAnchor = TextAnchor.BOTTOM_CENTER;</span>
+                    }
+                    else {
+<span class="fc" id="L1529">                        anchor = TextAnchor.TOP_CENTER;</span>
+<span class="fc" id="L1530">                        rotationAnchor = TextAnchor.TOP_CENTER;</span>
+                    }
+                }
+
+<span class="fc" id="L1534">                DateTick tick = new DateTick(tickDate, tickLabel, anchor,</span>
+                        rotationAnchor, angle);
+<span class="fc" id="L1536">                result.add(tick);</span>
+<span class="fc" id="L1537">                hasRolled = false;</span>
+
+<span class="fc" id="L1539">                long currentTickTime = tickDate.getTime();</span>
+<span class="fc" id="L1540">                tickDate = unit.addToDate(tickDate, this.timeZone);</span>
+<span class="fc" id="L1541">                long nextTickTime = tickDate.getTime();</span>
+<span class="pc bpc" id="L1542" title="1 of 2 branches missed.">                for (int minorTick = 1; minorTick &lt; minorTickSpaces;</span>
+<span class="nc" id="L1543">                        minorTick++) {</span>
+<span class="nc" id="L1544">                    long minorTickTime = currentTickTime</span>
+                            + (nextTickTime - currentTickTime)
+                            * minorTick / minorTickSpaces;
+<span class="nc bnc" id="L1547" title="All 2 branches missed.">                    if (getRange().contains(minorTickTime)</span>
+<span class="nc bnc" id="L1548" title="All 2 branches missed.">                            &amp;&amp; (!isHiddenValue(minorTickTime))) {</span>
+<span class="nc" id="L1549">                        result.add(new DateTick(TickType.MINOR,</span>
+                                new Date(minorTickTime), &quot;&quot;,
+                                TextAnchor.TOP_CENTER, TextAnchor.CENTER,
+                                0.0));
+                    }
+                }
+
+<span class="fc" id="L1556">            }</span>
+            else {
+<span class="nc" id="L1558">                tickDate = unit.rollDate(tickDate, this.timeZone);</span>
+<span class="nc" id="L1559">                hasRolled = true;</span>
+            }
+<span class="fc" id="L1561">        }</span>
+<span class="fc" id="L1562">        return result;</span>
+
+    }
+
+    /**
+     * Recalculates the ticks for the date axis.
+     *
+     * @param g2  the graphics device.
+     * @param dataArea  the area in which the plot should be drawn.
+     * @param edge  the location of the axis.
+     *
+     * @return A list of ticks.
+     */
+    protected List&lt;? extends Tick&gt; refreshTicksVertical(Graphics2D g2,
+            Rectangle2D dataArea, RectangleEdge edge) {
+
+<span class="fc" id="L1578">        List&lt;DateTick&gt; result = new ArrayList&lt;&gt;();</span>
+
+<span class="fc" id="L1580">        Font tickLabelFont = tickLabel.getTickLabelFont();</span>
+<span class="fc" id="L1581">        g2.setFont(tickLabelFont);</span>
+
+<span class="pc bpc" id="L1583" title="1 of 2 branches missed.">        if (isAutoTickUnitSelection()) {</span>
+<span class="nc" id="L1584">            selectAutoTickUnit(g2, dataArea, edge);</span>
+        }
+<span class="fc" id="L1586">        DateTickUnit unit = getTickUnit();</span>
+<span class="fc" id="L1587">        Date tickDate = calculateLowestVisibleTickValue(unit);</span>
+<span class="fc" id="L1588">        Date upperDate = getMaximumDate();</span>
+
+<span class="fc" id="L1590">        boolean hasRolled = false;</span>
+<span class="fc bfc" id="L1591" title="All 2 branches covered.">        while (tickDate.before(upperDate)) {</span>
+
+            // could add a flag to make the following correction optional...
+<span class="pc bpc" id="L1594" title="1 of 2 branches missed.">            if (!hasRolled) {</span>
+<span class="fc" id="L1595">                tickDate = correctTickDateForPosition(tickDate, unit,</span>
+                    this.tickMarkPosition);
+            }
+
+<span class="fc" id="L1599">            long lowestTickTime = tickDate.getTime();</span>
+<span class="fc" id="L1600">            long distance = unit.addToDate(tickDate, this.timeZone).getTime()</span>
+                    - lowestTickTime;
+<span class="fc" id="L1602">            int minorTickSpaces = getMinorTickCount();</span>
+<span class="pc bpc" id="L1603" title="1 of 2 branches missed.">            if (minorTickSpaces &lt;= 0) {</span>
+<span class="fc" id="L1604">                minorTickSpaces = unit.getMinorTickCount();</span>
+            }
+<span class="pc bpc" id="L1606" title="1 of 2 branches missed.">            for (int minorTick = 1; minorTick &lt; minorTickSpaces; minorTick++) {</span>
+<span class="nc" id="L1607">                long minorTickTime = lowestTickTime - distance</span>
+                        * minorTick / minorTickSpaces;
+<span class="nc bnc" id="L1609" title="All 4 branches missed.">                if (minorTickTime &gt; 0 &amp;&amp; getRange().contains(minorTickTime)</span>
+<span class="nc bnc" id="L1610" title="All 2 branches missed.">                        &amp;&amp; (!isHiddenValue(minorTickTime))) {</span>
+<span class="nc" id="L1611">                    result.add(new DateTick(TickType.MINOR,</span>
+                            new Date(minorTickTime), &quot;&quot;, TextAnchor.TOP_CENTER,
+                            TextAnchor.CENTER, 0.0));
+                }
+            }
+<span class="pc bpc" id="L1616" title="1 of 2 branches missed.">            if (!isHiddenValue(tickDate.getTime())) {</span>
+                // work out the value, label and position
+                String tickLabel;
+<span class="fc" id="L1619">                DateFormat formatter = getDateFormatOverride();</span>
+<span class="pc bpc" id="L1620" title="1 of 2 branches missed.">                if (formatter != null) {</span>
+<span class="nc" id="L1621">                    tickLabel = formatter.format(tickDate);</span>
+                }
+                else {
+<span class="fc" id="L1624">                    tickLabel = this.tickUnit.dateToString(tickDate);</span>
+                }
+                TextAnchor anchor, rotationAnchor;
+<span class="fc" id="L1627">                double angle = 0.0;</span>
+<span class="pc bpc" id="L1628" title="1 of 2 branches missed.">                if (isVerticalTickLabels()) {</span>
+<span class="nc" id="L1629">                    anchor = TextAnchor.BOTTOM_CENTER;</span>
+<span class="nc" id="L1630">                    rotationAnchor = TextAnchor.BOTTOM_CENTER;</span>
+<span class="nc bnc" id="L1631" title="All 2 branches missed.">                    if (edge == RectangleEdge.LEFT) {</span>
+<span class="nc" id="L1632">                        angle = -Math.PI / 2.0;</span>
+                    }
+                    else {
+<span class="nc" id="L1635">                        angle = Math.PI / 2.0;</span>
+                    }
+                }
+                else {
+<span class="pc bpc" id="L1639" title="1 of 2 branches missed.">                    if (edge == RectangleEdge.LEFT) {</span>
+<span class="fc" id="L1640">                        anchor = TextAnchor.CENTER_RIGHT;</span>
+<span class="fc" id="L1641">                        rotationAnchor = TextAnchor.CENTER_RIGHT;</span>
+                    }
+                    else {
+<span class="nc" id="L1644">                        anchor = TextAnchor.CENTER_LEFT;</span>
+<span class="nc" id="L1645">                        rotationAnchor = TextAnchor.CENTER_LEFT;</span>
+                    }
+                }
+
+<span class="fc" id="L1649">                DateTick tick = new DateTick(tickDate, tickLabel, anchor,</span>
+                        rotationAnchor, angle);
+<span class="fc" id="L1651">                result.add(tick);</span>
+<span class="fc" id="L1652">                hasRolled = false;</span>
+
+<span class="fc" id="L1654">                long currentTickTime = tickDate.getTime();</span>
+<span class="fc" id="L1655">                tickDate = unit.addToDate(tickDate, this.timeZone);</span>
+<span class="fc" id="L1656">                long nextTickTime = tickDate.getTime();</span>
+<span class="pc bpc" id="L1657" title="1 of 2 branches missed.">                for (int minorTick = 1; minorTick &lt; minorTickSpaces;</span>
+<span class="nc" id="L1658">                        minorTick++) {</span>
+<span class="nc" id="L1659">                    long minorTickTime = currentTickTime</span>
+                            + (nextTickTime - currentTickTime)
+                            * minorTick / minorTickSpaces;
+<span class="nc bnc" id="L1662" title="All 2 branches missed.">                    if (getRange().contains(minorTickTime)</span>
+<span class="nc bnc" id="L1663" title="All 2 branches missed.">                            &amp;&amp; (!isHiddenValue(minorTickTime))) {</span>
+<span class="nc" id="L1664">                        result.add(new DateTick(TickType.MINOR,</span>
+                                new Date(minorTickTime), &quot;&quot;,
+                                TextAnchor.TOP_CENTER, TextAnchor.CENTER,
+                                0.0));
+                    }
+                }
+<span class="fc" id="L1670">            }</span>
+            else {
+<span class="nc" id="L1672">                tickDate = unit.rollDate(tickDate, this.timeZone);</span>
+<span class="nc" id="L1673">                hasRolled = true;</span>
+            }
+<span class="fc" id="L1675">        }</span>
+<span class="fc" id="L1676">        return result;</span>
+    }
+
+    /**
+     * Draws the axis on a Java 2D graphics device (such as the screen or a
+     * printer).
+     *
+     * @param g2  the graphics device ({@code null} not permitted).
+     * @param cursor  the cursor location.
+     * @param plotArea  the area within which the axes and data should be
+     *                  drawn ({@code null} not permitted).
+     * @param dataArea  the area within which the data should be drawn
+     *                  ({@code null} not permitted).
+     * @param edge  the location of the axis ({@code null} not permitted).
+     * @param plotState  collects information about the plot
+     *                   ({@code null} permitted).
+     *
+     * @return The axis state (never {@code null}).
+     */
+    @Override
+    public AxisState draw(Graphics2D g2, double cursor, Rectangle2D plotArea,
+            Rectangle2D dataArea, RectangleEdge edge,
+            PlotRenderingInfo plotState) {
+
+        // if the axis is not visible, don't draw it...
+<span class="pc bpc" id="L1701" title="1 of 2 branches missed.">        if (!isVisible()) {</span>
+<span class="nc" id="L1702">            AxisState state = new AxisState(cursor);</span>
+            // even though the axis is not visible, we need to refresh ticks in
+            // case the grid is being drawn...
+<span class="nc" id="L1705">            List ticks = refreshTicks(g2, state, dataArea, edge);</span>
+<span class="nc" id="L1706">            state.setTicks(ticks);</span>
+<span class="nc" id="L1707">            return state;</span>
+        }
+
+        // draw the tick marks and labels...
+<span class="fc" id="L1711">        AxisState state = drawTickMarksAndLabels(g2, cursor, plotArea,</span>
+                dataArea, edge);
+
+        // draw the axis label (note that 'state' is passed in *and*
+        // returned)...
+<span class="pc bpc" id="L1716" title="1 of 2 branches missed.">        if (getAttributedLabel() != null) {</span>
+<span class="nc" id="L1717">            state = drawAttributedLabel(getAttributedLabel(), g2,</span>
+                    dataArea, edge, state);
+            
+        } else {
+<span class="fc" id="L1721">            state = drawLabel(getLabel(), g2, dataArea, edge, state);</span>
+        }
+<span class="fc" id="L1723">        createAndAddEntity(cursor, state, dataArea, edge, plotState);</span>
+<span class="fc" id="L1724">        return state;</span>
+
+    }
+
+    private long setAdjStart(double start, double length, double lowerPercent, double upperPercent) {
+        long adjStart;
+<span class="nc bnc" id="L1730" title="All 2 branches missed.">        if (isInverted()) {</span>
+<span class="nc" id="L1731">            adjStart = (long) (start + (length * (1 - upperPercent)));</span>
+        } else {
+<span class="nc" id="L1733">            adjStart = (long) (start + length * lowerPercent);</span>
+        }
+<span class="nc" id="L1735">        return adjStart;</span>
+    }
+
+    private long setAdjEnd(double start, double length, double lowerPercent, double upperPercent) {
+        long adjEnd;
+<span class="nc bnc" id="L1740" title="All 2 branches missed.">        if (isInverted()) {</span>
+<span class="nc" id="L1741">            adjEnd = (long) (start + (length * (1 - lowerPercent)));</span>
+        } else {
+<span class="nc" id="L1743">            adjEnd = (long) (start + length * upperPercent);</span>
+        }
+<span class="nc" id="L1745">        return adjEnd;</span>
+    }
+
+    /**
+     * Zooms in on the current range (zoom-in stops once the axis length 
+     * reaches the equivalent of one millisecond).  
+     *
+     * @param lowerPercent  the new lower bound.
+     * @param upperPercent  the new upper bound.
+     */
+    @Override
+    public void zoomRange(double lowerPercent, double upperPercent) {
+<span class="nc" id="L1757">        double start = this.timeline.toTimelineValue(</span>
+<span class="nc" id="L1758">                (long) getRange().getLowerBound());</span>
+<span class="nc" id="L1759">        double end = this.timeline.toTimelineValue(</span>
+<span class="nc" id="L1760">                (long) getRange().getUpperBound());</span>
+<span class="nc" id="L1761">        double length = end - start;</span>
+        Range adjusted;
+<span class="nc" id="L1763">        long adjStart = setAdjStart(start, length, lowerPercent, upperPercent);</span>
+<span class="nc" id="L1764">        long adjEnd = setAdjEnd(start, length, lowerPercent, upperPercent);</span>
+        // when zooming to sub-millisecond ranges, it can be the case that
+        // adjEnd == adjStart...and we can't have an axis with zero length
+        // so we apply this instead:
+<span class="nc bnc" id="L1768" title="All 2 branches missed.">        if (adjEnd &lt;= adjStart) {</span>
+<span class="nc" id="L1769">            adjEnd = adjStart + 1L;</span>
+        } 
+<span class="nc" id="L1771">        adjusted = new DateRange(this.timeline.toMillisecond(adjStart),</span>
+<span class="nc" id="L1772">               this.timeline.toMillisecond(adjEnd));</span>
+<span class="nc" id="L1773">        setRange(adjusted);</span>
+<span class="nc" id="L1774">    }</span>
+
+    /**
+     * Tests this axis for equality with an arbitrary object.
+     *
+     * @param obj  the object ({@code null} permitted).
+     *
+     * @return A boolean.
+     */
+    @Override
+    public boolean equals(Object obj) {
+<span class="pc bpc" id="L1785" title="1 of 2 branches missed.">        if (obj == this) {</span>
+<span class="nc" id="L1786">            return true;</span>
+        }
+<span class="pc bpc" id="L1788" title="1 of 2 branches missed.">        if (!(obj instanceof DateAxis)) {</span>
+<span class="nc" id="L1789">            return false;</span>
+        }
+<span class="fc" id="L1791">        DateAxis that = (DateAxis) obj;</span>
+<span class="fc bfc" id="L1792" title="All 2 branches covered.">        if (!Objects.equals(this.timeZone, that.timeZone)) {</span>
+<span class="fc" id="L1793">            return false;</span>
+        }
+<span class="fc bfc" id="L1795" title="All 2 branches covered.">        if (!Objects.equals(this.locale, that.locale)) {</span>
+<span class="fc" id="L1796">            return false;</span>
+        }
+<span class="fc bfc" id="L1798" title="All 2 branches covered.">        if (!Objects.equals(this.tickUnit, that.tickUnit)) {</span>
+<span class="fc" id="L1799">            return false;</span>
+        }
+<span class="fc bfc" id="L1801" title="All 2 branches covered.">        if (!Objects.equals(this.dateFormatOverride, that.dateFormatOverride)) {</span>
+<span class="fc" id="L1802">            return false;</span>
+        }
+<span class="fc bfc" id="L1804" title="All 2 branches covered.">        if (!Objects.equals(this.tickMarkPosition, that.tickMarkPosition)) {</span>
+<span class="fc" id="L1805">            return false;</span>
+        }
+<span class="pc bpc" id="L1807" title="1 of 2 branches missed.">        if (!Objects.equals(this.timeline, that.timeline)) {</span>
+<span class="nc" id="L1808">            return false;</span>
+        }
+<span class="fc" id="L1810">        return super.equals(obj);</span>
+    }
+
+    /**
+     * Returns a hash code for this object.
+     *
+     * @return A hash code.
+     */
+    @Override
+    public int hashCode() {
+<span class="fc" id="L1820">        return super.hashCode();</span>
+    }
+
+    /**
+     * Returns a clone of the object.
+     *
+     * @return A clone.
+     *
+     * @throws CloneNotSupportedException if some component of the axis does
+     *         not support cloning.
+     */
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+<span class="fc" id="L1833">        DateAxis clone = (DateAxis) super.clone();</span>
+        // 'dateTickUnit' is immutable : no need to clone
+<span class="pc bpc" id="L1835" title="1 of 2 branches missed.">        if (this.dateFormatOverride != null) {</span>
+<span class="nc" id="L1836">            clone.dateFormatOverride</span>
+<span class="nc" id="L1837">                = (DateFormat) this.dateFormatOverride.clone();</span>
+        }
+        // 'tickMarkPosition' is immutable : no need to clone
+<span class="fc" id="L1840">        return clone;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

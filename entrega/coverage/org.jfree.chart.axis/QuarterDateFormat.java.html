@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>QuarterDateFormat.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.chart.axis</a> &gt; <span class="el_source">QuarterDateFormat.java</span></div><h1>QuarterDateFormat.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * ----------------------
+ * QuarterDateFormat.java
+ * ----------------------
+ * (C) Copyright 2005-2022, by David Gilbert and Contributors.
+ *
+ * Original Author:  David Gilbert;
+ * Contributor(s):   -;
+ *
+ */
+
+package org.jfree.chart.axis;
+
+import java.io.Serializable;
+import java.text.DateFormat;
+import java.text.FieldPosition;
+import java.text.NumberFormat;
+import java.text.ParsePosition;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
+import org.jfree.chart.internal.Args;
+
+/**
+ * A formatter that formats dates to show the year and quarter (for example,
+ * '2004 IV' for the last quarter of 2004.
+ */
+public class QuarterDateFormat extends DateFormat
+        implements Cloneable, Serializable {
+
+    /** For serialization. */
+    private static final long serialVersionUID = -6738465248529797176L;
+
+    /** Symbols for regular quarters. */
+<span class="fc" id="L62">    public static final String[] REGULAR_QUARTERS = new String[] {&quot;1&quot;, &quot;2&quot;,</span>
+            &quot;3&quot;, &quot;4&quot;};
+
+    /** Symbols for roman numbered quarters. */
+<span class="fc" id="L66">    public static final String[] ROMAN_QUARTERS  = new String[] {&quot;I&quot;, &quot;II&quot;,</span>
+            &quot;III&quot;, &quot;IV&quot;};
+
+    /**
+     * Symbols for greek numbered quarters.
+     */
+<span class="fc" id="L72">    public static final String[] GREEK_QUARTERS = new String[] {&quot;\u0391&quot;,</span>
+            &quot;\u0392&quot;, &quot;\u0393&quot;, &quot;\u0394&quot;};
+
+    /** The strings. */
+<span class="fc" id="L76">    private String[] quarters = REGULAR_QUARTERS;</span>
+
+    /** A flag that controls whether the quarter or the year goes first. */
+    private boolean quarterFirst;
+
+    /**
+     * Creates a new instance for the default time zone.
+     */
+    public QuarterDateFormat() {
+<span class="nc" id="L85">        this(TimeZone.getDefault());</span>
+<span class="nc" id="L86">    }</span>
+
+    /**
+     * Creates a new instance for the specified time zone.
+     *
+     * @param zone  the time zone ({@code null} not permitted).
+     */
+    public QuarterDateFormat(TimeZone zone) {
+<span class="nc" id="L94">        this(zone, REGULAR_QUARTERS);</span>
+<span class="nc" id="L95">    }</span>
+
+    /**
+     * Creates a new instance for the specified time zone.
+     *
+     * @param zone  the time zone ({@code null} not permitted).
+     * @param quarterSymbols  the quarter symbols.
+     */
+    public QuarterDateFormat(TimeZone zone, String[] quarterSymbols) {
+<span class="fc" id="L104">        this(zone, quarterSymbols, false);</span>
+<span class="fc" id="L105">    }</span>
+
+    /**
+     * Creates a new instance for the specified time zone.
+     *
+     * @param zone  the time zone ({@code null} not permitted).
+     * @param quarterSymbols  the quarter symbols.
+     * @param quarterFirst  a flag that controls whether the quarter or the
+     *         year is displayed first.
+     */
+    public QuarterDateFormat(TimeZone zone, String[] quarterSymbols,
+<span class="fc" id="L116">            boolean quarterFirst) {</span>
+<span class="fc" id="L117">        Args.nullNotPermitted(zone, &quot;zone&quot;);</span>
+<span class="fc" id="L118">        this.calendar = new GregorianCalendar(zone);</span>
+<span class="fc" id="L119">        this.quarters = quarterSymbols;</span>
+<span class="fc" id="L120">        this.quarterFirst = quarterFirst;</span>
+
+        // the following is never used, but it seems that DateFormat requires
+        // it to be non-null.  It isn't well covered in the spec, refer to
+        // bug parade 5061189 for more info.
+<span class="fc" id="L125">        this.numberFormat = NumberFormat.getNumberInstance();</span>
+
+<span class="fc" id="L127">    }</span>
+
+    /**
+     * Formats the given date.
+     *
+     * @param date  the date.
+     * @param toAppendTo  the string buffer.
+     * @param fieldPosition  the field position.
+     *
+     * @return The formatted date.
+     */
+    @Override
+    public StringBuffer format(Date date, StringBuffer toAppendTo,
+                               FieldPosition fieldPosition) {
+<span class="nc" id="L141">        this.calendar.setTime(date);</span>
+<span class="nc" id="L142">        int year = this.calendar.get(Calendar.YEAR);</span>
+<span class="nc" id="L143">        int month = this.calendar.get(Calendar.MONTH);</span>
+<span class="nc" id="L144">        int quarter = month / 3;</span>
+<span class="nc bnc" id="L145" title="All 2 branches missed.">        if (this.quarterFirst) {</span>
+<span class="nc" id="L146">            toAppendTo.append(this.quarters[quarter]);</span>
+<span class="nc" id="L147">            toAppendTo.append(&quot; &quot;);</span>
+<span class="nc" id="L148">            toAppendTo.append(year);</span>
+        }
+        else {
+<span class="nc" id="L151">            toAppendTo.append(year);</span>
+<span class="nc" id="L152">            toAppendTo.append(&quot; &quot;);</span>
+<span class="nc" id="L153">            toAppendTo.append(this.quarters[quarter]);</span>
+        }
+<span class="nc" id="L155">        return toAppendTo;</span>
+    }
+
+    /**
+     * Parses the given string (not implemented).
+     *
+     * @param source  the date string.
+     * @param pos  the parse position.
+     *
+     * @return {@code null}, as this method has not been implemented.
+     */
+    @Override
+    public Date parse(String source, ParsePosition pos) {
+<span class="nc" id="L168">        return null;</span>
+    }
+
+    /**
+     * Tests this formatter for equality with an arbitrary object.
+     *
+     * @param obj  the object ({@code null} permitted).
+     *
+     * @return A boolean.
+     */
+    @Override
+    public boolean equals(Object obj) {
+<span class="pc bpc" id="L180" title="1 of 2 branches missed.">        if (obj == this) {</span>
+<span class="nc" id="L181">            return true;</span>
+        }
+<span class="pc bpc" id="L183" title="1 of 2 branches missed.">        if (!(obj instanceof QuarterDateFormat)) {</span>
+<span class="nc" id="L184">            return false;</span>
+        }
+<span class="fc" id="L186">        QuarterDateFormat that = (QuarterDateFormat) obj;</span>
+<span class="fc bfc" id="L187" title="All 2 branches covered.">        if (!Arrays.equals(this.quarters, that.quarters)) {</span>
+<span class="fc" id="L188">            return false;</span>
+        }
+<span class="fc bfc" id="L190" title="All 2 branches covered.">        if (this.quarterFirst != that.quarterFirst) {</span>
+<span class="fc" id="L191">            return false;</span>
+        }
+<span class="fc" id="L193">        return super.equals(obj);</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>KeyToGroupMap.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.data</a> &gt; <span class="el_source">KeyToGroupMap.java</span></div><h1>KeyToGroupMap.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * ------------------
+ * KeyToGroupMap.java
+ * ------------------
+ * (C) Copyright 2004-2022, by David Gilbert and Contributors.
+ *
+ * Original Author:  David Gilbert;
+ * Contributor(s):   -;
+ *
+ */
+
+package org.jfree.data;
+
+import org.jfree.chart.api.PublicCloneable;
+import org.jfree.chart.internal.Args;
+
+import java.io.Serializable;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.*;
+
+/**
+ * A class that maps keys (instances of {@code Comparable}) to groups.
+ */
+public class KeyToGroupMap&lt;K extends Comparable&lt;K&gt;, G extends Comparable&lt;G&gt;&gt; 
+        implements Cloneable, PublicCloneable, Serializable {
+
+    /** For serialization. */
+    private static final long serialVersionUID = -2228169345475318082L;
+
+    /** The default group. */
+    private G defaultGroup;
+
+    /** The groups. */
+    private List&lt;G&gt; groups;
+
+    /** A mapping between keys and groups. */
+    private Map&lt;K, G&gt; keyToGroupMap;
+
+    /**
+     * Creates a new map with a default group named 'Default Group'.
+     */
+    public KeyToGroupMap() {
+<span class="fc" id="L69">        this((G) &quot;Default Group&quot;); // FIXME</span>
+<span class="fc" id="L70">    }</span>
+
+    /**
+     * Creates a new map with the specified default group.
+     *
+     * @param defaultGroup  the default group ({@code null} not permitted).
+     */
+<span class="fc" id="L77">    public KeyToGroupMap(G defaultGroup) {</span>
+<span class="fc" id="L78">        Args.nullNotPermitted(defaultGroup, &quot;defaultGroup&quot;);</span>
+<span class="fc" id="L79">        this.defaultGroup = defaultGroup;</span>
+<span class="fc" id="L80">        this.groups = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L81">        this.keyToGroupMap = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L82">    }</span>
+
+    /**
+     * Returns the number of groups in the map.
+     *
+     * @return The number of groups in the map.
+     */
+    public int getGroupCount() {
+<span class="fc" id="L90">        return this.groups.size() + 1;</span>
+    }
+
+    /**
+     * Returns a list of the groups (always including the default group) in the
+     * map.  The returned list is independent of the map, so altering the list
+     * will have no effect.
+     *
+     * @return The groups (never {@code null}).
+     */
+    public List&lt;G&gt; getGroups() {
+<span class="nc" id="L101">        List&lt;G&gt; result = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L102">        result.add(this.defaultGroup);</span>
+<span class="nc bnc" id="L103" title="All 2 branches missed.">        for (G group : this.groups) {</span>
+<span class="nc bnc" id="L104" title="All 2 branches missed.">            if (!result.contains(group)) {</span>
+<span class="nc" id="L105">                result.add(group);</span>
+            }
+<span class="nc" id="L107">        }</span>
+<span class="nc" id="L108">        return result;</span>
+    }
+
+    /**
+     * Returns the index for the group.
+     *
+     * @param group  the group.
+     *
+     * @return The group index (or -1 if the group is not represented within
+     *         the map).
+     */
+    public int getGroupIndex(G group) {
+<span class="fc" id="L120">        int result = this.groups.indexOf(group);</span>
+<span class="fc bfc" id="L121" title="All 2 branches covered.">        if (result &lt; 0) {</span>
+<span class="fc bfc" id="L122" title="All 2 branches covered.">            if (this.defaultGroup.equals(group)) {</span>
+<span class="fc" id="L123">                result = 0;</span>
+            }
+        }
+        else {
+<span class="fc" id="L127">            result = result + 1;</span>
+        }
+<span class="fc" id="L129">        return result;</span>
+    }
+
+    /**
+     * Returns the group that a key is mapped to.
+     *
+     * @param key  the key ({@code null} not permitted).
+     *
+     * @return The group (never {@code null}, returns the default group if
+     *         there is no mapping for the specified key).
+     */
+    public G getGroup(K key) {
+<span class="fc" id="L141">        Args.nullNotPermitted(key, &quot;key&quot;);</span>
+<span class="fc" id="L142">        G result = this.defaultGroup;</span>
+<span class="fc" id="L143">        G group = this.keyToGroupMap.get(key);</span>
+<span class="fc bfc" id="L144" title="All 2 branches covered.">        if (group != null) {</span>
+<span class="fc" id="L145">            result = group;</span>
+        }
+<span class="fc" id="L147">        return result;</span>
+    }
+
+    /**
+     * Maps a key to a group.
+     *
+     * @param key  the key ({@code null} not permitted).
+     * @param group  the group ({@code null} permitted, clears any
+     *               existing mapping).
+     */
+    public void mapKeyToGroup(K key, G group) {
+<span class="fc" id="L158">        Args.nullNotPermitted(key, &quot;key&quot;);</span>
+<span class="fc" id="L159">        G currentGroup = getGroup(key);</span>
+<span class="fc bfc" id="L160" title="All 2 branches covered.">        if (!currentGroup.equals(this.defaultGroup)) {</span>
+<span class="pc bpc" id="L161" title="1 of 2 branches missed.">            if (!currentGroup.equals(group)) {</span>
+<span class="fc" id="L162">                int count = getKeyCount(currentGroup);</span>
+<span class="fc bfc" id="L163" title="All 2 branches covered.">                if (count == 1) {</span>
+<span class="fc" id="L164">                    this.groups.remove(currentGroup);</span>
+                }
+            }
+        }
+<span class="fc bfc" id="L168" title="All 2 branches covered.">        if (group == null) {</span>
+<span class="fc" id="L169">            this.keyToGroupMap.remove(key);</span>
+        }
+        else {
+<span class="fc bfc" id="L172" title="All 2 branches covered.">            if (!this.groups.contains(group)) {</span>
+<span class="fc bfc" id="L173" title="All 2 branches covered.">                if (!this.defaultGroup.equals(group)) {</span>
+<span class="fc" id="L174">                    this.groups.add(group);</span>
+                }
+            }
+<span class="fc" id="L177">            this.keyToGroupMap.put(key, group);</span>
+        }
+<span class="fc" id="L179">    }</span>
+
+    /**
+     * Returns the number of keys mapped to the specified group.  This method
+     * won't always return an accurate result for the default group, since
+     * explicit mappings are not required for this group.
+     *
+     * @param group  the group ({@code null} not permitted).
+     *
+     * @return The key count.
+     */
+    public int getKeyCount(G group) {
+<span class="fc" id="L191">        Args.nullNotPermitted(group, &quot;group&quot;);</span>
+<span class="fc" id="L192">        int result = 0;</span>
+<span class="fc bfc" id="L193" title="All 2 branches covered.">        for (G g : this.keyToGroupMap.values()) {</span>
+<span class="fc bfc" id="L194" title="All 2 branches covered.">            if (group.equals(g)) {</span>
+<span class="fc" id="L195">                result++;</span>
+            }
+<span class="fc" id="L197">        }</span>
+<span class="fc" id="L198">        return result;</span>
+    }
+
+    /**
+     * Tests the map for equality against an arbitrary object.
+     *
+     * @param obj  the object to test against ({@code null} permitted).
+     *
+     * @return A boolean.
+     */
+    @Override
+    public boolean equals(Object obj) {
+<span class="fc bfc" id="L210" title="All 2 branches covered.">        if (obj == this) {</span>
+<span class="fc" id="L211">            return true;</span>
+        }
+<span class="pc bpc" id="L213" title="1 of 2 branches missed.">        if (!(obj instanceof KeyToGroupMap)) {</span>
+<span class="nc" id="L214">            return false;</span>
+        }
+<span class="fc" id="L216">        KeyToGroupMap&lt;K, G&gt; that = (KeyToGroupMap) obj;</span>
+<span class="fc bfc" id="L217" title="All 2 branches covered.">        if (!Objects.equals(this.defaultGroup, that.defaultGroup)) {</span>
+<span class="fc" id="L218">            return false;</span>
+        }
+<span class="fc bfc" id="L220" title="All 2 branches covered.">        if (!this.keyToGroupMap.equals(that.keyToGroupMap)) {</span>
+<span class="fc" id="L221">            return false;</span>
+        }
+<span class="fc" id="L223">        return true;</span>
+    }
+
+    @Override
+    public int hashCode(){
+<span class="nc" id="L228">        int hash = 3;</span>
+<span class="nc" id="L229">        hash = 83 * hash + Objects.hashCode(this.defaultGroup);</span>
+<span class="nc" id="L230">        hash = 83 * hash + Objects.hashCode(this.keyToGroupMap);</span>
+<span class="nc" id="L231">        return hash;</span>
+    }
+
+    /**
+     * Returns a clone of the map.
+     *
+     * @return A clone.
+     *
+     * @throws CloneNotSupportedException  if there is a problem cloning the
+     *                                     map.
+     */
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+<span class="fc" id="L244">        KeyToGroupMap&lt;K, G&gt; result = (KeyToGroupMap) super.clone();</span>
+<span class="fc" id="L245">        result.defaultGroup</span>
+<span class="fc" id="L246">            = (G) KeyToGroupMap.clone(this.defaultGroup);</span>
+<span class="fc" id="L247">        result.groups = (List&lt;G&gt;) KeyToGroupMap.clone(this.groups);</span>
+<span class="fc" id="L248">        result.keyToGroupMap = (Map&lt;K, G&gt;) KeyToGroupMap.clone(this.keyToGroupMap);</span>
+<span class="fc" id="L249">        return result;</span>
+    }
+
+    /**
+     * Attempts to clone the specified object using reflection.
+     *
+     * @param object  the object ({@code null} permitted).
+     *
+     * @return The cloned object, or the original object if cloning failed.
+     */
+    private static Object clone(Object object) {
+<span class="pc bpc" id="L260" title="1 of 2 branches missed.">        if (object == null) {</span>
+<span class="nc" id="L261">            return null;</span>
+        }
+<span class="fc" id="L263">        Class&lt;?&gt; c = object.getClass();</span>
+<span class="fc" id="L264">        Object result = null;</span>
+        try {
+<span class="fc" id="L266">            Method m = c.getMethod(&quot;clone&quot;, (Class[]) null);</span>
+<span class="pc bpc" id="L267" title="1 of 2 branches missed.">            if (Modifier.isPublic(m.getModifiers())) {</span>
+                try {
+<span class="fc" id="L269">                    result = m.invoke(object, (Object[]) null);</span>
+                }
+<span class="nc" id="L271">                catch (Exception e) {</span>
+<span class="nc" id="L272">                    e.printStackTrace();</span>
+<span class="fc" id="L273">                }</span>
+            }
+        }
+<span class="fc" id="L276">        catch (NoSuchMethodException e) {</span>
+<span class="fc" id="L277">            result = object;</span>
+<span class="fc" id="L278">        }</span>
+<span class="fc" id="L279">        return result;</span>
+    }
+
+    /**
+     * Returns a clone of the list.
+     *
+     * @param list  the list.
+     *
+     * @return A clone of the list.
+     *
+     * @throws CloneNotSupportedException if the list could not be cloned.
+     */
+    private static Collection clone(Collection list)
+        throws CloneNotSupportedException {
+<span class="fc" id="L293">        Collection result = null;</span>
+<span class="pc bpc" id="L294" title="1 of 2 branches missed.">        if (list != null) {</span>
+            try {
+<span class="fc" id="L296">                Collection clone = list.getClass().getDeclaredConstructor().newInstance();</span>
+<span class="fc bfc" id="L297" title="All 2 branches covered.">                for (Object o : list) {</span>
+<span class="fc" id="L298">                    clone.add(KeyToGroupMap.clone(o));</span>
+<span class="fc" id="L299">                }</span>
+<span class="fc" id="L300">                result = clone;</span>
+            }
+<span class="nc" id="L302">            catch (Exception e) {</span>
+<span class="nc" id="L303">                throw new CloneNotSupportedException(&quot;Exception.&quot;);</span>
+<span class="fc" id="L304">            }</span>
+        }
+<span class="fc" id="L306">        return result;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

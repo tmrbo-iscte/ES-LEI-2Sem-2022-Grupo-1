@@ -1,0 +1,443 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GridArrangement.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.chart.block</a> &gt; <span class="el_source">GridArrangement.java</span></div><h1>GridArrangement.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * --------------------
+ * GridArrangement.java
+ * --------------------
+ * (C) Copyright 2005-2022, by David Gilbert.
+ *
+ * Original Author:  David Gilbert;
+ * Contributor(s):   -;
+ *
+ */
+
+package org.jfree.chart.block;
+
+import java.awt.Graphics2D;
+import java.awt.geom.Rectangle2D;
+import java.io.Serializable;
+import java.util.List;
+
+/**
+ * Arranges blocks in a grid within their container.
+ */
+public class GridArrangement implements Arrangement, Serializable {
+
+    /** For serialization. */
+    private static final long serialVersionUID = -2563758090144655938L;
+
+    /** The rows. */
+    private final int rows;
+
+    /** The columns. */
+    private final int columns;
+
+    /**
+     * Creates a new grid arrangement.
+     *
+     * @param rows  the row count.
+     * @param columns  the column count.
+     */
+<span class="fc" id="L64">    public GridArrangement(int rows, int columns) {</span>
+<span class="fc" id="L65">        this.rows = rows;</span>
+<span class="fc" id="L66">        this.columns = columns;</span>
+<span class="fc" id="L67">    }</span>
+
+    /**
+     * Adds a block and a key which can be used to determine the position of
+     * the block in the arrangement.  This method is called by the container
+     * (you don't need to call this method directly) and gives the arrangement
+     * an opportunity to record the details if they are required.
+     *
+     * @param block  the block.
+     * @param key  the key ({@code null} permitted).
+     */
+    @Override
+    public void add(Block block, Object key) {
+        // can safely ignore
+<span class="fc" id="L81">    }</span>
+
+    /**
+     * Arranges the blocks within the specified container, subject to the given
+     * constraint.
+     *
+     * @param container  the container ({@code null} not permitted).
+     * @param constraint  the constraint.
+     * @param g2  the graphics device.
+     *
+     * @return The size following the arrangement.
+     */
+    @Override
+    public Size2D arrange(BlockContainer container, Graphics2D g2,
+                          RectangleConstraint constraint) {
+<span class="fc" id="L96">        LengthConstraintType w = constraint.getWidthConstraintType();</span>
+<span class="fc" id="L97">        LengthConstraintType h = constraint.getHeightConstraintType();</span>
+<span class="fc bfc" id="L98" title="All 2 branches covered.">        if (w == LengthConstraintType.NONE) {</span>
+<span class="fc bfc" id="L99" title="All 2 branches covered.">            if (h == LengthConstraintType.NONE) {</span>
+<span class="fc" id="L100">                return arrangeNN(container, g2);</span>
+            }
+<span class="fc bfc" id="L102" title="All 2 branches covered.">            else if (h == LengthConstraintType.FIXED) {</span>
+<span class="fc" id="L103">                return arrangeNF(container, g2, constraint);</span>
+            }
+<span class="pc bpc" id="L105" title="1 of 2 branches missed.">            else if (h == LengthConstraintType.RANGE) {</span>
+                // find optimum height, then map to range
+<span class="fc" id="L107">                return arrangeNR(container, g2, constraint);</span>
+            }
+        }
+<span class="fc bfc" id="L110" title="All 2 branches covered.">        else if (w == LengthConstraintType.FIXED) {</span>
+<span class="fc bfc" id="L111" title="All 2 branches covered.">            if (h == LengthConstraintType.NONE) {</span>
+                // find optimum height
+<span class="fc" id="L113">                return arrangeFN(container, g2, constraint);</span>
+            }
+<span class="fc bfc" id="L115" title="All 2 branches covered.">            else if (h == LengthConstraintType.FIXED) {</span>
+<span class="fc" id="L116">                return arrangeFF(container, g2, constraint);</span>
+            }
+<span class="pc bpc" id="L118" title="1 of 2 branches missed.">            else if (h == LengthConstraintType.RANGE) {</span>
+                // find optimum height and map to range
+<span class="fc" id="L120">                return arrangeFR(container, g2, constraint);</span>
+            }
+        }
+<span class="pc bpc" id="L123" title="1 of 2 branches missed.">        else if (w == LengthConstraintType.RANGE) {</span>
+            // find optimum width and map to range
+<span class="fc bfc" id="L125" title="All 2 branches covered.">            if (h == LengthConstraintType.NONE) {</span>
+                // find optimum height
+<span class="fc" id="L127">                return arrangeRN(container, g2, constraint);</span>
+            }
+<span class="fc bfc" id="L129" title="All 2 branches covered.">            else if (h == LengthConstraintType.FIXED) {</span>
+                // fixed width
+<span class="fc" id="L131">                return arrangeRF(container, g2, constraint);</span>
+            }
+<span class="pc bpc" id="L133" title="1 of 2 branches missed.">            else if (h == LengthConstraintType.RANGE) {</span>
+<span class="fc" id="L134">                return arrangeRR(container, g2, constraint);</span>
+            }
+        }
+<span class="nc" id="L137">        throw new RuntimeException(&quot;Should never get to here!&quot;);</span>
+    }
+
+    /**
+     * Arranges the container with no constraint on the width or height.
+     *
+     * @param container  the container ({@code null} not permitted).
+     * @param g2  the graphics device.
+     *
+     * @return The size.
+     */
+    protected Size2D arrangeNN(BlockContainer container, Graphics2D g2) {
+<span class="fc" id="L149">        double maxW = 0.0;</span>
+<span class="fc" id="L150">        double maxH = 0.0;</span>
+<span class="fc" id="L151">        List&lt;Block&gt; blocks = container.getBlocks();</span>
+<span class="fc bfc" id="L152" title="All 2 branches covered.">        for (Block b : blocks) {</span>
+<span class="fc bfc" id="L153" title="All 2 branches covered.">            if (b != null) {</span>
+<span class="fc" id="L154">                Size2D s = b.arrange(g2, RectangleConstraint.NONE);</span>
+<span class="fc" id="L155">                maxW = Math.max(maxW, s.getWidth());</span>
+<span class="fc" id="L156">                maxH = Math.max(maxH, s.getHeight());</span>
+            }
+<span class="fc" id="L158">        }</span>
+<span class="fc" id="L159">        double width = this.columns * maxW;</span>
+<span class="fc" id="L160">        double height = this.rows * maxH;</span>
+<span class="fc" id="L161">        RectangleConstraint c = new RectangleConstraint(width, height);</span>
+<span class="fc" id="L162">        return arrangeFF(container, g2, c);</span>
+    }
+
+    /**
+     * Arranges the container with a fixed overall width and height.
+     *
+     * @param container  the container ({@code null} not permitted).
+     * @param g2  the graphics device.
+     * @param constraint  the constraint ({@code null} not permitted).
+     *
+     * @return The size following the arrangement.
+     */
+    protected Size2D arrangeFF(BlockContainer container, Graphics2D g2,
+                               RectangleConstraint constraint) {
+<span class="fc" id="L176">        double width = constraint.getWidth() / this.columns;</span>
+<span class="fc" id="L177">        double height = constraint.getHeight() / this.rows;</span>
+<span class="fc" id="L178">        List&lt;Block&gt; blocks = container.getBlocks();</span>
+<span class="fc bfc" id="L179" title="All 2 branches covered.">        for (int c = 0; c &lt; this.columns; c++) {</span>
+<span class="fc bfc" id="L180" title="All 2 branches covered.">            for (int r = 0; r &lt; this.rows; r++) {</span>
+<span class="fc" id="L181">                int index = r * this.columns + c;</span>
+<span class="fc bfc" id="L182" title="All 2 branches covered.">                if (index &gt;= blocks.size()) {</span>
+<span class="fc" id="L183">                    break;</span>
+                }
+<span class="fc" id="L185">                Block b = blocks.get(index);</span>
+<span class="fc bfc" id="L186" title="All 2 branches covered.">                if (b != null) {</span>
+<span class="fc" id="L187">                    b.setBounds(new Rectangle2D.Double(c * width, r * height,</span>
+                            width, height));
+                }
+            }
+        }
+<span class="fc" id="L192">        return new Size2D(this.columns * width, this.rows * height);</span>
+    }
+
+    /**
+     * Arrange with a fixed width and a height within a given range.
+     *
+     * @param container  the container.
+     * @param constraint  the constraint.
+     * @param g2  the graphics device.
+     *
+     * @return The size of the arrangement.
+     */
+    protected Size2D arrangeFR(BlockContainer container, Graphics2D g2,
+                               RectangleConstraint constraint) {
+
+<span class="fc" id="L207">        RectangleConstraint c1 = constraint.toUnconstrainedHeight();</span>
+<span class="fc" id="L208">        Size2D size1 = arrange(container, g2, c1);</span>
+
+<span class="fc bfc" id="L210" title="All 2 branches covered.">        if (constraint.getHeightRange().contains(size1.getHeight())) {</span>
+<span class="fc" id="L211">            return size1;</span>
+        }
+        else {
+<span class="fc" id="L214">            double h = constraint.getHeightRange().constrain(size1.getHeight());</span>
+<span class="fc" id="L215">            RectangleConstraint c2 = constraint.toFixedHeight(h);</span>
+<span class="fc" id="L216">            return arrange(container, g2, c2);</span>
+        }
+    }
+
+    /**
+     * Arrange with a fixed height and a width within a given range.
+     *
+     * @param container  the container.
+     * @param constraint  the constraint.
+     * @param g2  the graphics device.
+     *
+     * @return The size of the arrangement.
+     */
+    protected Size2D arrangeRF(BlockContainer container, Graphics2D g2,
+                               RectangleConstraint constraint) {
+
+<span class="fc" id="L232">        RectangleConstraint c1 = constraint.toUnconstrainedWidth();</span>
+<span class="fc" id="L233">        Size2D size1 = arrange(container, g2, c1);</span>
+
+<span class="pc bpc" id="L235" title="1 of 2 branches missed.">        if (constraint.getWidthRange().contains(size1.getWidth())) {</span>
+<span class="nc" id="L236">            return size1;</span>
+        }
+        else {
+<span class="fc" id="L239">            double w = constraint.getWidthRange().constrain(size1.getWidth());</span>
+<span class="fc" id="L240">            RectangleConstraint c2 = constraint.toFixedWidth(w);</span>
+<span class="fc" id="L241">            return arrange(container, g2, c2);</span>
+        }
+    }
+
+    /**
+     * Arrange with a fixed width and no height constraint.
+     *
+     * @param container  the container.
+     * @param constraint  the constraint.
+     * @param g2  the graphics device.
+     *
+     * @return The size of the arrangement.
+     */
+    protected Size2D arrangeRN(BlockContainer container, Graphics2D g2,
+                               RectangleConstraint constraint) {
+
+<span class="fc" id="L257">        RectangleConstraint c1 = constraint.toUnconstrainedWidth();</span>
+<span class="fc" id="L258">        Size2D size1 = arrange(container, g2, c1);</span>
+
+<span class="pc bpc" id="L260" title="1 of 2 branches missed.">        if (constraint.getWidthRange().contains(size1.getWidth())) {</span>
+<span class="nc" id="L261">            return size1;</span>
+        }
+        else {
+<span class="fc" id="L264">            double w = constraint.getWidthRange().constrain(size1.getWidth());</span>
+<span class="fc" id="L265">            RectangleConstraint c2 = constraint.toFixedWidth(w);</span>
+<span class="fc" id="L266">            return arrange(container, g2, c2);</span>
+        }
+    }
+
+    /**
+     * Arrange with a fixed height and no width constraint.
+     *
+     * @param container  the container.
+     * @param constraint  the constraint.
+     * @param g2  the graphics device.
+     *
+     * @return The size of the arrangement.
+     */
+    protected Size2D arrangeNR(BlockContainer container, Graphics2D g2,
+                               RectangleConstraint constraint) {
+
+<span class="fc" id="L282">        RectangleConstraint c1 = constraint.toUnconstrainedHeight();</span>
+<span class="fc" id="L283">        Size2D size1 = arrange(container, g2, c1);</span>
+
+<span class="pc bpc" id="L285" title="1 of 2 branches missed.">        if (constraint.getHeightRange().contains(size1.getHeight())) {</span>
+<span class="nc" id="L286">            return size1;</span>
+        }
+        else {
+<span class="fc" id="L289">            double h = constraint.getHeightRange().constrain(size1.getHeight());</span>
+<span class="fc" id="L290">            RectangleConstraint c2 = constraint.toFixedHeight(h);</span>
+<span class="fc" id="L291">            return arrange(container, g2, c2);</span>
+        }
+    }
+
+    /**
+     * Arrange with ranges for both the width and height constraints.
+     *
+     * @param container  the container.
+     * @param constraint  the constraint.
+     * @param g2  the graphics device.
+     *
+     * @return The size of the arrangement.
+     */
+    protected Size2D arrangeRR(BlockContainer container, Graphics2D g2,
+                               RectangleConstraint constraint) {
+
+<span class="fc" id="L307">        Size2D size1 = arrange(container, g2, RectangleConstraint.NONE);</span>
+
+<span class="pc bpc" id="L309" title="1 of 2 branches missed.">        if (constraint.getWidthRange().contains(size1.getWidth())) {</span>
+<span class="nc bnc" id="L310" title="All 2 branches missed.">            if (constraint.getHeightRange().contains(size1.getHeight())) {</span>
+<span class="nc" id="L311">                return size1;</span>
+            }
+            else {
+                // width is OK, but height must be constrained
+<span class="nc" id="L315">                double h = constraint.getHeightRange().constrain(</span>
+<span class="nc" id="L316">                        size1.getHeight());</span>
+<span class="nc" id="L317">                RectangleConstraint cc = new RectangleConstraint(</span>
+<span class="nc" id="L318">                        size1.getWidth(), h);</span>
+<span class="nc" id="L319">                return arrangeFF(container, g2, cc);</span>
+            }
+        }
+        else {
+<span class="pc bpc" id="L323" title="1 of 2 branches missed.">            if (constraint.getHeightRange().contains(size1.getHeight())) {</span>
+                // height is OK, but width must be constrained
+<span class="nc" id="L325">                double w = constraint.getWidthRange().constrain(</span>
+<span class="nc" id="L326">                        size1.getWidth());</span>
+<span class="nc" id="L327">                RectangleConstraint cc = new RectangleConstraint(w,</span>
+<span class="nc" id="L328">                        size1.getHeight());</span>
+<span class="nc" id="L329">                return arrangeFF(container, g2, cc);</span>
+
+            }
+            else {
+<span class="fc" id="L333">                double w = constraint.getWidthRange().constrain(</span>
+<span class="fc" id="L334">                        size1.getWidth());</span>
+<span class="fc" id="L335">                double h = constraint.getHeightRange().constrain(</span>
+<span class="fc" id="L336">                        size1.getHeight());</span>
+<span class="fc" id="L337">                RectangleConstraint cc = new RectangleConstraint(w, h);</span>
+<span class="fc" id="L338">                return arrangeFF(container, g2, cc);</span>
+            }
+        }
+    }
+
+    /**
+     * Arrange with a fixed width and a height within a given range.
+     *
+     * @param container  the container.
+     * @param g2  the graphics device.
+     * @param constraint  the constraint.
+     *
+     * @return The size of the arrangement.
+     */
+    protected Size2D arrangeFN(BlockContainer container, Graphics2D g2,
+                               RectangleConstraint constraint) {
+
+<span class="fc" id="L355">        double width = constraint.getWidth() / this.columns;</span>
+<span class="fc" id="L356">        RectangleConstraint bc = constraint.toFixedWidth(width);</span>
+<span class="fc" id="L357">        List&lt;Block&gt; blocks = container.getBlocks();</span>
+<span class="fc" id="L358">        double maxH = 0.0;</span>
+<span class="fc bfc" id="L359" title="All 2 branches covered.">        for (int r = 0; r &lt; this.rows; r++) {</span>
+<span class="fc bfc" id="L360" title="All 2 branches covered.">            for (int c = 0; c &lt; this.columns; c++) {</span>
+<span class="fc" id="L361">                int index = r * this.columns + c;</span>
+<span class="fc bfc" id="L362" title="All 2 branches covered.">                if (index &gt;= blocks.size()) {</span>
+<span class="fc" id="L363">                    break;</span>
+                }
+<span class="fc" id="L365">                Block b = blocks.get(index);</span>
+<span class="fc bfc" id="L366" title="All 2 branches covered.">                if (b != null) {</span>
+<span class="fc" id="L367">                    Size2D s = b.arrange(g2, bc);</span>
+<span class="fc" id="L368">                    maxH = Math.max(maxH, s.getHeight());</span>
+                }
+            }
+        }
+<span class="fc" id="L372">        RectangleConstraint cc = constraint.toFixedHeight(maxH * this.rows);</span>
+<span class="fc" id="L373">        return arrange(container, g2, cc);</span>
+    }
+
+    /**
+     * Arrange with a fixed height and no constraint for the width.
+     *
+     * @param container  the container.
+     * @param g2  the graphics device.
+     * @param constraint  the constraint.
+     *
+     * @return The size of the arrangement.
+     */
+    protected Size2D arrangeNF(BlockContainer container, Graphics2D g2,
+                               RectangleConstraint constraint) {
+
+<span class="fc" id="L388">        double height = constraint.getHeight() / this.rows;</span>
+<span class="fc" id="L389">        RectangleConstraint bc = constraint.toFixedHeight(height);</span>
+<span class="fc" id="L390">        List&lt;Block&gt; blocks = container.getBlocks();</span>
+<span class="fc" id="L391">        double maxW = 0.0;</span>
+<span class="fc bfc" id="L392" title="All 2 branches covered.">        for (int r = 0; r &lt; this.rows; r++) {</span>
+<span class="fc bfc" id="L393" title="All 2 branches covered.">            for (int c = 0; c &lt; this.columns; c++) {</span>
+<span class="fc" id="L394">                int index = r * this.columns + c;</span>
+<span class="pc bpc" id="L395" title="1 of 2 branches missed.">                if (index &gt;= blocks.size()) {</span>
+<span class="nc" id="L396">                    break;</span>
+                }
+<span class="fc" id="L398">                Block b = blocks.get(index);</span>
+<span class="pc bpc" id="L399" title="1 of 2 branches missed.">                if (b != null) {</span>
+<span class="fc" id="L400">                    Size2D s = b.arrange(g2, bc);</span>
+<span class="fc" id="L401">                    maxW = Math.max(maxW, s.getWidth());</span>
+                }
+            }
+        }
+<span class="fc" id="L405">        RectangleConstraint cc = constraint.toFixedWidth(maxW * this.columns);</span>
+<span class="fc" id="L406">        return arrange(container, g2, cc);</span>
+    }
+
+    /**
+     * Clears any cached layout information retained by the arrangement.
+     */
+    @Override
+    public void clear() {
+        // nothing to clear
+<span class="nc" id="L415">    }</span>
+
+    /**
+     * Compares this layout manager for equality with an arbitrary object.
+     *
+     * @param obj  the object.
+     *
+     * @return A boolean.
+     */
+    @Override
+    public boolean equals(Object obj) {
+<span class="pc bpc" id="L426" title="1 of 2 branches missed.">        if (obj == this) {</span>
+<span class="nc" id="L427">            return true;</span>
+        }
+<span class="pc bpc" id="L429" title="1 of 2 branches missed.">        if (!(obj instanceof GridArrangement)) {</span>
+<span class="nc" id="L430">            return false;</span>
+        }
+<span class="fc" id="L432">        GridArrangement that = (GridArrangement) obj;</span>
+<span class="fc bfc" id="L433" title="All 2 branches covered.">        if (this.columns != that.columns) {</span>
+<span class="fc" id="L434">            return false;</span>
+        }
+<span class="fc bfc" id="L436" title="All 2 branches covered.">        if (this.rows != that.rows) {</span>
+<span class="fc" id="L437">            return false;</span>
+        }
+<span class="fc" id="L439">        return true;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

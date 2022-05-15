@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SymbolicXYItemLabelGenerator.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.chart.labels</a> &gt; <span class="el_source">SymbolicXYItemLabelGenerator.java</span></div><h1>SymbolicXYItemLabelGenerator.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * ---------------------------------
+ * SymbolicXYItemLabelGenerator.java
+ * ---------------------------------
+ * (C) Copyright 2001-2021, by Anthony Boulestreau and Contributors.
+ *
+ * Original Author:  Anthony Boulestreau;
+ * Contributor(s):   David Gilbert;
+ *
+ */
+
+package org.jfree.chart.labels;
+
+import java.io.Serializable;
+import org.jfree.chart.internal.Args;
+import org.jfree.chart.api.PublicCloneable;
+
+import org.jfree.data.time.RegularTimePeriod;
+import org.jfree.data.time.TimeSeriesCollection;
+import org.jfree.data.xy.XYDataset;
+import org.jfree.data.xy.XisSymbolic;
+import org.jfree.data.xy.YisSymbolic;
+
+/**
+ * A standard item label generator for plots that use data from an
+ * {@link XYDataset}.
+ */
+<span class="fc" id="L53">public class SymbolicXYItemLabelGenerator implements XYItemLabelGenerator,</span>
+        XYToolTipGenerator, Cloneable, PublicCloneable, Serializable {
+
+    /** For serialization. */
+    private static final long serialVersionUID = 3963400354475494395L;
+
+    /**
+     * Generates a tool tip text item for a particular item within a series.
+     *
+     * @param dataset  the dataset ({@code null} not permitted).
+     * @param series  the series number (zero-based index).
+     * @param item  the item number (zero-based index).
+     *
+     * @return The tool tip text (possibly {@code null}).
+     */
+    @Override
+    public String generateToolTip(XYDataset dataset, int series, int item) {
+<span class="nc" id="L70">        Args.nullNotPermitted(dataset, &quot;dataset&quot;);</span>
+        String xStr, yStr;
+<span class="nc bnc" id="L72" title="All 2 branches missed.">        if (dataset instanceof YisSymbolic) {</span>
+<span class="nc" id="L73">            yStr = ((YisSymbolic) dataset).getYSymbolicValue(series, item);</span>
+        }
+        else {
+<span class="nc" id="L76">            double y = dataset.getYValue(series, item);</span>
+<span class="nc" id="L77">            yStr = Double.toString(round(y, 2));</span>
+        }
+<span class="nc bnc" id="L79" title="All 2 branches missed.">        if (dataset instanceof XisSymbolic) {</span>
+<span class="nc" id="L80">            xStr = ((XisSymbolic) dataset).getXSymbolicValue(series, item);</span>
+        }
+<span class="nc bnc" id="L82" title="All 2 branches missed.">        else if (dataset instanceof TimeSeriesCollection) {</span>
+<span class="nc" id="L83">            RegularTimePeriod p</span>
+<span class="nc" id="L84">                = ((TimeSeriesCollection) dataset).getSeries(series)</span>
+<span class="nc" id="L85">                    .getTimePeriod(item);</span>
+<span class="nc" id="L86">            xStr = p.toString();</span>
+<span class="nc" id="L87">        }</span>
+        else {
+<span class="nc" id="L89">            double x = dataset.getXValue(series, item);</span>
+<span class="nc" id="L90">            xStr = Double.toString(round(x, 2));</span>
+        }
+<span class="nc" id="L92">        return &quot;X: &quot; + xStr + &quot;, Y: &quot; + yStr;</span>
+    }
+
+    /**
+     * Generates a label for the specified item. The label is typically a
+     * formatted version of the data value, but any text can be used.
+     *
+     * @param dataset  the dataset ({@code null} not permitted).
+     * @param series  the series index (zero-based).
+     * @param category  the category index (zero-based).
+     *
+     * @return The label (possibly {@code null}).
+     */
+    @Override
+    public String generateLabel(XYDataset dataset, int series, int category) {
+<span class="nc" id="L107">        return null;  //TODO: implement this method properly</span>
+    }
+
+    /**
+    * Round a double value.
+    *
+    * @param value  the value.
+    * @param nb  the exponent.
+    *
+    * @return The rounded value.
+    */
+    private static double round(double value, int nb) {
+<span class="nc bnc" id="L119" title="All 2 branches missed.">        if (nb &lt;= 0) {</span>
+<span class="nc" id="L120">            return Math.floor(value + 0.5d);</span>
+        }
+<span class="nc" id="L122">        double p = Math.pow(10, nb);</span>
+<span class="nc" id="L123">        double tempval = Math.floor(value * p + 0.5d);</span>
+<span class="nc" id="L124">        return tempval / p;</span>
+    }
+
+    /**
+     * Returns an independent copy of the generator.
+     *
+     * @return A clone.
+     *
+     * @throws CloneNotSupportedException if cloning is not supported.
+     */
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+<span class="fc" id="L136">        return super.clone();</span>
+    }
+
+    /**
+     * Tests if this object is equal to another.
+     *
+     * @param obj  the other object.
+     *
+     * @return A boolean.
+     */
+    @Override
+    public boolean equals(Object obj) {
+<span class="pc bpc" id="L148" title="1 of 2 branches missed.">        if (obj == this) {</span>
+<span class="nc" id="L149">            return true;</span>
+        }
+<span class="pc bpc" id="L151" title="1 of 2 branches missed.">        if (obj instanceof SymbolicXYItemLabelGenerator) {</span>
+<span class="fc" id="L152">            return true;</span>
+        }
+<span class="nc" id="L154">        return false;</span>
+    }
+
+    /**
+     * Returns a hash code for this instance.
+     *
+     * @return A hash code.
+     */
+    @Override
+    public int hashCode() {
+<span class="fc" id="L164">        int result = 127;</span>
+<span class="fc" id="L165">        return result;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

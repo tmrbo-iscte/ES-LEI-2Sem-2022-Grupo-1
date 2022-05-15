@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LineUtils.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.chart.internal</a> &gt; <span class="el_source">LineUtils.java</span></div><h1>LineUtils.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * --------------
+ * LineUtils.java
+ * --------------
+ * (C) Copyright 2008-2022, by David Gilbert and Contributors.
+ *
+ * Original Author:  David Gilbert;
+ * Contributor(s):   -;
+ *
+ */
+
+package org.jfree.chart.internal;
+
+import java.awt.geom.Line2D;
+import java.awt.geom.Rectangle2D;
+
+/**
+ * Some utility methods for {@link Line2D} objects.
+ */
+<span class="nc" id="L45">public class LineUtils {</span>
+
+    /**
+     * Clips the specified line to the given rectangle.  If any of the line
+     * coordinates is not finite, then the method returns {@code false} and
+     * the line is not modified.
+     *
+     * @param line  the line ({@code null} not permitted).
+     * @param rect  the clipping rectangle ({@code null} not permitted).
+     *
+     * @return {@code true} if the clipped line is visible, and
+     *     {@code false} otherwise.
+     */
+    public static boolean clipLine(Line2D line, Rectangle2D rect) {
+
+<span class="fc" id="L60">        double x1 = line.getX1();</span>
+<span class="fc" id="L61">        double y1 = line.getY1();</span>
+<span class="fc" id="L62">        double x2 = line.getX2();</span>
+<span class="fc" id="L63">        double y2 = line.getY2();</span>
+        
+        // check that the line can be worked with (bug#223)
+<span class="fc bfc" id="L66" title="All 4 branches covered.">        if ((!Double.isFinite(x1) || !Double.isFinite(y1)) </span>
+<span class="fc bfc" id="L67" title="All 4 branches covered.">                || !Double.isFinite(x2) || !Double.isFinite(y2)) {</span>
+<span class="fc" id="L68">            return false;</span>
+        }
+
+<span class="fc" id="L71">        double minX = rect.getMinX();</span>
+<span class="fc" id="L72">        double maxX = rect.getMaxX();</span>
+<span class="fc" id="L73">        double minY = rect.getMinY();</span>
+<span class="fc" id="L74">        double maxY = rect.getMaxY();</span>
+
+<span class="fc" id="L76">        int f1 = rect.outcode(x1, y1);</span>
+<span class="fc" id="L77">        int f2 = rect.outcode(x2, y2);</span>
+
+<span class="fc bfc" id="L79" title="All 2 branches covered.">        while ((f1 | f2) != 0) {</span>
+<span class="fc bfc" id="L80" title="All 2 branches covered.">            if ((f1 &amp; f2) != 0) {</span>
+<span class="fc" id="L81">                return false;</span>
+            }
+<span class="fc" id="L83">            double dx = (x2 - x1);</span>
+<span class="fc" id="L84">            double dy = (y2 - y1);</span>
+            // update (x1, y1), (x2, y2) and f1 and f2 using intersections
+            // then recheck
+<span class="fc bfc" id="L87" title="All 2 branches covered.">            if (f1 != 0) {</span>
+                // first point is outside, so we update it against one of the
+                // four sides then continue
+<span class="pc bpc" id="L90" title="1 of 4 branches missed.">                if ((f1 &amp; Rectangle2D.OUT_LEFT) == Rectangle2D.OUT_LEFT</span>
+                        &amp;&amp; dx != 0.0) {
+<span class="fc" id="L92">                    y1 = y1 + (minX - x1) * dy / dx;</span>
+<span class="fc" id="L93">                    x1 = minX;</span>
+<span class="pc bpc" id="L94" title="1 of 4 branches missed.">                } else if ((f1 &amp; Rectangle2D.OUT_RIGHT) == Rectangle2D.OUT_RIGHT</span>
+                        &amp;&amp; dx != 0.0) {
+<span class="fc" id="L96">                    y1 = y1 + (maxX - x1) * dy / dx;</span>
+<span class="fc" id="L97">                    x1 = maxX;</span>
+<span class="pc bpc" id="L98" title="3 of 4 branches missed.">                } else if ((f1 &amp; Rectangle2D.OUT_BOTTOM) == Rectangle2D.OUT_BOTTOM</span>
+                        &amp;&amp; dy != 0.0) {
+<span class="nc" id="L100">                    x1 = x1 + (maxY - y1) * dx / dy;</span>
+<span class="nc" id="L101">                    y1 = maxY;</span>
+<span class="pc bpc" id="L102" title="2 of 4 branches missed.">                } else if ((f1 &amp; Rectangle2D.OUT_TOP) == Rectangle2D.OUT_TOP</span>
+                        &amp;&amp; dy != 0.0) {
+<span class="fc" id="L104">                    x1 = x1 + (minY - y1) * dx / dy;</span>
+<span class="fc" id="L105">                    y1 = minY;</span>
+                }
+<span class="fc" id="L107">                f1 = rect.outcode(x1, y1);</span>
+<span class="pc bpc" id="L108" title="1 of 2 branches missed.">            } else if (f2 != 0) {</span>
+                // second point is outside, so we update it against one of the
+                // four sides then continue
+<span class="pc bpc" id="L111" title="3 of 4 branches missed.">                if ((f2 &amp; Rectangle2D.OUT_LEFT) == Rectangle2D.OUT_LEFT</span>
+                        &amp;&amp; dx != 0.0) {
+<span class="nc" id="L113">                    y2 = y2 + (minX - x2) * dy / dx;</span>
+<span class="nc" id="L114">                    x2 = minX;</span>
+<span class="pc bpc" id="L115" title="1 of 4 branches missed.">                } else if ((f2 &amp; Rectangle2D.OUT_RIGHT) == Rectangle2D.OUT_RIGHT</span>
+                        &amp;&amp; dx != 0.0) {
+<span class="fc" id="L117">                    y2 = y2 + (maxX - x2) * dy / dx;</span>
+<span class="fc" id="L118">                    x2 = maxX;</span>
+<span class="pc bpc" id="L119" title="2 of 4 branches missed.">                } else if ((f2 &amp; Rectangle2D.OUT_BOTTOM) == Rectangle2D.OUT_BOTTOM</span>
+                        &amp;&amp; dy != 0.0) {
+<span class="fc" id="L121">                    x2 = x2 + (maxY - y2) * dx / dy;</span>
+<span class="fc" id="L122">                    y2 = maxY;</span>
+<span class="nc bnc" id="L123" title="All 4 branches missed.">                } else if ((f2 &amp; Rectangle2D.OUT_TOP) == Rectangle2D.OUT_TOP</span>
+                        &amp;&amp; dy != 0.0) {
+<span class="nc" id="L125">                    x2 = x2 + (minY - y2) * dx / dy;</span>
+<span class="nc" id="L126">                    y2 = minY;</span>
+                }
+<span class="fc" id="L128">                f2 = rect.outcode(x2, y2);</span>
+            }
+<span class="fc" id="L130">        }</span>
+
+<span class="fc" id="L132">        line.setLine(x1, y1, x2, y2);</span>
+<span class="fc" id="L133">        return true;  // the line is visible - if it wasn't, we'd have</span>
+                      // returned false from within the while loop above
+
+    }
+    
+    /**
+     * Creates a new line by extending an existing line.
+     *
+     * @param line  the line ({@code null} not permitted).
+     * @param startPercent  the amount to extend the line at the start point
+     *                      end.
+     * @param endPercent  the amount to extend the line at the end point end.
+     *
+     * @return A new line.
+     */
+    public static Line2D extendLine(Line2D line, double startPercent,
+                              double endPercent) {
+<span class="nc" id="L150">        Args.nullNotPermitted(line, &quot;line&quot;);</span>
+<span class="nc" id="L151">        double x1 = line.getX1();</span>
+<span class="nc" id="L152">        double x2 = line.getX2();</span>
+<span class="nc" id="L153">        double deltaX = x2 - x1;</span>
+<span class="nc" id="L154">        double y1 = line.getY1();</span>
+<span class="nc" id="L155">        double y2 = line.getY2();</span>
+<span class="nc" id="L156">        double deltaY = y2 - y1;</span>
+<span class="nc" id="L157">        x1 = x1 - (startPercent * deltaX);</span>
+<span class="nc" id="L158">        y1 = y1 - (startPercent * deltaY);</span>
+<span class="nc" id="L159">        x2 = x2 + (endPercent * deltaX);</span>
+<span class="nc" id="L160">        y2 = y2 + (endPercent * deltaY);</span>
+<span class="nc" id="L161">        return new Line2D.Double(x1, y1, x2, y2);</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

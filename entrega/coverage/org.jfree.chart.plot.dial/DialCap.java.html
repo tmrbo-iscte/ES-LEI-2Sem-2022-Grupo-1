@@ -1,0 +1,336 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DialCap.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.chart.plot.dial</a> &gt; <span class="el_source">DialCap.java</span></div><h1>DialCap.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * ------------
+ * DialCap.java
+ * ------------
+ * (C) Copyright 2006-2022, by David Gilbert.
+ *
+ * Original Author:  David Gilbert;
+ * Contributor(s):   -;
+ *
+ */
+
+package org.jfree.chart.plot.dial;
+
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Paint;
+import java.awt.Stroke;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Rectangle2D;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+
+import org.jfree.chart.internal.HashUtils;
+import org.jfree.chart.internal.PaintUtils;
+import org.jfree.chart.internal.Args;
+import org.jfree.chart.api.PublicCloneable;
+import org.jfree.chart.internal.SerialUtils;
+
+/**
+ * A regular dial layer that can be used to draw a cap over the center of
+ * the dial (the base of the dial pointer(s)).
+ */
+public class DialCap extends AbstractDialLayer implements DialLayer, Cloneable,
+        PublicCloneable, Serializable {
+
+    /** For serialization. */
+    static final long serialVersionUID = -2929484264982524463L;
+
+    /**
+     * The radius of the cap, as a percentage of the framing rectangle.
+     */
+    private double radius;
+
+    /**
+     * The fill paint.  This field is transient because it requires special
+     * handling for serialization.
+     */
+    private transient Paint fillPaint;
+
+    /**
+     * The paint used to draw the cap outline (this should never be
+     * {@code null}).  This field is transient because it requires
+     * special handling for serialization.
+     */
+    private transient Paint outlinePaint;
+
+    /**
+     * The stroke used to draw the cap outline (this should never be
+     * {@code null}).   This field is transient because it requires
+     * special handling for serialization.
+     */
+    private transient Stroke outlineStroke;
+
+    /**
+     * Creates a new instance of {@code StandardDialBackground}.  The
+     * default background paint is {@code Color.WHITE}.
+     */
+<span class="fc" id="L96">    public DialCap() {</span>
+<span class="fc" id="L97">        this.radius = 0.05;</span>
+<span class="fc" id="L98">        this.fillPaint = Color.WHITE;</span>
+<span class="fc" id="L99">        this.outlinePaint = Color.BLACK;</span>
+<span class="fc" id="L100">        this.outlineStroke = new BasicStroke(2.0f);</span>
+<span class="fc" id="L101">    }</span>
+
+    /**
+     * Returns the radius of the cap, as a percentage of the dial's framing
+     * rectangle.
+     *
+     * @return The radius.
+     *
+     * @see #setRadius(double)
+     */
+    public double getRadius() {
+<span class="nc" id="L112">        return this.radius;</span>
+    }
+
+    /**
+     * Sets the radius of the cap, as a percentage of the dial's framing
+     * rectangle, and sends a {@link DialLayerChangeEvent} to all registered
+     * listeners.
+     *
+     * @param radius  the radius (must be greater than zero).
+     *
+     * @see #getRadius()
+     */
+    public void setRadius(double radius) {
+<span class="pc bpc" id="L125" title="1 of 2 branches missed.">        if (radius &lt;= 0.0) {</span>
+<span class="nc" id="L126">            throw new IllegalArgumentException(&quot;Requires radius &gt; 0.0.&quot;);</span>
+        }
+<span class="fc" id="L128">        this.radius = radius;</span>
+<span class="fc" id="L129">        notifyListeners(new DialLayerChangeEvent(this));</span>
+<span class="fc" id="L130">    }</span>
+
+    /**
+     * Returns the paint used to fill the cap.
+     *
+     * @return The paint (never {@code null}).
+     *
+     * @see #setFillPaint(Paint)
+     */
+    public Paint getFillPaint() {
+<span class="nc" id="L140">        return this.fillPaint;</span>
+    }
+
+    /**
+     * Sets the paint for the cap background and sends a
+     * {@link DialLayerChangeEvent} to all registered listeners.
+     *
+     * @param paint  the paint ({@code null} not permitted).
+     *
+     * @see #getFillPaint()
+     */
+    public void setFillPaint(Paint paint) {
+<span class="fc" id="L152">        Args.nullNotPermitted(paint, &quot;paint&quot;);</span>
+<span class="fc" id="L153">        this.fillPaint = paint;</span>
+<span class="fc" id="L154">        notifyListeners(new DialLayerChangeEvent(this));</span>
+<span class="fc" id="L155">    }</span>
+
+    /**
+     * Returns the paint used to draw the outline of the cap.
+     *
+     * @return The paint (never {@code null}).
+     *
+     * @see #setOutlinePaint(Paint)
+     */
+    public Paint getOutlinePaint() {
+<span class="nc" id="L165">        return this.outlinePaint;</span>
+    }
+
+    /**
+     * Sets the paint used to draw the outline of the cap and sends a
+     * {@link DialLayerChangeEvent} to all registered listeners.
+     *
+     * @param paint  the paint ({@code null} not permitted).
+     *
+     * @see #getOutlinePaint()
+     */
+    public void setOutlinePaint(Paint paint) {
+<span class="fc" id="L177">        Args.nullNotPermitted(paint, &quot;paint&quot;);</span>
+<span class="fc" id="L178">        this.outlinePaint = paint;</span>
+<span class="fc" id="L179">        notifyListeners(new DialLayerChangeEvent(this));</span>
+<span class="fc" id="L180">    }</span>
+
+    /**
+     * Returns the stroke used to draw the outline of the cap.
+     *
+     * @return The stroke (never {@code null}).
+     *
+     * @see #setOutlineStroke(Stroke)
+     */
+    public Stroke getOutlineStroke() {
+<span class="nc" id="L190">        return this.outlineStroke;</span>
+    }
+
+    /**
+     * Sets the stroke used to draw the outline of the cap and sends a
+     * {@link DialLayerChangeEvent} to all registered listeners.
+     *
+     * @param stroke  the stroke ({@code null} not permitted).
+     *
+     * @see #getOutlineStroke()
+     */
+    public void setOutlineStroke(Stroke stroke) {
+<span class="fc" id="L202">        Args.nullNotPermitted(stroke, &quot;stroke&quot;);</span>
+<span class="fc" id="L203">        this.outlineStroke = stroke;</span>
+<span class="fc" id="L204">        notifyListeners(new DialLayerChangeEvent(this));</span>
+<span class="fc" id="L205">    }</span>
+
+    /**
+     * Returns {@code true} to indicate that this layer should be
+     * clipped within the dial window.
+     *
+     * @return {@code true}.
+     */
+    @Override
+    public boolean isClippedToWindow() {
+<span class="nc" id="L215">        return true;</span>
+    }
+
+    /**
+     * Draws the background to the specified graphics device.  If the dial
+     * frame specifies a window, the clipping region will already have been
+     * set to this window before this method is called.
+     *
+     * @param g2  the graphics device ({@code null} not permitted).
+     * @param plot  the plot (ignored here).
+     * @param frame  the dial frame (ignored here).
+     * @param view  the view rectangle ({@code null} not permitted).
+     */
+    @Override
+    public void draw(Graphics2D g2, DialPlot plot, Rectangle2D frame,
+            Rectangle2D view) {
+
+<span class="nc" id="L232">        g2.setPaint(this.fillPaint);</span>
+
+<span class="nc" id="L234">        Rectangle2D f = DialPlot.rectangleByRadius(frame, this.radius,</span>
+                this.radius);
+<span class="nc" id="L236">        Ellipse2D e = new Ellipse2D.Double(f.getX(), f.getY(), f.getWidth(),</span>
+<span class="nc" id="L237">                f.getHeight());</span>
+<span class="nc" id="L238">        g2.fill(e);</span>
+<span class="nc" id="L239">        g2.setPaint(this.outlinePaint);</span>
+<span class="nc" id="L240">        g2.setStroke(this.outlineStroke);</span>
+<span class="nc" id="L241">        g2.draw(e);</span>
+
+<span class="nc" id="L243">    }</span>
+
+    /**
+     * Tests this instance for equality with an arbitrary object.
+     *
+     * @param obj  the object ({@code null} permitted).
+     *
+     * @return A boolean.
+     */
+    @Override
+    public boolean equals(Object obj) {
+<span class="pc bpc" id="L254" title="1 of 2 branches missed.">        if (obj == this) {</span>
+<span class="nc" id="L255">            return true;</span>
+        }
+<span class="fc bfc" id="L257" title="All 2 branches covered.">        if (!(obj instanceof DialCap)) {</span>
+<span class="fc" id="L258">            return false;</span>
+        }
+<span class="fc" id="L260">        DialCap that = (DialCap) obj;</span>
+<span class="fc bfc" id="L261" title="All 2 branches covered.">        if (this.radius != that.radius) {</span>
+<span class="fc" id="L262">            return false;</span>
+        }
+<span class="fc bfc" id="L264" title="All 2 branches covered.">        if (!PaintUtils.equal(this.fillPaint, that.fillPaint)) {</span>
+<span class="fc" id="L265">            return false;</span>
+        }
+<span class="fc bfc" id="L267" title="All 2 branches covered.">        if (!PaintUtils.equal(this.outlinePaint, that.outlinePaint)) {</span>
+<span class="fc" id="L268">            return false;</span>
+        }
+<span class="fc bfc" id="L270" title="All 2 branches covered.">        if (!this.outlineStroke.equals(that.outlineStroke)) {</span>
+<span class="fc" id="L271">            return false;</span>
+        }
+<span class="fc" id="L273">        return super.equals(obj);</span>
+    }
+
+    /**
+     * Returns a hash code for this instance.
+     *
+     * @return The hash code.
+     */
+    @Override
+    public int hashCode() {
+<span class="fc" id="L283">        int result = 193;</span>
+<span class="fc" id="L284">        result = 37 * result + HashUtils.hashCodeForPaint(this.fillPaint);</span>
+<span class="fc" id="L285">        result = 37 * result + HashUtils.hashCodeForPaint(</span>
+                this.outlinePaint);
+<span class="fc" id="L287">        result = 37 * result + this.outlineStroke.hashCode();</span>
+<span class="fc" id="L288">        return result;</span>
+    }
+
+    /**
+     * Returns a clone of this instance.
+     *
+     * @return A clone.
+     *
+     * @throws CloneNotSupportedException if some attribute of the cap cannot
+     *     be cloned.
+     */
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+<span class="fc" id="L301">        return super.clone();</span>
+    }
+
+    /**
+     * Provides serialization support.
+     *
+     * @param stream  the output stream.
+     *
+     * @throws IOException  if there is an I/O error.
+     */
+    private void writeObject(ObjectOutputStream stream) throws IOException {
+<span class="fc" id="L312">        stream.defaultWriteObject();</span>
+<span class="fc" id="L313">        SerialUtils.writePaint(this.fillPaint, stream);</span>
+<span class="fc" id="L314">        SerialUtils.writePaint(this.outlinePaint, stream);</span>
+<span class="fc" id="L315">        SerialUtils.writeStroke(this.outlineStroke, stream);</span>
+<span class="fc" id="L316">    }</span>
+
+    /**
+     * Provides serialization support.
+     *
+     * @param stream  the input stream.
+     *
+     * @throws IOException  if there is an I/O error.
+     * @throws ClassNotFoundException  if there is a classpath problem.
+     */
+    private void readObject(ObjectInputStream stream)
+            throws IOException, ClassNotFoundException {
+<span class="fc" id="L328">        stream.defaultReadObject();</span>
+<span class="fc" id="L329">        this.fillPaint = SerialUtils.readPaint(stream);</span>
+<span class="fc" id="L330">        this.outlinePaint = SerialUtils.readPaint(stream);</span>
+<span class="fc" id="L331">        this.outlineStroke = SerialUtils.readStroke(stream);</span>
+<span class="fc" id="L332">    }</span>
+
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

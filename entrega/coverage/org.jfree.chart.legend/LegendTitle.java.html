@@ -1,0 +1,680 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LegendTitle.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.chart.legend</a> &gt; <span class="el_source">LegendTitle.java</span></div><h1>LegendTitle.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * ----------------
+ * LegendTitle.java
+ * ----------------
+ * (C) Copyright 2002-2022, by David Gilbert.
+ *
+ * Original Author:  David Gilbert;
+ * Contributor(s):   Pierre-Marie Le Biot;
+ * 
+ */
+
+package org.jfree.chart.legend;
+
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics2D;
+import java.awt.Paint;
+import java.awt.geom.Rectangle2D;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import org.jfree.chart.ChartElementVisitor;
+
+import org.jfree.chart.block.Arrangement;
+import org.jfree.chart.block.Block;
+import org.jfree.chart.block.BlockContainer;
+import org.jfree.chart.block.BlockFrame;
+import org.jfree.chart.block.BlockResult;
+import org.jfree.chart.block.BorderArrangement;
+import org.jfree.chart.block.CenterArrangement;
+import org.jfree.chart.block.ColumnArrangement;
+import org.jfree.chart.block.EntityBlockParams;
+import org.jfree.chart.block.FlowArrangement;
+import org.jfree.chart.block.LabelBlock;
+import org.jfree.chart.block.RectangleConstraint;
+import org.jfree.chart.entity.EntityCollection;
+import org.jfree.chart.entity.StandardEntityCollection;
+import org.jfree.chart.entity.TitleEntity;
+import org.jfree.chart.event.TitleChangeEvent;
+import org.jfree.chart.api.RectangleAnchor;
+import org.jfree.chart.api.RectangleEdge;
+import org.jfree.chart.api.PublicCloneable;
+import org.jfree.chart.internal.SerialUtils;
+import org.jfree.chart.api.RectangleInsets;
+import org.jfree.chart.block.Size2D;
+import org.jfree.chart.internal.PaintUtils;
+import org.jfree.chart.internal.Args;
+import org.jfree.chart.title.Title;
+import org.jfree.chart.api.SortOrder;
+
+
+/**
+ * A chart title that displays a legend for the data in the chart.
+ * &lt;P&gt;
+ * The title can be populated with legend items manually, or you can assign a
+ * reference to the plot, in which case the legend items will be automatically
+ * created to match the dataset(s).
+ */
+public class LegendTitle extends Title
+        implements Cloneable, PublicCloneable, Serializable {
+
+    /** For serialization. */
+    private static final long serialVersionUID = 2644010518533854633L;
+
+    /** The default item font. */
+<span class="fc" id="L92">    public static final Font DEFAULT_ITEM_FONT</span>
+            = new Font(&quot;SansSerif&quot;, Font.PLAIN, 12);
+
+    /** The default item paint. */
+<span class="fc" id="L96">    public static final Paint DEFAULT_ITEM_PAINT = Color.BLACK;</span>
+
+    /** The sources for legend items. */
+    private LegendItemSource[] sources;
+
+    /** The background paint (possibly {@code null}). */
+    private transient Paint backgroundPaint;
+
+    /** The edge for the legend item graphic relative to the text. */
+    private RectangleEdge legendItemGraphicEdge;
+
+    /** The anchor point for the legend item graphic. */
+    private RectangleAnchor legendItemGraphicAnchor;
+
+    /** The legend item graphic location. */
+    private RectangleAnchor legendItemGraphicLocation;
+
+    /** The padding for the legend item graphic. */
+    private RectangleInsets legendItemGraphicPadding;
+
+    /** The item font. */
+    private Font itemFont;
+
+    /** The item paint. */
+    private transient Paint itemPaint;
+
+    /** The padding for the item labels. */
+    private RectangleInsets itemLabelPadding;
+
+    /**
+     * A container that holds and displays the legend items.
+     */
+    private BlockContainer items;
+
+    /**
+     * The layout for the legend when it is positioned at the top or bottom
+     * of the chart.
+     */
+    private Arrangement hLayout;
+
+    /**
+     * The layout for the legend when it is positioned at the left or right
+     * of the chart.
+     */
+    private Arrangement vLayout;
+
+    /**
+     * An optional container for wrapping the legend items (allows for adding
+     * a title or other text to the legend).
+     */
+    private BlockContainer wrapper;
+
+    /**
+     * Whether to render legend items in ascending or descending order.
+     */
+    private SortOrder sortOrder;
+
+    /**
+     * Constructs a new (empty) legend for the specified source.
+     *
+     * @param source  the source.
+     */
+    public LegendTitle(LegendItemSource source) {
+<span class="fc" id="L159">        this(source, new FlowArrangement(), new ColumnArrangement());</span>
+<span class="fc" id="L160">    }</span>
+
+    /**
+     * Creates a new legend title with the specified arrangement.
+     *
+     * @param source  the source.
+     * @param hLayout  the horizontal item arrangement ({@code null} not
+     *                 permitted).
+     * @param vLayout  the vertical item arrangement ({@code null} not
+     *                 permitted).
+     */
+    public LegendTitle(LegendItemSource source,
+<span class="fc" id="L172">                       Arrangement hLayout, Arrangement vLayout) {</span>
+<span class="fc" id="L173">        this.sources = new LegendItemSource[] {source};</span>
+<span class="fc" id="L174">        this.items = new BlockContainer(hLayout);</span>
+<span class="fc" id="L175">        this.hLayout = hLayout;</span>
+<span class="fc" id="L176">        this.vLayout = vLayout;</span>
+<span class="fc" id="L177">        this.backgroundPaint = null;</span>
+<span class="fc" id="L178">        this.legendItemGraphicEdge = RectangleEdge.LEFT;</span>
+<span class="fc" id="L179">        this.legendItemGraphicAnchor = RectangleAnchor.CENTER;</span>
+<span class="fc" id="L180">        this.legendItemGraphicLocation = RectangleAnchor.CENTER;</span>
+<span class="fc" id="L181">        this.legendItemGraphicPadding = new RectangleInsets(2.0, 2.0, 2.0, 2.0);</span>
+<span class="fc" id="L182">        this.itemFont = DEFAULT_ITEM_FONT;</span>
+<span class="fc" id="L183">        this.itemPaint = DEFAULT_ITEM_PAINT;</span>
+<span class="fc" id="L184">        this.itemLabelPadding = new RectangleInsets(2.0, 2.0, 2.0, 2.0);</span>
+<span class="fc" id="L185">        this.sortOrder = SortOrder.ASCENDING;</span>
+<span class="fc" id="L186">    }</span>
+
+    /**
+     * Returns the legend item sources.
+     *
+     * @return The sources.
+     */
+    public LegendItemSource[] getSources() {
+<span class="fc" id="L194">        return this.sources;</span>
+    }
+
+    /**
+     * Sets the legend item sources and sends a {@link TitleChangeEvent} to
+     * all registered listeners.
+     *
+     * @param sources  the sources ({@code null} not permitted).
+     */
+    public void setSources(LegendItemSource[] sources) {
+<span class="nc" id="L204">        Args.nullNotPermitted(sources, &quot;sources&quot;);</span>
+<span class="nc" id="L205">        this.sources = sources;</span>
+<span class="nc" id="L206">        notifyListeners(new TitleChangeEvent(this));</span>
+<span class="nc" id="L207">    }</span>
+
+    /**
+     * Returns the background paint.
+     *
+     * @return The background paint (possibly {@code null}).
+     */
+    public Paint getBackgroundPaint() {
+<span class="fc" id="L215">        return this.backgroundPaint;</span>
+    }
+
+    /**
+     * Sets the background paint for the legend and sends a
+     * {@link TitleChangeEvent} to all registered listeners.
+     *
+     * @param paint  the paint ({@code null} permitted).
+     */
+    public void setBackgroundPaint(Paint paint) {
+<span class="fc" id="L225">        this.backgroundPaint = paint;</span>
+<span class="fc" id="L226">        notifyListeners(new TitleChangeEvent(this));</span>
+<span class="fc" id="L227">    }</span>
+
+    /**
+     * Returns the location of the shape within each legend item.
+     *
+     * @return The location (never {@code null}).
+     */
+    public RectangleEdge getLegendItemGraphicEdge() {
+<span class="nc" id="L235">        return this.legendItemGraphicEdge;</span>
+    }
+
+    /**
+     * Sets the location of the shape within each legend item.
+     *
+     * @param edge  the edge ({@code null} not permitted).
+     */
+    public void setLegendItemGraphicEdge(RectangleEdge edge) {
+<span class="fc" id="L244">        Args.nullNotPermitted(edge, &quot;edge&quot;);</span>
+<span class="fc" id="L245">        this.legendItemGraphicEdge = edge;</span>
+<span class="fc" id="L246">        notifyListeners(new TitleChangeEvent(this));</span>
+<span class="fc" id="L247">    }</span>
+
+    /**
+     * Returns the legend item graphic anchor.
+     *
+     * @return The graphic anchor (never {@code null}).
+     */
+    public RectangleAnchor getLegendItemGraphicAnchor() {
+<span class="fc" id="L255">        return this.legendItemGraphicAnchor;</span>
+    }
+
+    /**
+     * Sets the anchor point used for the graphic in each legend item.
+     *
+     * @param anchor  the anchor point ({@code null} not permitted).
+     */
+    public void setLegendItemGraphicAnchor(RectangleAnchor anchor) {
+<span class="fc" id="L264">        Args.nullNotPermitted(anchor, &quot;anchor&quot;);</span>
+<span class="fc" id="L265">        this.legendItemGraphicAnchor = anchor;</span>
+<span class="fc" id="L266">    }</span>
+
+    /**
+     * Returns the legend item graphic location.
+     *
+     * @return The location (never {@code null}).
+     */
+    public RectangleAnchor getLegendItemGraphicLocation() {
+<span class="fc" id="L274">        return this.legendItemGraphicLocation;</span>
+    }
+
+    /**
+     * Sets the legend item graphic location.
+     *
+     * @param anchor  the anchor ({@code null} not permitted).
+     */
+    public void setLegendItemGraphicLocation(RectangleAnchor anchor) {
+<span class="fc" id="L283">        this.legendItemGraphicLocation = anchor;</span>
+<span class="fc" id="L284">    }</span>
+
+    /**
+     * Returns the padding that will be applied to each item graphic.
+     *
+     * @return The padding (never {@code null}).
+     */
+    public RectangleInsets getLegendItemGraphicPadding() {
+<span class="nc" id="L292">        return this.legendItemGraphicPadding;</span>
+    }
+
+    /**
+     * Sets the padding that will be applied to each item graphic in the
+     * legend and sends a {@link TitleChangeEvent} to all registered listeners.
+     *
+     * @param padding  the padding ({@code null} not permitted).
+     */
+    public void setLegendItemGraphicPadding(RectangleInsets padding) {
+<span class="nc" id="L302">        Args.nullNotPermitted(padding, &quot;padding&quot;);</span>
+<span class="nc" id="L303">        this.legendItemGraphicPadding = padding;</span>
+<span class="nc" id="L304">        notifyListeners(new TitleChangeEvent(this));</span>
+<span class="nc" id="L305">    }</span>
+
+    /**
+     * Returns the item font.
+     *
+     * @return The font (never {@code null}).
+     */
+    public Font getItemFont() {
+<span class="nc" id="L313">        return this.itemFont;</span>
+    }
+
+    /**
+     * Sets the item font and sends a {@link TitleChangeEvent} to
+     * all registered listeners.
+     *
+     * @param font  the font ({@code null} not permitted).
+     */
+    public void setItemFont(Font font) {
+<span class="fc" id="L323">        Args.nullNotPermitted(font, &quot;font&quot;);</span>
+<span class="fc" id="L324">        this.itemFont = font;</span>
+<span class="fc" id="L325">        notifyListeners(new TitleChangeEvent(this));</span>
+<span class="fc" id="L326">    }</span>
+
+    /**
+     * Returns the item paint.
+     *
+     * @return The paint (never {@code null}).
+     */
+    public Paint getItemPaint() {
+<span class="nc" id="L334">        return this.itemPaint;</span>
+    }
+
+    /**
+     * Sets the item paint.
+     *
+     * @param paint  the paint ({@code null} not permitted).
+     */
+    public void setItemPaint(Paint paint) {
+<span class="fc" id="L343">        Args.nullNotPermitted(paint, &quot;paint&quot;);</span>
+<span class="fc" id="L344">        this.itemPaint = paint;</span>
+<span class="fc" id="L345">        notifyListeners(new TitleChangeEvent(this));</span>
+<span class="fc" id="L346">    }</span>
+
+    /**
+     * Returns the padding used for the items labels.
+     *
+     * @return The padding (never {@code null}).
+     */
+    public RectangleInsets getItemLabelPadding() {
+<span class="nc" id="L354">        return this.itemLabelPadding;</span>
+    }
+
+    /**
+     * Sets the padding used for the item labels in the legend.
+     *
+     * @param padding  the padding ({@code null} not permitted).
+     */
+    public void setItemLabelPadding(RectangleInsets padding) {
+<span class="nc" id="L363">        Args.nullNotPermitted(padding, &quot;padding&quot;);</span>
+<span class="nc" id="L364">        this.itemLabelPadding = padding;</span>
+<span class="nc" id="L365">        notifyListeners(new TitleChangeEvent(this));</span>
+<span class="nc" id="L366">    }</span>
+
+    /**
+     * Gets the order used to display legend items.
+     * 
+     * @return The order (never {@code null}).
+     */
+    public SortOrder getSortOrder() {
+<span class="nc" id="L374">        return this.sortOrder;</span>
+    }
+
+    /**
+     * Sets the order used to display legend items.
+     * 
+     * @param order Specifies ascending or descending order ({@code null}
+     *              not permitted).
+     */
+    public void setSortOrder(SortOrder order) {
+<span class="fc" id="L384">        Args.nullNotPermitted(order, &quot;order&quot;);</span>
+<span class="fc" id="L385">        this.sortOrder = order;</span>
+<span class="fc" id="L386">        notifyListeners(new TitleChangeEvent(this));</span>
+<span class="fc" id="L387">    }</span>
+
+    /**
+     * Fetches the latest legend items.
+     */
+    protected void fetchLegendItems() {
+<span class="fc" id="L393">        this.items.clear();</span>
+<span class="fc" id="L394">        RectangleEdge p = getPosition();</span>
+<span class="pc bpc" id="L395" title="1 of 2 branches missed.">        if (RectangleEdge.isTopOrBottom(p)) {</span>
+<span class="fc" id="L396">            this.items.setArrangement(this.hLayout);</span>
+        }
+        else {
+<span class="nc" id="L399">            this.items.setArrangement(this.vLayout);</span>
+        }
+
+<span class="pc bpc" id="L402" title="1 of 2 branches missed.">        if (this.sortOrder.equals(SortOrder.ASCENDING)) {</span>
+<span class="fc bfc" id="L403" title="All 2 branches covered.">            for (int s = 0; s &lt; this.sources.length; s++) {</span>
+<span class="fc" id="L404">                LegendItemCollection legendItems =</span>
+<span class="fc" id="L405">                    this.sources[s].getLegendItems();</span>
+<span class="fc bfc" id="L406" title="All 2 branches covered.">                if (legendItems != null) {</span>
+<span class="fc bfc" id="L407" title="All 2 branches covered.">                    for (int i = 0; i &lt; legendItems.getItemCount(); i++) {</span>
+<span class="fc" id="L408">                        addItemBlock(legendItems.get(i));</span>
+                    }
+                }
+            }
+        }
+        else {
+<span class="nc bnc" id="L414" title="All 2 branches missed.">            for (int s = this.sources.length - 1; s &gt;= 0; s--) {</span>
+<span class="nc" id="L415">                LegendItemCollection legendItems =</span>
+<span class="nc" id="L416">                    this.sources[s].getLegendItems();</span>
+<span class="nc bnc" id="L417" title="All 2 branches missed.">                if (legendItems != null) {</span>
+<span class="nc bnc" id="L418" title="All 2 branches missed.">                    for (int i = legendItems.getItemCount()-1; i &gt;= 0; i--) {</span>
+<span class="nc" id="L419">                        addItemBlock(legendItems.get(i));</span>
+                    }
+                }
+            }
+        }
+<span class="fc" id="L424">    }</span>
+
+    private void addItemBlock(LegendItem item) {
+<span class="fc" id="L427">        Block block = createLegendItemBlock(item);</span>
+<span class="fc" id="L428">        this.items.add(block);</span>
+<span class="fc" id="L429">    }</span>
+
+    /**
+     * Creates a legend item block.
+     *
+     * @param item  the legend item.
+     *
+     * @return The block.
+     */
+    protected Block createLegendItemBlock(LegendItem item) {
+        BlockContainer result;
+<span class="fc" id="L440">        LegendGraphic lg = new LegendGraphic(item.getShape(),</span>
+<span class="fc" id="L441">                item.getFillPaint());</span>
+<span class="fc" id="L442">        lg.setFillPaintTransformer(item.getFillPaintTransformer());</span>
+<span class="fc" id="L443">        lg.setShapeFilled(item.isShapeFilled());</span>
+<span class="fc" id="L444">        lg.setLine(item.getLine());</span>
+<span class="fc" id="L445">        lg.setLineStroke(item.getLineStroke());</span>
+<span class="fc" id="L446">        lg.setLinePaint(item.getLinePaint());</span>
+<span class="fc" id="L447">        lg.setLineVisible(item.isLineVisible());</span>
+<span class="fc" id="L448">        lg.setShapeVisible(item.isShapeVisible());</span>
+<span class="fc" id="L449">        lg.setShapeOutlineVisible(item.isShapeOutlineVisible());</span>
+<span class="fc" id="L450">        lg.setOutlinePaint(item.getOutlinePaint());</span>
+<span class="fc" id="L451">        lg.setOutlineStroke(item.getOutlineStroke());</span>
+<span class="fc" id="L452">        lg.setPadding(this.legendItemGraphicPadding);</span>
+
+<span class="fc" id="L454">        LegendItemBlockContainer legendItem = new LegendItemBlockContainer(</span>
+<span class="fc" id="L455">                new BorderArrangement(), item.getDataset(),</span>
+<span class="fc" id="L456">                item.getSeriesKey());</span>
+<span class="fc" id="L457">        lg.setShapeAnchor(getLegendItemGraphicAnchor());</span>
+<span class="fc" id="L458">        lg.setShapeLocation(getLegendItemGraphicLocation());</span>
+<span class="fc" id="L459">        legendItem.add(lg, this.legendItemGraphicEdge);</span>
+<span class="fc" id="L460">        Font textFont = item.getLabelFont();</span>
+<span class="pc bpc" id="L461" title="1 of 2 branches missed.">        if (textFont == null) {</span>
+<span class="fc" id="L462">            textFont = this.itemFont;</span>
+        }
+<span class="fc" id="L464">        Paint textPaint = item.getLabelPaint();</span>
+<span class="pc bpc" id="L465" title="1 of 2 branches missed.">        if (textPaint == null) {</span>
+<span class="fc" id="L466">            textPaint = this.itemPaint;</span>
+        }
+<span class="fc" id="L468">        LabelBlock labelBlock = new LabelBlock(item.getLabel(), textFont,</span>
+                textPaint);
+<span class="fc" id="L470">        labelBlock.setPadding(this.itemLabelPadding);</span>
+<span class="fc" id="L471">        legendItem.add(labelBlock);</span>
+<span class="fc" id="L472">        legendItem.setToolTipText(item.getToolTipText());</span>
+<span class="fc" id="L473">        legendItem.setURLText(item.getURLText());</span>
+
+<span class="fc" id="L475">        result = new BlockContainer(new CenterArrangement());</span>
+<span class="fc" id="L476">        result.add(legendItem);</span>
+
+<span class="fc" id="L478">        return result;</span>
+    }
+
+    /**
+     * Returns the container that holds the legend items.
+     *
+     * @return The container for the legend items.
+     */
+    public BlockContainer getItemContainer() {
+<span class="nc" id="L487">        return this.items;</span>
+    }
+
+    /**
+     * Arranges the contents of the block, within the given constraints, and
+     * returns the block size.
+     *
+     * @param g2  the graphics device.
+     * @param constraint  the constraint ({@code null} not permitted).
+     *
+     * @return The block size (in Java2D units, never {@code null}).
+     */
+    @Override
+    public Size2D arrange(Graphics2D g2, RectangleConstraint constraint) {
+<span class="fc" id="L501">        Size2D result = new Size2D();</span>
+<span class="fc" id="L502">        fetchLegendItems();</span>
+<span class="fc bfc" id="L503" title="All 2 branches covered.">        if (this.items.isEmpty()) {</span>
+<span class="fc" id="L504">            return result;</span>
+        }
+<span class="fc" id="L506">        BlockContainer container = this.wrapper;</span>
+<span class="pc bpc" id="L507" title="1 of 2 branches missed.">        if (container == null) {</span>
+<span class="fc" id="L508">            container = this.items;</span>
+        }
+<span class="fc" id="L510">        RectangleConstraint c = toContentConstraint(constraint);</span>
+<span class="fc" id="L511">        Size2D size = container.arrange(g2, c);</span>
+<span class="fc" id="L512">        result.setHeight(calculateTotalHeight(size.getHeight()));</span>
+<span class="fc" id="L513">        result.setWidth(calculateTotalWidth(size.getWidth()));</span>
+<span class="fc" id="L514">        return result;</span>
+    }
+
+    /**
+     * Receives a chart element visitor. 
+     * 
+     * @param visitor  the visitor ({@code null} not permitted).
+     */
+    @Override
+    public void receive(ChartElementVisitor visitor) {
+        // FIXME : visit the legend components
+<span class="nc" id="L525">        super.receive(visitor);</span>
+<span class="nc" id="L526">    }</span>
+
+    /**
+     * Draws the title on a Java 2D graphics device (such as the screen or a
+     * printer).
+     *
+     * @param g2  the graphics device.
+     * @param area  the available area for the title.
+     */
+    @Override
+    public void draw(Graphics2D g2, Rectangle2D area) {
+<span class="nc" id="L537">        draw(g2, area, null);</span>
+<span class="nc" id="L538">    }</span>
+
+    /**
+     * Draws the block within the specified area.
+     *
+     * @param g2  the graphics device.
+     * @param area  the area.
+     * @param params  ignored ({@code null} permitted).
+     *
+     * @return An {@link org.jfree.chart.block.EntityBlockResult} or
+     *         {@code null}.
+     */
+    @Override
+    public Object draw(Graphics2D g2, Rectangle2D area, Object params) {
+<span class="fc" id="L552">        Rectangle2D target = (Rectangle2D) area.clone();</span>
+<span class="fc" id="L553">        Rectangle2D hotspot = (Rectangle2D) area.clone();</span>
+<span class="fc" id="L554">        StandardEntityCollection sec = null;</span>
+<span class="pc bpc" id="L555" title="1 of 2 branches missed.">        if (params instanceof EntityBlockParams</span>
+<span class="fc bfc" id="L556" title="All 2 branches covered.">                &amp;&amp; ((EntityBlockParams) params).getGenerateEntities()) {</span>
+<span class="fc" id="L557">            sec = new StandardEntityCollection();</span>
+<span class="fc" id="L558">            sec.add(new TitleEntity(hotspot, this));</span>
+        }
+<span class="fc" id="L560">        target = trimMargin(target);</span>
+<span class="pc bpc" id="L561" title="1 of 2 branches missed.">        if (this.backgroundPaint != null) {</span>
+<span class="fc" id="L562">            g2.setPaint(this.backgroundPaint);</span>
+<span class="fc" id="L563">            g2.fill(target);</span>
+        }
+<span class="fc" id="L565">        BlockFrame border = getFrame();</span>
+<span class="fc" id="L566">        border.draw(g2, target);</span>
+<span class="fc" id="L567">        border.getInsets().trim(target);</span>
+<span class="fc" id="L568">        BlockContainer container = this.wrapper;</span>
+<span class="pc bpc" id="L569" title="1 of 2 branches missed.">        if (container == null) {</span>
+<span class="fc" id="L570">            container = this.items;</span>
+        }
+<span class="fc" id="L572">        target = trimPadding(target);</span>
+<span class="fc" id="L573">        Object val = container.draw(g2, target, params);</span>
+<span class="fc bfc" id="L574" title="All 2 branches covered.">        if (val instanceof BlockResult) {</span>
+<span class="fc" id="L575">            EntityCollection ec = ((BlockResult) val).getEntityCollection();</span>
+<span class="pc bpc" id="L576" title="2 of 4 branches missed.">            if (ec != null &amp;&amp; sec != null) {</span>
+<span class="fc" id="L577">                sec.addAll(ec);</span>
+<span class="fc" id="L578">                ((BlockResult) val).setEntityCollection(sec);</span>
+            }
+        }
+<span class="fc" id="L581">        return val;</span>
+    }
+
+    /**
+     * Returns the wrapper container, if any.
+     *
+     * @return The wrapper container (possibly {@code null}).
+     */
+    public BlockContainer getWrapper() {
+<span class="fc" id="L590">        return this.wrapper;</span>
+    }
+
+    /**
+     * Sets the wrapper container for the legend.
+     *
+     * @param wrapper  the wrapper container.
+     */
+    public void setWrapper(BlockContainer wrapper) {
+<span class="nc" id="L599">        this.wrapper = wrapper;</span>
+<span class="nc" id="L600">    }</span>
+
+    /**
+     * Tests this title for equality with an arbitrary object.
+     *
+     * @param obj  the object ({@code null} permitted).
+     *
+     * @return A boolean.
+     */
+    @Override
+    public boolean equals(Object obj) {
+<span class="fc bfc" id="L611" title="All 2 branches covered.">        if (obj == this) {</span>
+<span class="fc" id="L612">            return true;</span>
+        }
+<span class="pc bpc" id="L614" title="1 of 2 branches missed.">        if (!(obj instanceof LegendTitle)) {</span>
+<span class="nc" id="L615">            return false;</span>
+        }
+<span class="fc bfc" id="L617" title="All 2 branches covered.">        if (!super.equals(obj)) {</span>
+<span class="fc" id="L618">            return false;</span>
+        }
+<span class="fc" id="L620">        LegendTitle that = (LegendTitle) obj;</span>
+<span class="fc bfc" id="L621" title="All 2 branches covered.">        if (!PaintUtils.equal(this.backgroundPaint, that.backgroundPaint)) {</span>
+<span class="fc" id="L622">            return false;</span>
+        }
+<span class="fc bfc" id="L624" title="All 2 branches covered.">        if (this.legendItemGraphicEdge != that.legendItemGraphicEdge) {</span>
+<span class="fc" id="L625">            return false;</span>
+        }
+<span class="fc bfc" id="L627" title="All 2 branches covered.">        if (this.legendItemGraphicAnchor != that.legendItemGraphicAnchor) {</span>
+<span class="fc" id="L628">            return false;</span>
+        }
+<span class="fc bfc" id="L630" title="All 2 branches covered.">        if (this.legendItemGraphicLocation != that.legendItemGraphicLocation) {</span>
+<span class="fc" id="L631">            return false;</span>
+        }
+<span class="fc bfc" id="L633" title="All 2 branches covered.">        if (!this.itemFont.equals(that.itemFont)) {</span>
+<span class="fc" id="L634">            return false;</span>
+        }
+<span class="pc bpc" id="L636" title="1 of 2 branches missed.">        if (!this.itemPaint.equals(that.itemPaint)) {</span>
+<span class="nc" id="L637">            return false;</span>
+        }
+<span class="pc bpc" id="L639" title="1 of 2 branches missed.">        if (!this.hLayout.equals(that.hLayout)) {</span>
+<span class="nc" id="L640">            return false;</span>
+        }
+<span class="pc bpc" id="L642" title="1 of 2 branches missed.">        if (!this.vLayout.equals(that.vLayout)) {</span>
+<span class="nc" id="L643">            return false;</span>
+        }
+<span class="fc bfc" id="L645" title="All 2 branches covered.">        if (!this.sortOrder.equals(that.sortOrder)) {</span>
+<span class="fc" id="L646">            return false;</span>
+        }
+<span class="fc" id="L648">        return true;</span>
+    }
+
+    /**
+     * Provides serialization support.
+     *
+     * @param stream  the output stream.
+     *
+     * @throws IOException  if there is an I/O error.
+     */
+    private void writeObject(ObjectOutputStream stream) throws IOException {
+<span class="fc" id="L659">        stream.defaultWriteObject();</span>
+<span class="fc" id="L660">        SerialUtils.writePaint(this.backgroundPaint, stream);</span>
+<span class="fc" id="L661">        SerialUtils.writePaint(this.itemPaint, stream);</span>
+<span class="fc" id="L662">    }</span>
+
+    /**
+     * Provides serialization support.
+     *
+     * @param stream  the input stream.
+     *
+     * @throws IOException  if there is an I/O error.
+     * @throws ClassNotFoundException  if there is a classpath problem.
+     */
+    private void readObject(ObjectInputStream stream)
+        throws IOException, ClassNotFoundException {
+<span class="fc" id="L674">        stream.defaultReadObject();</span>
+<span class="fc" id="L675">        this.backgroundPaint = SerialUtils.readPaint(stream);</span>
+<span class="fc" id="L676">        this.itemPaint = SerialUtils.readPaint(stream);</span>
+<span class="fc" id="L677">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

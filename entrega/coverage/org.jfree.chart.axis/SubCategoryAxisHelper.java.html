@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SubCategoryAxisHelper.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.chart.axis</a> &gt; <span class="el_source">SubCategoryAxisHelper.java</span></div><h1>SubCategoryAxisHelper.java</h1><pre class="source lang-java linenums">package org.jfree.chart.axis;
+
+import org.jfree.chart.event.AxisChangeEvent;
+import org.jfree.chart.internal.Args;
+
+import java.awt.*;
+import java.io.Serializable;
+import java.util.List;
+import java.util.Objects;
+
+/**
+ * Extract Class - refactor God Class SubCategoryAxis.
+ * @author Afonso Caniço (adapted from JDeodorant suggestion)
+ */
+public class SubCategoryAxisHelper implements Serializable, Cloneable {
+    private final SubCategoryAxis axis;
+    private final List subCategories;
+<span class="fc" id="L18">    private Font subLabelFont = new Font(&quot;SansSerif&quot;, Font.PLAIN, 10);</span>
+<span class="fc" id="L19">    private transient Paint subLabelPaint = Color.BLACK; /** The paint for the sub-category labels. **/</span>
+
+<span class="fc" id="L21">    public SubCategoryAxisHelper(SubCategoryAxis axis, List subCategories) {</span>
+<span class="fc" id="L22">        Args.nullNotPermitted(axis, &quot;axis&quot;);</span>
+<span class="fc" id="L23">        Args.nullNotPermitted(subCategories, &quot;subCategories&quot;);</span>
+<span class="fc" id="L24">        this.axis = axis;</span>
+<span class="fc" id="L25">        this.subCategories = subCategories;</span>
+<span class="fc" id="L26">    }</span>
+
+    public List getSubCategories() {
+<span class="fc" id="L29">        return subCategories;</span>
+    }
+
+    public Object getSubCategory(int index) {
+<span class="nc" id="L33">        return subCategories.get(index);</span>
+    }
+
+    public Font getSubLabelFont() {
+<span class="fc" id="L37">        return subLabelFont;</span>
+    }
+
+    public Paint getSubLabelPaint() {
+<span class="fc" id="L41">        return subLabelPaint;</span>
+    }
+
+    public void setSubLabelPaint(Paint paint) {
+<span class="fc" id="L45">        Args.nullNotPermitted(paint, &quot;paint&quot;);</span>
+<span class="fc" id="L46">        this.subLabelPaint = paint;</span>
+<span class="fc" id="L47">        axis.notifyListeners(new AxisChangeEvent(axis));</span>
+<span class="fc" id="L48">    }</span>
+
+    /**
+     * Adds a sub-category to the axis and sends an  {@link AxisChangeEvent}  to all registered listeners.
+     * @param subCategory   the sub-category ( {@code  null}  not permitted).
+     */
+    public void addSubCategory(Comparable subCategory) {
+<span class="fc" id="L55">        Args.nullNotPermitted(subCategory, &quot;subCategory&quot;);</span>
+<span class="fc" id="L56">        this.subCategories.add(subCategory);</span>
+<span class="fc" id="L57">        axis.notifyListeners(new AxisChangeEvent(axis));</span>
+<span class="fc" id="L58">    }</span>
+
+    /**
+     * Sets the font used to display the sub-category labels and sends an {@link AxisChangeEvent}  to all registered listeners.
+     * @param font   the font ( {@code  null}  not permitted).
+     * @see #getSubLabelFont()
+     */
+    public void setSubLabelFont(Font font) {
+<span class="fc" id="L66">        Args.nullNotPermitted(font, &quot;font&quot;);</span>
+<span class="fc" id="L67">        this.subLabelFont = font;</span>
+<span class="fc" id="L68">        axis.notifyListeners(new AxisChangeEvent(axis));</span>
+<span class="fc" id="L69">    }</span>
+
+    public Object clone() throws CloneNotSupportedException {
+<span class="nc" id="L72">        return super.clone();</span>
+    }
+
+    @Override
+    public boolean equals(Object o) {
+<span class="fc bfc" id="L77" title="All 2 branches covered.">        if (this == o) return true;</span>
+<span class="pc bpc" id="L78" title="2 of 4 branches missed.">        if (o == null || getClass() != o.getClass()) return false;</span>
+<span class="fc" id="L79">        SubCategoryAxisHelper that = (SubCategoryAxisHelper) o;</span>
+<span class="fc bfc" id="L80" title="All 6 branches covered.">        return Objects.equals(subCategories, that.subCategories) &amp;&amp; Objects.equals(subLabelFont, that.subLabelFont) &amp;&amp; Objects.equals(subLabelPaint, that.subLabelPaint);</span>
+    }
+
+    @Override
+    public int hashCode() {
+<span class="nc" id="L85">        return Objects.hash(subCategories, subLabelFont, subLabelPaint);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

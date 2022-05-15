@@ -1,0 +1,417 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CategoryTableXYDataset.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.data.xy</a> &gt; <span class="el_source">CategoryTableXYDataset.java</span></div><h1>CategoryTableXYDataset.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * ---------------------------
+ * CategoryTableXYDataset.java
+ * ---------------------------
+ * (C) Copyright 2004-2020, by Andreas Schroeder and Contributors.
+ *
+ * Original Author:  Andreas Schroeder;
+ * Contributor(s):   David Gilbert;
+ *
+ */
+
+package org.jfree.data.xy;
+
+import org.jfree.chart.api.PublicCloneable;
+import org.jfree.data.DefaultKeyedValues2D;
+import org.jfree.data.DomainInfo;
+import org.jfree.data.Range;
+import org.jfree.data.general.DatasetChangeEvent;
+import org.jfree.data.general.DatasetUtils;
+
+/**
+ * An implementation variant of the {@link TableXYDataset} where every series
+ * shares the same x-values (required for generating stacked area charts).
+ * This implementation uses a {@link DefaultKeyedValues2D} Object as backend
+ * implementation and is hence more &quot;category oriented&quot; than the {@link
+ * DefaultTableXYDataset} implementation.
+ * &lt;p&gt;
+ * This implementation provides no means to remove data items yet.
+ * This is due to the lack of such facility in the DefaultKeyedValues2D class.
+ * &lt;p&gt;
+ * This class also implements the {@link IntervalXYDataset} interface, but this
+ * implementation is provisional.
+ */
+public class CategoryTableXYDataset extends AbstractIntervalXYDataset
+        implements TableXYDataset, IntervalXYDataset, DomainInfo,
+                   PublicCloneable {
+
+    /**
+     * The backing data structure.
+     */
+    private DefaultKeyedValues2D values;
+
+    /** A delegate for controlling the interval width. */
+    private IntervalXYDelegate intervalDelegate;
+
+    /**
+     * Creates a new empty CategoryTableXYDataset.
+     */
+<span class="fc" id="L74">    public CategoryTableXYDataset() {</span>
+<span class="fc" id="L75">        this.values = new DefaultKeyedValues2D(true);</span>
+<span class="fc" id="L76">        this.intervalDelegate = new IntervalXYDelegate(this);</span>
+<span class="fc" id="L77">        addChangeListener(this.intervalDelegate);</span>
+<span class="fc" id="L78">    }</span>
+
+    /**
+     * Adds a data item to this dataset and sends a {@link DatasetChangeEvent}
+     * to all registered listeners.
+     *
+     * @param x  the x value.
+     * @param y  the y value.
+     * @param seriesName  the name of the series to add the data item.
+     */
+    public void add(double x, double y, String seriesName) {
+<span class="fc" id="L89">        add(x, y, seriesName, true);</span>
+<span class="fc" id="L90">    }</span>
+
+    /**
+     * Adds a data item to this dataset and, if requested, sends a
+     * {@link DatasetChangeEvent} to all registered listeners.
+     *
+     * @param x  the x value.
+     * @param y  the y value.
+     * @param seriesName  the name of the series to add the data item.
+     * @param notify  notify listeners?
+     */
+    public void add(Number x, Number y, String seriesName, boolean notify) {
+<span class="fc" id="L102">        this.values.addValue(y, (Comparable&lt;?&gt;) x, seriesName);</span>
+<span class="pc bpc" id="L103" title="1 of 2 branches missed.">        if (notify) {</span>
+<span class="fc" id="L104">            fireDatasetChanged();</span>
+        }
+<span class="fc" id="L106">    }</span>
+
+    /**
+     * Removes a value from the dataset.
+     *
+     * @param x  the x-value.
+     * @param seriesName  the series name.
+     */
+    public void remove(double x, String seriesName) {
+<span class="nc" id="L115">        remove(x, seriesName, true);</span>
+<span class="nc" id="L116">    }</span>
+
+    /**
+     * Removes an item from the dataset.
+     *
+     * @param x  the x-value.
+     * @param seriesName  the series name.
+     * @param notify  notify listeners?
+     */
+    public void remove(Number x, String seriesName, boolean notify) {
+<span class="nc" id="L126">        this.values.removeValue((Comparable) x, seriesName);</span>
+<span class="nc bnc" id="L127" title="All 2 branches missed.">        if (notify) {</span>
+<span class="nc" id="L128">            fireDatasetChanged();</span>
+        }
+<span class="nc" id="L130">    }</span>
+
+    /**
+     * Clears all data from the dataset and sends a {@link DatasetChangeEvent}
+     * to all registered listeners.
+     * 
+     * @since 1.0.14
+     */
+    public void clear() {
+<span class="nc" id="L139">        this.values.clear();</span>
+<span class="nc" id="L140">        fireDatasetChanged();</span>
+<span class="nc" id="L141">    }</span>
+
+    /**
+     * Returns the number of series in the collection.
+     *
+     * @return The series count.
+     */
+    @Override
+    public int getSeriesCount() {
+<span class="fc" id="L150">        return this.values.getColumnCount();</span>
+    }
+
+    /**
+     * Returns the key for a series.
+     *
+     * @param series  the series index (zero-based).
+     *
+     * @return The key for a series.
+     */
+    @Override
+    public Comparable&lt;?&gt; getSeriesKey(int series) {
+<span class="nc" id="L162">        return this.values.getColumnKey(series);</span>
+    }
+
+    /**
+     * Returns the number of x values in the dataset.
+     *
+     * @return The item count.
+     */
+    @Override
+    public int getItemCount() {
+<span class="fc" id="L172">        return this.values.getRowCount();</span>
+    }
+
+    /**
+     * Returns the number of items in the specified series.
+     * Returns the same as {@link CategoryTableXYDataset#getItemCount()}.
+     *
+     * @param series  the series index (zero-based).
+     *
+     * @return The item count.
+     */
+    @Override
+    public int getItemCount(int series) {
+<span class="fc" id="L185">        return getItemCount();  // all series have the same number of items in</span>
+                                // this dataset
+    }
+
+    /**
+     * Returns the x-value for the specified series and item.
+     *
+     * @param series  the series index (zero-based).
+     * @param item  the item index (zero-based).
+     *
+     * @return The value.
+     */
+    @Override
+    public Number getX(int series, int item) {
+<span class="fc" id="L199">        return (Number) this.values.getRowKey(item);</span>
+    }
+
+    /**
+     * Returns the starting X value for the specified series and item.
+     *
+     * @param series  the series index (zero-based).
+     * @param item  the item index (zero-based).
+     *
+     * @return The starting X value.
+     */
+    @Override
+    public Number getStartX(int series, int item) {
+<span class="fc" id="L212">        return this.intervalDelegate.getStartX(series, item);</span>
+    }
+
+    /**
+     * Returns the ending X value for the specified series and item.
+     *
+     * @param series  the series index (zero-based).
+     * @param item  the item index (zero-based).
+     *
+     * @return The ending X value.
+     */
+    @Override
+    public Number getEndX(int series, int item) {
+<span class="fc" id="L225">        return this.intervalDelegate.getEndX(series, item);</span>
+    }
+
+    /**
+     * Returns the y-value for the specified series and item.
+     *
+     * @param series  the series index (zero-based).
+     * @param item  the item index (zero-based).
+     *
+     * @return The y value (possibly {@code null}).
+     */
+    @Override
+    public Number getY(int series, int item) {
+<span class="nc" id="L238">        return this.values.getValue(item, series);</span>
+    }
+
+    /**
+     * Returns the starting Y value for the specified series and item.
+     *
+     * @param series  the series index (zero-based).
+     * @param item  the item index (zero-based).
+     *
+     * @return The starting Y value.
+     */
+    @Override
+    public Number getStartY(int series, int item) {
+<span class="nc" id="L251">        return getY(series, item);</span>
+    }
+
+    /**
+     * Returns the ending Y value for the specified series and item.
+     *
+     * @param series  the series index (zero-based).
+     * @param item  the item index (zero-based).
+     *
+     * @return The ending Y value.
+     */
+    @Override
+    public Number getEndY(int series, int item) {
+<span class="nc" id="L264">        return getY(series, item);</span>
+    }
+
+    /**
+     * Returns the minimum x-value in the dataset.
+     *
+     * @param includeInterval  a flag that determines whether or not the
+     *                         x-interval is taken into account.
+     *
+     * @return The minimum value.
+     */
+    @Override
+    public double getDomainLowerBound(boolean includeInterval) {
+<span class="nc" id="L277">        return this.intervalDelegate.getDomainLowerBound(includeInterval);</span>
+    }
+
+    /**
+     * Returns the maximum x-value in the dataset.
+     *
+     * @param includeInterval  a flag that determines whether or not the
+     *                         x-interval is taken into account.
+     *
+     * @return The maximum value.
+     */
+    @Override
+    public double getDomainUpperBound(boolean includeInterval) {
+<span class="nc" id="L290">        return this.intervalDelegate.getDomainUpperBound(includeInterval);</span>
+    }
+
+    /**
+     * Returns the range of the values in this dataset's domain.
+     *
+     * @param includeInterval  a flag that determines whether or not the
+     *                         x-interval is taken into account.
+     *
+     * @return The range.
+     */
+    @Override
+    public Range getDomainBounds(boolean includeInterval) {
+<span class="nc bnc" id="L303" title="All 2 branches missed.">        if (includeInterval) {</span>
+<span class="nc" id="L304">            return this.intervalDelegate.getDomainBounds(includeInterval);</span>
+        }
+        else {
+<span class="nc" id="L307">            return DatasetUtils.iterateDomainBounds(this, includeInterval);</span>
+        }
+    }
+
+    /**
+     * Returns the interval position factor.
+     *
+     * @return The interval position factor.
+     */
+    public double getIntervalPositionFactor() {
+<span class="fc" id="L317">        return this.intervalDelegate.getIntervalPositionFactor();</span>
+    }
+
+    /**
+     * Sets the interval position factor. Must be between 0.0 and 1.0 inclusive.
+     * If the factor is 0.5, the gap is in the middle of the x values. If it
+     * is lesser than 0.5, the gap is farther to the left and if greater than
+     * 0.5 it gets farther to the right.
+     *
+     * @param d  the new interval position factor.
+     */
+    public void setIntervalPositionFactor(double d) {
+<span class="fc" id="L329">        this.intervalDelegate.setIntervalPositionFactor(d);</span>
+<span class="fc" id="L330">        fireDatasetChanged();</span>
+<span class="fc" id="L331">    }</span>
+
+    /**
+     * Returns the full interval width.
+     *
+     * @return The interval width to use.
+     */
+    public double getIntervalWidth() {
+<span class="fc" id="L339">        return this.intervalDelegate.getIntervalWidth();</span>
+    }
+
+    /**
+     * Sets the interval width to a fixed value, and sends a
+     * {@link DatasetChangeEvent} to all registered listeners.
+     *
+     * @param d  the new interval width (must be &amp;gt; 0).
+     */
+    public void setIntervalWidth(double d) {
+<span class="fc" id="L349">        this.intervalDelegate.setFixedIntervalWidth(d);</span>
+<span class="fc" id="L350">        fireDatasetChanged();</span>
+<span class="fc" id="L351">    }</span>
+
+    /**
+     * Returns whether the interval width is automatically calculated or not.
+     *
+     * @return whether the width is automatically calculated or not.
+     */
+    public boolean isAutoWidth() {
+<span class="fc" id="L359">        return this.intervalDelegate.isAutoWidth();</span>
+    }
+
+    /**
+     * Sets the flag that indicates whether the interval width is automatically
+     * calculated or not.
+     *
+     * @param b  the flag.
+     */
+    public void setAutoWidth(boolean b) {
+<span class="fc" id="L369">        this.intervalDelegate.setAutoWidth(b);</span>
+<span class="fc" id="L370">        fireDatasetChanged();</span>
+<span class="fc" id="L371">    }</span>
+
+    /**
+     * Tests this dataset for equality with an arbitrary object.
+     *
+     * @param obj  the object ({@code null} permitted).
+     *
+     * @return A boolean.
+     */
+    @Override
+    public boolean equals(Object obj) {
+<span class="pc bpc" id="L382" title="1 of 2 branches missed.">        if (!(obj instanceof CategoryTableXYDataset)) {</span>
+<span class="nc" id="L383">            return false;</span>
+        }
+<span class="fc" id="L385">        CategoryTableXYDataset that = (CategoryTableXYDataset) obj;</span>
+<span class="fc bfc" id="L386" title="All 2 branches covered.">        if (!this.intervalDelegate.equals(that.intervalDelegate)) {</span>
+<span class="fc" id="L387">            return false;</span>
+        }
+<span class="fc bfc" id="L389" title="All 2 branches covered.">        if (!this.values.equals(that.values)) {</span>
+<span class="fc" id="L390">            return false;</span>
+        }
+<span class="fc" id="L392">        return true;</span>
+    }
+
+    /**
+     * Returns an independent copy of this dataset.
+     *
+     * @return A clone.
+     *
+     * @throws CloneNotSupportedException if there is some reason that cloning
+     *     cannot be performed.
+     */
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+<span class="fc" id="L405">        CategoryTableXYDataset clone = (CategoryTableXYDataset) super.clone();</span>
+<span class="fc" id="L406">        clone.values = (DefaultKeyedValues2D) this.values.clone();</span>
+<span class="fc" id="L407">        clone.intervalDelegate = new IntervalXYDelegate(clone);</span>
+        // need to configure the intervalDelegate to match the original
+<span class="fc" id="L409">        clone.intervalDelegate.setFixedIntervalWidth(getIntervalWidth());</span>
+<span class="fc" id="L410">        clone.intervalDelegate.setAutoWidth(isAutoWidth());</span>
+<span class="fc" id="L411">        clone.intervalDelegate.setIntervalPositionFactor(</span>
+<span class="fc" id="L412">                getIntervalPositionFactor());</span>
+<span class="fc" id="L413">        return clone;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

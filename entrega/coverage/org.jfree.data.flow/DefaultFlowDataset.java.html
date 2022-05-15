@@ -1,0 +1,377 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DefaultFlowDataset.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.data.flow</a> &gt; <span class="el_source">DefaultFlowDataset.java</span></div><h1>DefaultFlowDataset.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * -----------------------
+ * DefaultFlowDataset.java
+ * -----------------------
+ * (C) Copyright 2021-2022, by David Gilbert and Contributors.
+ *
+ * Original Author:  David Gilbert;
+ * Contributor(s):   -;
+ *
+ */
+
+package org.jfree.data.flow;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import org.jfree.chart.internal.Args;
+import org.jfree.chart.internal.CloneUtils;
+import org.jfree.chart.api.PublicCloneable;
+import org.jfree.data.general.AbstractDataset;
+
+/**
+ * A dataset representing flows between source and destination nodes.
+ * 
+ * @param &lt;K&gt; the type for the keys used to identify sources and destinations 
+ *     (instances should be immutable, {@code String} is a good default choice).
+ * 
+ * @since 1.5.3
+ */
+public class DefaultFlowDataset&lt;K extends Comparable&lt;K&gt;&gt; extends AbstractDataset 
+        implements FlowDataset&lt;K&gt;, PublicCloneable, Serializable {
+
+    /** 
+     * The nodes at each stage.  The list will have N+1 entries, where N is
+     * the number of stages - the last entry contains the destination nodes for 
+     * the final stage.
+     */
+    private List&lt;List&lt;K&gt;&gt; nodes;
+    
+    /** Node properties. */
+    private Map&lt;NodeKey, Map&lt;String, Object&gt;&gt; nodeProperties;
+    
+    /** Storage for the flows. */
+    private Map&lt;FlowKey&lt;K&gt;, Number&gt; flows;
+    
+    /** Flow properties. */
+    private Map&lt;FlowKey, Map&lt;String, Object&gt;&gt; flowProperties;
+
+    /**
+     * Creates a new dataset that is initially empty.
+     */
+<span class="fc" id="L83">    public DefaultFlowDataset() {</span>
+<span class="fc" id="L84">        this.nodes = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L85">        this.nodes.add(new ArrayList&lt;&gt;());</span>
+<span class="fc" id="L86">        this.nodes.add(new ArrayList&lt;&gt;());</span>
+<span class="fc" id="L87">        this.nodeProperties = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L88">        this.flows = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L89">        this.flowProperties = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L90">    }</span>
+
+    /**
+     * Returns a list of the source nodes for the specified stage.
+     * 
+     * @param stage  the stage (0 to {@code getStageCount() - 1}).
+     * 
+     * @return A list of source nodes (possibly empty but never {@code null}). 
+     */
+    @Override
+    public List&lt;K&gt; getSources(int stage) {
+<span class="fc" id="L101">        return new ArrayList&lt;&gt;(this.nodes.get(stage));</span>
+    }
+
+    /**
+     * Returns a list of the destination nodes for the specified stage.
+     * 
+     * @param stage  the stage (0 to {@code getStageCount() - 1}).
+     * 
+     * @return A list of destination nodes (possibly empty but never {@code null}). 
+     */
+    @Override
+    public List&lt;K&gt; getDestinations(int stage) {
+<span class="fc" id="L113">        return new ArrayList&lt;&gt;(this.nodes.get(stage + 1));</span>
+    }
+
+    /**
+     * Returns the set of keys for all the nodes in the dataset.
+     * 
+     * @return The set of keys for all the nodes in the dataset (possibly empty 
+     *     but never {@code null}).
+     */
+    @Override
+    public Set&lt;NodeKey&lt;K&gt;&gt; getAllNodes() {
+<span class="nc" id="L124">        Set&lt;NodeKey&lt;K&gt;&gt; result = new HashSet&lt;&gt;();</span>
+<span class="nc bnc" id="L125" title="All 2 branches missed.">        for (int s = 0; s &lt;= this.getStageCount(); s++) {</span>
+<span class="nc bnc" id="L126" title="All 2 branches missed.">            for (K key : this.getSources(s)) {</span>
+<span class="nc" id="L127">                result.add(new NodeKey&lt;&gt;(s, key));</span>
+<span class="nc" id="L128">            }</span>
+        }
+<span class="nc" id="L130">        return result;</span>
+    }
+ 
+    /**
+     * Returns the value of a property, if specified, for the specified node.  
+     *
+     * @param nodeKey  the node key ({@code null} not permitted).
+     * @param propertyKey  the node key ({@code null} not permitted).
+     * 
+     * @return The property value, or {@code null}. 
+     */    
+    @Override
+    public Object getNodeProperty(NodeKey&lt;K&gt; nodeKey, String propertyKey) {
+<span class="nc" id="L143">        Map&lt;String, Object&gt; props = this.nodeProperties.get(nodeKey);</span>
+<span class="nc bnc" id="L144" title="All 2 branches missed.">        if (props != null) {</span>
+<span class="nc" id="L145">            return props.get(propertyKey);</span>
+        }
+<span class="nc" id="L147">        return null;</span>
+    }
+    
+    /**
+     * Sets a property for the specified node and notifies registered listeners
+     * that the dataset has changed.
+     * 
+     * @param nodeKey  the node key ({@code null} not permitted).
+     * @param propertyKey  the property key ({@code null} not permitted).
+     * @param value  the property value.
+     */
+    public void setNodeProperty(NodeKey&lt;K&gt; nodeKey, String propertyKey, Object value) {
+<span class="nc" id="L159">        Map&lt;String, Object&gt; props = this.nodeProperties.get(nodeKey);</span>
+<span class="nc bnc" id="L160" title="All 2 branches missed.">        if (props == null) {</span>
+<span class="nc" id="L161">            props = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L162">            this.nodeProperties.put(nodeKey, props);</span>
+        }
+<span class="nc" id="L164">        props.put(propertyKey, value);</span>
+<span class="nc" id="L165">        fireDatasetChanged();</span>
+<span class="nc" id="L166">    }</span>
+
+    /**
+     * Returns the flow between a source node and a destination node at a
+     * specified stage.  This must be 0 or greater.  The dataset can return
+     * {@code null} to represent an unknown value.
+     * 
+     * @param stage  the stage index (0 to {@code getStageCount()} - 1).
+     * @param source  the source ({@code null} not permitted). 
+     * @param destination  the destination ({@code null} not permitted).
+     * 
+     * @return The flow (zero or greater, possibly {@code null}). 
+     */
+    @Override
+    public Number getFlow(int stage, K source, K destination) {
+<span class="fc" id="L181">        return this.flows.get(new FlowKey&lt;&gt;(stage, source, destination));</span>
+    }
+
+    /**
+     * Sets the flow between a source node and a destination node at the 
+     * specified stage.  A new stage will be added if {@code stage} is equal
+     * to {@code getStageCount()}.
+     * 
+     * @param stage  the stage (0 to {@code getStageCount()}.
+     * @param source  the source ({@code null} not permitted).
+     * @param destination  the destination ({@code null} not permitted).
+     * @param flow  the flow (0 or greater).
+     */
+    public void setFlow(int stage, K source, K destination, double flow) {
+<span class="fc" id="L195">        Args.requireInRange(stage, &quot;stage&quot;, 0, getStageCount());</span>
+<span class="fc" id="L196">        Args.nullNotPermitted(source, &quot;source&quot;);</span>
+<span class="fc" id="L197">        Args.nullNotPermitted(destination, &quot;destination&quot;);</span>
+<span class="fc bfc" id="L198" title="All 2 branches covered.">        if (stage &gt; this.nodes.size() - 2) {</span>
+<span class="fc" id="L199">            this.nodes.add(new ArrayList&lt;&gt;());</span>
+        }
+<span class="fc bfc" id="L201" title="All 2 branches covered.">        if (!getSources(stage).contains(source)) {</span>
+<span class="fc" id="L202">            this.nodes.get(stage).add(source);</span>
+        }
+<span class="pc bpc" id="L204" title="1 of 2 branches missed.">        if (!getDestinations(stage).contains(destination)) {</span>
+<span class="fc" id="L205">            this.nodes.get(stage + 1).add(destination);</span>
+        }
+<span class="fc" id="L207">        this.flows.put(new FlowKey&lt;&gt;(stage, source, destination), flow);</span>
+<span class="fc" id="L208">        fireDatasetChanged();</span>
+<span class="fc" id="L209">    }</span>
+
+    /**
+     * Returns the value of a property, if specified, for the specified flow.  
+     * 
+     * @param flowKey  flowKey ({@code null} not permitted).
+     * 
+     * @return The property value, or {@code null}. 
+     */    
+    @Override
+    public Object getFlowProperty(FlowKey&lt;K&gt; flowKey, String propertyKey) {
+<span class="nc" id="L220">        Map&lt;String, Object&gt; props = this.flowProperties.get(flowKey);</span>
+<span class="nc bnc" id="L221" title="All 2 branches missed.">        if (props != null) {</span>
+<span class="nc" id="L222">            return props.get(propertyKey);</span>
+        }
+<span class="nc" id="L224">        return null;      </span>
+    }
+
+    /**
+     * Sets a property for the specified flow and notifies registered listeners
+     * that the dataset has changed.
+     * 
+     * @param flowKey  the node key ({@code null} not permitted).
+     * @param propertyKey  the property key ({@code null} not permitted).
+     * @param value  the property value.
+     */
+
+    public void setFlowProperty(FlowKey&lt;K&gt; flowKey, String propertyKey, Object value) {
+<span class="nc" id="L237">        Map&lt;String, Object&gt; props = this.flowProperties.get(flowKey);</span>
+<span class="nc bnc" id="L238" title="All 2 branches missed.">        if (props == null) {</span>
+<span class="nc" id="L239">            props = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L240">            this.flowProperties.put(flowKey, props);</span>
+        }
+<span class="nc" id="L242">        props.put(propertyKey, value);</span>
+<span class="nc" id="L243">        fireDatasetChanged();</span>
+<span class="nc" id="L244">    }</span>
+
+    /**
+     * Returns the number of flow stages.  A flow dataset always has one or
+     * more stages, so this method will return {@code 1} even for an empty
+     * dataset (one with no sources, destinations or flows defined).
+     * 
+     * @return The number of flow stages.
+     */
+    @Override
+    public int getStageCount() {
+<span class="fc" id="L255">        return this.nodes.size() - 1;</span>
+    }
+    
+    /**
+     * Returns a set of keys for all the flows in the dataset.
+     * 
+     * @return A set. 
+     */
+    @Override
+    public Set&lt;FlowKey&lt;K&gt;&gt; getAllFlows() {
+<span class="nc" id="L265">        return new HashSet&lt;&gt;(this.flows.keySet());    </span>
+    }
+    
+    /**
+     * Returns a list of flow keys for all the flows coming into this node.
+     * 
+     * @param nodeKey  the node key ({@code null} not permitted).
+     * 
+     * @return A list of flow keys (possibly empty but never {@code null}). 
+     */
+    public List&lt;FlowKey&lt;K&gt;&gt; getInFlows(NodeKey nodeKey) {
+<span class="nc" id="L276">        Args.nullNotPermitted(nodeKey, &quot;nodeKey&quot;);</span>
+<span class="nc bnc" id="L277" title="All 2 branches missed.">        if (nodeKey.getStage() == 0) {</span>
+<span class="nc" id="L278">            return Collections.EMPTY_LIST;</span>
+        }
+<span class="nc" id="L280">        List&lt;FlowKey&lt;K&gt;&gt; result = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L281" title="All 2 branches missed.">        for (FlowKey&lt;K&gt; flowKey : this.flows.keySet()) {</span>
+<span class="nc bnc" id="L282" title="All 4 branches missed.">            if (flowKey.getStage() == nodeKey.getStage() - 1 &amp;&amp; flowKey.getDestination().equals(nodeKey.getNode())) {</span>
+<span class="nc" id="L283">                result.add(flowKey);</span>
+            }
+<span class="nc" id="L285">        }</span>
+<span class="nc" id="L286">        return result;</span>
+    }
+
+    /**
+     * Returns a list of flow keys for all the flows going out of this node.
+     * 
+     * @param nodeKey  the node key ({@code null} not permitted).
+     * 
+     * @return A list of flow keys (possibly empty but never {@code null}). 
+     */
+    public List&lt;FlowKey&gt; getOutFlows(NodeKey nodeKey) {
+<span class="nc" id="L297">        Args.nullNotPermitted(nodeKey, &quot;nodeKey&quot;);</span>
+<span class="nc bnc" id="L298" title="All 2 branches missed.">        if (nodeKey.getStage() == this.getStageCount()) {</span>
+<span class="nc" id="L299">            return Collections.EMPTY_LIST;</span>
+        }
+<span class="nc" id="L301">        List&lt;FlowKey&gt; result = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L302" title="All 2 branches missed.">        for (FlowKey flowKey : this.flows.keySet()) {</span>
+<span class="nc bnc" id="L303" title="All 4 branches missed.">            if (flowKey.getStage() == nodeKey.getStage() &amp;&amp; flowKey.getSource().equals(nodeKey.getNode())) {</span>
+<span class="nc" id="L304">                result.add(flowKey);</span>
+            }
+<span class="nc" id="L306">        }</span>
+<span class="nc" id="L307">        return result;</span>
+    }
+
+    /**
+     * Returns a clone of the dataset.
+     * 
+     * @return A clone of the dataset.
+     * 
+     * @throws CloneNotSupportedException if there is a problem with cloning.
+     */
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+<span class="fc" id="L319">        DefaultFlowDataset&lt;K&gt; clone = (DefaultFlowDataset) super.clone();</span>
+<span class="fc" id="L320">        clone.flows = new HashMap&lt;&gt;(this.flows);</span>
+<span class="fc" id="L321">        clone.nodes = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L322" title="All 2 branches covered.">        for (List&lt;?&gt; list : nodes) {</span>
+<span class="fc" id="L323">            clone.nodes.add((List&lt;K&gt;) CloneUtils.cloneList(list));</span>
+<span class="fc" id="L324">        }</span>
+<span class="fc" id="L325">        return clone;</span>
+    }
+
+    /**
+     * Tests this dataset for equality with an arbitrary object.  This method
+     * will return {@code true} if the object implements the 
+     * {@link FlowDataset} and defines the exact same set of nodes and flows 
+     * as this dataset.
+     * 
+     * @param obj  the object to test equality against ({@code null} permitted).
+     * 
+     * @return A boolean. 
+     */
+    @Override
+    public boolean equals(Object obj) {
+<span class="pc bpc" id="L340" title="1 of 2 branches missed.">        if (this == obj) {</span>
+<span class="nc" id="L341">            return true;</span>
+        }
+<span class="pc bpc" id="L343" title="1 of 2 branches missed.">        if (!(obj instanceof FlowDataset)) {</span>
+<span class="nc" id="L344">            return false;</span>
+        }
+<span class="fc" id="L346">        final FlowDataset other = (FlowDataset) obj;</span>
+<span class="pc bpc" id="L347" title="1 of 2 branches missed.">        if (other.getStageCount() != getStageCount()) {</span>
+<span class="nc" id="L348">            return false;</span>
+        }
+<span class="fc bfc" id="L350" title="All 2 branches covered.">        for (int stage = 0; stage &lt; getStageCount(); stage++) {</span>
+<span class="fc bfc" id="L351" title="All 2 branches covered.">            if (!Objects.equals(other.getSources(stage), getSources(stage))) {</span>
+<span class="fc" id="L352">                return false;</span>
+            }
+<span class="fc bfc" id="L354" title="All 2 branches covered.">            if (!Objects.equals(other.getDestinations(stage), getDestinations(stage))) {</span>
+<span class="fc" id="L355">                return false;</span>
+            }
+<span class="fc bfc" id="L357" title="All 2 branches covered.">            for (K source : getSources(stage)) {</span>
+<span class="fc bfc" id="L358" title="All 2 branches covered.">                for (K destination : getDestinations(stage)) {</span>
+<span class="pc bpc" id="L359" title="1 of 2 branches missed.">                    if (!Objects.equals(other.getFlow(stage, source, destination), getFlow(stage, source, destination))) {</span>
+<span class="nc" id="L360">                        return false;</span>
+                    }
+<span class="fc" id="L362">                }</span>
+<span class="fc" id="L363">            }</span>
+        }
+<span class="fc" id="L365">        return true;</span>
+    }
+
+    @Override
+    public int hashCode() {
+<span class="nc" id="L370">        int hash = 3;</span>
+<span class="nc" id="L371">        hash = 89 * hash + Objects.hashCode(getSources(0));</span>
+<span class="nc" id="L372">        hash = 89 * hash + Objects.hashCode(getDestinations(getStageCount() - 1));</span>
+<span class="nc" id="L373">        return hash;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

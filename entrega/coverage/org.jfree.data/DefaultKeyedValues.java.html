@@ -1,0 +1,453 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DefaultKeyedValues.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.data</a> &gt; <span class="el_source">DefaultKeyedValues.java</span></div><h1>DefaultKeyedValues.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * -----------------------
+ * DefaultKeyedValues.java
+ * -----------------------
+ * (C) Copyright 2002-2022, by David Gilbert.
+ *
+ * Original Author:  David Gilbert;
+ * Contributor(s):   Thomas Morgner;
+ *                   Tracy Hiltbrand (generics for bug fix to PiePlot);
+ *
+ */
+
+package org.jfree.data;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import org.jfree.chart.internal.Args;
+import org.jfree.chart.api.PublicCloneable;
+import org.jfree.chart.api.SortOrder;
+
+/**
+ * An ordered list of (key, value) items.  This class provides a default
+ * implementation of the {@link KeyedValues} interface.
+ * 
+ * @param &lt;K&gt; the key type ({@code String} is a good default).
+ */
+public class DefaultKeyedValues&lt;K extends Comparable&lt;K&gt;&gt; 
+        implements KeyedValues&lt;K&gt;, Cloneable, PublicCloneable, Serializable {
+
+    /** For serialization. */
+    private static final long serialVersionUID = 8468154364608194797L;
+
+    /** Storage for the keys. */
+    private List&lt;K&gt; keys;
+
+    /** Storage for the values. */
+    private List&lt;Number&gt; values;
+
+    /**
+     * Contains (key, Integer) mappings, where the Integer is the index for
+     * the key in the list.
+     */
+    private Map&lt;K, Integer&gt; indexMap;
+
+  /**
+     * Creates a new collection (initially empty).
+     */
+<span class="fc" id="L78">    public DefaultKeyedValues() {</span>
+<span class="fc" id="L79">        this.keys = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L80">        this.values = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L81">        this.indexMap = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L82">    }</span>
+
+    /**
+     * Returns the number of items (values) in the collection.
+     *
+     * @return The item count.
+     */
+    @Override
+    public int getItemCount() {
+<span class="fc" id="L91">        return this.indexMap.size();</span>
+    }
+
+    /**
+     * Returns a value.
+     *
+     * @param item  the item of interest (zero-based index).
+     *
+     * @return The value (possibly {@code null}).
+     *
+     * @throws IndexOutOfBoundsException if {@code item} is out of bounds.
+     */
+    @Override
+    public Number getValue(int item) {
+<span class="fc" id="L105">        return this.values.get(item);</span>
+    }
+
+    /**
+     * Returns a key.
+     *
+     * @param index  the item index (zero-based).
+     *
+     * @return The row key.
+     *
+     * @throws IndexOutOfBoundsException if {@code item} is out of bounds.
+     */
+    @Override
+    public K getKey(int index) {
+<span class="fc" id="L119">        return this.keys.get(index);</span>
+    }
+
+    /**
+     * Returns the index for a given key.
+     *
+     * @param key  the key ({@code null} not permitted).
+     *
+     * @return The index, or {@code -1} if the key is not recognised.
+     *
+     * @throws IllegalArgumentException if {@code key} is
+     *     {@code null}.
+     */
+    @Override
+    public int getIndex(K key) {
+<span class="fc" id="L134">        Args.nullNotPermitted(key, &quot;key&quot;);</span>
+<span class="fc" id="L135">        final Integer i = this.indexMap.get(key);</span>
+<span class="fc bfc" id="L136" title="All 2 branches covered.">        if (i == null) {</span>
+<span class="fc" id="L137">            return -1;  // key not found</span>
+        }
+<span class="fc" id="L139">        return i;</span>
+    }
+
+    /**
+     * Returns the keys for the values in the collection.
+     *
+     * @return The keys (never {@code null}).
+     */
+    @Override
+    public List&lt;K&gt; getKeys() {
+<span class="fc" id="L149">        return new ArrayList&lt;&gt;(this.keys);</span>
+    }
+
+    /**
+     * Returns the value for a given key.
+     *
+     * @param key  the key ({@code null} not permitted).
+     *
+     * @return The value (possibly {@code null}).
+     *
+     * @throws UnknownKeyException if the key is not recognised.
+     *
+     * @see #getValue(int)
+     */
+    @Override
+    public Number getValue(K key) {
+<span class="fc" id="L165">        int index = getIndex(key);</span>
+<span class="fc bfc" id="L166" title="All 2 branches covered.">        if (index &lt; 0) {</span>
+<span class="fc" id="L167">            throw new UnknownKeyException(&quot;Key not found: &quot; + key);</span>
+        }
+<span class="fc" id="L169">        return getValue(index);</span>
+    }
+
+    /**
+     * Updates an existing value, or adds a new value to the collection.
+     *
+     * @param key  the key ({@code null} not permitted).
+     * @param value  the value.
+     *
+     * @see #addValue(Comparable, Number)
+     */
+    public void addValue(K key, double value) {
+<span class="fc" id="L181">        addValue(key, Double.valueOf(value));</span>
+<span class="fc" id="L182">    }</span>
+
+    /**
+     * Adds a new value to the collection, or updates an existing value.
+     * This method passes control directly to the
+     * {@link #setValue(Comparable, Number)} method.
+     *
+     * @param key  the key ({@code null} not permitted).
+     * @param value  the value ({@code null} permitted).
+     */
+    public void addValue(K key, Number value) {
+<span class="fc" id="L193">        setValue(key, value);</span>
+<span class="fc" id="L194">    }</span>
+
+    /**
+     * Updates an existing value, or adds a new value to the collection.
+     *
+     * @param key  the key ({@code null} not permitted).
+     * @param value  the value.
+     */
+    public void setValue(K key, double value) {
+<span class="fc" id="L203">        setValue(key, Double.valueOf(value));</span>
+<span class="fc" id="L204">    }</span>
+
+    /**
+     * Updates an existing value, or adds a new value to the collection.
+     *
+     * @param key  the key ({@code null} not permitted).
+     * @param value  the value ({@code null} permitted).
+     */
+    public void setValue(K key, Number value) {
+<span class="fc" id="L213">        Args.nullNotPermitted(key, &quot;key&quot;);</span>
+<span class="fc" id="L214">        int keyIndex = getIndex(key);</span>
+<span class="fc bfc" id="L215" title="All 2 branches covered.">        if (keyIndex &gt;= 0) {</span>
+<span class="fc" id="L216">            this.keys.set(keyIndex, key);</span>
+<span class="fc" id="L217">            this.values.set(keyIndex, value);</span>
+        }
+        else {
+<span class="fc" id="L220">            this.keys.add(key);</span>
+<span class="fc" id="L221">            this.values.add(value);</span>
+<span class="fc" id="L222">            this.indexMap.put(key, this.keys.size() - 1);</span>
+        }
+<span class="fc" id="L224">    }</span>
+
+    /**
+     * Inserts a new value at the specified position in the dataset or, if
+     * there is an existing item with the specified key, updates the value
+     * for that item and moves it to the specified position.
+     *
+     * @param position  the position (in the range 0 to getItemCount()).
+     * @param key  the key ({@code null} not permitted).
+     * @param value  the value.
+     *
+     * @since 1.0.6
+     */
+    public void insertValue(int position, K key, double value) {
+<span class="fc" id="L238">        insertValue(position, key, Double.valueOf(value));</span>
+<span class="fc" id="L239">    }</span>
+
+    /**
+     * Inserts a new value at the specified position in the dataset or, if
+     * there is an existing item with the specified key, updates the value
+     * for that item and moves it to the specified position.
+     *
+     * @param position  the position (in the range 0 to getItemCount()).
+     * @param key  the key ({@code null} not permitted).
+     * @param value  the value ({@code null} permitted).
+     *
+     * @since 1.0.6
+     */
+    public void insertValue(int position, K key, Number value) {
+<span class="pc bpc" id="L253" title="2 of 4 branches missed.">        if (position &lt; 0 || position &gt; getItemCount()) {</span>
+<span class="nc" id="L254">            throw new IllegalArgumentException(&quot;'position' out of bounds.&quot;);</span>
+        }
+<span class="fc" id="L256">        Args.nullNotPermitted(key, &quot;key&quot;);</span>
+<span class="fc" id="L257">        int pos = getIndex(key);</span>
+<span class="pc bpc" id="L258" title="1 of 2 branches missed.">        if (pos == position) {</span>
+<span class="nc" id="L259">            this.keys.set(pos, key);</span>
+<span class="nc" id="L260">            this.values.set(pos, value);</span>
+        }
+        else {
+<span class="fc bfc" id="L263" title="All 2 branches covered.">            if (pos &gt;= 0) {</span>
+<span class="fc" id="L264">                this.keys.remove(pos);</span>
+<span class="fc" id="L265">                this.values.remove(pos);</span>
+            }
+
+<span class="fc" id="L268">            this.keys.add(position, key);</span>
+<span class="fc" id="L269">            this.values.add(position, value);</span>
+<span class="fc" id="L270">            rebuildIndex();</span>
+        }
+<span class="fc" id="L272">    }</span>
+
+    /**
+     * Rebuilds the key to indexed-position mapping after an positioned insert
+     * or a remove operation.
+     */
+    private void rebuildIndex () {
+<span class="fc" id="L279">        this.indexMap.clear();</span>
+<span class="fc bfc" id="L280" title="All 2 branches covered.">        for (int i = 0; i &lt; this.keys.size(); i++) {</span>
+<span class="fc" id="L281">            final K key = this.keys.get(i);</span>
+<span class="fc" id="L282">            this.indexMap.put(key, i);</span>
+        }
+<span class="fc" id="L284">    }</span>
+
+    /**
+     * Removes a value from the collection.
+     *
+     * @param index  the index of the item to remove (in the range
+     *     {@code 0} to {@code getItemCount() -1}).
+     *
+     * @throws IndexOutOfBoundsException if {@code index} is not within
+     *     the specified range.
+     */
+    public void removeValue(int index) {
+<span class="fc" id="L296">        this.keys.remove(index);</span>
+<span class="fc" id="L297">        this.values.remove(index);</span>
+<span class="fc" id="L298">        rebuildIndex();</span>
+<span class="fc" id="L299">    }</span>
+
+    /**
+     * Removes a value from the collection.
+     *
+     * @param key  the item key ({@code null} not permitted).
+     *
+     * @throws IllegalArgumentException if {@code key} is
+     *     {@code null}.
+     * @throws UnknownKeyException if {@code key} is not recognised.
+     */
+    public void removeValue(K key) {
+<span class="fc" id="L311">        int index = getIndex(key);</span>
+<span class="fc bfc" id="L312" title="All 2 branches covered.">        if (index &lt; 0) {</span>
+<span class="fc" id="L313">            throw new UnknownKeyException(&quot;The key (&quot; + key</span>
+                    + &quot;) is not recognised.&quot;);
+        }
+<span class="fc" id="L316">        removeValue(index);</span>
+<span class="fc" id="L317">    }</span>
+
+    /**
+     * Clears all values from the collection.
+     *
+     * @since 1.0.2
+     */
+    public void clear() {
+<span class="fc" id="L325">        this.keys.clear();</span>
+<span class="fc" id="L326">        this.values.clear();</span>
+<span class="fc" id="L327">        this.indexMap.clear();</span>
+<span class="fc" id="L328">    }</span>
+
+    /**
+     * Sorts the items in the list by key.
+     *
+     * @param order  the sort order ({@code null} not permitted).
+     */
+    public void sortByKeys(SortOrder order) {
+<span class="fc" id="L336">        final int size = this.keys.size();</span>
+<span class="fc" id="L337">        final DefaultKeyedValue&lt;K&gt;[] data = new DefaultKeyedValue[size];</span>
+
+<span class="fc bfc" id="L339" title="All 2 branches covered.">        for (int i = 0; i &lt; size; i++) {</span>
+<span class="fc" id="L340">            data[i] = new DefaultKeyedValue(this.keys.get(i), this.values.get(i));</span>
+        }
+
+<span class="fc" id="L343">        Comparator comparator = new KeyedValueComparator(</span>
+                KeyedValueComparatorType.BY_KEY, order);
+<span class="fc" id="L345">        Arrays.sort(data, comparator);</span>
+<span class="fc" id="L346">        clear();</span>
+
+<span class="fc bfc" id="L348" title="All 2 branches covered.">        for (int i = 0; i &lt; data.length; i++) {</span>
+<span class="fc" id="L349">            final DefaultKeyedValue&lt;K&gt; value = data[i];</span>
+<span class="fc" id="L350">            addValue(value.getKey(), value.getValue());</span>
+        }
+<span class="fc" id="L352">    }</span>
+
+    /**
+     * Sorts the items in the list by value.  If the list contains
+     * {@code null} values, they will sort to the end of the list,
+     * irrespective of the sort order.
+     *
+     * @param order  the sort order ({@code null} not permitted).
+     */
+    public void sortByValues(SortOrder order) {
+<span class="fc" id="L362">        final int size = this.keys.size();</span>
+<span class="fc" id="L363">        final DefaultKeyedValue[] data = new DefaultKeyedValue[size];</span>
+<span class="fc bfc" id="L364" title="All 2 branches covered.">        for (int i = 0; i &lt; size; i++) {</span>
+<span class="fc" id="L365">            data[i] = new DefaultKeyedValue((Comparable) this.keys.get(i),</span>
+<span class="fc" id="L366">                    (Number) this.values.get(i));</span>
+        }
+
+<span class="fc" id="L369">        Comparator comparator = new KeyedValueComparator(</span>
+                KeyedValueComparatorType.BY_VALUE, order);
+<span class="fc" id="L371">        Arrays.sort(data, comparator);</span>
+
+<span class="fc" id="L373">        clear();</span>
+<span class="fc bfc" id="L374" title="All 2 branches covered.">        for (int i = 0; i &lt; data.length; i++) {</span>
+<span class="fc" id="L375">            final DefaultKeyedValue&lt;K&gt; value = data[i];</span>
+<span class="fc" id="L376">            addValue(value.getKey(), value.getValue());</span>
+        }
+<span class="fc" id="L378">    }</span>
+
+    /**
+     * Tests if this object is equal to another.
+     *
+     * @param obj  the object ({@code null} permitted).
+     *
+     * @return A boolean.
+     */
+    @Override
+    public boolean equals(Object obj) {
+<span class="pc bpc" id="L389" title="1 of 2 branches missed.">        if (obj == this) {</span>
+<span class="nc" id="L390">            return true;</span>
+        }
+
+<span class="pc bpc" id="L393" title="1 of 2 branches missed.">        if (!(obj instanceof KeyedValues)) {</span>
+<span class="nc" id="L394">            return false;</span>
+        }
+
+<span class="fc" id="L397">        KeyedValues that = (KeyedValues) obj;</span>
+<span class="fc" id="L398">        int count = getItemCount();</span>
+<span class="pc bpc" id="L399" title="1 of 2 branches missed.">        if (count != that.getItemCount()) {</span>
+<span class="nc" id="L400">            return false;</span>
+        }
+
+<span class="fc bfc" id="L403" title="All 2 branches covered.">        for (int i = 0; i &lt; count; i++) {</span>
+<span class="fc" id="L404">            Comparable k1 = getKey(i);</span>
+<span class="fc" id="L405">            Comparable k2 = that.getKey(i);</span>
+<span class="pc bpc" id="L406" title="1 of 2 branches missed.">            if (!k1.equals(k2)) {</span>
+<span class="nc" id="L407">                return false;</span>
+            }
+<span class="fc" id="L409">            Number v1 = getValue(i);</span>
+<span class="fc" id="L410">            Number v2 = that.getValue(i);</span>
+<span class="fc bfc" id="L411" title="All 2 branches covered.">            if (v1 == null) {</span>
+<span class="pc bpc" id="L412" title="1 of 2 branches missed.">                if (v2 != null) {</span>
+<span class="nc" id="L413">                    return false;</span>
+                }
+            }
+            else {
+<span class="fc bfc" id="L417" title="All 2 branches covered.">                if (!v1.equals(v2)) {</span>
+<span class="fc" id="L418">                    return false;</span>
+                }
+            }
+        }
+<span class="fc" id="L422">        return true;</span>
+    }
+
+    /**
+     * Returns a hash code.
+     *
+     * @return A hash code.
+     */
+    @Override
+    public int hashCode() {
+<span class="nc bnc" id="L432" title="All 2 branches missed.">        return (this.keys != null ? this.keys.hashCode() : 0);</span>
+    }
+
+    /**
+     * Returns a clone.
+     *
+     * @return A clone.
+     *
+     * @throws CloneNotSupportedException  this class will not throw this
+     *         exception, but subclasses might.
+     */
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+<span class="fc" id="L445">        DefaultKeyedValues clone = (DefaultKeyedValues) super.clone();</span>
+<span class="fc" id="L446">        clone.keys = new ArrayList&lt;&gt;(this.keys);</span>
+<span class="fc" id="L447">        clone.values = new ArrayList&lt;&gt;(this.values);</span>
+<span class="fc" id="L448">        clone.indexMap = new HashMap(this.indexMap);</span>
+<span class="fc" id="L449">        return clone;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

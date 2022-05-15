@@ -1,0 +1,760 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TextUtils.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.chart.text</a> &gt; <span class="el_source">TextUtils.java</span></div><h1>TextUtils.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ */
+
+package org.jfree.chart.text;
+
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics2D;
+import java.awt.Paint;
+import java.awt.Shape;
+import java.awt.font.FontRenderContext;
+import java.awt.font.LineMetrics;
+import java.awt.font.TextLayout;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Rectangle2D;
+import java.text.AttributedString;
+import java.text.BreakIterator;
+import org.jfree.chart.internal.Args;
+
+/**
+ * Some utility methods for working with text in Java2D.
+ */
+public class TextUtils {
+
+    /**
+     * When this flag is set to {@code true}, strings will be drawn
+     * as attributed strings with the attributes taken from the current font.
+     * This allows for underlining, strike-out etc, but it means that
+     * TextLayout will be used to render the text:
+     * 
+     * http://www.jfree.org/phpBB2/viewtopic.php?p=45459&amp;highlight=#45459
+     */
+<span class="fc" id="L58">    private static boolean drawStringsWithFontAttributes = false;</span>
+    
+    /**
+     * A flag that controls whether or not the rotated string workaround is
+     * used.
+     */
+<span class="fc" id="L64">    private static boolean useDrawRotatedStringWorkaround = false;</span>
+
+    /**
+     * A flag that controls whether the FontMetrics.getStringBounds() method
+     * is used or a workaround is applied.
+     */
+<span class="fc" id="L70">    private static boolean useFontMetricsGetStringBounds = false;</span>
+
+    /**
+     * Private constructor prevents object creation.
+     */
+    private TextUtils() {
+        // prevent instantiation
+    }
+
+    /**
+     * Creates a {@link TextBlock} from a {@code String}.  Line breaks
+     * are added where the {@code String} contains '\n' characters.
+     *
+     * @param text  the text ({@code null} not permitted).
+     * @param font  the font.
+     * @param paint  the paint.
+     *
+     * @return A text block.
+     */
+    public static TextBlock createTextBlock(String text, Font font, Paint paint) {
+<span class="fc" id="L90">        Args.nullNotPermitted(text, &quot;text&quot;);</span>
+<span class="fc" id="L91">        TextBlock result = new TextBlock();</span>
+<span class="fc" id="L92">        String input = text;</span>
+<span class="pc bpc" id="L93" title="1 of 2 branches missed.">        boolean moreInputToProcess = (text.length() &gt; 0);</span>
+<span class="fc" id="L94">        int start = 0;</span>
+<span class="fc bfc" id="L95" title="All 2 branches covered.">        while (moreInputToProcess) {</span>
+<span class="fc" id="L96">            int index = input.indexOf(&quot;\n&quot;);</span>
+<span class="pc bpc" id="L97" title="1 of 2 branches missed.">            if (index &gt; start) {</span>
+<span class="nc" id="L98">                String line = input.substring(start, index);</span>
+<span class="nc bnc" id="L99" title="All 2 branches missed.">                if (index &lt; input.length() - 1) {</span>
+<span class="nc" id="L100">                    result.addLine(line, font, paint);</span>
+<span class="nc" id="L101">                    input = input.substring(index + 1);</span>
+                } else {
+<span class="nc" id="L103">                    moreInputToProcess = false;</span>
+                }
+<span class="pc bpc" id="L105" title="1 of 2 branches missed.">            } else if (index == start) {</span>
+<span class="nc bnc" id="L106" title="All 2 branches missed.">                if (index &lt; input.length() - 1) {</span>
+<span class="nc" id="L107">                    input = input.substring(index + 1);</span>
+                }
+                else {
+<span class="nc" id="L110">                    moreInputToProcess = false;</span>
+                }
+            } else {
+<span class="fc" id="L113">                result.addLine(input, font, paint);</span>
+<span class="fc" id="L114">                moreInputToProcess = false;</span>
+            }
+<span class="fc" id="L116">        }</span>
+<span class="fc" id="L117">        return result;</span>
+    }
+
+    /**
+     * Creates a new text block from the given string, breaking the
+     * text into lines so that the {@code maxWidth} value is respected.
+     *
+     * @param text  the text.
+     * @param font  the font.
+     * @param paint  the paint.
+     * @param maxWidth  the maximum width for each line.
+     * @param measurer  the text measurer.
+     *
+     * @return A text block.
+     */
+    public static TextBlock createTextBlock(String text, Font font,
+            Paint paint, float maxWidth, TextMeasurer measurer) {
+<span class="fc" id="L134">        return createTextBlock(text, font, paint, maxWidth, Integer.MAX_VALUE,</span>
+                measurer);
+    }
+
+    /**
+     * Creates a new text block from the given string, breaking the
+     * text into lines so that the {@code maxWidth} value is
+     * respected.
+     *
+     * @param text  the text.
+     * @param font  the font.
+     * @param paint  the paint.
+     * @param maxWidth  the maximum width for each line.
+     * @param maxLines  the maximum number of lines.
+     * @param measurer  the text measurer.
+     *
+     * @return A text block.
+     */
+    public static TextBlock createTextBlock(String text, Font font,
+            Paint paint, float maxWidth, int maxLines, TextMeasurer measurer) {
+
+<span class="fc" id="L155">        TextBlock result = new TextBlock();</span>
+<span class="fc" id="L156">        BreakIterator iterator = BreakIterator.getLineInstance();</span>
+<span class="fc" id="L157">        iterator.setText(text);</span>
+<span class="fc" id="L158">        int current = 0;</span>
+<span class="fc" id="L159">        int lines = 0;</span>
+<span class="fc" id="L160">        int length = text.length();</span>
+<span class="pc bpc" id="L161" title="1 of 4 branches missed.">        while (current &lt; length &amp;&amp; lines &lt; maxLines) {</span>
+<span class="fc" id="L162">            int next = nextLineBreak(text, current, maxWidth, iterator,</span>
+                    measurer);
+<span class="fc bfc" id="L164" title="All 2 branches covered.">            if (next == BreakIterator.DONE) {</span>
+<span class="fc" id="L165">                result.addLine(text.substring(current), font, paint);</span>
+<span class="fc" id="L166">                return result;</span>
+<span class="fc bfc" id="L167" title="All 2 branches covered.">            } else if (next == current) {</span>
+<span class="fc" id="L168">                next++; // we must take one more character or we'll loop forever</span>
+            }
+<span class="fc" id="L170">            result.addLine(text.substring(current, next), font, paint);</span>
+<span class="fc" id="L171">            lines++;</span>
+<span class="fc" id="L172">            current = next;</span>
+<span class="pc bpc" id="L173" title="2 of 4 branches missed.">            while (current &lt; text.length()&amp;&amp; text.charAt(current) == '\n') {</span>
+<span class="nc" id="L174">                current++;</span>
+            }
+<span class="fc" id="L176">        }</span>
+<span class="pc bpc" id="L177" title="1 of 2 branches missed.">        if (current &lt; length) {</span>
+<span class="fc" id="L178">            TextLine lastLine = result.getLastLine();</span>
+<span class="fc" id="L179">            TextFragment lastFragment = lastLine.getLastTextFragment();</span>
+<span class="fc" id="L180">            String oldStr = lastFragment.getText();</span>
+<span class="fc" id="L181">            String newStr = &quot;...&quot;;</span>
+<span class="fc bfc" id="L182" title="All 2 branches covered.">            if (oldStr.length() &gt; 3) {</span>
+<span class="fc" id="L183">                newStr = oldStr.substring(0, oldStr.length() - 3) + &quot;...&quot;;</span>
+            }
+
+<span class="fc" id="L186">            lastLine.removeFragment(lastFragment);</span>
+<span class="fc" id="L187">            TextFragment newFragment = new TextFragment(newStr,</span>
+<span class="fc" id="L188">                    lastFragment.getFont(), lastFragment.getPaint());</span>
+<span class="fc" id="L189">            lastLine.addFragment(newFragment);</span>
+        }
+<span class="fc" id="L191">        return result;</span>
+    }
+
+    /**
+     * Returns the character index of the next line break.  If the next
+     * character is wider than {@code width]} this method will return
+     * {@code start} - the caller should check for this case.
+     *
+     * @param text  the text ({@code null} not permitted).
+     * @param start  the start index.
+     * @param width  the target display width.
+     * @param iterator  the word break iterator.
+     * @param measurer  the text measurer.
+     *
+     * @return The index of the next line break.
+     */
+    private static int nextLineBreak(String text, int start, float width, 
+            BreakIterator iterator, TextMeasurer measurer) {
+
+        // this method is (loosely) based on code in JFreeReport's
+        // TextParagraph class
+<span class="fc" id="L212">        int current = start;</span>
+        int end;
+<span class="fc" id="L214">        float x = 0.0f;</span>
+<span class="fc" id="L215">        boolean firstWord = true;</span>
+<span class="fc" id="L216">        int newline = text.indexOf('\n', start);</span>
+<span class="pc bpc" id="L217" title="1 of 2 branches missed.">        if (newline &lt; 0) {</span>
+<span class="fc" id="L218">            newline = Integer.MAX_VALUE;</span>
+        }
+<span class="fc bfc" id="L220" title="All 2 branches covered.">        while (((end = iterator.following(current)) != BreakIterator.DONE)) {</span>
+<span class="fc" id="L221">            x += measurer.getStringWidth(text, current, end);</span>
+<span class="fc bfc" id="L222" title="All 2 branches covered.">            if (x &gt; width) {</span>
+<span class="fc bfc" id="L223" title="All 2 branches covered.">                if (firstWord) {</span>
+<span class="fc bfc" id="L224" title="All 2 branches covered.">                    while (measurer.getStringWidth(text, start, end) &gt; width) {</span>
+<span class="fc" id="L225">                        end--;</span>
+<span class="fc bfc" id="L226" title="All 2 branches covered.">                        if (end &lt;= start) {</span>
+<span class="fc" id="L227">                            return end;</span>
+                        }
+                    }
+<span class="fc" id="L230">                    return end;</span>
+                } else {
+<span class="fc" id="L232">                    end = iterator.previous();</span>
+<span class="fc" id="L233">                    return end;</span>
+                }
+            } else {
+<span class="pc bpc" id="L236" title="1 of 2 branches missed.">                if (end &gt; newline) {</span>
+<span class="nc" id="L237">                    return newline;</span>
+                }
+            }
+            // we found at least one word that fits ...
+<span class="fc" id="L241">            firstWord = false;</span>
+<span class="fc" id="L242">            current = end;</span>
+        }
+<span class="fc" id="L244">        return BreakIterator.DONE;</span>
+    }
+
+    /**
+     * Returns the bounds for the specified text.
+     *
+     * @param text  the text ({@code null} permitted).
+     * @param g2  the graphics context (not {@code null}).
+     * @param fm  the font metrics (not {@code null}).
+     *
+     * @return The text bounds ({@code null} if the {@code text}
+     *         argument is {@code null}).
+     */
+    public static Rectangle2D getTextBounds(String text, Graphics2D g2, 
+            FontMetrics fm) {
+
+        Rectangle2D bounds;
+<span class="pc bpc" id="L261" title="1 of 2 branches missed.">        if (TextUtils.useFontMetricsGetStringBounds) {</span>
+<span class="nc" id="L262">            bounds = fm.getStringBounds(text, g2);</span>
+            // getStringBounds() can return incorrect height for some Unicode
+            // characters...see bug parade 6183356, let's replace it with
+            // something correct
+<span class="nc" id="L266">            LineMetrics lm = fm.getFont().getLineMetrics(text,</span>
+<span class="nc" id="L267">                    g2.getFontRenderContext());</span>
+<span class="nc" id="L268">            bounds.setRect(bounds.getX(), bounds.getY(), bounds.getWidth(),</span>
+<span class="nc" id="L269">                    lm.getHeight());</span>
+<span class="nc" id="L270">        } else {</span>
+<span class="fc" id="L271">            double width = fm.stringWidth(text);</span>
+<span class="fc" id="L272">            double height = fm.getHeight();</span>
+<span class="fc" id="L273">            bounds = new Rectangle2D.Double(0.0, -fm.getAscent(), width,</span>
+                    height);
+        }
+<span class="fc" id="L276">        return bounds;</span>
+    }
+
+
+    /**
+     * Returns the bounds of an aligned string.
+     * 
+     * @param text  the string ({@code null} not permitted).
+     * @param g2  the graphics target ({@code null} not permitted).
+     * @param x  the x-coordinate.
+     * @param y  the y-coordinate.
+     * @param anchor  the anchor point that will be aligned to 
+     *     {@code (x, y)} ({@code null} not permitted).
+     * 
+     * @return The text bounds (never {@code null}).
+     */
+    public static Rectangle2D calcAlignedStringBounds(String text,
+            Graphics2D g2, float x, float y, TextAnchor anchor) {
+
+<span class="nc" id="L295">        Rectangle2D textBounds = new Rectangle2D.Double();</span>
+<span class="nc" id="L296">        float[] adjust = deriveTextBoundsAnchorOffsets(g2, text, anchor,</span>
+                textBounds);
+        // adjust text bounds to match string position
+<span class="nc" id="L299">        textBounds.setRect(x + adjust[0], y + adjust[1] + adjust[2],</span>
+<span class="nc" id="L300">            textBounds.getWidth(), textBounds.getHeight());</span>
+<span class="nc" id="L301">        return textBounds;</span>
+    }
+    
+    /**
+     * Draws a string such that the specified anchor point is aligned to the
+     * given (x, y) location.
+     *
+     * @param text  the text.
+     * @param g2  the graphics device.
+     * @param x  the x coordinate (Java 2D).
+     * @param y  the y coordinate (Java 2D).
+     * @param anchor  the anchor location.
+     *
+     * @return The text bounds (adjusted for the text position).
+     */
+    public static Rectangle2D drawAlignedString(String text, Graphics2D g2, 
+            float x, float y, TextAnchor anchor) {
+
+<span class="fc" id="L319">        Rectangle2D textBounds = new Rectangle2D.Double();</span>
+<span class="fc" id="L320">        float[] adjust = deriveTextBoundsAnchorOffsets(g2, text, anchor,</span>
+                textBounds);
+        // adjust text bounds to match string position
+<span class="fc" id="L323">        textBounds.setRect(x + adjust[0], y + adjust[1] + adjust[2],</span>
+<span class="fc" id="L324">            textBounds.getWidth(), textBounds.getHeight());</span>
+<span class="pc bpc" id="L325" title="1 of 2 branches missed.">        if (!drawStringsWithFontAttributes) {</span>
+<span class="fc" id="L326">            g2.drawString(text, x + adjust[0], y + adjust[1]);</span>
+        } else {
+<span class="nc" id="L328">            AttributedString as = new AttributedString(text, </span>
+<span class="nc" id="L329">                    g2.getFont().getAttributes());</span>
+<span class="nc" id="L330">            g2.drawString(as.getIterator(), x + adjust[0], y + adjust[1]);</span>
+        }
+<span class="fc" id="L332">        return textBounds;</span>
+    }
+
+    /**
+     * A utility method that calculates the anchor offsets for a string.
+     * Normally, the (x, y) coordinate for drawing text is a point on the
+     * baseline at the left of the text string.  If you add these offsets to
+     * (x, y) and draw the string, then the anchor point should coincide with
+     * the (x, y) point.
+     *
+     * @param g2  the graphics device (not {@code null}).
+     * @param text  the text.
+     * @param anchor  the anchor point.
+     * @param textBounds  the text bounds (if not {@code null}, this
+     *                    object will be updated by this method to match the
+     *                    string bounds).
+     *
+     * @return  The offsets.
+     */
+    private static float[] deriveTextBoundsAnchorOffsets(Graphics2D g2,
+            String text, TextAnchor anchor, Rectangle2D textBounds) {
+
+<span class="fc" id="L354">        float[] result = new float[3];</span>
+<span class="fc" id="L355">        FontRenderContext frc = g2.getFontRenderContext();</span>
+<span class="fc" id="L356">        Font f = g2.getFont();</span>
+<span class="fc" id="L357">        FontMetrics fm = g2.getFontMetrics(f);</span>
+<span class="fc" id="L358">        Rectangle2D bounds = TextUtils.getTextBounds(text, g2, fm);</span>
+<span class="fc" id="L359">        LineMetrics metrics = f.getLineMetrics(text, frc);</span>
+<span class="fc" id="L360">        float ascent = metrics.getAscent();</span>
+<span class="fc" id="L361">        result[2] = -ascent;</span>
+<span class="fc" id="L362">        float halfAscent = ascent / 2.0f;</span>
+<span class="fc" id="L363">        float descent = metrics.getDescent();</span>
+<span class="fc" id="L364">        float leading = metrics.getLeading();</span>
+<span class="fc" id="L365">        float xAdj = 0.0f;</span>
+<span class="fc" id="L366">        float yAdj = 0.0f;</span>
+
+<span class="fc bfc" id="L368" title="All 2 branches covered.">        if (anchor.isHorizontalCenter()) {</span>
+<span class="fc" id="L369">            xAdj = (float) -bounds.getWidth() / 2.0f;</span>
+<span class="fc bfc" id="L370" title="All 2 branches covered.">        } else if (anchor.isRight()) {</span>
+<span class="fc" id="L371">            xAdj = (float) -bounds.getWidth();</span>
+        }
+
+<span class="fc bfc" id="L374" title="All 2 branches covered.">        if (anchor.isTop()) {</span>
+<span class="fc" id="L375">            yAdj = -descent - leading + (float) bounds.getHeight();</span>
+<span class="pc bpc" id="L376" title="1 of 2 branches missed.">        } else if (anchor.isHalfAscent()) {</span>
+<span class="nc" id="L377">            yAdj = halfAscent;</span>
+<span class="fc bfc" id="L378" title="All 2 branches covered.">        } else if (anchor.isVerticalCenter()) {</span>
+<span class="fc" id="L379">            yAdj = -descent - leading + (float) (bounds.getHeight() / 2.0);</span>
+<span class="fc bfc" id="L380" title="All 2 branches covered.">        } else if (anchor.isBaseline()) {</span>
+<span class="fc" id="L381">            yAdj = 0.0f;</span>
+<span class="pc bpc" id="L382" title="1 of 2 branches missed.">        } else if (anchor.isBottom()) {</span>
+<span class="fc" id="L383">            yAdj = -metrics.getDescent() - metrics.getLeading();</span>
+        }
+<span class="pc bpc" id="L385" title="1 of 2 branches missed.">        if (textBounds != null) {</span>
+<span class="fc" id="L386">            textBounds.setRect(bounds);</span>
+        }
+<span class="fc" id="L388">        result[0] = xAdj;</span>
+<span class="fc" id="L389">        result[1] = yAdj;</span>
+<span class="fc" id="L390">        return result;</span>
+
+    }
+
+    /**
+     * A utility method for drawing rotated text.
+     * &lt;P&gt;
+     * A common rotation is -Math.PI/2 which draws text 'vertically' (with the
+     * top of the characters on the left).
+     *
+     * @param text  the text.
+     * @param g2  the graphics device.
+     * @param angle  the angle of the (clockwise) rotation (in radians).
+     * @param x  the x-coordinate.
+     * @param y  the y-coordinate.
+     */
+    public static void drawRotatedString(String text, Graphics2D g2,
+            double angle, float x, float y) {
+<span class="nc" id="L408">        drawRotatedString(text, g2, x, y, angle, x, y);</span>
+<span class="nc" id="L409">    }</span>
+
+    /**
+     * A utility method for drawing rotated text.
+     * &lt;P&gt;
+     * A common rotation is -Math.PI/2 which draws text 'vertically' (with the
+     * top of the characters on the left).
+     *
+     * @param text  the text.
+     * @param g2  the graphics device.
+     * @param textX  the x-coordinate for the text (before rotation).
+     * @param textY  the y-coordinate for the text (before rotation).
+     * @param angle  the angle of the (clockwise) rotation (in radians).
+     * @param rotateX  the point about which the text is rotated.
+     * @param rotateY  the point about which the text is rotated.
+     */
+    public static void drawRotatedString(String text, Graphics2D g2,
+            float textX, float textY, 
+            double angle, float rotateX, float rotateY) {
+
+<span class="pc bpc" id="L429" title="2 of 4 branches missed.">        if ((text == null) || (text.equals(&quot;&quot;))) {</span>
+<span class="nc" id="L430">            return;</span>
+        }
+<span class="pc bpc" id="L432" title="1 of 2 branches missed.">        if (angle == 0.0) {</span>
+<span class="nc" id="L433">            drawAlignedString(text, g2, textX, textY, TextAnchor.BASELINE_LEFT);</span>
+<span class="nc" id="L434">            return;</span>
+        }
+        
+<span class="fc" id="L437">        AffineTransform saved = g2.getTransform();</span>
+<span class="fc" id="L438">        AffineTransform rotate = AffineTransform.getRotateInstance(</span>
+                angle, rotateX, rotateY);
+<span class="fc" id="L440">        g2.transform(rotate);</span>
+
+<span class="pc bpc" id="L442" title="1 of 2 branches missed.">        if (useDrawRotatedStringWorkaround) {</span>
+            // workaround for JDC bug ID 4312117 and others...
+<span class="nc" id="L444">            TextLayout tl = new TextLayout(text, g2.getFont(),</span>
+<span class="nc" id="L445">                    g2.getFontRenderContext());</span>
+<span class="nc" id="L446">            tl.draw(g2, textX, textY);</span>
+<span class="nc" id="L447">        } else {</span>
+<span class="pc bpc" id="L448" title="1 of 2 branches missed.">            if (!drawStringsWithFontAttributes) {</span>
+<span class="fc" id="L449">                g2.drawString(text, textX, textY);</span>
+            } else {
+<span class="nc" id="L451">                AttributedString as = new AttributedString(text, </span>
+<span class="nc" id="L452">                        g2.getFont().getAttributes());</span>
+<span class="nc" id="L453">                g2.drawString(as.getIterator(), textX, textY);</span>
+            }
+        }
+<span class="fc" id="L456">        g2.setTransform(saved);</span>
+
+<span class="fc" id="L458">    }</span>
+
+    /**
+     * Draws a string that is aligned by one anchor point and rotated about
+     * another anchor point.
+     *
+     * @param text  the text.
+     * @param g2  the graphics device.
+     * @param x  the x-coordinate for positioning the text.
+     * @param y  the y-coordinate for positioning the text.
+     * @param textAnchor  the text anchor.
+     * @param angle  the rotation angle.
+     * @param rotationX  the x-coordinate for the rotation anchor point.
+     * @param rotationY  the y-coordinate for the rotation anchor point.
+     */
+    public static void drawRotatedString(String text, Graphics2D g2, 
+            float x, float y, TextAnchor textAnchor, 
+            double angle, float rotationX, float rotationY) {
+
+<span class="pc bpc" id="L477" title="2 of 4 branches missed.">        if (text == null || text.equals(&quot;&quot;)) {</span>
+<span class="nc" id="L478">            return;</span>
+        }
+<span class="pc bpc" id="L480" title="1 of 2 branches missed.">        if (angle == 0.0) {</span>
+<span class="fc" id="L481">            drawAlignedString(text, g2, x, y, textAnchor);</span>
+        } else {
+<span class="nc" id="L483">            float[] textAdj = deriveTextBoundsAnchorOffsets(g2, text, </span>
+                    textAnchor);
+<span class="nc" id="L485">            drawRotatedString(text, g2, x + textAdj[0], y + textAdj[1], angle,</span>
+                    rotationX, rotationY);
+        }
+<span class="fc" id="L488">    }</span>
+
+    /**
+     * Draws a string that is aligned by one anchor point and rotated about
+     * another anchor point.
+     *
+     * @param text  the text.
+     * @param g2  the graphics device.
+     * @param x  the x-coordinate for positioning the text.
+     * @param y  the y-coordinate for positioning the text.
+     * @param textAnchor  the text anchor.
+     * @param angle  the rotation angle (in radians).
+     * @param rotationAnchor  the rotation anchor.
+     */
+    public static void drawRotatedString(String text, Graphics2D g2, 
+            float x, float y, TextAnchor textAnchor, 
+            double angle, TextAnchor rotationAnchor) {
+
+<span class="pc bpc" id="L506" title="1 of 4 branches missed.">        if (text == null || text.equals(&quot;&quot;)) {</span>
+<span class="fc" id="L507">            return;</span>
+        }
+<span class="fc bfc" id="L509" title="All 2 branches covered.">        if (angle == 0.0) {</span>
+<span class="fc" id="L510">            drawAlignedString(text, g2, x, y, textAnchor);</span>
+        } else {
+<span class="fc" id="L512">            float[] textAdj = deriveTextBoundsAnchorOffsets(g2, text, </span>
+                    textAnchor);
+<span class="fc" id="L514">            float[] rotateAdj = deriveRotationAnchorOffsets(g2, text, </span>
+                    rotationAnchor);
+<span class="fc" id="L516">            drawRotatedString(text, g2, x + textAdj[0], y + textAdj[1],</span>
+                    angle, x + textAdj[0] + rotateAdj[0],
+                    y + textAdj[1] + rotateAdj[1]);
+        }
+<span class="fc" id="L520">    }</span>
+
+    /**
+     * Returns a shape that represents the bounds of the string after the
+     * specified rotation has been applied.
+     *
+     * @param text  the text ({@code null} permitted).
+     * @param g2  the graphics device.
+     * @param x  the x coordinate for the anchor point.
+     * @param y  the y coordinate for the anchor point.
+     * @param textAnchor  the text anchor.
+     * @param angle  the angle.
+     * @param rotationAnchor  the rotation anchor.
+     *
+     * @return The bounds (possibly {@code null}).
+     */
+    public static Shape calculateRotatedStringBounds(String text, Graphics2D g2, 
+            float x, float y, TextAnchor textAnchor, 
+            double angle, TextAnchor rotationAnchor) {
+
+<span class="pc bpc" id="L540" title="2 of 4 branches missed.">        if (text == null || text.equals(&quot;&quot;)) {</span>
+<span class="nc" id="L541">            return null;</span>
+        }
+<span class="fc" id="L543">        float[] textAdj = deriveTextBoundsAnchorOffsets(g2, text, textAnchor);</span>
+<span class="fc" id="L544">        float[] rotateAdj = deriveRotationAnchorOffsets(g2, text, </span>
+                rotationAnchor);
+<span class="fc" id="L546">        Shape result = calculateRotatedStringBounds(text, g2,</span>
+                x + textAdj[0], y + textAdj[1], angle,
+                x + textAdj[0] + rotateAdj[0], y + textAdj[1] + rotateAdj[1]);
+<span class="fc" id="L549">        return result;</span>
+        
+    }
+
+    /**
+     * A utility method that calculates the anchor offsets for a string.
+     * Normally, the (x, y) coordinate for drawing text is a point on the
+     * baseline at the left of the text string.  If you add these offsets to
+     * (x, y) and draw the string, then the anchor point should coincide with
+     * the (x, y) point.
+     *
+     * @param g2  the graphics device (not {@code null}).
+     * @param text  the text.
+     * @param anchor  the anchor point.
+     *
+     * @return  The offsets.
+     */
+    private static float[] deriveTextBoundsAnchorOffsets(Graphics2D g2,
+            String text, TextAnchor anchor) {
+
+<span class="fc" id="L569">        float[] result = new float[2];</span>
+<span class="fc" id="L570">        FontRenderContext frc = g2.getFontRenderContext();</span>
+<span class="fc" id="L571">        Font f = g2.getFont();</span>
+<span class="fc" id="L572">        FontMetrics fm = g2.getFontMetrics(f);</span>
+<span class="fc" id="L573">        Rectangle2D bounds = getTextBounds(text, g2, fm);</span>
+<span class="fc" id="L574">        LineMetrics metrics = f.getLineMetrics(text, frc);</span>
+<span class="fc" id="L575">        float ascent = metrics.getAscent();</span>
+<span class="fc" id="L576">        float halfAscent = ascent / 2.0f;</span>
+<span class="fc" id="L577">        float descent = metrics.getDescent();</span>
+<span class="fc" id="L578">        float leading = metrics.getLeading();</span>
+<span class="fc" id="L579">        float xAdj = 0.0f;</span>
+<span class="fc" id="L580">        float yAdj = 0.0f;</span>
+
+<span class="pc bpc" id="L582" title="1 of 2 branches missed.">        if (anchor.isHorizontalCenter()) {</span>
+<span class="fc" id="L583">            xAdj = (float) -bounds.getWidth() / 2.0f;</span>
+<span class="nc bnc" id="L584" title="All 2 branches missed.">        } else if (anchor.isRight()) {</span>
+<span class="nc" id="L585">            xAdj = (float) -bounds.getWidth();</span>
+        }
+
+<span class="pc bpc" id="L588" title="1 of 2 branches missed.">        if (anchor.isTop()) {</span>
+<span class="nc" id="L589">            yAdj = -descent - leading + (float) bounds.getHeight();</span>
+<span class="pc bpc" id="L590" title="1 of 2 branches missed.">        } else if (anchor.isHalfAscent()) {</span>
+<span class="nc" id="L591">            yAdj = halfAscent;</span>
+<span class="pc bpc" id="L592" title="1 of 2 branches missed.">        } else if (anchor.isVerticalCenter()) {</span>
+<span class="fc" id="L593">            yAdj = -descent - leading + (float) (bounds.getHeight() / 2.0);</span>
+<span class="nc bnc" id="L594" title="All 2 branches missed.">        } else if (anchor.isBaseline()) {</span>
+<span class="nc" id="L595">            yAdj = 0.0f;</span>
+<span class="nc bnc" id="L596" title="All 2 branches missed.">        } else if (anchor.isBottom()) {</span>
+<span class="nc" id="L597">            yAdj = -metrics.getDescent() - metrics.getLeading();</span>
+        }
+<span class="fc" id="L599">        result[0] = xAdj;</span>
+<span class="fc" id="L600">        result[1] = yAdj;</span>
+<span class="fc" id="L601">        return result;</span>
+
+    }
+
+    /**
+     * A utility method that calculates the rotation anchor offsets for a
+     * string.  These offsets are relative to the text starting coordinate
+     * ({@code BASELINE_LEFT}).
+     *
+     * @param g2  the graphics device.
+     * @param text  the text.
+     * @param anchor  the anchor point.
+     *
+     * @return The offsets.
+     */
+    private static float[] deriveRotationAnchorOffsets(Graphics2D g2,
+            String text, TextAnchor anchor) {
+
+<span class="fc" id="L619">        float[] result = new float[2];</span>
+<span class="fc" id="L620">        FontRenderContext frc = g2.getFontRenderContext();</span>
+<span class="fc" id="L621">        LineMetrics metrics = g2.getFont().getLineMetrics(text, frc);</span>
+<span class="fc" id="L622">        FontMetrics fm = g2.getFontMetrics();</span>
+<span class="fc" id="L623">        Rectangle2D bounds = TextUtils.getTextBounds(text, g2, fm);</span>
+<span class="fc" id="L624">        float ascent = metrics.getAscent();</span>
+<span class="fc" id="L625">        float halfAscent = ascent / 2.0f;</span>
+<span class="fc" id="L626">        float descent = metrics.getDescent();</span>
+<span class="fc" id="L627">        float leading = metrics.getLeading();</span>
+<span class="fc" id="L628">        float xAdj = 0.0f;</span>
+<span class="fc" id="L629">        float yAdj = 0.0f;</span>
+
+<span class="pc bpc" id="L631" title="1 of 2 branches missed.">        if (anchor.isLeft()) {</span>
+<span class="nc" id="L632">            xAdj = 0.0f;</span>
+<span class="pc bpc" id="L633" title="1 of 2 branches missed.">        } else if (anchor.isHorizontalCenter()) {</span>
+<span class="fc" id="L634">            xAdj = (float) bounds.getWidth() / 2.0f;</span>
+<span class="nc bnc" id="L635" title="All 2 branches missed.">        } else if (anchor.isRight()) {</span>
+<span class="nc" id="L636">            xAdj = (float) bounds.getWidth();</span>
+        }
+
+<span class="pc bpc" id="L639" title="1 of 2 branches missed.">        if (anchor.isTop()) {</span>
+<span class="nc" id="L640">            yAdj = descent + leading - (float) bounds.getHeight();</span>
+<span class="pc bpc" id="L641" title="1 of 2 branches missed.">        } else if (anchor.isVerticalCenter()) {</span>
+<span class="fc" id="L642">            yAdj = descent + leading - (float) (bounds.getHeight() / 2.0);</span>
+<span class="nc bnc" id="L643" title="All 2 branches missed.">        } else if (anchor.isHalfAscent()) {</span>
+<span class="nc" id="L644">            yAdj = -halfAscent;</span>
+<span class="nc bnc" id="L645" title="All 2 branches missed.">        } else if (anchor.isBaseline()) {</span>
+<span class="nc" id="L646">            yAdj = 0.0f;</span>
+<span class="nc bnc" id="L647" title="All 2 branches missed.">        } else if (anchor.isBottom()) {</span>
+<span class="nc" id="L648">            yAdj = metrics.getDescent() + metrics.getLeading();</span>
+        }
+<span class="fc" id="L650">        result[0] = xAdj;</span>
+<span class="fc" id="L651">        result[1] = yAdj;</span>
+<span class="fc" id="L652">        return result;</span>
+
+    }
+
+    /**
+     * Returns a shape that represents the bounds of the string after the
+     * specified rotation has been applied.
+     *
+     * @param text  the text ({@code null} permitted).
+     * @param g2  the graphics device.
+     * @param textX  the x coordinate for the text.
+     * @param textY  the y coordinate for the text.
+     * @param angle  the angle.
+     * @param rotateX  the x coordinate for the rotation point.
+     * @param rotateY  the y coordinate for the rotation point.
+     *
+     * @return The bounds ({@code null} if {@code text} is
+     *         {@code null} or has zero length).
+     */
+    public static Shape calculateRotatedStringBounds(String text, Graphics2D g2,
+            float textX, float textY, double angle, float rotateX, 
+            float rotateY) {
+
+<span class="pc bpc" id="L675" title="2 of 4 branches missed.">        if ((text == null) || (text.equals(&quot;&quot;))) {</span>
+<span class="nc" id="L676">            return null;</span>
+        }
+<span class="fc" id="L678">        FontMetrics fm = g2.getFontMetrics();</span>
+<span class="fc" id="L679">        Rectangle2D bounds = TextUtils.getTextBounds(text, g2, fm);</span>
+<span class="fc" id="L680">        AffineTransform translate = AffineTransform.getTranslateInstance(</span>
+                textX, textY);
+<span class="fc" id="L682">        Shape translatedBounds = translate.createTransformedShape(bounds);</span>
+<span class="fc" id="L683">        AffineTransform rotate = AffineTransform.getRotateInstance(</span>
+                angle, rotateX, rotateY);
+<span class="fc" id="L685">        Shape result = rotate.createTransformedShape(translatedBounds);</span>
+<span class="fc" id="L686">        return result;</span>
+
+    }
+
+    /**
+     * Returns the flag that controls whether the FontMetrics.getStringBounds()
+     * method is used or not.  If you are having trouble with label alignment
+     * or positioning, try changing the value of this flag.
+     *
+     * @return A boolean.
+     */
+    public static boolean getUseFontMetricsGetStringBounds() {
+<span class="nc" id="L698">        return useFontMetricsGetStringBounds;</span>
+    }
+
+    /**
+     * Sets the flag that controls whether the FontMetrics.getStringBounds()
+     * method is used or not.  If you are having trouble with label alignment
+     * or positioning, try changing the value of this flag.
+     *
+     * @param use  the flag.
+     */
+    public static void setUseFontMetricsGetStringBounds(boolean use) {
+<span class="nc" id="L709">        useFontMetricsGetStringBounds = use;</span>
+<span class="nc" id="L710">    }</span>
+
+    /**
+     * Returns the flag that controls whether or not a workaround is used for
+     * drawing rotated strings.
+     *
+     * @return A boolean.
+     */
+    public static boolean isUseDrawRotatedStringWorkaround() {
+<span class="nc" id="L719">        return useDrawRotatedStringWorkaround;</span>
+    }
+ 
+    /**
+     * Sets the flag that controls whether or not a workaround is used for
+     * drawing rotated strings.  The related bug is on Sun's bug parade
+     * (id 4312117) and the workaround involves using a {@code TextLayout}
+     * instance to draw the text instead of calling the
+     * {@code drawString()} method in the {@code Graphics2D} class.
+     *
+     * @param use  the new flag value.
+     */
+    public static void setUseDrawRotatedStringWorkaround(boolean use) {
+<span class="nc" id="L732">        TextUtils.useDrawRotatedStringWorkaround = use;</span>
+<span class="nc" id="L733">    }</span>
+    
+    /**
+     * Returns the flag that controls whether or not strings are drawn using
+     * the current font attributes (such as underlining, strikethrough etc).
+     * The default value is {@code false}.
+     * 
+     * @return A boolean. 
+     */
+    public static boolean getDrawStringsWithFontAttributes() {
+<span class="nc" id="L743">        return TextUtils.drawStringsWithFontAttributes;</span>
+    }
+    
+    /**
+     * Sets the flag that controls whether or not strings are drawn using the
+     * current font attributes.  This is a hack to allow underlining of titles
+     * without big changes to the API.  See:
+     * http://www.jfree.org/phpBB2/viewtopic.php?p=45459&amp;amp;highlight=#45459
+     * 
+     * @param b  the new flag value.
+     */
+    public static void setDrawStringsWithFontAttributes(boolean b) {
+<span class="nc" id="L755">        TextUtils.drawStringsWithFontAttributes = b;</span>
+<span class="nc" id="L756">    }</span>
+
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

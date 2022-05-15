@@ -1,0 +1,345 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>XYPolygonAnnotation.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.chart.annotations</a> &gt; <span class="el_source">XYPolygonAnnotation.java</span></div><h1>XYPolygonAnnotation.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * ------------------------
+ * XYPolygonAnnotation.java
+ * ------------------------
+ * (C) Copyright 2005-2022, by David Gilbert and Contributors.
+ *
+ * Original Author:  David Gilbert;
+ * Contributor(s):   Peter Kolb (patch 2809117);
+ *
+ */
+
+package org.jfree.chart.annotations;
+
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Paint;
+import java.awt.Stroke;
+import java.awt.geom.GeneralPath;
+import java.awt.geom.Rectangle2D;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Objects;
+
+import org.jfree.chart.internal.HashUtils;
+import org.jfree.chart.axis.ValueAxis;
+import org.jfree.chart.plot.Plot;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.plot.PlotRenderingInfo;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.api.RectangleEdge;
+import org.jfree.chart.internal.PaintUtils;
+import org.jfree.chart.internal.Args;
+import org.jfree.chart.api.PublicCloneable;
+import org.jfree.chart.internal.SerialUtils;
+
+/**
+ * A polygon annotation that can be placed on an {@link XYPlot}.  The
+ * polygon coordinates are specified in data space.
+ */
+public class XYPolygonAnnotation extends AbstractXYAnnotation
+        implements Cloneable, PublicCloneable, Serializable {
+
+    /** For serialization. */
+    private static final long serialVersionUID = -6984203651995900036L;
+
+    /** The polygon. */
+    private double[] polygon;
+
+    /** The stroke used to draw the box outline. */
+    private transient Stroke stroke;
+
+    /** The paint used to draw the box outline. */
+    private transient Paint outlinePaint;
+
+    /** The paint used to fill the box. */
+    private transient Paint fillPaint;
+
+    /**
+     * Creates a new annotation (where, by default, the polygon is drawn
+     * with a black outline).  The array of polygon coordinates must contain
+     * an even number of coordinates (each pair is an (x, y) location on the
+     * plot) and the last point is automatically joined back to the first point.
+     *
+     * @param polygon  the coordinates of the polygon's vertices
+     *     ({@code null} not permitted).
+     */
+    public XYPolygonAnnotation(double[] polygon) {
+<span class="nc" id="L97">        this(polygon, new BasicStroke(1.0f), Color.BLACK);</span>
+<span class="nc" id="L98">    }</span>
+
+    /**
+     * Creates a new annotation where the box is drawn as an outline using
+     * the specified {@code stroke} and {@code outlinePaint}.
+     * The array of polygon coordinates must contain an even number of
+     * coordinates (each pair is an (x, y) location on the plot) and the last
+     * point is automatically joined back to the first point.
+     *
+     * @param polygon  the coordinates of the polygon's vertices
+     *     ({@code null} not permitted).
+     * @param stroke  the shape stroke ({@code null} permitted).
+     * @param outlinePaint  the shape color ({@code null} permitted).
+     */
+    public XYPolygonAnnotation(double[] polygon,
+                               Stroke stroke, Paint outlinePaint) {
+<span class="nc" id="L114">        this(polygon, stroke, outlinePaint, null);</span>
+<span class="nc" id="L115">    }</span>
+
+    /**
+     * Creates a new annotation.  The array of polygon coordinates must
+     * contain an even number of coordinates (each pair is an (x, y) location
+     * on the plot) and the last point is automatically joined back to the
+     * first point.
+     *
+     * @param polygon  the coordinates of the polygon's vertices
+     *     ({@code null} not permitted).
+     * @param stroke  the shape stroke ({@code null} permitted).
+     * @param outlinePaint  the shape color ({@code null} permitted).
+     * @param fillPaint  the paint used to fill the shape ({@code null}
+     *                   permitted).
+     */
+    public XYPolygonAnnotation(double[] polygon, Stroke stroke, 
+            Paint outlinePaint, Paint fillPaint) {
+<span class="fc" id="L132">        super();</span>
+<span class="fc" id="L133">        Args.nullNotPermitted(polygon, &quot;polygon&quot;);</span>
+<span class="pc bpc" id="L134" title="1 of 2 branches missed.">        if (polygon.length % 2 != 0) {</span>
+<span class="nc" id="L135">            throw new IllegalArgumentException(&quot;The 'polygon' array must &quot;</span>
+                    + &quot;contain an even number of items.&quot;);
+        }
+<span class="fc" id="L138">        this.polygon = (double[]) polygon.clone();</span>
+<span class="fc" id="L139">        this.stroke = stroke;</span>
+<span class="fc" id="L140">        this.outlinePaint = outlinePaint;</span>
+<span class="fc" id="L141">        this.fillPaint = fillPaint;</span>
+<span class="fc" id="L142">    }</span>
+
+    /**
+     * Returns the coordinates of the polygon's vertices.  The returned array
+     * is a copy, so it is safe to modify without altering the annotation's
+     * state.
+     *
+     * @return The coordinates of the polygon's vertices.
+     */
+    public double[] getPolygonCoordinates() {
+<span class="nc" id="L152">        return (double[]) this.polygon.clone();</span>
+    }
+
+    /**
+     * Returns the fill paint.
+     *
+     * @return The fill paint (possibly {@code null}).
+     */
+    public Paint getFillPaint() {
+<span class="nc" id="L161">        return this.fillPaint;</span>
+    }
+
+    /**
+     * Returns the outline stroke.
+     *
+     * @return The outline stroke (possibly {@code null}).
+     */
+    public Stroke getOutlineStroke() {
+<span class="nc" id="L170">        return this.stroke;</span>
+    }
+
+    /**
+     * Returns the outline paint.
+     *
+     * @return The outline paint (possibly {@code null}).
+     */
+    public Paint getOutlinePaint() {
+<span class="nc" id="L179">        return this.outlinePaint;</span>
+    }
+
+    /**
+     * Made by Rodrigo Paulo
+     * @param x
+     * @param y
+     * @param domainAxis
+     * @param dataArea
+     * @param rangeAxis
+     * @param domainEdge
+     * @param rangeEdge
+     * @param area
+     */
+    private void createPath(double x, double y, ValueAxis domainAxis, Rectangle2D dataArea, ValueAxis rangeAxis, RectangleEdge domainEdge,
+                            RectangleEdge rangeEdge, GeneralPath area){
+<span class="nc bnc" id="L195" title="All 2 branches missed.">        for (int i = 2; i &lt; this.polygon.length; i += 2) {</span>
+<span class="nc" id="L196">            x = domainAxis.valueToJava2D(this.polygon[i], dataArea,</span>
+                    domainEdge);
+<span class="nc" id="L198">            y = rangeAxis.valueToJava2D(this.polygon[i + 1], dataArea,</span>
+                    rangeEdge);
+<span class="nc" id="L200">            area.lineTo((float) y, (float) x);</span>
+        }
+<span class="nc" id="L202">    }</span>
+
+    /**
+     * Draws the annotation.  This method is usually called by the
+     * {@link XYPlot} class, you shouldn't need to call it directly.
+     *
+     * @param g2  the graphics device.
+     * @param plot  the plot.
+     * @param dataArea  the data area.
+     * @param domainAxis  the domain axis.
+     * @param rangeAxis  the range axis.
+     * @param rendererIndex  the renderer index.
+     * @param info  the plot rendering info.
+     */
+    @Override
+    public void draw(Graphics2D g2, XYPlot plot, Rectangle2D dataArea,
+                     ValueAxis domainAxis, ValueAxis rangeAxis,
+                     int rendererIndex, PlotRenderingInfo info) {
+
+        // if we don't have at least 2 (x, y) coordinates, just return
+<span class="nc bnc" id="L222" title="All 2 branches missed.">        if (this.polygon.length &lt; 4) {</span>
+<span class="nc" id="L223">            return;</span>
+        }
+<span class="nc" id="L225">        PlotOrientation orientation = plot.getOrientation();</span>
+<span class="nc" id="L226">        RectangleEdge domainEdge = Plot.resolveDomainAxisLocation(plot.getDomainAxisLocation(), orientation);</span>
+<span class="nc" id="L227">        RectangleEdge rangeEdge = Plot.resolveRangeAxisLocation(plot.getRangeAxisLocation(), orientation);</span>
+
+<span class="nc" id="L229">        GeneralPath area = new GeneralPath();</span>
+<span class="nc" id="L230">        double x = domainAxis.valueToJava2D(this.polygon[0], dataArea,</span>
+                domainEdge);
+<span class="nc" id="L232">        double y = rangeAxis.valueToJava2D(this.polygon[1], dataArea,</span>
+                rangeEdge);
+
+<span class="nc" id="L235">        area.moveTo((float) y, (float) x);</span>
+<span class="nc" id="L236">        createPath(x,y,domainAxis, dataArea, rangeAxis, domainEdge, rangeEdge, area);</span>
+<span class="nc" id="L237">        area.closePath();</span>
+
+<span class="nc" id="L239">        Painter p = new Painter(area, stroke, outlinePaint, fillPaint);</span>
+<span class="nc" id="L240">        p.paintArea(g2);</span>
+
+<span class="nc" id="L242">        addEntity(info, area, rendererIndex, getToolTipText(), getURL());</span>
+
+<span class="nc" id="L244">    }</span>
+
+    /**
+     * Tests this annotation for equality with an arbitrary object.
+     *
+     * @param obj  the object ({@code null} permitted).
+     *
+     * @return A boolean.
+     */
+    @Override
+    public boolean equals(Object obj) {
+<span class="pc bpc" id="L255" title="1 of 2 branches missed.">        if (obj == this) {</span>
+<span class="nc" id="L256">            return true;</span>
+        }
+        // now try to reject equality
+<span class="pc bpc" id="L259" title="1 of 2 branches missed.">        if (!super.equals(obj)) {</span>
+<span class="nc" id="L260">            return false;</span>
+        }
+<span class="pc bpc" id="L262" title="1 of 2 branches missed.">        if (!(obj instanceof XYPolygonAnnotation)) {</span>
+<span class="nc" id="L263">            return false;</span>
+        }
+<span class="fc" id="L265">        XYPolygonAnnotation that = (XYPolygonAnnotation) obj;</span>
+<span class="fc bfc" id="L266" title="All 2 branches covered.">        if (!Arrays.equals(this.polygon, that.polygon)) {</span>
+<span class="fc" id="L267">            return false;</span>
+        }
+<span class="fc bfc" id="L269" title="All 2 branches covered.">        if (!Objects.equals(this.stroke, that.stroke)) {</span>
+<span class="fc" id="L270">            return false;</span>
+        }
+<span class="fc bfc" id="L272" title="All 2 branches covered.">        if (!PaintUtils.equal(this.outlinePaint, that.outlinePaint)) {</span>
+<span class="fc" id="L273">            return false;</span>
+        }
+<span class="fc bfc" id="L275" title="All 2 branches covered.">        if (!PaintUtils.equal(this.fillPaint, that.fillPaint)) {</span>
+<span class="fc" id="L276">            return false;</span>
+        }
+        // seem to be the same
+<span class="fc" id="L279">        return true;</span>
+    }
+
+    /**
+     * Returns a hash code for this instance.
+     *
+     * @return A hash code.
+     */
+    @Override
+    public int hashCode() {
+<span class="fc" id="L289">        int result = 193;</span>
+<span class="fc" id="L290">        result = 37 * result + HashUtils.hashCodeForDoubleArray(</span>
+                this.polygon);
+<span class="fc" id="L292">        result = 37 * result + HashUtils.hashCodeForPaint(this.fillPaint);</span>
+<span class="fc" id="L293">        result = 37 * result + HashUtils.hashCodeForPaint(</span>
+                this.outlinePaint);
+<span class="pc bpc" id="L295" title="1 of 2 branches missed.">        if (this.stroke != null) {</span>
+<span class="fc" id="L296">            result = 37 * result + this.stroke.hashCode();</span>
+        }
+<span class="fc" id="L298">        return result;</span>
+    }
+
+    /**
+     * Returns a clone.
+     *
+     * @return A clone.
+     *
+     * @throws CloneNotSupportedException not thrown by this class, but may be
+     *                                    by subclasses.
+     */
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+<span class="fc" id="L311">        return super.clone();</span>
+    }
+
+    /**
+     * Provides serialization support.
+     *
+     * @param stream  the output stream ({@code null} not permitted).
+     *
+     * @throws IOException if there is an I/O error.
+     */
+    private void writeObject(ObjectOutputStream stream) throws IOException {
+<span class="fc" id="L322">        stream.defaultWriteObject();</span>
+<span class="fc" id="L323">        SerialUtils.writeStroke(this.stroke, stream);</span>
+<span class="fc" id="L324">        SerialUtils.writePaint(this.outlinePaint, stream);</span>
+<span class="fc" id="L325">        SerialUtils.writePaint(this.fillPaint, stream);</span>
+<span class="fc" id="L326">    }</span>
+
+    /**
+     * Provides serialization support.
+     *
+     * @param stream  the input stream ({@code null} not permitted).
+     *
+     * @throws IOException  if there is an I/O error.
+     * @throws ClassNotFoundException  if there is a classpath problem.
+     */
+    private void readObject(ObjectInputStream stream)
+            throws IOException, ClassNotFoundException {
+<span class="fc" id="L338">        stream.defaultReadObject();</span>
+<span class="fc" id="L339">        this.stroke = SerialUtils.readStroke(stream);</span>
+<span class="fc" id="L340">        this.outlinePaint = SerialUtils.readPaint(stream);</span>
+<span class="fc" id="L341">        this.fillPaint = SerialUtils.readPaint(stream);</span>
+<span class="fc" id="L342">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

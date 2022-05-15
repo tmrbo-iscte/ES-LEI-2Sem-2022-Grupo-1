@@ -1,0 +1,715 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TimeSeriesCollection.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.data.time</a> &gt; <span class="el_source">TimeSeriesCollection.java</span></div><h1>TimeSeriesCollection.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * -------------------------
+ * TimeSeriesCollection.java
+ * -------------------------
+ * (C) Copyright 2001-2022, by David Gilbert.
+ *
+ * Original Author:  David Gilbert;
+ * Contributor(s):   -;
+ *
+ */
+
+package org.jfree.data.time;
+
+import org.jfree.chart.internal.Args;
+import org.jfree.chart.internal.CloneUtils;
+import org.jfree.data.DomainInfo;
+import org.jfree.data.DomainOrder;
+import org.jfree.data.Range;
+import org.jfree.data.general.DatasetChangeEvent;
+import org.jfree.data.general.Series;
+import org.jfree.data.xy.*;
+
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyVetoException;
+import java.beans.VetoableChangeListener;
+import java.io.Serializable;
+import java.util.*;
+
+/**
+ * A collection of time series objects.  This class implements the
+ * {@link XYDataset} interface, as well as the extended
+ * {@link IntervalXYDataset} interface.  This makes it a convenient dataset for
+ * use with the {@link org.jfree.chart.plot.XYPlot} class.
+ */
+public class TimeSeriesCollection&lt;S extends Comparable&lt;S&gt;&gt; 
+        extends AbstractIntervalXYDataset
+        implements XYDataset, IntervalXYDataset, DomainInfo, XYDomainInfo,
+        XYRangeInfo, VetoableChangeListener, Serializable {
+
+    /** For serialization. */
+    private static final long serialVersionUID = 834149929022371137L;
+
+    /** Storage for the time series. */
+    private List&lt;TimeSeries&lt;S&gt;&gt; data;
+
+    /** A working calendar (to recycle) */
+    private Calendar workingCalendar;
+
+    /**
+     * The point within each time period that is used for the X value when this
+     * collection is used as an {@link org.jfree.data.xy.XYDataset}.  This can
+     * be the start, middle or end of the time period.
+     */
+    private TimePeriodAnchor xPosition;
+
+    /**
+     * Constructs an empty dataset, tied to the default timezone.
+     */
+    public TimeSeriesCollection() {
+<span class="fc" id="L85">        this(null, TimeZone.getDefault());</span>
+<span class="fc" id="L86">    }</span>
+
+    /**
+     * Constructs an empty dataset, tied to a specific timezone.
+     *
+     * @param zone  the timezone ({@code null} permitted, will use
+     *              {@code TimeZone.getDefault()} in that case).
+     */
+    public TimeSeriesCollection(TimeZone zone) {
+        // FIXME: need a locale as well as a timezone
+<span class="fc" id="L96">        this(null, zone);</span>
+<span class="fc" id="L97">    }</span>
+
+    /**
+     * Constructs a dataset containing a single series (more can be added),
+     * tied to the default timezone.
+     *
+     * @param series the series ({@code null} permitted).
+     */
+    public TimeSeriesCollection(TimeSeries&lt;S&gt; series) {
+<span class="fc" id="L106">        this(series, TimeZone.getDefault());</span>
+<span class="fc" id="L107">    }</span>
+
+    /**
+     * Constructs a dataset containing a single series (more can be added),
+     * tied to a specific timezone.
+     *
+     * @param series  a series to add to the collection ({@code null}
+     *                permitted).
+     * @param zone  the timezone ({@code null} permitted, will use
+     *              {@code TimeZone.getDefault()} in that case).
+     */
+<span class="fc" id="L118">    public TimeSeriesCollection(TimeSeries&lt;S&gt; series, TimeZone zone) {</span>
+        // FIXME:  need a locale as well as a timezone
+<span class="pc bpc" id="L120" title="1 of 2 branches missed.">        if (zone == null) {</span>
+<span class="nc" id="L121">            zone = TimeZone.getDefault();</span>
+        }
+<span class="fc" id="L123">        this.workingCalendar = Calendar.getInstance(zone);</span>
+<span class="fc" id="L124">        this.data = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L125" title="All 2 branches covered.">        if (series != null) {</span>
+<span class="fc" id="L126">            this.data.add(series);</span>
+<span class="fc" id="L127">            series.addChangeListener(this);</span>
+        }
+<span class="fc" id="L129">        this.xPosition = TimePeriodAnchor.START;</span>
+<span class="fc" id="L130">    }</span>
+
+    /**
+     * Returns the order of the domain values in this dataset.
+     *
+     * @return {@link DomainOrder#ASCENDING}
+     */
+    @Override
+    public DomainOrder getDomainOrder() {
+<span class="nc" id="L139">        return DomainOrder.ASCENDING;</span>
+    }
+
+    /**
+     * Returns the position within each time period that is used for the X
+     * value when the collection is used as an
+     * {@link org.jfree.data.xy.XYDataset}.
+     *
+     * @return The anchor position (never {@code null}).
+     */
+    public TimePeriodAnchor getXPosition() {
+<span class="nc" id="L150">        return this.xPosition;</span>
+    }
+
+    /**
+     * Sets the position within each time period that is used for the X values
+     * when the collection is used as an {@link XYDataset}, then sends a
+     * {@link DatasetChangeEvent} is sent to all registered listeners.
+     *
+     * @param anchor  the anchor position ({@code null} not permitted).
+     */
+    public void setXPosition(TimePeriodAnchor anchor) {
+<span class="fc" id="L161">        Args.nullNotPermitted(anchor, &quot;anchor&quot;);</span>
+<span class="fc" id="L162">        this.xPosition = anchor;</span>
+<span class="fc" id="L163">        notifyListeners(new DatasetChangeEvent(this, this));</span>
+<span class="fc" id="L164">    }</span>
+
+    /**
+     * Returns a list of all the series in the collection.
+     *
+     * @return The list (which is unmodifiable).
+     */
+    public List&lt;TimeSeries&lt;S&gt;&gt; getSeries() {
+<span class="nc" id="L172">        return Collections.unmodifiableList(this.data);</span>
+    }
+
+    /**
+     * Returns the number of series in the collection.
+     *
+     * @return The series count.
+     */
+    @Override
+    public int getSeriesCount() {
+<span class="fc" id="L182">        return this.data.size();</span>
+    }
+
+    /**
+     * Returns the index of the specified series, or -1 if that series is not
+     * present in the dataset.
+     *
+     * @param series  the series ({@code null} not permitted).
+     *
+     * @return The series index.
+     *
+     * @since 1.0.6
+     */
+    public int indexOf(TimeSeries&lt;S&gt; series) {
+<span class="fc" id="L196">        Args.nullNotPermitted(series, &quot;series&quot;);</span>
+<span class="fc" id="L197">        return this.data.indexOf(series);</span>
+    }
+
+    /**
+     * Returns a series.
+     *
+     * @param series  the index of the series (zero-based).
+     *
+     * @return The series.
+     */
+    public TimeSeries&lt;S&gt; getSeries(int series) {
+<span class="fc" id="L208">        Args.requireInRange(series, &quot;series&quot;, 0, getSeriesCount() - 1);</span>
+<span class="fc" id="L209">        return this.data.get(series);</span>
+    }
+
+    /**
+     * Returns the series with the specified key, or {@code null} if
+     * there is no such series.
+     *
+     * @param key  the series key ({@code null} permitted).
+     *
+     * @return The series with the given key.
+     */
+    public TimeSeries&lt;S&gt; getSeries(S key) {
+<span class="pc bpc" id="L221" title="1 of 2 branches missed.">        for (TimeSeries series : this.data) {</span>
+<span class="pc bpc" id="L222" title="1 of 4 branches missed.">            if (series.getKey() != null &amp;&amp; series.getKey().equals(key)) {</span>
+<span class="fc" id="L223">                return series;</span>
+            }
+<span class="fc" id="L225">        }</span>
+<span class="nc" id="L226">        return null;</span>
+    }
+
+    /**
+     * Returns the key for a series.
+     *
+     * @param series  the index of the series (zero-based).
+     *
+     * @return The key for a series.
+     */
+    @Override
+    public Comparable getSeriesKey(int series) {
+        // check arguments...delegated
+        // fetch the series name...
+<span class="fc" id="L240">        return getSeries(series).getKey();</span>
+    }
+
+    /**
+     * Returns the index of the series with the specified key, or -1 if no
+     * series has that key.
+     * 
+     * @param key  the key ({@code null} not permitted).
+     * 
+     * @return The index.
+     * 
+     * @since 1.0.17
+     */
+    public int getSeriesIndex(Comparable key) {
+<span class="nc" id="L254">        Args.nullNotPermitted(key, &quot;key&quot;);</span>
+<span class="nc" id="L255">        int seriesCount = getSeriesCount();</span>
+<span class="nc bnc" id="L256" title="All 2 branches missed.">        for (int i = 0; i &lt; seriesCount; i++) {</span>
+<span class="nc" id="L257">            TimeSeries&lt;S&gt; series = this.data.get(i);</span>
+<span class="nc bnc" id="L258" title="All 2 branches missed.">            if (key.equals(series.getKey())) {</span>
+<span class="nc" id="L259">                return i;</span>
+            }
+        }
+<span class="nc" id="L262">        return -1;</span>
+    }
+
+    /**
+     * Adds a series to the collection and sends a {@link DatasetChangeEvent} to
+     * all registered listeners.
+     *
+     * @param series  the series ({@code null} not permitted).
+     */
+    public void addSeries(TimeSeries&lt;S&gt; series) {
+<span class="fc" id="L272">        Args.nullNotPermitted(series, &quot;series&quot;);</span>
+<span class="fc" id="L273">        this.data.add(series);</span>
+<span class="fc" id="L274">        series.addChangeListener(this);</span>
+<span class="fc" id="L275">        fireDatasetChanged();</span>
+<span class="fc" id="L276">    }</span>
+
+    /**
+     * Removes the specified series from the collection and sends a
+     * {@link DatasetChangeEvent} to all registered listeners.
+     *
+     * @param series  the series ({@code null} not permitted).
+     */
+    public void removeSeries(TimeSeries&lt;S&gt; series) {
+<span class="fc" id="L285">        Args.nullNotPermitted(series, &quot;series&quot;);</span>
+<span class="fc" id="L286">        this.data.remove(series);</span>
+<span class="fc" id="L287">        series.removeChangeListener(this);</span>
+<span class="fc" id="L288">        fireDatasetChanged();</span>
+<span class="fc" id="L289">    }</span>
+
+    /**
+     * Removes a series from the collection.
+     *
+     * @param index  the series index (zero-based).
+     */
+    public void removeSeries(int index) {
+<span class="fc" id="L297">        TimeSeries&lt;S&gt; series = getSeries(index);</span>
+<span class="pc bpc" id="L298" title="1 of 2 branches missed.">        if (series != null) {</span>
+<span class="fc" id="L299">            removeSeries(series);</span>
+        }
+<span class="fc" id="L301">    }</span>
+
+    /**
+     * Removes all the series from the collection and sends a
+     * {@link DatasetChangeEvent} to all registered listeners.
+     */
+    public void removeAllSeries() {
+
+        // deregister the collection as a change listener to each series in the
+        // collection
+<span class="fc bfc" id="L311" title="All 2 branches covered.">        for (TimeSeries&lt;S&gt; series : this.data) {</span>
+<span class="fc" id="L312">            series.removeChangeListener(this);</span>
+<span class="fc" id="L313">        }</span>
+
+        // remove all the series from the collection and notify listeners.
+<span class="fc" id="L316">        this.data.clear();</span>
+<span class="fc" id="L317">        fireDatasetChanged();</span>
+<span class="fc" id="L318">    }</span>
+
+    /**
+     * Returns the number of items in the specified series.  This method is
+     * provided for convenience.
+     *
+     * @param series  the series index (zero-based).
+     *
+     * @return The item count.
+     */
+    @Override
+    public int getItemCount(int series) {
+<span class="fc" id="L330">        return getSeries(series).getItemCount();</span>
+    }
+
+    /**
+     * Returns the x-value (as a double primitive) for an item within a series.
+     *
+     * @param series  the series (zero-based index).
+     * @param item  the item (zero-based index).
+     *
+     * @return The x-value.
+     */
+    @Override
+    public double getXValue(int series, int item) {
+<span class="nc" id="L343">        TimeSeries&lt;S&gt; s = this.data.get(series);</span>
+<span class="nc" id="L344">        RegularTimePeriod period = s.getTimePeriod(item);</span>
+<span class="nc" id="L345">        return getX(period);</span>
+    }
+
+    /**
+     * Returns the x-value for the specified series and item.
+     *
+     * @param series  the series (zero-based index).
+     * @param item  the item (zero-based index).
+     *
+     * @return The value.
+     */
+    @Override
+    public Number getX(int series, int item) {
+<span class="fc" id="L358">        TimeSeries&lt;S&gt; ts = this.data.get(series);</span>
+<span class="fc" id="L359">        RegularTimePeriod period = ts.getTimePeriod(item);</span>
+<span class="fc" id="L360">        return getX(period);</span>
+    }
+
+    /**
+     * Returns the x-value for a time period.
+     *
+     * @param period  the time period ({@code null} not permitted).
+     *
+     * @return The x-value.
+     */
+    protected synchronized long getX(RegularTimePeriod period) {
+<span class="fc" id="L371">        long result = 0L;</span>
+<span class="fc bfc" id="L372" title="All 2 branches covered.">        if (this.xPosition == TimePeriodAnchor.START) {</span>
+<span class="fc" id="L373">            result = period.getFirstMillisecond(this.workingCalendar);</span>
+        }
+<span class="pc bpc" id="L375" title="1 of 2 branches missed.">        else if (this.xPosition == TimePeriodAnchor.MIDDLE) {</span>
+<span class="fc" id="L376">            result = period.getMiddleMillisecond(this.workingCalendar);</span>
+        }
+<span class="nc bnc" id="L378" title="All 2 branches missed.">        else if (this.xPosition == TimePeriodAnchor.END) {</span>
+<span class="nc" id="L379">            result = period.getLastMillisecond(this.workingCalendar);</span>
+        }
+<span class="fc" id="L381">        return result;</span>
+    }
+
+    /**
+     * Returns the starting X value for the specified series and item.
+     *
+     * @param series  the series (zero-based index).
+     * @param item  the item (zero-based index).
+     *
+     * @return The value.
+     */
+    @Override
+    public synchronized Number getStartX(int series, int item) {
+<span class="nc" id="L394">        TimeSeries&lt;S&gt; ts = this.data.get(series);</span>
+<span class="nc" id="L395">        return ts.getTimePeriod(item).getFirstMillisecond(this.workingCalendar);</span>
+    }
+
+    /**
+     * Returns the ending X value for the specified series and item.
+     *
+     * @param series The series (zero-based index).
+     * @param item  The item (zero-based index).
+     *
+     * @return The value.
+     */
+    @Override
+    public synchronized Number getEndX(int series, int item) {
+<span class="nc" id="L408">        TimeSeries&lt;S&gt; ts = this.data.get(series);</span>
+<span class="nc" id="L409">        return ts.getTimePeriod(item).getLastMillisecond(this.workingCalendar);</span>
+    }
+
+    /**
+     * Returns the y-value for the specified series and item.
+     *
+     * @param series  the series (zero-based index).
+     * @param item  the item (zero-based index).
+     *
+     * @return The value (possibly {@code null}).
+     */
+    @Override
+    public Number getY(int series, int item) {
+<span class="fc" id="L422">        TimeSeries&lt;S&gt; ts = this.data.get(series);</span>
+<span class="fc" id="L423">        return ts.getValue(item);</span>
+    }
+
+    /**
+     * Returns the starting Y value for the specified series and item.
+     *
+     * @param series  the series (zero-based index).
+     * @param item  the item (zero-based index).
+     *
+     * @return The value (possibly {@code null}).
+     */
+    @Override
+    public Number getStartY(int series, int item) {
+<span class="fc" id="L436">        return getY(series, item);</span>
+    }
+
+    /**
+     * Returns the ending Y value for the specified series and item.
+     *
+     * @param series  te series (zero-based index).
+     * @param item  the item (zero-based index).
+     *
+     * @return The value (possibly {@code null}).
+     */
+    @Override
+    public Number getEndY(int series, int item) {
+<span class="fc" id="L449">        return getY(series, item);</span>
+    }
+
+
+    /**
+     * Returns the indices of the two data items surrounding a particular
+     * millisecond value.
+     *
+     * @param series  the series index.
+     * @param milliseconds  the time.
+     *
+     * @return An array containing the (two) indices of the items surrounding
+     *         the time.
+     */
+    public int[] getSurroundingItems(int series, long milliseconds) {
+<span class="fc" id="L464">        int[] result = new int[] {-1, -1};</span>
+<span class="fc" id="L465">        TimeSeries&lt;S&gt; timeSeries = getSeries(series);</span>
+<span class="fc bfc" id="L466" title="All 2 branches covered.">        for (int i = 0; i &lt; timeSeries.getItemCount(); i++) {</span>
+<span class="fc" id="L467">            Number x = getX(series, i);</span>
+<span class="fc" id="L468">            long m = x.longValue();</span>
+<span class="fc bfc" id="L469" title="All 2 branches covered.">            if (m &lt;= milliseconds) {</span>
+<span class="fc" id="L470">                result[0] = i;</span>
+            }
+<span class="fc bfc" id="L472" title="All 2 branches covered.">            if (m &gt;= milliseconds) {</span>
+<span class="fc" id="L473">                result[1] = i;</span>
+<span class="fc" id="L474">                break;</span>
+            }
+        }
+<span class="fc" id="L477">        return result;</span>
+    }
+
+    /**
+     * Returns the minimum x-value in the dataset.
+     *
+     * @param includeInterval  a flag that determines whether or not the
+     *                         x-interval is taken into account.
+     *
+     * @return The minimum value.
+     */
+    @Override
+    public double getDomainLowerBound(boolean includeInterval) {
+<span class="nc" id="L490">        double result = Double.NaN;</span>
+<span class="nc" id="L491">        Range r = getDomainBounds(includeInterval);</span>
+<span class="nc bnc" id="L492" title="All 2 branches missed.">        if (r != null) {</span>
+<span class="nc" id="L493">            result = r.getLowerBound();</span>
+        }
+<span class="nc" id="L495">        return result;</span>
+    }
+
+    /**
+     * Returns the maximum x-value in the dataset.
+     *
+     * @param includeInterval  a flag that determines whether or not the
+     *                         x-interval is taken into account.
+     *
+     * @return The maximum value.
+     */
+    @Override
+    public double getDomainUpperBound(boolean includeInterval) {
+<span class="nc" id="L508">        double result = Double.NaN;</span>
+<span class="nc" id="L509">        Range r = getDomainBounds(includeInterval);</span>
+<span class="nc bnc" id="L510" title="All 2 branches missed.">        if (r != null) {</span>
+<span class="nc" id="L511">            result = r.getUpperBound();</span>
+        }
+<span class="nc" id="L513">        return result;</span>
+    }
+
+    /**
+     * Returns the range of the values in this dataset's domain.
+     *
+     * @param includeInterval  a flag that determines whether or not the
+     *                         x-interval is taken into account.
+     *
+     * @return The range.
+     */
+    @Override
+    public Range getDomainBounds(boolean includeInterval) {
+<span class="fc" id="L526">        Range result = null;</span>
+<span class="fc bfc" id="L527" title="All 2 branches covered.">        for (TimeSeries&lt;S&gt; series : this.data) {</span>
+<span class="fc" id="L528">            int count = series.getItemCount();</span>
+<span class="pc bpc" id="L529" title="1 of 2 branches missed.">            if (count &gt; 0) {</span>
+<span class="fc" id="L530">                RegularTimePeriod start = series.getTimePeriod(0);</span>
+<span class="fc" id="L531">                RegularTimePeriod end = series.getTimePeriod(count - 1);</span>
+                Range temp;
+<span class="pc bpc" id="L533" title="1 of 2 branches missed.">                if (!includeInterval) {</span>
+<span class="nc" id="L534">                    temp = new Range(getX(start), getX(end));</span>
+                }
+                else {
+<span class="fc" id="L537">                    temp = new Range(</span>
+<span class="fc" id="L538">                            start.getFirstMillisecond(this.workingCalendar),</span>
+<span class="fc" id="L539">                            end.getLastMillisecond(this.workingCalendar));</span>
+                }
+<span class="fc" id="L541">                result = Range.combine(result, temp);</span>
+            }
+<span class="fc" id="L543">        }</span>
+<span class="fc" id="L544">        return result;</span>
+    }
+
+    /**
+     * Returns the bounds of the domain values for the specified series.
+     *
+     * @param visibleSeriesKeys  a list of keys for the visible series.
+     * @param includeInterval  include the x-interval?
+     *
+     * @return A range.
+     *
+     * @since 1.0.13
+     */
+    @Override
+    public Range getDomainBounds(List visibleSeriesKeys,
+            boolean includeInterval) {
+<span class="fc" id="L560">        Range result = null;</span>
+<span class="fc bfc" id="L561" title="All 2 branches covered.">        for (Object visibleSeriesKey : visibleSeriesKeys) {</span>
+<span class="fc" id="L562">            Comparable seriesKey = (Comparable) visibleSeriesKey;</span>
+<span class="fc" id="L563">            TimeSeries&lt;S&gt; series = getSeries((S) seriesKey);</span>
+<span class="fc" id="L564">            int count = series.getItemCount();</span>
+<span class="fc bfc" id="L565" title="All 2 branches covered.">            if (count &gt; 0) {</span>
+<span class="fc" id="L566">                RegularTimePeriod start = series.getTimePeriod(0);</span>
+<span class="fc" id="L567">                RegularTimePeriod end = series.getTimePeriod(count - 1);</span>
+                Range temp;
+<span class="fc bfc" id="L569" title="All 2 branches covered.">                if (!includeInterval) {</span>
+<span class="fc" id="L570">                    temp = new Range(getX(start), getX(end));</span>
+                }
+                else {
+<span class="fc" id="L573">                    temp = new Range(</span>
+<span class="fc" id="L574">                            start.getFirstMillisecond(this.workingCalendar),</span>
+<span class="fc" id="L575">                            end.getLastMillisecond(this.workingCalendar));</span>
+                }
+<span class="fc" id="L577">                result = Range.combine(result, temp);</span>
+            }
+<span class="fc" id="L579">        }</span>
+<span class="fc" id="L580">        return result;</span>
+    }
+
+    /**
+     * Returns the bounds for the y-values in the dataset.
+     * 
+     * @param includeInterval  ignored for this dataset.
+     * 
+     * @return The range of value in the dataset (possibly {@code null}).
+     *
+     * @since 1.0.15
+     */
+    public Range getRangeBounds(boolean includeInterval) {
+<span class="fc" id="L593">        Range result = null;</span>
+<span class="fc bfc" id="L594" title="All 2 branches covered.">        for (TimeSeries&lt;S&gt; series : this.data) {</span>
+<span class="fc" id="L595">            Range r = new Range(series.getMinY(), series.getMaxY());</span>
+<span class="fc" id="L596">            result = Range.combineIgnoringNaN(result, r);</span>
+<span class="fc" id="L597">        }</span>
+<span class="fc" id="L598">        return result;</span>
+    }
+
+    /**
+     * Returns the bounds for the y-values in the dataset.
+     *
+     * @param visibleSeriesKeys  the visible series keys.
+     * @param xRange  the x-range ({@code null} not permitted).
+     * @param includeInterval  ignored.
+     *
+     * @return The bounds.
+     *
+     * @since 1.0.14
+     */
+    @Override
+    public Range getRangeBounds(List visibleSeriesKeys, Range xRange,
+            boolean includeInterval) {
+<span class="fc" id="L615">        Range result = null;</span>
+<span class="fc bfc" id="L616" title="All 2 branches covered.">        for (Object visibleSeriesKey : visibleSeriesKeys) {</span>
+<span class="fc" id="L617">            Comparable seriesKey = (Comparable) visibleSeriesKey;</span>
+<span class="fc" id="L618">            TimeSeries&lt;S&gt; series = getSeries((S) seriesKey);</span>
+<span class="fc" id="L619">            Range r = series.findValueRange(xRange, this.xPosition,</span>
+                    this.workingCalendar);
+<span class="fc" id="L621">            result = Range.combineIgnoringNaN(result, r);</span>
+<span class="fc" id="L622">        }</span>
+<span class="fc" id="L623">        return result;</span>
+    }
+
+    /**
+     * Receives notification that the key for one of the series in the 
+     * collection has changed, and vetos it if the key is already present in 
+     * the collection.
+     * 
+     * @param e  the event.
+     * 
+     * @since 1.0.17
+     */
+    @Override
+    public void vetoableChange(PropertyChangeEvent e)
+            throws PropertyVetoException {
+        // if it is not the series name, then we have no interest
+<span class="nc bnc" id="L639" title="All 2 branches missed.">        if (!&quot;Key&quot;.equals(e.getPropertyName())) {</span>
+<span class="nc" id="L640">            return;</span>
+        }
+        
+        // to be defensive, let's check that the source series does in fact
+        // belong to this collection
+<span class="nc" id="L645">        Series s = (Series) e.getSource();</span>
+<span class="nc bnc" id="L646" title="All 2 branches missed.">        if (getSeriesIndex(s.getKey()) == -1) {</span>
+<span class="nc" id="L647">            throw new IllegalStateException(&quot;Receiving events from a series &quot; +</span>
+                    &quot;that does not belong to this collection.&quot;);
+        }
+        // check if the new series name already exists for another series
+<span class="nc" id="L651">        Comparable key = (Comparable) e.getNewValue();</span>
+<span class="nc bnc" id="L652" title="All 2 branches missed.">        if (getSeriesIndex(key) &gt;= 0) {</span>
+<span class="nc" id="L653">            throw new PropertyVetoException(&quot;Duplicate key2&quot;, e);</span>
+        }
+<span class="nc" id="L655">    }</span>
+
+    /**
+     * Tests this time series collection for equality with another object.
+     *
+     * @param obj  the other object.
+     *
+     * @return A boolean.
+     */
+    @Override
+    public boolean equals(Object obj) {
+<span class="fc bfc" id="L666" title="All 2 branches covered.">        if (obj == this) {</span>
+<span class="fc" id="L667">            return true;</span>
+        }
+<span class="pc bpc" id="L669" title="1 of 2 branches missed.">        if (!(obj instanceof TimeSeriesCollection)) {</span>
+<span class="nc" id="L670">            return false;</span>
+        }
+<span class="fc" id="L672">        TimeSeriesCollection that = (TimeSeriesCollection) obj;</span>
+<span class="pc bpc" id="L673" title="1 of 2 branches missed.">        if (this.xPosition != that.xPosition) {</span>
+<span class="nc" id="L674">            return false;</span>
+        }
+<span class="fc bfc" id="L676" title="All 2 branches covered.">        if (!Objects.equals(this.data, that.data)) {</span>
+<span class="fc" id="L677">            return false;</span>
+        }
+<span class="fc" id="L679">        return true;</span>
+    }
+
+    /**
+     * Returns a hash code value for the object.
+     *
+     * @return The hashcode
+     */
+    @Override
+    public int hashCode() {
+        int result;
+<span class="nc" id="L690">        result = this.data.hashCode();</span>
+<span class="nc bnc" id="L691" title="All 2 branches missed.">        result = 29 * result + (this.workingCalendar != null</span>
+<span class="nc" id="L692">                ? this.workingCalendar.hashCode() : 0);</span>
+<span class="nc bnc" id="L693" title="All 2 branches missed.">        result = 29 * result + (this.xPosition != null</span>
+<span class="nc" id="L694">                ? this.xPosition.hashCode() : 0);</span>
+<span class="nc" id="L695">        return result;</span>
+    }
+
+    /**
+     * Returns a clone of this time series collection.
+     *
+     * @return A clone.
+     *
+     * @throws java.lang.CloneNotSupportedException if there is a problem 
+     *         cloning.
+     */
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+<span class="fc" id="L708">        TimeSeriesCollection clone = (TimeSeriesCollection) super.clone();</span>
+<span class="fc" id="L709">        clone.data = CloneUtils.cloneList(this.data);</span>
+<span class="fc" id="L710">        clone.workingCalendar = (Calendar) this.workingCalendar.clone();</span>
+<span class="fc" id="L711">        return clone;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

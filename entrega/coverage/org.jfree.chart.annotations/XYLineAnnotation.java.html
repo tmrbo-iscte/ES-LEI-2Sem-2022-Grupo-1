@@ -1,0 +1,371 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>XYLineAnnotation.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.chart.annotations</a> &gt; <span class="el_source">XYLineAnnotation.java</span></div><h1>XYLineAnnotation.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * ---------------------
+ * XYLineAnnotation.java
+ * ---------------------
+ * (C) Copyright 2003-2022, by David Gilbert.
+ *
+ * Original Author:  David Gilbert;
+ * Contributor(s):   Peter Kolb (see patch 2809117);
+ *
+ */
+
+package org.jfree.chart.annotations;
+
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Paint;
+import java.awt.Stroke;
+import java.awt.geom.Line2D;
+import java.awt.geom.Rectangle2D;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.util.Objects;
+
+import org.jfree.chart.axis.ValueAxis;
+import org.jfree.chart.plot.Plot;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.plot.PlotRenderingInfo;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.api.RectangleEdge;
+import org.jfree.chart.internal.LineUtils;
+import org.jfree.chart.internal.PaintUtils;
+import org.jfree.chart.internal.Args;
+import org.jfree.chart.api.PublicCloneable;
+import org.jfree.chart.internal.SerialUtils;
+import org.jfree.chart.internal.ShapeUtils;
+
+/**
+ * A simple line annotation that can be placed on an {@link XYPlot}.
+ * Instances of this class are immutable.
+ */
+public class XYLineAnnotation extends AbstractXYAnnotation
+        implements Cloneable, PublicCloneable, Serializable {
+
+    /** For serialization. */
+    private static final long serialVersionUID = -80535465244091334L;
+
+    /** The x-coordinate. */
+    private double x1;
+
+    /** The y-coordinate. */
+    private double y1;
+
+    /** The x-coordinate. */
+    private double x2;
+
+    /** The y-coordinate. */
+    private double y2;
+
+    /** The line stroke. */
+    private transient Stroke stroke;
+
+    /** The line color. */
+    private transient Paint paint;
+
+    /**
+     * Creates a new annotation that draws a line from (x1, y1) to (x2, y2)
+     * where the coordinates are measured in data space (that is, against the
+     * plot's axes).  All the line coordinates are required to be finite values.
+     *
+     * @param x1  the x-coordinate for the start of the line.
+     * @param y1  the y-coordinate for the start of the line.
+     * @param x2  the x-coordinate for the end of the line.
+     * @param y2  the y-coordinate for the end of the line.
+     */
+    public XYLineAnnotation(double x1, double y1, double x2, double y2) {
+<span class="nc" id="L104">        this(x1, y1, x2, y2, new BasicStroke(1.0f), Color.BLACK);</span>
+<span class="nc" id="L105">    }</span>
+
+    /**
+     * Creates a new annotation that draws a line from (x1, y1) to (x2, y2)
+     * where the coordinates are measured in data space (that is, against the
+     * plot's axes).
+     *
+     * @param x1  the x-coordinate for the start of the line (must be finite).
+     * @param y1  the y-coordinate for the start of the line (must be finite).
+     * @param x2  the x-coordinate for the end of the line (must be finite).
+     * @param y2  the y-coordinate for the end of the line (must be finite).
+     * @param stroke  the line stroke ({@code null} not permitted).
+     * @param paint  the line color ({@code null} not permitted).
+     */
+    public XYLineAnnotation(double x1, double y1, double x2, double y2,
+                            Stroke stroke, Paint paint) {
+<span class="fc" id="L121">        super();</span>
+<span class="fc" id="L122">        Args.nullNotPermitted(stroke, &quot;stroke&quot;);</span>
+<span class="fc" id="L123">        Args.nullNotPermitted(paint, &quot;paint&quot;);</span>
+<span class="fc" id="L124">        Args.requireFinite(x1, &quot;x1&quot;);</span>
+<span class="fc" id="L125">        Args.requireFinite(y1, &quot;y1&quot;);</span>
+<span class="fc" id="L126">        Args.requireFinite(x2, &quot;x2&quot;);</span>
+<span class="fc" id="L127">        Args.requireFinite(y2, &quot;y2&quot;);</span>
+<span class="fc" id="L128">        this.x1 = x1;</span>
+<span class="fc" id="L129">        this.y1 = y1;</span>
+<span class="fc" id="L130">        this.x2 = x2;</span>
+<span class="fc" id="L131">        this.y2 = y2;</span>
+<span class="fc" id="L132">        this.stroke = stroke;</span>
+<span class="fc" id="L133">        this.paint = paint;</span>
+<span class="fc" id="L134">    }</span>
+
+    /**
+     * Returns the x-coordinate for the starting point of the line (set in the
+     * constructor).
+     * 
+     * @return The x-coordinate for the starting point of the line.
+     */
+    public double getX1() {
+<span class="fc" id="L143">        return x1;</span>
+    }
+
+    /**
+     * Returns the y-coordinate for the starting point of the line (set in the
+     * constructor).
+     * 
+     * @return The y-coordinate for the starting point of the line.
+     */
+    public double getY1() {
+<span class="fc" id="L153">        return y1;</span>
+    }
+
+    /**
+     * Returns the x-coordinate for the ending point of the line (set in the
+     * constructor).
+     * 
+     * @return The x-coordinate for the ending point of the line.
+     */
+    public double getX2() {
+<span class="fc" id="L163">        return x2;</span>
+    }
+
+    /**
+     * Returns the y-coordinate for the ending point of the line (set in the
+     * constructor).
+     * 
+     * @return The y-coordinate for the ending point of the line.
+     */
+    public double getY2() {
+<span class="fc" id="L173">        return y2;</span>
+    }
+
+    /**
+     * Returns the stroke used for drawing the line (set in the constructor).
+     * 
+     * @return The stroke (never {@code null}).
+     */
+    public Stroke getStroke() {
+<span class="fc" id="L182">        return stroke;</span>
+    }
+
+    /**
+     * Returns the paint used for drawing the line (set in the constructor).
+     * 
+     * @return The paint (never {@code null}).
+     */
+    public Paint getPaint() {
+<span class="fc" id="L191">        return paint;</span>
+    }
+
+    /**
+     * There were done by Rodrigo Paulo
+     * @param orientation
+     * @param domainAxis
+     * @param rangeAxis
+     * @param dataArea
+     * @param domainEdge
+     * @param rangeEdge
+     * @return
+     */
+    private float set2DX1(PlotOrientation orientation, ValueAxis domainAxis, ValueAxis rangeAxis,
+                         Rectangle2D dataArea, RectangleEdge domainEdge, RectangleEdge rangeEdge){
+<span class="nc bnc" id="L206" title="All 2 branches missed.">        return orientation == PlotOrientation.VERTICAL ?  (float) domainAxis.valueToJava2D(this.x1, dataArea,</span>
+<span class="nc" id="L207">                domainEdge) : (float) rangeAxis.valueToJava2D(this.y1, dataArea, rangeEdge);</span>
+    }
+
+    private float set2DX2(PlotOrientation orientation, ValueAxis domainAxis, ValueAxis rangeAxis,
+                          Rectangle2D dataArea, RectangleEdge domainEdge, RectangleEdge rangeEdge){
+<span class="nc bnc" id="L212" title="All 2 branches missed.">        return orientation == PlotOrientation.VERTICAL ?  (float) domainAxis.valueToJava2D(this.x2, dataArea,</span>
+<span class="nc" id="L213">                domainEdge) : (float) rangeAxis.valueToJava2D(this.y2, dataArea, rangeEdge);</span>
+    }
+
+    private float set2DY1(PlotOrientation orientation, ValueAxis domainAxis, ValueAxis rangeAxis,
+                          Rectangle2D dataArea, RectangleEdge domainEdge, RectangleEdge rangeEdge){
+<span class="nc bnc" id="L218" title="All 2 branches missed.">        return orientation == PlotOrientation.VERTICAL ?  (float) domainAxis.valueToJava2D(this.y1, dataArea,</span>
+<span class="nc" id="L219">                domainEdge) : (float) rangeAxis.valueToJava2D(this.x1, dataArea, rangeEdge);</span>
+    }
+
+    private float set2DY2(PlotOrientation orientation, ValueAxis domainAxis, ValueAxis rangeAxis,
+                          Rectangle2D dataArea, RectangleEdge domainEdge, RectangleEdge rangeEdge){
+<span class="nc bnc" id="L224" title="All 2 branches missed.">        return orientation == PlotOrientation.VERTICAL ?  (float) domainAxis.valueToJava2D(this.y2, dataArea,</span>
+<span class="nc" id="L225">                domainEdge) : (float) rangeAxis.valueToJava2D(this.x2, dataArea, rangeEdge);</span>
+    }
+
+    /**
+     * Draws the annotation.  This method is called by the {@link XYPlot}
+     * class, you won't normally need to call it yourself.
+     *
+     * @param g2  the graphics device.
+     * @param plot  the plot.
+     * @param dataArea  the data area.
+     * @param domainAxis  the domain axis.
+     * @param rangeAxis  the range axis.
+     * @param rendererIndex  the renderer index.
+     * @param info  if supplied, this info object will be populated with
+     *              entity information.
+     */
+    @Override
+    public void draw(Graphics2D g2, XYPlot plot, Rectangle2D dataArea,
+                     ValueAxis domainAxis, ValueAxis rangeAxis, int rendererIndex, PlotRenderingInfo info) {
+
+<span class="nc" id="L245">        PlotOrientation orientation = plot.getOrientation();</span>
+<span class="nc" id="L246">        RectangleEdge domainEdge = Plot.resolveDomainAxisLocation(plot.getDomainAxisLocation(), orientation);</span>
+<span class="nc" id="L247">        RectangleEdge rangeEdge = Plot.resolveRangeAxisLocation(plot.getRangeAxisLocation(), orientation);</span>
+<span class="nc" id="L248">        float j2DX1 = set2DX1(orientation, domainAxis, rangeAxis, dataArea, domainEdge, rangeEdge);</span>
+<span class="nc" id="L249">        float j2DX2 = set2DX2(orientation, domainAxis, rangeAxis, dataArea, domainEdge, rangeEdge);</span>
+<span class="nc" id="L250">        float j2DY1 = set2DY1(orientation, domainAxis, rangeAxis, dataArea, domainEdge, rangeEdge);</span>
+<span class="nc" id="L251">        float j2DY2 = set2DY2(orientation, domainAxis, rangeAxis, dataArea, domainEdge, rangeEdge);</span>
+
+<span class="nc" id="L253">        g2.setPaint(this.paint);</span>
+<span class="nc" id="L254">        g2.setStroke(this.stroke);</span>
+<span class="nc" id="L255">        Line2D line = new Line2D.Float(j2DX1, j2DY1, j2DX2, j2DY2);</span>
+        // line is clipped to avoid JRE bug 6574155, for more info
+        // see JFreeChart bug 2221495
+<span class="nc" id="L258">        boolean visible = LineUtils.clipLine(line, dataArea);</span>
+<span class="nc bnc" id="L259" title="All 2 branches missed.">        if (visible) {</span>
+<span class="nc" id="L260">            g2.draw(line);</span>
+        }
+<span class="nc" id="L262">        String toolTip = getToolTipText();</span>
+<span class="nc" id="L263">        String url = getURL();</span>
+<span class="nc bnc" id="L264" title="All 4 branches missed.">        if (toolTip != null || url != null) {</span>
+<span class="nc" id="L265">            addEntity(info, ShapeUtils.createLineRegion(line, 1.0f),</span>
+                    rendererIndex, toolTip, url);
+        }
+<span class="nc" id="L268">    }</span>
+
+    /**
+     * Tests this object for equality with an arbitrary object.
+     *
+     * @param obj  the object to test against ({@code null} permitted).
+     *
+     * @return {@code true} or {@code false}.
+     */
+    @Override
+    public boolean equals(Object obj) {
+<span class="pc bpc" id="L279" title="1 of 2 branches missed.">        if (obj == this) {</span>
+<span class="nc" id="L280">            return true;</span>
+        }
+<span class="pc bpc" id="L282" title="1 of 2 branches missed.">        if (!super.equals(obj)) {</span>
+<span class="nc" id="L283">            return false;</span>
+        }
+<span class="pc bpc" id="L285" title="1 of 2 branches missed.">        if (!(obj instanceof XYLineAnnotation)) {</span>
+<span class="nc" id="L286">            return false;</span>
+        }
+<span class="fc" id="L288">        XYLineAnnotation that = (XYLineAnnotation) obj;</span>
+<span class="fc bfc" id="L289" title="All 2 branches covered.">        if (this.x1 != that.x1) {</span>
+<span class="fc" id="L290">            return false;</span>
+        }
+<span class="fc bfc" id="L292" title="All 2 branches covered.">        if (this.y1 != that.y1) {</span>
+<span class="fc" id="L293">            return false;</span>
+        }
+<span class="fc bfc" id="L295" title="All 2 branches covered.">        if (this.x2 != that.x2) {</span>
+<span class="fc" id="L296">            return false;</span>
+        }
+<span class="fc bfc" id="L298" title="All 2 branches covered.">        if (this.y2 != that.y2) {</span>
+<span class="fc" id="L299">            return false;</span>
+        }
+<span class="fc bfc" id="L301" title="All 2 branches covered.">        if (!PaintUtils.equal(this.paint, that.paint)) {</span>
+<span class="fc" id="L302">            return false;</span>
+        }
+<span class="pc bpc" id="L304" title="1 of 2 branches missed.">        if (!Objects.equals(this.stroke, that.stroke)) {</span>
+<span class="nc" id="L305">            return false;</span>
+        }
+<span class="fc" id="L307">        return true;</span>
+    }
+
+    /**
+     * Returns a hash code.
+     *
+     * @return A hash code.
+     */
+    @Override
+    public int hashCode() {
+        int result;
+        long temp;
+<span class="fc" id="L319">        temp = Double.doubleToLongBits(this.x1);</span>
+<span class="fc" id="L320">        result = (int) (temp ^ (temp &gt;&gt;&gt; 32));</span>
+<span class="fc" id="L321">        temp = Double.doubleToLongBits(this.x2);</span>
+<span class="fc" id="L322">        result = 29 * result + (int) (temp ^ (temp &gt;&gt;&gt; 32));</span>
+<span class="fc" id="L323">        temp = Double.doubleToLongBits(this.y1);</span>
+<span class="fc" id="L324">        result = 29 * result + (int) (temp ^ (temp &gt;&gt;&gt; 32));</span>
+<span class="fc" id="L325">        temp = Double.doubleToLongBits(this.y2);</span>
+<span class="fc" id="L326">        result = 29 * result + (int) (temp ^ (temp &gt;&gt;&gt; 32));</span>
+<span class="fc" id="L327">        return result;</span>
+    }
+
+    /**
+     * Returns a clone of the annotation.
+     *
+     * @return A clone.
+     *
+     * @throws CloneNotSupportedException  if the annotation can't be cloned.
+     */
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+<span class="fc" id="L339">        return super.clone();</span>
+    }
+
+    /**
+     * Provides serialization support.
+     *
+     * @param stream  the output stream.
+     *
+     * @throws IOException  if there is an I/O error.
+     */
+    private void writeObject(ObjectOutputStream stream) throws IOException {
+<span class="fc" id="L350">        stream.defaultWriteObject();</span>
+<span class="fc" id="L351">        SerialUtils.writePaint(this.paint, stream);</span>
+<span class="fc" id="L352">        SerialUtils.writeStroke(this.stroke, stream);</span>
+<span class="fc" id="L353">    }</span>
+
+    /**
+     * Provides serialization support.
+     *
+     * @param stream  the input stream.
+     *
+     * @throws IOException  if there is an I/O error.
+     * @throws ClassNotFoundException  if there is a classpath problem.
+     */
+    private void readObject(ObjectInputStream stream)
+        throws IOException, ClassNotFoundException {
+<span class="fc" id="L365">        stream.defaultReadObject();</span>
+<span class="fc" id="L366">        this.paint = SerialUtils.readPaint(stream);</span>
+<span class="fc" id="L367">        this.stroke = SerialUtils.readStroke(stream);</span>
+<span class="fc" id="L368">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

@@ -1,0 +1,427 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DefaultWindDataset.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.data.xy</a> &gt; <span class="el_source">DefaultWindDataset.java</span></div><h1>DefaultWindDataset.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * -----------------------
+ * DefaultWindDataset.java
+ * -----------------------
+ * (C) Copyright 2001-2021, by Achilleus Mantzios and Contributors.
+ *
+ * Original Author:  Achilleus Mantzios;
+ * Contributor(s):   David Gilbert;
+ *
+ */
+
+package org.jfree.data.xy;
+
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import org.jfree.chart.internal.Args;
+import org.jfree.chart.api.PublicCloneable;
+
+/**
+ * A default implementation of the {@link WindDataset} interface.
+ */
+public class DefaultWindDataset extends AbstractXYDataset
+        implements WindDataset, PublicCloneable {
+
+    /** The keys for the series. */
+    private List seriesKeys;
+
+    /** Storage for the series data. */
+    private List allSeriesData;
+
+    /**
+     * Constructs a new, empty, dataset.  Since there are currently no methods
+     * to add data to an existing dataset, you should probably use a different
+     * constructor.
+     */
+<span class="fc" id="L64">    public DefaultWindDataset() {</span>
+<span class="fc" id="L65">        this.seriesKeys = new java.util.ArrayList();</span>
+<span class="fc" id="L66">        this.allSeriesData = new java.util.ArrayList();</span>
+<span class="fc" id="L67">    }</span>
+
+    /**
+     * Constructs a dataset based on the specified data array.
+     *
+     * @param data  the data ({@code null} not permitted).
+     *
+     * @throws NullPointerException if {@code data} is {@code null}.
+     */
+    public DefaultWindDataset(Object[][][] data) {
+<span class="fc" id="L77">        this(seriesNameListFromDataArray(data), data);</span>
+<span class="fc" id="L78">    }</span>
+
+    /**
+     * Constructs a dataset based on the specified data array.
+     *
+     * @param seriesNames  the names of the series ({@code null} not
+     *     permitted).
+     * @param data  the wind data.
+     *
+     * @throws NullPointerException if {@code seriesNames} is {@code null}.
+     */
+    public DefaultWindDataset(String[] seriesNames, Object[][][] data) {
+<span class="nc" id="L90">        this(Arrays.asList(seriesNames), data);</span>
+<span class="nc" id="L91">    }</span>
+
+    /**
+     * Constructs a dataset based on the specified data array.  The array
+     * can contain multiple series, each series can contain multiple items,
+     * and each item is as follows:
+     * &lt;ul&gt;
+     * &lt;li&gt;{@code data[series][item][0]} - the date (either a
+     *   {@code Date} or a {@code Number} that is the milliseconds
+     *   since 1-Jan-1970);&lt;/li&gt;
+     * &lt;li&gt;{@code data[series][item][1]} - the wind direction (1 - 12,
+     *   like the numbers on a clock face);&lt;/li&gt;
+     * &lt;li&gt;{@code data[series][item][2]} - the wind force (1 - 12 on the
+     *   Beaufort scale)&lt;/li&gt;
+     * &lt;/ul&gt;
+     *
+     * @param seriesKeys  the names of the series ({@code null} not
+     *     permitted).
+     * @param data  the wind dataset ({@code null} not permitted).
+     *
+     * @throws IllegalArgumentException if {@code seriesKeys} is
+     *     {@code null}.
+     * @throws IllegalArgumentException if the number of series keys does not
+     *     match the number of series in the array.
+     * @throws NullPointerException if {@code data} is {@code null}.
+     */
+<span class="fc" id="L117">    public DefaultWindDataset(List seriesKeys, Object[][][] data) {</span>
+<span class="fc" id="L118">        Args.nullNotPermitted(seriesKeys, &quot;seriesKeys&quot;);</span>
+<span class="pc bpc" id="L119" title="1 of 2 branches missed.">        if (seriesKeys.size() != data.length) {</span>
+<span class="nc" id="L120">            throw new IllegalArgumentException(&quot;The number of series keys does &quot;</span>
+                    + &quot;not match the number of series in the data array.&quot;);
+        }
+<span class="fc" id="L123">        this.seriesKeys = seriesKeys;</span>
+<span class="fc" id="L124">        int seriesCount = data.length;</span>
+<span class="fc" id="L125">        this.allSeriesData = new java.util.ArrayList(seriesCount);</span>
+
+<span class="fc bfc" id="L127" title="All 2 branches covered.">        for (int seriesIndex = 0; seriesIndex &lt; seriesCount; seriesIndex++) {</span>
+<span class="fc" id="L128">            List oneSeriesData = new java.util.ArrayList();</span>
+<span class="fc" id="L129">            int maxItemCount = data[seriesIndex].length;</span>
+<span class="fc bfc" id="L130" title="All 2 branches covered.">            for (int itemIndex = 0; itemIndex &lt; maxItemCount; itemIndex++) {</span>
+<span class="fc" id="L131">                Object xObject = data[seriesIndex][itemIndex][0];</span>
+<span class="pc bpc" id="L132" title="1 of 2 branches missed.">                if (xObject != null) {</span>
+                    Number xNumber;
+<span class="pc bpc" id="L134" title="1 of 2 branches missed.">                    if (xObject instanceof Number) {</span>
+<span class="fc" id="L135">                        xNumber = (Number) xObject;</span>
+                    }
+                    else {
+<span class="nc bnc" id="L138" title="All 2 branches missed.">                        if (xObject instanceof Date) {</span>
+<span class="nc" id="L139">                            Date xDate = (Date) xObject;</span>
+<span class="nc" id="L140">                            xNumber = xDate.getTime();</span>
+<span class="nc" id="L141">                        }</span>
+                        else {
+<span class="nc" id="L143">                            xNumber = 0;</span>
+                        }
+                    }
+<span class="fc" id="L146">                    Number windDir = (Number) data[seriesIndex][itemIndex][1];</span>
+<span class="fc" id="L147">                    Number windForce = (Number) data[seriesIndex][itemIndex][2];</span>
+<span class="fc" id="L148">                    oneSeriesData.add(new WindDataItem(xNumber, windDir,</span>
+                            windForce));
+                }
+            }
+<span class="fc" id="L152">            Collections.sort(oneSeriesData);</span>
+<span class="fc" id="L153">            this.allSeriesData.add(seriesIndex, oneSeriesData);</span>
+        }
+
+<span class="fc" id="L156">    }</span>
+
+    /**
+     * Returns the number of series in the dataset.
+     *
+     * @return The series count.
+     */
+    @Override
+    public int getSeriesCount() {
+<span class="fc" id="L165">        return this.allSeriesData.size();</span>
+    }
+
+    /**
+     * Returns the number of items in a series.
+     *
+     * @param series  the series (zero-based index).
+     *
+     * @return The item count.
+     */
+    @Override
+    public int getItemCount(int series) {
+<span class="nc bnc" id="L177" title="All 4 branches missed.">        if (series &lt; 0 || series &gt;= getSeriesCount()) {</span>
+<span class="nc" id="L178">            throw new IllegalArgumentException(&quot;Invalid series index: &quot;</span>
+                    + series);
+        }
+<span class="nc" id="L181">        List oneSeriesData = (List) this.allSeriesData.get(series);</span>
+<span class="nc" id="L182">        return oneSeriesData.size();</span>
+    }
+
+    /**
+     * Returns the key for a series.
+     *
+     * @param series  the series (zero-based index).
+     *
+     * @return The series key.
+     */
+    @Override
+    public Comparable getSeriesKey(int series) {
+<span class="fc bfc" id="L194" title="All 4 branches covered.">        if (series &lt; 0 || series &gt;= getSeriesCount()) {</span>
+<span class="fc" id="L195">            throw new IllegalArgumentException(&quot;Invalid series index: &quot;</span>
+                    + series);
+        }
+<span class="fc" id="L198">        return (Comparable) this.seriesKeys.get(series);</span>
+    }
+
+    /**
+     * Returns the x-value for one item within a series.  This should represent
+     * a point in time, encoded as milliseconds in the same way as
+     * java.util.Date.
+     *
+     * @param series  the series (zero-based index).
+     * @param item  the item (zero-based index).
+     *
+     * @return The x-value for the item within the series.
+     */
+    @Override
+    public Number getX(int series, int item) {
+<span class="nc" id="L213">        List oneSeriesData = (List) this.allSeriesData.get(series);</span>
+<span class="nc" id="L214">        WindDataItem windItem = (WindDataItem) oneSeriesData.get(item);</span>
+<span class="nc" id="L215">        return windItem.getX();</span>
+    }
+
+    /**
+     * Returns the y-value for one item within a series.  This maps to the
+     * {@link #getWindForce(int, int)} method and is implemented because
+     * {@code WindDataset} is an extension of {@link XYDataset}.
+     *
+     * @param series  the series (zero-based index).
+     * @param item  the item (zero-based index).
+     *
+     * @return The y-value for the item within the series.
+     */
+    @Override
+    public Number getY(int series, int item) {
+<span class="nc" id="L230">        return getWindForce(series, item);</span>
+    }
+
+    /**
+     * Returns the wind direction for one item within a series.  This is a
+     * number between 0 and 12, like the numbers on an upside-down clock face.
+     *
+     * @param series  the series (zero-based index).
+     * @param item  the item (zero-based index).
+     *
+     * @return The wind direction for the item within the series.
+     */
+    @Override
+    public Number getWindDirection(int series, int item) {
+<span class="nc" id="L244">        List oneSeriesData = (List) this.allSeriesData.get(series);</span>
+<span class="nc" id="L245">        WindDataItem windItem = (WindDataItem) oneSeriesData.get(item);</span>
+<span class="nc" id="L246">        return windItem.getWindDirection();</span>
+    }
+
+    /**
+     * Returns the wind force for one item within a series.  This is a number
+     * between 0 and 12, as defined by the Beaufort scale.
+     *
+     * @param series  the series (zero-based index).
+     * @param item  the item (zero-based index).
+     *
+     * @return The wind force for the item within the series.
+     */
+    @Override
+    public Number getWindForce(int series, int item) {
+<span class="nc" id="L260">        List oneSeriesData = (List) this.allSeriesData.get(series);</span>
+<span class="nc" id="L261">        WindDataItem windItem = (WindDataItem) oneSeriesData.get(item);</span>
+<span class="nc" id="L262">        return windItem.getWindForce();</span>
+    }
+
+    /**
+     * Utility method for automatically generating series names.
+     *
+     * @param data  the wind data ({@code null} not permitted).
+     *
+     * @return An array of &lt;i&gt;Series N&lt;/i&gt; with N = { 1 .. data.length }.
+     *
+     * @throws NullPointerException if {@code data} is {@code null}.
+     */
+    public static List seriesNameListFromDataArray(Object[][] data) {
+<span class="fc" id="L275">        int seriesCount = data.length;</span>
+<span class="fc" id="L276">        List seriesNameList = new java.util.ArrayList(seriesCount);</span>
+<span class="fc bfc" id="L277" title="All 2 branches covered.">        for (int i = 0; i &lt; seriesCount; i++) {</span>
+<span class="fc" id="L278">            seriesNameList.add(&quot;Series &quot; + (i + 1));</span>
+        }
+<span class="fc" id="L280">        return seriesNameList;</span>
+    }
+
+    /**
+     * Checks this {@code WindDataset} for equality with an arbitrary
+     * object.  This method returns {@code true} if and only if:
+     * &lt;ul&gt;
+     *   &lt;li&gt;{@code obj} is not {@code null};&lt;/li&gt;
+     *   &lt;li&gt;{@code obj} is an instance of {@code DefaultWindDataset};&lt;/li&gt;
+     *   &lt;li&gt;both datasets have the same number of series containing identical
+     *       values.&lt;/li&gt;
+     * &lt;/ul&gt;
+     *
+     * @param obj  the object ({@code null} permitted).
+     *
+     * @return A boolean.
+     */
+    @Override
+    public boolean equals(Object obj) {
+<span class="pc bpc" id="L299" title="1 of 2 branches missed.">        if (this == obj) {</span>
+<span class="nc" id="L300">            return true;</span>
+        }
+<span class="pc bpc" id="L302" title="1 of 2 branches missed.">        if (!(obj instanceof DefaultWindDataset)) {</span>
+<span class="nc" id="L303">            return false;</span>
+        }
+<span class="fc" id="L305">        DefaultWindDataset that = (DefaultWindDataset) obj;</span>
+<span class="fc bfc" id="L306" title="All 2 branches covered.">        if (!this.seriesKeys.equals(that.seriesKeys)) {</span>
+<span class="fc" id="L307">            return false;</span>
+        }
+<span class="pc bpc" id="L309" title="1 of 2 branches missed.">        if (!this.allSeriesData.equals(that.allSeriesData)) {</span>
+<span class="nc" id="L310">            return false;</span>
+        }
+<span class="fc" id="L312">        return true;</span>
+    }
+
+}
+
+/**
+ * A wind data item.
+ */
+class WindDataItem implements Comparable, Serializable {
+
+    /** The x-value. */
+    private Number x;
+
+    /** The wind direction. */
+    private Number windDir;
+
+    /** The wind force. */
+    private Number windForce;
+
+    /**
+     * Creates a new wind data item.
+     *
+     * @param x  the x-value.
+     * @param windDir  the direction.
+     * @param windForce  the force.
+     */
+<span class="fc" id="L338">    public WindDataItem(Number x, Number windDir, Number windForce) {</span>
+<span class="fc" id="L339">        this.x = x;</span>
+<span class="fc" id="L340">        this.windDir = windDir;</span>
+<span class="fc" id="L341">        this.windForce = windForce;</span>
+<span class="fc" id="L342">    }</span>
+
+    /**
+     * Returns the x-value.
+     *
+     * @return The x-value.
+     */
+    public Number getX() {
+<span class="nc" id="L350">        return this.x;</span>
+    }
+
+    /**
+     * Returns the wind direction.
+     *
+     * @return The wind direction.
+     */
+    public Number getWindDirection() {
+<span class="nc" id="L359">        return this.windDir;</span>
+    }
+
+    /**
+     * Returns the wind force.
+     *
+     * @return The wind force.
+     */
+    public Number getWindForce() {
+<span class="nc" id="L368">        return this.windForce;</span>
+    }
+
+    /**
+     * Compares this item to another object.
+     *
+     * @param object  the other object.
+     *
+     * @return An int that indicates the relative comparison.
+     */
+    @Override
+    public int compareTo(Object object) {
+<span class="pc bpc" id="L380" title="1 of 2 branches missed.">        if (object instanceof WindDataItem) {</span>
+<span class="fc" id="L381">            WindDataItem item = (WindDataItem) object;</span>
+<span class="fc bfc" id="L382" title="All 2 branches covered.">            if (this.x.doubleValue() &gt; item.x.doubleValue()) {</span>
+<span class="fc" id="L383">                return 1;</span>
+            }
+<span class="pc bpc" id="L385" title="1 of 2 branches missed.">            else if (this.x.equals(item.x)) {</span>
+<span class="fc" id="L386">                return 0;</span>
+            }
+            else {
+<span class="nc" id="L389">                return -1;</span>
+            }
+        }
+        else {
+<span class="nc" id="L393">            throw new ClassCastException(&quot;WindDataItem.compareTo(error)&quot;);</span>
+        }
+    }
+
+    /**
+     * Tests this {@code WindDataItem} for equality with an arbitrary
+     * object.
+     *
+     * @param obj  the object ({@code null} permitted).
+     *
+     * @return A boolean.
+     */
+    @Override
+    public boolean equals(Object obj) {
+<span class="pc bpc" id="L407" title="1 of 2 branches missed.">        if (this == obj) {</span>
+<span class="nc" id="L408">            return false;</span>
+        }
+<span class="pc bpc" id="L410" title="1 of 2 branches missed.">        if (!(obj instanceof WindDataItem)) {</span>
+<span class="nc" id="L411">            return false;</span>
+        }
+<span class="fc" id="L413">        WindDataItem that = (WindDataItem) obj;</span>
+<span class="pc bpc" id="L414" title="1 of 2 branches missed.">        if (!this.x.equals(that.x)) {</span>
+<span class="nc" id="L415">            return false;</span>
+        }
+<span class="pc bpc" id="L417" title="1 of 2 branches missed.">        if (!this.windDir.equals(that.windDir)) {</span>
+<span class="nc" id="L418">            return false;</span>
+        }
+<span class="pc bpc" id="L420" title="1 of 2 branches missed.">        if (!this.windForce.equals(that.windForce)) {</span>
+<span class="nc" id="L421">            return false;</span>
+        }
+<span class="fc" id="L423">        return true;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

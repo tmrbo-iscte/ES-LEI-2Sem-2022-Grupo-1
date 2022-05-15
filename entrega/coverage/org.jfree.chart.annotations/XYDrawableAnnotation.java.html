@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>XYDrawableAnnotation.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.chart.annotations</a> &gt; <span class="el_source">XYDrawableAnnotation.java</span></div><h1>XYDrawableAnnotation.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * -------------------------
+ * XYDrawableAnnotation.java
+ * -------------------------
+ * (C) Copyright 2003-2022, by David Gilbert.
+ *
+ * Original Author:  David Gilbert;
+ * Contributor(s):   -;
+ *
+ */
+
+package org.jfree.chart.annotations;
+
+import java.awt.Graphics2D;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Rectangle2D;
+import java.io.Serializable;
+import java.util.Objects;
+
+import org.jfree.chart.axis.ValueAxis;
+import org.jfree.chart.plot.Plot;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.plot.PlotRenderingInfo;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.Drawable;
+import org.jfree.chart.api.RectangleEdge;
+import org.jfree.chart.internal.Args;
+import org.jfree.chart.api.PublicCloneable;
+
+/**
+ * A general annotation that can be placed on an {@link XYPlot}.
+ */
+public class XYDrawableAnnotation extends AbstractXYAnnotation
+        implements Cloneable, PublicCloneable, Serializable {
+
+    /** For serialization. */
+    private static final long serialVersionUID = -6540812859722691020L;
+
+    /** The scaling factor. */
+    private double drawScaleFactor;
+
+    /** The x-coordinate. */
+    private double x;
+
+    /** The y-coordinate. */
+    private double y;
+
+    /** The width. */
+    private double displayWidth;
+
+    /** The height. */
+    private double displayHeight;
+
+    /** The drawable object. */
+    private Drawable drawable;
+
+    /**
+     * Creates a new annotation to be displayed within the given area.
+     *
+     * @param x  the x-coordinate for the area (must be finite).
+     * @param y  the y-coordinate for the area (must be finite).
+     * @param width  the width of the area (must be finite).
+     * @param height  the height of the area (must be finite).
+     * @param drawable  the drawable object ({@code null} not permitted).
+     */
+    public XYDrawableAnnotation(double x, double y, double width, double height,
+                                Drawable drawable) {
+<span class="fc" id="L93">        this(x, y, width, height, 1.0, drawable);</span>
+<span class="fc" id="L94">    }</span>
+
+    /**
+     * Creates a new annotation to be displayed within the given area.  If you
+     * specify a {@code drawScaleFactor} of 2.0, the {@code drawable}
+     * will be drawn at twice the requested display size then scaled down to
+     * fit the space.
+     *
+     * @param x  the x-coordinate for the area (must be finite).
+     * @param y  the y-coordinate for the area (must be finite).
+     * @param displayWidth  the width of the area (must be finite).
+     * @param displayHeight  the height of the area (must be finite).
+     * @param drawScaleFactor  the scaling factor for drawing (must be finite).
+     * @param drawable  the drawable object ({@code null} not permitted).
+     */
+    public XYDrawableAnnotation(double x, double y, double displayWidth,
+            double displayHeight, double drawScaleFactor, Drawable drawable) {
+<span class="fc" id="L111">        super();</span>
+<span class="fc" id="L112">        Args.nullNotPermitted(drawable, &quot;drawable&quot;);</span>
+<span class="fc" id="L113">        Args.requireFinite(x, &quot;x&quot;);</span>
+<span class="fc" id="L114">        Args.requireFinite(y, &quot;y&quot;);</span>
+<span class="fc" id="L115">        Args.requireFinite(displayWidth, &quot;displayWidth&quot;);</span>
+<span class="fc" id="L116">        Args.requireFinite(displayHeight, &quot;displayHeight&quot;);</span>
+<span class="fc" id="L117">        Args.requireFinite(drawScaleFactor, &quot;drawScaleFactor&quot;);</span>
+<span class="fc" id="L118">        this.x = x;</span>
+<span class="fc" id="L119">        this.y = y;</span>
+<span class="fc" id="L120">        this.displayWidth = displayWidth;</span>
+<span class="fc" id="L121">        this.displayHeight = displayHeight;</span>
+<span class="fc" id="L122">        this.drawScaleFactor = drawScaleFactor;</span>
+<span class="fc" id="L123">        this.drawable = drawable;</span>
+<span class="fc" id="L124">    }</span>
+
+    /**
+     * Returns the x-coordinate (set in the constructor).
+     * 
+     * @return The x-coordinate.
+     */
+    public double getX() {
+<span class="nc" id="L132">        return x;</span>
+    }
+
+    /**
+     * Returns the y-coordinate (set in the constructor).
+     * 
+     * @return The y-coordinate.
+     */
+    public double getY() {
+<span class="nc" id="L141">        return y;</span>
+    }
+
+    /**
+     * Returns the display width (set in the constructor).
+     * 
+     * @return The display width.
+     */
+    public double getDisplayWidth() {
+<span class="nc" id="L150">        return displayWidth;</span>
+    }
+
+    /**
+     * Returns the display height (set in the constructor).
+     * 
+     * @return The display height.
+     */
+    public double getDisplayHeight() {
+<span class="nc" id="L159">        return displayHeight;</span>
+    }
+
+    /**
+     * Returns the scale factor (set in the constructor).
+     * 
+     * @return The scale factor.
+     */
+    public double getDrawScaleFactor() {
+<span class="nc" id="L168">        return drawScaleFactor;</span>
+    }
+
+    /**
+     * Draws the annotation.
+     *
+     * @param g2  the graphics device.
+     * @param plot  the plot.
+     * @param dataArea  the data area.
+     * @param domainAxis  the domain axis.
+     * @param rangeAxis  the range axis.
+     * @param rendererIndex  the renderer index.
+     * @param info  if supplied, this info object will be populated with
+     *              entity information.
+     */
+    @Override
+    public void draw(Graphics2D g2, XYPlot plot, Rectangle2D dataArea,
+                     ValueAxis domainAxis, ValueAxis rangeAxis,
+                     int rendererIndex,
+                     PlotRenderingInfo info) {
+
+<span class="nc" id="L189">        PlotOrientation orientation = plot.getOrientation();</span>
+<span class="nc" id="L190">        RectangleEdge domainEdge = Plot.resolveDomainAxisLocation(</span>
+<span class="nc" id="L191">                plot.getDomainAxisLocation(), orientation);</span>
+<span class="nc" id="L192">        RectangleEdge rangeEdge = Plot.resolveRangeAxisLocation(</span>
+<span class="nc" id="L193">                plot.getRangeAxisLocation(), orientation);</span>
+<span class="nc" id="L194">        float j2DX = (float) domainAxis.valueToJava2D(this.x, dataArea,</span>
+                domainEdge);
+<span class="nc" id="L196">        float j2DY = (float) rangeAxis.valueToJava2D(this.y, dataArea,</span>
+                rangeEdge);
+<span class="nc" id="L198">        Rectangle2D displayArea = new Rectangle2D.Double(</span>
+                j2DX - this.displayWidth / 2.0,
+                j2DY - this.displayHeight / 2.0, this.displayWidth,
+                this.displayHeight);
+
+        // here we change the AffineTransform so we can draw the annotation
+        // to a larger area and scale it down into the display area
+        // afterwards, the original transform is restored
+<span class="nc" id="L206">        AffineTransform savedTransform = g2.getTransform();</span>
+<span class="nc" id="L207">        Rectangle2D drawArea = new Rectangle2D.Double(0.0, 0.0,</span>
+                this.displayWidth * this.drawScaleFactor,
+                this.displayHeight * this.drawScaleFactor);
+
+<span class="nc" id="L211">        g2.scale(1 / this.drawScaleFactor, 1 / this.drawScaleFactor);</span>
+<span class="nc" id="L212">        g2.translate((j2DX - this.displayWidth / 2.0) * this.drawScaleFactor,</span>
+                (j2DY - this.displayHeight / 2.0) * this.drawScaleFactor);
+<span class="nc" id="L214">        this.drawable.draw(g2, drawArea);</span>
+<span class="nc" id="L215">        g2.setTransform(savedTransform);</span>
+<span class="nc" id="L216">        String toolTip = getToolTipText();</span>
+<span class="nc" id="L217">        String url = getURL();</span>
+<span class="nc bnc" id="L218" title="All 4 branches missed.">        if (toolTip != null || url != null) {</span>
+<span class="nc" id="L219">            addEntity(info, displayArea, rendererIndex, toolTip, url);</span>
+        }
+
+<span class="nc" id="L222">    }</span>
+
+    /**
+     * Tests this annotation for equality with an arbitrary object.
+     *
+     * @param obj  the object to test against.
+     *
+     * @return {@code true} or {@code false}.
+     */
+    @Override
+    public boolean equals(Object obj) {
+<span class="pc bpc" id="L233" title="1 of 2 branches missed.">        if (obj == this) { // simple case</span>
+<span class="nc" id="L234">            return true;</span>
+        }
+        // now try to reject equality...
+<span class="pc bpc" id="L237" title="1 of 2 branches missed.">        if (!super.equals(obj)) {</span>
+<span class="nc" id="L238">            return false;</span>
+        }
+<span class="pc bpc" id="L240" title="1 of 2 branches missed.">        if (!(obj instanceof XYDrawableAnnotation)) {</span>
+<span class="nc" id="L241">            return false;</span>
+        }
+<span class="fc" id="L243">        XYDrawableAnnotation that = (XYDrawableAnnotation) obj;</span>
+<span class="fc bfc" id="L244" title="All 2 branches covered.">        if (this.x != that.x) {</span>
+<span class="fc" id="L245">            return false;</span>
+        }
+<span class="fc bfc" id="L247" title="All 2 branches covered.">        if (this.y != that.y) {</span>
+<span class="fc" id="L248">            return false;</span>
+        }
+<span class="fc bfc" id="L250" title="All 2 branches covered.">        if (this.displayWidth != that.displayWidth) {</span>
+<span class="fc" id="L251">            return false;</span>
+        }
+<span class="fc bfc" id="L253" title="All 2 branches covered.">        if (this.displayHeight != that.displayHeight) {</span>
+<span class="fc" id="L254">            return false;</span>
+        }
+<span class="fc bfc" id="L256" title="All 2 branches covered.">        if (this.drawScaleFactor != that.drawScaleFactor) {</span>
+<span class="fc" id="L257">            return false;</span>
+        }
+<span class="pc bpc" id="L259" title="1 of 2 branches missed.">        if (!Objects.equals(this.drawable, that.drawable)) {</span>
+<span class="nc" id="L260">            return false;</span>
+        }
+<span class="fc" id="L262">        return true;</span>
+    }
+
+    /**
+     * Returns a hash code.
+     *
+     * @return A hash code.
+     */
+    @Override
+    public int hashCode() {
+        int result;
+        long temp;
+<span class="fc" id="L274">        temp = Double.doubleToLongBits(this.x);</span>
+<span class="fc" id="L275">        result = (int) (temp ^ (temp &gt;&gt;&gt; 32));</span>
+<span class="fc" id="L276">        temp = Double.doubleToLongBits(this.y);</span>
+<span class="fc" id="L277">        result = 29 * result + (int) (temp ^ (temp &gt;&gt;&gt; 32));</span>
+<span class="fc" id="L278">        temp = Double.doubleToLongBits(this.displayWidth);</span>
+<span class="fc" id="L279">        result = 29 * result + (int) (temp ^ (temp &gt;&gt;&gt; 32));</span>
+<span class="fc" id="L280">        temp = Double.doubleToLongBits(this.displayHeight);</span>
+<span class="fc" id="L281">        result = 29 * result + (int) (temp ^ (temp &gt;&gt;&gt; 32));</span>
+<span class="fc" id="L282">        return result;</span>
+    }
+
+    /**
+     * Returns a clone of the annotation.
+     *
+     * @return A clone.
+     *
+     * @throws CloneNotSupportedException  if the annotation can't be cloned.
+     */
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+<span class="fc" id="L294">        return super.clone();</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

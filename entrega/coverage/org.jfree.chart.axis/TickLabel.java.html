@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TickLabel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.chart.axis</a> &gt; <span class="el_source">TickLabel.java</span></div><h1>TickLabel.java</h1><pre class="source lang-java linenums">package org.jfree.chart.axis;
+
+import org.jfree.chart.api.RectangleInsets;
+import org.jfree.chart.event.AxisChangeEvent;
+import org.jfree.chart.internal.Args;
+import org.jfree.chart.internal.PaintUtils;
+import org.jfree.chart.internal.SerialUtils;
+
+import javax.swing.event.EventListenerList;
+import java.awt.*;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.util.Objects;
+
+public class TickLabel implements Serializable {
+    private final Axis axis;
+    /**
+     * The default tick labels visibility ({@code true}).
+     */
+    public static final boolean DEFAULT_TICK_LABELS_VISIBLE = true;
+    /**
+     * The default tick label font ({@code Font(&quot;SansSerif&quot;, Font.PLAIN, 10)}).
+     */
+<span class="fc" id="L26">    public static final Font DEFAULT_TICK_LABEL_FONT = new Font(&quot;SansSerif&quot;, Font.PLAIN, 10);</span>
+    /**
+     * The default tick label paint ({@code Color.BLACK}).
+     */
+<span class="fc" id="L30">    public static final Paint DEFAULT_TICK_LABEL_PAINT = Color.BLACK;</span>
+    /**
+     * The default tick label insets ({@code RectangleInsets(2.0, 4.0, 2.0, 4.0)}).
+     */
+<span class="fc" id="L34">    public static final RectangleInsets DEFAULT_TICK_LABEL_INSETS</span>
+            = new RectangleInsets(2.0, 4.0, 2.0, 4.0);
+    /**
+     * A flag that indicates whether or not tick labels are visible for the
+     * axis.
+     */
+    private boolean tickLabelsVisible;
+    /**
+     * The font used to display the tick labels.
+     */
+    private Font tickLabelFont;
+    /**
+     * The color used to display the tick labels.
+     */
+    private transient Paint tickLabelPaint;
+    /**
+     * The blank space around each tick label.
+     */
+    private RectangleInsets tickLabelInsets;
+
+<span class="fc" id="L54">    public TickLabel(Axis axis) {</span>
+<span class="fc" id="L55">        this.axis = axis;</span>
+<span class="fc" id="L56">        this.tickLabelsVisible = DEFAULT_TICK_LABELS_VISIBLE;</span>
+<span class="fc" id="L57">        this.tickLabelFont = DEFAULT_TICK_LABEL_FONT;</span>
+<span class="fc" id="L58">        this.tickLabelPaint = DEFAULT_TICK_LABEL_PAINT;</span>
+<span class="fc" id="L59">        this.tickLabelInsets = DEFAULT_TICK_LABEL_INSETS;</span>
+<span class="fc" id="L60">    }</span>
+
+    /**
+     * Returns a flag indicating whether or not the tick labels are visible.
+     *
+     * @return The flag.
+     * @see #getTickLabelFont()
+     * @see #getTickLabelPaint()
+     * @see #setTickLabelsVisible(boolean)
+     */
+    public boolean isTickLabelsVisible() {
+<span class="fc" id="L71">        return this.tickLabelsVisible;</span>
+    }
+
+    /**
+     * Sets the flag that determines whether or not the tick labels are
+     * visible and sends an {@link AxisChangeEvent} to all registered
+     * listeners.
+     *
+     * @param flag the flag.
+     * @see #isTickLabelsVisible()
+     * @see #setTickLabelFont(Font)
+     * @see #setTickLabelPaint(Paint)
+     */
+    public void setTickLabelsVisible(boolean flag) {
+<span class="pc bpc" id="L85" title="1 of 2 branches missed.">        if (flag != this.tickLabelsVisible) {</span>
+<span class="fc" id="L86">            this.tickLabelsVisible = flag;</span>
+<span class="fc" id="L87">            axis.fireChangeEvent();</span>
+        }
+
+<span class="fc" id="L90">    }</span>
+
+    /**
+     * Returns the font used for the tick labels (if showing).
+     *
+     * @return The font (never {@code null}).
+     * @see #setTickLabelFont(Font)
+     */
+    public Font getTickLabelFont() {
+<span class="fc" id="L99">        return this.tickLabelFont;</span>
+    }
+
+    /**
+     * Sets the font for the tick labels and sends an {@link AxisChangeEvent}
+     * to all registered listeners.
+     *
+     * @param font the font ({@code null} not allowed).
+     * @see #getTickLabelFont()
+     */
+    public void setTickLabelFont(Font font) {
+<span class="fc" id="L110">        Args.nullNotPermitted(font, &quot;font&quot;);</span>
+<span class="pc bpc" id="L111" title="1 of 2 branches missed.">        if (!this.tickLabelFont.equals(font)) {</span>
+<span class="fc" id="L112">            this.tickLabelFont = font;</span>
+<span class="fc" id="L113">            axis.fireChangeEvent();</span>
+        }
+<span class="fc" id="L115">    }</span>
+
+    /**
+     * Returns the color/shade used for the tick labels.
+     *
+     * @return The paint used for the tick labels.
+     * @see #setTickLabelPaint(Paint)
+     */
+    public Paint getTickLabelPaint() {
+<span class="fc" id="L124">        return this.tickLabelPaint;</span>
+    }
+
+    /**
+     * Sets the paint used to draw tick labels (if they are showing) and
+     * sends an {@link AxisChangeEvent} to all registered listeners.
+     *
+     * @param paint the paint ({@code null} not permitted).
+     * @see #getTickLabelPaint()
+     */
+    public void setTickLabelPaint(Paint paint) {
+<span class="fc" id="L135">        Args.nullNotPermitted(paint, &quot;paint&quot;);</span>
+<span class="fc" id="L136">        this.tickLabelPaint = paint;</span>
+<span class="fc" id="L137">        axis.fireChangeEvent();</span>
+<span class="fc" id="L138">    }</span>
+
+    /**
+     * Returns the insets for the tick labels.
+     *
+     * @return The insets (never {@code null}).
+     * @see #setTickLabelInsets(RectangleInsets)
+     */
+    public RectangleInsets getTickLabelInsets() {
+<span class="fc" id="L147">        return this.tickLabelInsets;</span>
+    }
+
+    /**
+     * Sets the insets for the tick labels and sends an {@link AxisChangeEvent}
+     * to all registered listeners.
+     *
+     * @param insets the insets ({@code null} not permitted).
+     * @see #getTickLabelInsets()
+     */
+    public void setTickLabelInsets(RectangleInsets insets) {
+<span class="fc" id="L158">        Args.nullNotPermitted(insets, &quot;insets&quot;);</span>
+<span class="pc bpc" id="L159" title="1 of 2 branches missed.">        if (!this.tickLabelInsets.equals(insets)) {</span>
+<span class="fc" id="L160">            this.tickLabelInsets = insets;</span>
+<span class="fc" id="L161">            axis.fireChangeEvent();</span>
+        }
+<span class="fc" id="L163">    }</span>
+
+    @Override
+    public boolean equals(Object obj) {
+<span class="fc bfc" id="L167" title="All 2 branches covered.">        if (obj == this) {</span>
+<span class="fc" id="L168">            return true;</span>
+        }
+<span class="pc bpc" id="L170" title="1 of 2 branches missed.">        if (!(obj instanceof TickLabel)) {</span>
+<span class="nc" id="L171">            return false;</span>
+        }
+<span class="fc" id="L173">        TickLabel that = (TickLabel) obj;</span>
+<span class="fc bfc" id="L174" title="All 2 branches covered.">        if (isTickLabelsVisible() != that.isTickLabelsVisible()) {</span>
+<span class="fc" id="L175">            return false;</span>
+        }
+<span class="fc bfc" id="L177" title="All 2 branches covered.">        if (!Objects.equals(this.tickLabelFont, that.tickLabelFont)) {</span>
+<span class="fc" id="L178">            return false;</span>
+        }
+<span class="fc bfc" id="L180" title="All 2 branches covered.">        if (!PaintUtils.equal(tickLabelPaint, that.tickLabelPaint)) {</span>
+<span class="fc" id="L181">            return false;</span>
+        }
+<span class="fc" id="L183">        return tickLabelInsets.equals(that.tickLabelInsets);</span>
+    }
+
+    /**
+     * Provides serialization support.
+     *
+     * @param stream  the output stream.
+     *
+     * @throws IOException  if there is an I/O error.
+     */
+
+    private void writeObject(ObjectOutputStream stream) throws IOException {
+<span class="fc" id="L195">        stream.defaultWriteObject();</span>
+<span class="fc" id="L196">        SerialUtils.writePaint(tickLabelPaint, stream);</span>
+<span class="fc" id="L197">    }</span>
+
+    /**
+     * Provides serialization support.
+     *
+     * @param stream  the input stream.
+     *
+     * @throws IOException  if there is an I/O error.
+     * @throws ClassNotFoundException  if there is a classpath problem.
+     */
+
+    private void readObject(ObjectInputStream stream)
+            throws IOException, ClassNotFoundException {
+<span class="fc" id="L210">        stream.defaultReadObject();</span>
+<span class="fc" id="L211">        tickLabelPaint = SerialUtils.readPaint(stream);</span>
+<span class="fc" id="L212">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

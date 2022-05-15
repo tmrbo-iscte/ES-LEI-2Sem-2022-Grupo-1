@@ -1,0 +1,1466 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SpiderWebPlot.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.chart.plot</a> &gt; <span class="el_source">SpiderWebPlot.java</span></div><h1>SpiderWebPlot.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates.
+ * Other names may be trademarks of their respective owners.]
+ *
+ * ------------------
+ * SpiderWebPlot.java
+ * ------------------
+ * (C) Copyright 2005-2021, by Heaps of Flavour Pty Ltd and Contributors.
+ *
+ * Company Info:  http://www.i4-talent.com
+ *
+ * Original Author:  Don Elliott;
+ * Contributor(s):   David Gilbert;
+ *                   Nina Jeliazkova;
+ *
+ */
+
+package org.jfree.chart.plot;
+
+import org.jfree.chart.StandardChartTheme;
+import org.jfree.chart.api.RectangleInsets;
+import org.jfree.chart.api.Rotation;
+import org.jfree.chart.api.TableOrder;
+import org.jfree.chart.entity.CategoryItemEntity;
+import org.jfree.chart.entity.EntityCollection;
+import org.jfree.chart.event.PlotChangeEvent;
+import org.jfree.chart.internal.*;
+import org.jfree.chart.labels.CategoryItemLabelGenerator;
+import org.jfree.chart.labels.CategoryToolTipGenerator;
+import org.jfree.chart.labels.StandardCategoryItemLabelGenerator;
+import org.jfree.chart.legend.LegendItem;
+import org.jfree.chart.legend.LegendItemCollection;
+import org.jfree.chart.urls.CategoryURLGenerator;
+import org.jfree.data.category.CategoryDataset;
+import org.jfree.data.general.DatasetChangeEvent;
+import org.jfree.data.general.DatasetUtils;
+
+import java.awt.*;
+import java.awt.font.FontRenderContext;
+import java.awt.font.LineMetrics;
+import java.awt.geom.*;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.util.List;
+import java.util.*;
+
+/**
+ * A plot that displays data from a {@link CategoryDataset} in the form of a
+ * &quot;spider web&quot;.  Multiple series can be plotted on the same axis to allow
+ * easy comparison.  This plot doesn't support negative values at present.
+ */
+public class SpiderWebPlot extends Plot implements Cloneable, Serializable {
+
+    /** For serialization. */
+    private static final long serialVersionUID = -5376340422031599463L;
+
+    /** The default head radius percent (currently 1%). */
+    public static final double DEFAULT_HEAD = 0.01;
+
+    /** The default axis label gap (currently 10%). */
+    public static final double DEFAULT_AXIS_LABEL_GAP = 0.10;
+
+    /** The default interior gap. */
+    public static final double DEFAULT_INTERIOR_GAP = 0.25;
+
+    /** The maximum interior gap (currently 40%). */
+    public static final double MAX_INTERIOR_GAP = 0.40;
+
+    /** The default starting angle for the radar chart axes. */
+    public static final double DEFAULT_START_ANGLE = 90.0;
+
+    /** The default series label font. */
+<span class="fc" id="L97">    public static final Font DEFAULT_LABEL_FONT = new Font(&quot;SansSerif&quot;,</span>
+            Font.PLAIN, 10);
+
+    /** The default series label paint. */
+<span class="fc" id="L101">    public static final Paint  DEFAULT_LABEL_PAINT = Color.BLACK;</span>
+
+    /** The default series label background paint. */
+<span class="fc" id="L104">    public static final Paint  DEFAULT_LABEL_BACKGROUND_PAINT</span>
+            = new Color(255, 255, 192);
+
+    /** The default series label outline paint. */
+<span class="fc" id="L108">    public static final Paint  DEFAULT_LABEL_OUTLINE_PAINT = Color.BLACK;</span>
+
+    /** The default series label outline stroke. */
+<span class="fc" id="L111">    public static final Stroke DEFAULT_LABEL_OUTLINE_STROKE</span>
+            = new BasicStroke(0.5f);
+
+    /** The default series label shadow paint. */
+<span class="fc" id="L115">    public static final Paint  DEFAULT_LABEL_SHADOW_PAINT = Color.LIGHT_GRAY;</span>
+
+    /**
+     * The default maximum value plotted - forces the plot to evaluate
+     *  the maximum from the data passed in
+     */
+    public static final double DEFAULT_MAX_VALUE = -1.0;
+
+    /** The head radius as a percentage of the available drawing area. */
+    protected double headPercent;
+
+    /** The space left around the outside of the plot as a percentage. */
+    private double interiorGap;
+
+    /** The gap between the labels and the axes as a %age of the radius. */
+    private double axisLabelGap;
+
+    /** The paint used to draw the axis lines. */
+    private transient Paint axisLinePaint;
+
+    /** The stroke used to draw the axis lines. */
+    private transient Stroke axisLineStroke;
+
+    /** The dataset. */
+    private CategoryDataset dataset;
+
+    /** The maximum value we are plotting against on each category axis */
+    private double maxValue;
+
+    /**
+     * The data extract order (BY_ROW or BY_COLUMN). This denotes whether
+     * the data series are stored in rows (in which case the category names are
+     * derived from the column keys) or in columns (in which case the category
+     * names are derived from the row keys).
+     */
+    private TableOrder dataExtractOrder;
+
+    /** The starting angle. */
+    private double startAngle;
+
+    /** The direction for drawing the radar axis and plots. */
+    private Rotation direction;
+
+    /** The legend item shape. */
+    private transient Shape legendItemShape;
+
+    /** The series paint list. */
+    private transient Map&lt;Integer, Paint&gt; seriesPaints;
+
+    /** The default series paint. */
+    private transient Paint defaultSeriesPaint;
+
+    /** The series outline paint list. */
+    private transient Map&lt;Integer, Paint&gt; seriesOutlinePaints;
+
+    /** The default series outline paint. */
+    private transient Paint defaultSeriesOutlinePaint;
+
+    /** The series outline stroke list. */
+    private transient Map&lt;Integer, Stroke&gt; seriesOutlineStrokes;
+
+    /** The default series outline stroke. */
+    private transient Stroke defaultSeriesOutlineStroke;
+
+    /** The font used to display the category labels. */
+    private Font labelFont;
+
+    /** The color used to draw the category labels. */
+    private transient Paint labelPaint;
+
+    /** The label generator. */
+    private CategoryItemLabelGenerator labelGenerator;
+
+    /** controls if the web polygons are filled or not */
+<span class="fc" id="L189">    private boolean webFilled = true;</span>
+
+    /** A tooltip generator for the plot ({@code null} permitted). */
+    private CategoryToolTipGenerator toolTipGenerator;
+
+    /** A URL generator for the plot ({@code null} permitted). */
+    private CategoryURLGenerator urlGenerator;
+
+    /**
+     * Creates a default plot with no dataset.
+     */
+    public SpiderWebPlot() {
+<span class="nc" id="L201">        this(null);</span>
+<span class="nc" id="L202">    }</span>
+
+    /**
+     * Creates a new spider web plot with the given dataset, with each row
+     * representing a series.
+     *
+     * @param dataset  the dataset ({@code null} permitted).
+     */
+    public SpiderWebPlot(CategoryDataset dataset) {
+<span class="fc" id="L211">        this(dataset, TableOrder.BY_ROW);</span>
+<span class="fc" id="L212">    }</span>
+
+    /**
+     * Creates a new spider web plot with the given dataset.
+     *
+     * @param dataset  the dataset.
+     * @param extract  controls how data is extracted ({@link TableOrder#BY_ROW}
+     *                 or {@link TableOrder#BY_COLUMN}).
+     */
+    public SpiderWebPlot(CategoryDataset dataset, TableOrder extract) {
+<span class="fc" id="L222">        super();</span>
+<span class="fc" id="L223">        Args.nullNotPermitted(extract, &quot;extract&quot;);</span>
+<span class="fc" id="L224">        this.dataset = dataset;</span>
+<span class="pc bpc" id="L225" title="1 of 2 branches missed.">        if (dataset != null) {</span>
+<span class="fc" id="L226">            dataset.addChangeListener(this);</span>
+        }
+
+<span class="fc" id="L229">        this.dataExtractOrder = extract;</span>
+<span class="fc" id="L230">        this.headPercent = DEFAULT_HEAD;</span>
+<span class="fc" id="L231">        this.axisLabelGap = DEFAULT_AXIS_LABEL_GAP;</span>
+<span class="fc" id="L232">        this.axisLinePaint = Color.BLACK;</span>
+<span class="fc" id="L233">        this.axisLineStroke = new BasicStroke(1.0f);</span>
+
+<span class="fc" id="L235">        this.interiorGap = DEFAULT_INTERIOR_GAP;</span>
+<span class="fc" id="L236">        this.startAngle = DEFAULT_START_ANGLE;</span>
+<span class="fc" id="L237">        this.direction = Rotation.CLOCKWISE;</span>
+<span class="fc" id="L238">        this.maxValue = DEFAULT_MAX_VALUE;</span>
+
+<span class="fc" id="L240">        this.seriesPaints = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L241">        this.defaultSeriesPaint = null;</span>
+
+<span class="fc" id="L243">        this.seriesOutlinePaints = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L244">        this.defaultSeriesOutlinePaint = DEFAULT_OUTLINE_PAINT;</span>
+
+<span class="fc" id="L246">        this.seriesOutlineStrokes = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L247">        this.defaultSeriesOutlineStroke = DEFAULT_OUTLINE_STROKE;</span>
+
+<span class="fc" id="L249">        this.labelFont = DEFAULT_LABEL_FONT;</span>
+<span class="fc" id="L250">        this.labelPaint = DEFAULT_LABEL_PAINT;</span>
+<span class="fc" id="L251">        this.labelGenerator = new StandardCategoryItemLabelGenerator();</span>
+
+<span class="fc" id="L253">        this.legendItemShape = DEFAULT_LEGEND_ITEM_CIRCLE;</span>
+<span class="fc" id="L254">    }</span>
+
+    /**
+     * Returns a short string describing the type of plot.
+     *
+     * @return The plot type.
+     */
+    @Override
+    public String getPlotType() {
+        // return localizationResources.getString(&quot;Radar_Plot&quot;);
+<span class="nc" id="L264">        return (&quot;Spider Web Plot&quot;);</span>
+    }
+
+    /**
+     * Returns the dataset.
+     *
+     * @return The dataset (possibly {@code null}).
+     *
+     * @see #setDataset(CategoryDataset)
+     */
+    public CategoryDataset getDataset() {
+<span class="fc" id="L275">        return this.dataset;</span>
+    }
+
+    /**
+     * Sets the dataset used by the plot and sends a {@link PlotChangeEvent}
+     * to all registered listeners.
+     *
+     * @param dataset  the dataset ({@code null} permitted).
+     *
+     * @see #getDataset()
+     */
+    public void setDataset(CategoryDataset dataset) {
+        // if there is an existing dataset, remove the plot from the list of
+        // change listeners...
+<span class="nc bnc" id="L289" title="All 2 branches missed.">        if (this.dataset != null) {</span>
+<span class="nc" id="L290">            this.dataset.removeChangeListener(this);</span>
+        }
+
+        // set the new dataset, and register the chart as a change listener...
+<span class="nc" id="L294">        this.dataset = dataset;</span>
+<span class="nc bnc" id="L295" title="All 2 branches missed.">        if (dataset != null) {</span>
+<span class="nc" id="L296">            dataset.addChangeListener(this);</span>
+        }
+
+        // send a dataset change event to self to trigger plot change event
+<span class="nc" id="L300">        datasetChanged(new DatasetChangeEvent(this, dataset));</span>
+<span class="nc" id="L301">    }</span>
+
+    /**
+     * Method to determine if the web chart is to be filled.
+     *
+     * @return A boolean.
+     *
+     * @see #setWebFilled(boolean)
+     */
+    public boolean isWebFilled() {
+<span class="nc" id="L311">        return this.webFilled;</span>
+    }
+
+    /**
+     * Sets the webFilled flag and sends a {@link PlotChangeEvent} to all
+     * registered listeners.
+     *
+     * @param flag  the flag.
+     *
+     * @see #isWebFilled()
+     */
+    public void setWebFilled(boolean flag) {
+<span class="fc" id="L323">        this.webFilled = flag;</span>
+<span class="fc" id="L324">        fireChangeEvent();</span>
+<span class="fc" id="L325">    }</span>
+
+    /**
+     * Returns the data extract order (by row or by column).
+     *
+     * @return The data extract order (never {@code null}).
+     *
+     * @see #setDataExtractOrder(TableOrder)
+     */
+    public TableOrder getDataExtractOrder() {
+<span class="nc" id="L335">        return this.dataExtractOrder;</span>
+    }
+
+    /**
+     * Sets the data extract order (by row or by column) and sends a
+     * {@link PlotChangeEvent}to all registered listeners.
+     *
+     * @param order the order ({@code null} not permitted).
+     *
+     * @throws IllegalArgumentException if {@code order} is
+     *     {@code null}.
+     *
+     * @see #getDataExtractOrder()
+     */
+    public void setDataExtractOrder(TableOrder order) {
+<span class="fc" id="L350">        Args.nullNotPermitted(order, &quot;order&quot;);</span>
+<span class="fc" id="L351">        this.dataExtractOrder = order;</span>
+<span class="fc" id="L352">        fireChangeEvent();</span>
+<span class="fc" id="L353">    }</span>
+
+    /**
+     * Returns the head percent (the default value is 0.01).
+     *
+     * @return The head percent (always &gt; 0).
+     *
+     * @see #setHeadPercent(double)
+     */
+    public double getHeadPercent() {
+<span class="nc" id="L363">        return this.headPercent;</span>
+    }
+
+    /**
+     * Sets the head percent and sends a {@link PlotChangeEvent} to all
+     * registered listeners.  Note that 0.10 is 10 percent.
+     *
+     * @param percent  the percent (must be greater than zero).
+     *
+     * @see #getHeadPercent()
+     */
+    public void setHeadPercent(double percent) {
+<span class="fc" id="L375">        Args.requireNonNegative(percent, &quot;percent&quot;);</span>
+<span class="fc" id="L376">        this.headPercent = percent;</span>
+<span class="fc" id="L377">        fireChangeEvent();</span>
+<span class="fc" id="L378">    }</span>
+
+    /**
+     * Returns the start angle for the first radar axis.
+     * &lt;BR&gt;
+     * This is measured in degrees starting from 3 o'clock (Java Arc2D default)
+     * and measuring anti-clockwise.
+     *
+     * @return The start angle.
+     *
+     * @see #setStartAngle(double)
+     */
+    public double getStartAngle() {
+<span class="fc" id="L391">        return this.startAngle;</span>
+    }
+
+    /**
+     * Sets the starting angle and sends a {@link PlotChangeEvent} to all
+     * registered listeners.
+     * &lt;P&gt;
+     * The initial default value is 90 degrees, which corresponds to 12 o'clock.
+     * A value of zero corresponds to 3 o'clock... this is the encoding used by
+     * Java's Arc2D class.
+     *
+     * @param angle  the angle (in degrees).
+     *
+     * @see #getStartAngle()
+     */
+    public void setStartAngle(double angle) {
+<span class="fc" id="L407">        this.startAngle = angle;</span>
+<span class="fc" id="L408">        fireChangeEvent();</span>
+<span class="fc" id="L409">    }</span>
+
+    /**
+     * Returns the maximum value any category axis can take.
+     *
+     * @return The maximum value.
+     *
+     * @see #setMaxValue(double)
+     */
+    public double getMaxValue() {
+<span class="nc" id="L419">        return this.maxValue;</span>
+    }
+
+    /**
+     * Sets the maximum value any category axis can take and sends
+     * a {@link PlotChangeEvent} to all registered listeners.
+     *
+     * @param value  the maximum value.
+     *
+     * @see #getMaxValue()
+     */
+    public void setMaxValue(double value) {
+<span class="fc" id="L431">        this.maxValue = value;</span>
+<span class="fc" id="L432">        fireChangeEvent();</span>
+<span class="fc" id="L433">    }</span>
+
+    /**
+     * Returns the direction in which the radar axes are drawn
+     * (clockwise or anti-clockwise).
+     *
+     * @return The direction (never {@code null}).
+     *
+     * @see #setDirection(Rotation)
+     */
+    public Rotation getDirection() {
+<span class="fc" id="L444">        return this.direction;</span>
+    }
+
+    /**
+     * Sets the direction in which the radar axes are drawn and sends a
+     * {@link PlotChangeEvent} to all registered listeners.
+     *
+     * @param direction  the direction ({@code null} not permitted).
+     *
+     * @see #getDirection()
+     */
+    public void setDirection(Rotation direction) {
+<span class="fc" id="L456">        Args.nullNotPermitted(direction, &quot;direction&quot;);</span>
+<span class="fc" id="L457">        this.direction = direction;</span>
+<span class="fc" id="L458">        fireChangeEvent();</span>
+<span class="fc" id="L459">    }</span>
+
+    /**
+     * Returns the interior gap, measured as a percentage of the available
+     * drawing space.
+     *
+     * @return The gap (as a percentage of the available drawing space).
+     *
+     * @see #setInteriorGap(double)
+     */
+    public double getInteriorGap() {
+<span class="fc" id="L470">        return this.interiorGap;</span>
+    }
+
+    /**
+     * Sets the interior gap and sends a {@link PlotChangeEvent} to all
+     * registered listeners. This controls the space between the edges of the
+     * plot and the plot area itself (the region where the axis labels appear).
+     *
+     * @param percent  the gap (as a percentage of the available drawing space).
+     *
+     * @see #getInteriorGap()
+     */
+    public void setInteriorGap(double percent) {
+<span class="pc bpc" id="L483" title="2 of 4 branches missed.">        if ((percent &lt; 0.0) || (percent &gt; MAX_INTERIOR_GAP)) {</span>
+<span class="nc" id="L484">            throw new IllegalArgumentException(</span>
+                    &quot;Percentage outside valid range.&quot;);
+        }
+<span class="pc bpc" id="L487" title="1 of 2 branches missed.">        if (this.interiorGap != percent) {</span>
+<span class="fc" id="L488">            this.interiorGap = percent;</span>
+<span class="fc" id="L489">            fireChangeEvent();</span>
+        }
+<span class="fc" id="L491">    }</span>
+
+    /**
+     * Returns the axis label gap.
+     *
+     * @return The axis label gap.
+     *
+     * @see #setAxisLabelGap(double)
+     */
+    public double getAxisLabelGap() {
+<span class="nc" id="L501">        return this.axisLabelGap;</span>
+    }
+
+    /**
+     * Sets the axis label gap and sends a {@link PlotChangeEvent} to all
+     * registered listeners.
+     *
+     * @param gap  the gap.
+     *
+     * @see #getAxisLabelGap()
+     */
+    public void setAxisLabelGap(double gap) {
+<span class="fc" id="L513">        this.axisLabelGap = gap;</span>
+<span class="fc" id="L514">        fireChangeEvent();</span>
+<span class="fc" id="L515">    }</span>
+
+    /**
+     * Returns the paint used to draw the axis lines.
+     *
+     * @return The paint used to draw the axis lines (never {@code null}).
+     *
+     * @see #setAxisLinePaint(Paint)
+     * @see #getAxisLineStroke()
+     */
+    public Paint getAxisLinePaint() {
+<span class="nc" id="L526">        return this.axisLinePaint;</span>
+    }
+
+    /**
+     * Sets the paint used to draw the axis lines and sends a
+     * {@link PlotChangeEvent} to all registered listeners.
+     *
+     * @param paint  the paint ({@code null} not permitted).
+     *
+     * @see #getAxisLinePaint()
+     */
+    public void setAxisLinePaint(Paint paint) {
+<span class="fc" id="L538">        Args.nullNotPermitted(paint, &quot;paint&quot;);</span>
+<span class="fc" id="L539">        this.axisLinePaint = paint;</span>
+<span class="fc" id="L540">        fireChangeEvent();</span>
+<span class="fc" id="L541">    }</span>
+
+    /**
+     * Returns the stroke used to draw the axis lines.
+     *
+     * @return The stroke used to draw the axis lines (never {@code null}).
+     *
+     * @see #setAxisLineStroke(Stroke)
+     * @see #getAxisLinePaint()
+     */
+    public Stroke getAxisLineStroke() {
+<span class="nc" id="L552">        return this.axisLineStroke;</span>
+    }
+
+    /**
+     * Sets the stroke used to draw the axis lines and sends a
+     * {@link PlotChangeEvent} to all registered listeners.
+     *
+     * @param stroke  the stroke ({@code null} not permitted).
+     *
+     * @see #getAxisLineStroke()
+     */
+    public void setAxisLineStroke(Stroke stroke) {
+<span class="fc" id="L564">        Args.nullNotPermitted(stroke, &quot;stroke&quot;);</span>
+<span class="fc" id="L565">        this.axisLineStroke = stroke;</span>
+<span class="fc" id="L566">        fireChangeEvent();</span>
+<span class="fc" id="L567">    }</span>
+
+    //// SERIES PAINT /////////////////////////
+
+    /**
+     * Returns the paint for the specified series.
+     *
+     * @param series  the series index (zero-based).
+     *
+     * @return The paint (never {@code null}).
+     *
+     * @see #setSeriesPaint(int, Paint)
+     */
+    public Paint getSeriesPaint(int series) {
+        // look up the paint list
+<span class="fc" id="L582">        Paint result = this.seriesPaints.get(series);</span>
+<span class="fc bfc" id="L583" title="All 2 branches covered.">        if (result == null) {</span>
+<span class="fc" id="L584">            DrawingSupplier supplier = getDrawingSupplier();</span>
+<span class="pc bpc" id="L585" title="1 of 2 branches missed.">            if (supplier != null) {</span>
+<span class="fc" id="L586">                Paint p = supplier.getNextPaint();</span>
+<span class="fc" id="L587">                this.seriesPaints.put(series, p);</span>
+<span class="fc" id="L588">                result = p;</span>
+<span class="fc" id="L589">            } else {</span>
+<span class="nc" id="L590">                result = this.defaultSeriesPaint;</span>
+            }
+        }
+<span class="fc" id="L593">        return result;</span>
+    }
+
+    /**
+     * Sets the paint used to fill a series of the radar and sends a
+     * {@link PlotChangeEvent} to all registered listeners.
+     *
+     * @param series  the series index (zero-based).
+     * @param paint  the paint ({@code null} permitted).
+     *
+     * @see #getSeriesPaint(int)
+     */
+    public void setSeriesPaint(int series, Paint paint) {
+<span class="fc" id="L606">        this.seriesPaints.put(series, paint);</span>
+<span class="fc" id="L607">        fireChangeEvent();</span>
+<span class="fc" id="L608">    }</span>
+
+    /**
+     * Returns the default series paint, used when no other paint is
+     * available.
+     *
+     * @return The paint (never {@code null}).
+     *
+     * @see #setDefaultSeriesPaint(Paint)
+     */
+    public Paint getDefaultSeriesPaint() {
+<span class="nc" id="L619">      return this.defaultSeriesPaint;</span>
+    }
+
+    /**
+     * Sets the default series paint.
+     *
+     * @param paint  the paint ({@code null} not permitted).
+     *
+     * @see #getDefaultSeriesPaint()
+     */
+    public void setDefaultSeriesPaint(Paint paint) {
+<span class="fc" id="L630">        Args.nullNotPermitted(paint, &quot;paint&quot;);</span>
+<span class="fc" id="L631">        this.defaultSeriesPaint = paint;</span>
+<span class="fc" id="L632">        fireChangeEvent();</span>
+<span class="fc" id="L633">    }</span>
+
+    //// SERIES OUTLINE PAINT ////////////////////////////
+
+    /**
+     * Returns the paint for the specified series.
+     *
+     * @param series  the series index (zero-based).
+     *
+     * @return The paint (never {@code null}).
+     */
+    public Paint getSeriesOutlinePaint(int series) {
+        // otherwise look up the paint list
+<span class="fc" id="L646">        Paint result = this.seriesOutlinePaints.get(series);</span>
+<span class="pc bpc" id="L647" title="1 of 2 branches missed.">        if (result == null) {</span>
+<span class="fc" id="L648">            result = this.defaultSeriesOutlinePaint;</span>
+        }
+<span class="fc" id="L650">        return result;</span>
+    }
+
+    /**
+     * Sets the paint used to fill a series of the radar and sends a
+     * {@link PlotChangeEvent} to all registered listeners.
+     *
+     * @param series  the series index (zero-based).
+     * @param paint  the paint ({@code null} permitted).
+     */
+    public void setSeriesOutlinePaint(int series, Paint paint) {
+<span class="fc" id="L661">        this.seriesOutlinePaints.put(series, paint);</span>
+<span class="fc" id="L662">        fireChangeEvent();</span>
+<span class="fc" id="L663">    }</span>
+
+    /**
+     * Returns the base series paint. This is used when no other paint is
+     * available.
+     *
+     * @return The paint (never {@code null}).
+     */
+    public Paint getDefaultSeriesOutlinePaint() {
+<span class="nc" id="L672">        return this.defaultSeriesOutlinePaint;</span>
+    }
+
+    /**
+     * Sets the base series paint and sends a change event to all registered
+     * listeners.
+     *
+     * @param paint  the paint ({@code null} not permitted).
+     */
+    public void setDefaultSeriesOutlinePaint(Paint paint) {
+<span class="fc" id="L682">        Args.nullNotPermitted(paint, &quot;paint&quot;);</span>
+<span class="fc" id="L683">        this.defaultSeriesOutlinePaint = paint;</span>
+<span class="fc" id="L684">        fireChangeEvent();</span>
+<span class="fc" id="L685">    }</span>
+
+    //// SERIES OUTLINE STROKE /////////////////////
+
+    /**
+     * Returns the stroke for the specified series.
+     *
+     * @param series  the series index (zero-based).
+     *
+     * @return The stroke (never {@code null}).
+     */
+    public Stroke getSeriesOutlineStroke(int series) {
+<span class="fc" id="L697">        Stroke result = this.seriesOutlineStrokes.get(series);</span>
+<span class="pc bpc" id="L698" title="1 of 2 branches missed.">        if (result == null) {</span>
+<span class="fc" id="L699">            result = this.defaultSeriesOutlineStroke;</span>
+        }
+<span class="fc" id="L701">        return result;</span>
+
+    }
+
+    /**
+     * Sets the stroke used to fill a series of the radar and sends a
+     * {@link PlotChangeEvent} to all registered listeners.
+     *
+     * @param series  the series index (zero-based).
+     * @param stroke  the stroke ({@code null} permitted).
+     */
+    public void setSeriesOutlineStroke(int series, Stroke stroke) {
+<span class="fc" id="L713">        this.seriesOutlineStrokes.put(series, stroke);</span>
+<span class="fc" id="L714">        fireChangeEvent();</span>
+<span class="fc" id="L715">    }</span>
+
+    /**
+     * Returns the default series stroke. This is used when no other stroke is
+     * available.
+     *
+     * @return The stroke (never {@code null}).
+     */
+    public Stroke getDefaultSeriesOutlineStroke() {
+<span class="nc" id="L724">        return this.defaultSeriesOutlineStroke;</span>
+    }
+
+    /**
+     * Sets the default series stroke and sends a change event to all 
+     * registered listeners.
+     *
+     * @param stroke  the stroke ({@code null} not permitted).
+     */
+    public void setDefaultSeriesOutlineStroke(Stroke stroke) {
+<span class="fc" id="L734">        Args.nullNotPermitted(stroke, &quot;stroke&quot;);</span>
+<span class="fc" id="L735">        this.defaultSeriesOutlineStroke = stroke;</span>
+<span class="fc" id="L736">        fireChangeEvent();</span>
+<span class="fc" id="L737">    }</span>
+
+    /**
+     * Returns the shape used for legend items.
+     *
+     * @return The shape (never {@code null}).
+     *
+     * @see #setLegendItemShape(Shape)
+     */
+    public Shape getLegendItemShape() {
+<span class="fc" id="L747">        return this.legendItemShape;</span>
+    }
+
+    /**
+     * Sets the shape used for legend items and sends a {@link PlotChangeEvent}
+     * to all registered listeners.
+     *
+     * @param shape  the shape ({@code null} not permitted).
+     *
+     * @see #getLegendItemShape()
+     */
+    public void setLegendItemShape(Shape shape) {
+<span class="fc" id="L759">        Args.nullNotPermitted(shape, &quot;shape&quot;);</span>
+<span class="fc" id="L760">        this.legendItemShape = shape;</span>
+<span class="fc" id="L761">        fireChangeEvent();</span>
+<span class="fc" id="L762">    }</span>
+
+    /**
+     * Returns the series label font.
+     *
+     * @return The font (never {@code null}).
+     *
+     * @see #setLabelFont(Font)
+     */
+    public Font getLabelFont() {
+<span class="fc" id="L772">        return this.labelFont;</span>
+    }
+
+    /**
+     * Sets the series label font and sends a {@link PlotChangeEvent} to all
+     * registered listeners.
+     *
+     * @param font  the font ({@code null} not permitted).
+     *
+     * @see #getLabelFont()
+     */
+    public void setLabelFont(Font font) {
+<span class="fc" id="L784">        Args.nullNotPermitted(font, &quot;font&quot;);</span>
+<span class="fc" id="L785">        this.labelFont = font;</span>
+<span class="fc" id="L786">        fireChangeEvent();</span>
+<span class="fc" id="L787">    }</span>
+
+    /**
+     * Returns the series label paint.
+     *
+     * @return The paint (never {@code null}).
+     *
+     * @see #setLabelPaint(Paint)
+     */
+    public Paint getLabelPaint() {
+<span class="fc" id="L797">        return this.labelPaint;</span>
+    }
+
+    /**
+     * Sets the series label paint and sends a {@link PlotChangeEvent} to all
+     * registered listeners.
+     *
+     * @param paint  the paint ({@code null} not permitted).
+     *
+     * @see #getLabelPaint()
+     */
+    public void setLabelPaint(Paint paint) {
+<span class="fc" id="L809">        Args.nullNotPermitted(paint, &quot;paint&quot;);</span>
+<span class="fc" id="L810">        this.labelPaint = paint;</span>
+<span class="fc" id="L811">        fireChangeEvent();</span>
+<span class="fc" id="L812">    }</span>
+
+    /**
+     * Returns the label generator.
+     *
+     * @return The label generator (never {@code null}).
+     *
+     * @see #setLabelGenerator(CategoryItemLabelGenerator)
+     */
+    public CategoryItemLabelGenerator getLabelGenerator() {
+<span class="nc" id="L822">        return this.labelGenerator;</span>
+    }
+
+    /**
+     * Sets the label generator and sends a {@link PlotChangeEvent} to all
+     * registered listeners.
+     *
+     * @param generator  the generator ({@code null} not permitted).
+     *
+     * @see #getLabelGenerator()
+     */
+    public void setLabelGenerator(CategoryItemLabelGenerator generator) {
+<span class="fc" id="L834">        Args.nullNotPermitted(generator, &quot;generator&quot;);</span>
+<span class="fc" id="L835">        this.labelGenerator = generator;</span>
+<span class="fc" id="L836">    }</span>
+
+    /**
+     * Returns the tool tip generator for the plot.
+     *
+     * @return The tool tip generator (possibly {@code null}).
+     *
+     * @see #setToolTipGenerator(CategoryToolTipGenerator)
+     */
+    public CategoryToolTipGenerator getToolTipGenerator() {
+<span class="nc" id="L846">        return this.toolTipGenerator;</span>
+    }
+
+    /**
+     * Sets the tool tip generator for the plot and sends a
+     * {@link PlotChangeEvent} to all registered listeners.
+     *
+     * @param generator  the generator ({@code null} permitted).
+     *
+     * @see #getToolTipGenerator()
+     */
+    public void setToolTipGenerator(CategoryToolTipGenerator generator) {
+<span class="fc" id="L858">        this.toolTipGenerator = generator;</span>
+<span class="fc" id="L859">        fireChangeEvent();</span>
+<span class="fc" id="L860">    }</span>
+
+    /**
+     * Returns the URL generator for the plot.
+     *
+     * @return The URL generator (possibly {@code null}).
+     *
+     * @see #setURLGenerator(CategoryURLGenerator)
+     */
+    public CategoryURLGenerator getURLGenerator() {
+<span class="nc" id="L870">        return this.urlGenerator;</span>
+    }
+
+    /**
+     * Sets the URL generator for the plot and sends a
+     * {@link PlotChangeEvent} to all registered listeners.
+     *
+     * @param generator  the generator ({@code null} permitted).
+     *
+     * @see #getURLGenerator()
+     */
+    public void setURLGenerator(CategoryURLGenerator generator) {
+<span class="fc" id="L882">        this.urlGenerator = generator;</span>
+<span class="fc" id="L883">        fireChangeEvent();</span>
+<span class="fc" id="L884">    }</span>
+
+    /**
+     * Returns a collection of legend items for the spider web chart.
+     *
+     * @return The legend items (never {@code null}).
+     */
+    @Override
+    public LegendItemCollection getLegendItems() {
+<span class="fc" id="L893">        LegendItemCollection result = new LegendItemCollection();</span>
+<span class="pc bpc" id="L894" title="1 of 2 branches missed.">        if (getDataset() == null) {</span>
+<span class="nc" id="L895">            return result;</span>
+        }
+<span class="fc" id="L897">        List keys = null;</span>
+<span class="pc bpc" id="L898" title="1 of 2 branches missed.">        if (this.dataExtractOrder == TableOrder.BY_ROW) {</span>
+<span class="fc" id="L899">            keys = this.dataset.getRowKeys();</span>
+        }
+<span class="nc bnc" id="L901" title="All 2 branches missed.">        else if (this.dataExtractOrder == TableOrder.BY_COLUMN) {</span>
+<span class="nc" id="L902">            keys = this.dataset.getColumnKeys();</span>
+        }
+<span class="pc bpc" id="L904" title="1 of 2 branches missed.">        if (keys == null) {</span>
+<span class="nc" id="L905">            return result;</span>
+        }
+
+<span class="fc" id="L908">        int series = 0;</span>
+<span class="fc" id="L909">        Iterator iterator = keys.iterator();</span>
+<span class="fc" id="L910">        Shape shape = getLegendItemShape();</span>
+<span class="fc bfc" id="L911" title="All 2 branches covered.">        while (iterator.hasNext()) {</span>
+<span class="fc" id="L912">            Comparable key = (Comparable) iterator.next();</span>
+<span class="fc" id="L913">            String label = key.toString();</span>
+<span class="fc" id="L914">            String description = label;</span>
+<span class="fc" id="L915">            Paint paint = getSeriesPaint(series);</span>
+<span class="fc" id="L916">            Paint outlinePaint = getSeriesOutlinePaint(series);</span>
+<span class="fc" id="L917">            Stroke stroke = getSeriesOutlineStroke(series);</span>
+<span class="fc" id="L918">            LegendItem item = new LegendItem(label, description,</span>
+                    null, null, shape, paint, stroke, outlinePaint);
+<span class="fc" id="L920">            item.setDataset(getDataset());</span>
+<span class="fc" id="L921">            item.setSeriesKey(key);</span>
+<span class="fc" id="L922">            item.setSeriesIndex(series);</span>
+<span class="fc" id="L923">            result.add(item);</span>
+<span class="fc" id="L924">            series++;</span>
+<span class="fc" id="L925">        }</span>
+<span class="fc" id="L926">        return result;</span>
+    }
+
+    /**
+     * Returns a cartesian point from a polar angle, length and bounding box
+     *
+     * @param bounds  the area inside which the point needs to be.
+     * @param angle  the polar angle, in degrees.
+     * @param length  the relative length. Given in percent of maximum extend.
+     *
+     * @return The cartesian point.
+     */
+    protected Point2D getWebPoint(Rectangle2D bounds,
+                                  double angle, double length) {
+
+<span class="fc" id="L941">        double angrad = Math.toRadians(angle);</span>
+<span class="fc" id="L942">        double x = Math.cos(angrad) * length * bounds.getWidth() / 2;</span>
+<span class="fc" id="L943">        double y = -Math.sin(angrad) * length * bounds.getHeight() / 2;</span>
+
+<span class="fc" id="L945">        return new Point2D.Double(bounds.getX() + x + bounds.getWidth() / 2,</span>
+<span class="fc" id="L946">                bounds.getY() + y + bounds.getHeight() / 2);</span>
+    }
+
+    /**
+     * Draws the plot on a Java 2D graphics device (such as the screen or a
+     * printer).
+     *
+     * @param g2  the graphics device.
+     * @param area  the area within which the plot should be drawn.
+     * @param anchor  the anchor point ({@code null} permitted).
+     * @param parentState  the state from the parent plot, if there is one.
+     * @param info  collects info about the drawing.
+     */
+    @Override
+    public void draw(Graphics2D g2, Rectangle2D area, Point2D anchor,
+            PlotState parentState, PlotRenderingInfo info) {
+
+        // adjust for insets...
+<span class="fc" id="L964">        RectangleInsets insets = getInsets();</span>
+<span class="fc" id="L965">        insets.trim(area);</span>
+
+<span class="pc bpc" id="L967" title="1 of 2 branches missed.">        if (info != null) {</span>
+<span class="nc" id="L968">            info.setPlotArea(area);</span>
+<span class="nc" id="L969">            info.setDataArea(area);</span>
+        }
+
+<span class="fc" id="L972">        drawBackground(g2, area);</span>
+<span class="fc" id="L973">        drawOutline(g2, area);</span>
+
+<span class="fc" id="L975">        Shape savedClip = g2.getClip();</span>
+
+<span class="fc" id="L977">        g2.clip(area);</span>
+<span class="fc" id="L978">        Composite originalComposite = g2.getComposite();</span>
+<span class="fc" id="L979">        g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,</span>
+<span class="fc" id="L980">                getForegroundAlpha()));</span>
+
+<span class="pc bpc" id="L982" title="1 of 2 branches missed.">        if (!DatasetUtils.isEmptyOrNull(this.dataset)) {</span>
+            int seriesCount, catCount;
+
+<span class="pc bpc" id="L985" title="1 of 2 branches missed.">            if (this.dataExtractOrder == TableOrder.BY_ROW) {</span>
+<span class="fc" id="L986">                seriesCount = this.dataset.getRowCount();</span>
+<span class="fc" id="L987">                catCount = this.dataset.getColumnCount();</span>
+            }
+            else {
+<span class="nc" id="L990">                seriesCount = this.dataset.getColumnCount();</span>
+<span class="nc" id="L991">                catCount = this.dataset.getRowCount();</span>
+            }
+
+            // ensure we have a maximum value to use on the axes
+<span class="pc bpc" id="L995" title="1 of 2 branches missed.">            if (this.maxValue == DEFAULT_MAX_VALUE) {</span>
+<span class="fc" id="L996">                calculateMaxValue(seriesCount, catCount);</span>
+            }
+
+            // Next, setup the plot area
+
+            // adjust the plot area by the interior spacing value
+
+<span class="fc" id="L1003">            double gapHorizontal = area.getWidth() * getInteriorGap();</span>
+<span class="fc" id="L1004">            double gapVertical = area.getHeight() * getInteriorGap();</span>
+
+<span class="fc" id="L1006">            double X = area.getX() + gapHorizontal / 2;</span>
+<span class="fc" id="L1007">            double Y = area.getY() + gapVertical / 2;</span>
+<span class="fc" id="L1008">            double W = area.getWidth() - gapHorizontal;</span>
+<span class="fc" id="L1009">            double H = area.getHeight() - gapVertical;</span>
+
+<span class="fc" id="L1011">            double headW = area.getWidth() * this.headPercent;</span>
+<span class="fc" id="L1012">            double headH = area.getHeight() * this.headPercent;</span>
+
+            // make the chart area a square
+<span class="fc" id="L1015">            double min = Math.min(W, H) / 2;</span>
+<span class="fc" id="L1016">            X = (X + X + W) / 2 - min;</span>
+<span class="fc" id="L1017">            Y = (Y + Y + H) / 2 - min;</span>
+<span class="fc" id="L1018">            W = 2 * min;</span>
+<span class="fc" id="L1019">            H = 2 * min;</span>
+
+<span class="fc" id="L1021">            Point2D  centre = new Point2D.Double(X + W / 2, Y + H / 2);</span>
+<span class="fc" id="L1022">            Rectangle2D radarArea = new Rectangle2D.Double(X, Y, W, H);</span>
+
+            // draw the axis and category label
+<span class="fc bfc" id="L1025" title="All 2 branches covered.">            for (int cat = 0; cat &lt; catCount; cat++) {</span>
+<span class="fc" id="L1026">                double angle = getStartAngle()</span>
+<span class="fc" id="L1027">                        + (getDirection().getFactor() * cat * 360 / catCount);</span>
+
+<span class="fc" id="L1029">                Point2D endPoint = getWebPoint(radarArea, angle, 1);</span>
+                                                     // 1 = end of axis
+<span class="fc" id="L1031">                Line2D  line = new Line2D.Double(centre, endPoint);</span>
+<span class="fc" id="L1032">                g2.setPaint(this.axisLinePaint);</span>
+<span class="fc" id="L1033">                g2.setStroke(this.axisLineStroke);</span>
+<span class="fc" id="L1034">                g2.draw(line);</span>
+<span class="fc" id="L1035">                drawLabel(g2, radarArea, 0.0, cat, angle, 360.0 / catCount);</span>
+            }
+
+            // Now actually plot each of the series polygons..
+<span class="fc bfc" id="L1039" title="All 2 branches covered.">            for (int series = 0; series &lt; seriesCount; series++) {</span>
+<span class="fc" id="L1040">                drawRadarPoly(g2, radarArea, centre, info, series, catCount,</span>
+                        headH, headW);
+            }
+<span class="fc" id="L1043">        } else {</span>
+<span class="nc" id="L1044">            drawNoDataMessage(g2, area);</span>
+        }
+<span class="fc" id="L1046">        g2.setClip(savedClip);</span>
+<span class="fc" id="L1047">        g2.setComposite(originalComposite);</span>
+<span class="fc" id="L1048">        drawOutline(g2, area);</span>
+<span class="fc" id="L1049">    }</span>
+
+    /**
+     * loop through each of the series to get the maximum value
+     * on each category axis
+     *
+     * @param seriesCount  the number of series
+     * @param catCount  the number of categories
+     */
+    private void calculateMaxValue(int seriesCount, int catCount) {
+        double v;
+        Number nV;
+
+<span class="fc bfc" id="L1062" title="All 2 branches covered.">        for (int seriesIndex = 0; seriesIndex &lt; seriesCount; seriesIndex++) {</span>
+<span class="fc bfc" id="L1063" title="All 2 branches covered.">            for (int catIndex = 0; catIndex &lt; catCount; catIndex++) {</span>
+<span class="fc" id="L1064">                nV = getPlotValue(seriesIndex, catIndex);</span>
+<span class="pc bpc" id="L1065" title="1 of 2 branches missed.">                if (nV != null) {</span>
+<span class="fc" id="L1066">                    v = nV.doubleValue();</span>
+<span class="fc bfc" id="L1067" title="All 2 branches covered.">                    if (v &gt; this.maxValue) {</span>
+<span class="fc" id="L1068">                        this.maxValue = v;</span>
+                    }
+                }
+            }
+        }
+<span class="fc" id="L1073">    }</span>
+
+    /**
+     * Draws a radar plot polygon.
+     *
+     * @param g2 the graphics device.
+     * @param plotArea the area we are plotting in (already adjusted).
+     * @param centre the centre point of the radar axes
+     * @param info chart rendering info.
+     * @param series the series within the dataset we are plotting
+     * @param catCount the number of categories per radar plot
+     * @param headH the data point height
+     * @param headW the data point width
+     */
+    protected void drawRadarPoly(Graphics2D g2, Rectangle2D plotArea,
+            Point2D centre, PlotRenderingInfo info, int series, int catCount,
+            double headH, double headW) {
+
+<span class="fc" id="L1091">        Polygon polygon = new Polygon();</span>
+
+<span class="fc" id="L1093">        EntityCollection entities = null;</span>
+<span class="pc bpc" id="L1094" title="1 of 2 branches missed.">        if (info != null) {</span>
+<span class="nc" id="L1095">            entities = info.getOwner().getEntityCollection();</span>
+        }
+
+        // plot the data...
+<span class="fc bfc" id="L1099" title="All 2 branches covered.">        for (int cat = 0; cat &lt; catCount; cat++) {</span>
+
+<span class="fc" id="L1101">            Number dataValue = getPlotValue(series, cat);</span>
+
+<span class="pc bpc" id="L1103" title="1 of 2 branches missed.">            if (dataValue != null) {</span>
+<span class="fc" id="L1104">                double value = dataValue.doubleValue();</span>
+
+<span class="pc bpc" id="L1106" title="1 of 2 branches missed.">                if (value &gt;= 0) { // draw the polygon series...</span>
+
+                    // Finds our starting angle from the centre for this axis
+
+<span class="fc" id="L1110">                    double angle = getStartAngle()</span>
+<span class="fc" id="L1111">                        + (getDirection().getFactor() * cat * 360 / catCount);</span>
+
+                    // The following angle calc will ensure there isn't a top
+                    // vertical axis - this may be useful if you don't want any
+                    // given criteria to 'appear' move important than the
+                    // others..
+                    //  + (getDirection().getFactor()
+                    //        * (cat + 0.5) * 360 / catCount);
+
+                    // find the point at the appropriate distance end point
+                    // along the axis/angle identified above and add it to the
+                    // polygon
+
+<span class="fc" id="L1124">                    Point2D point = getWebPoint(plotArea, angle,</span>
+                            value / this.maxValue);
+<span class="fc" id="L1126">                    polygon.addPoint((int) point.getX(), (int) point.getY());</span>
+
+                    // put an elipse at the point being plotted..
+
+<span class="fc" id="L1130">                    Paint paint = getSeriesPaint(series);</span>
+<span class="fc" id="L1131">                    Paint outlinePaint = getSeriesOutlinePaint(series);</span>
+<span class="fc" id="L1132">                    Stroke outlineStroke = getSeriesOutlineStroke(series);</span>
+
+<span class="fc" id="L1134">                    Ellipse2D head = new Ellipse2D.Double(point.getX()</span>
+<span class="fc" id="L1135">                            - headW / 2, point.getY() - headH / 2, headW,</span>
+                            headH);
+<span class="fc" id="L1137">                    g2.setPaint(paint);</span>
+<span class="fc" id="L1138">                    g2.fill(head);</span>
+<span class="fc" id="L1139">                    g2.setStroke(outlineStroke);</span>
+<span class="fc" id="L1140">                    g2.setPaint(outlinePaint);</span>
+<span class="fc" id="L1141">                    g2.draw(head);</span>
+
+<span class="pc bpc" id="L1143" title="1 of 2 branches missed.">                    if (entities != null) {</span>
+                        int row, col;
+<span class="nc bnc" id="L1145" title="All 2 branches missed.">                        if (this.dataExtractOrder == TableOrder.BY_ROW) {</span>
+<span class="nc" id="L1146">                            row = series;</span>
+<span class="nc" id="L1147">                            col = cat;</span>
+                        } else {
+<span class="nc" id="L1149">                            row = cat;</span>
+<span class="nc" id="L1150">                            col = series;</span>
+                        }
+<span class="nc" id="L1152">                        String tip = null;</span>
+<span class="nc bnc" id="L1153" title="All 2 branches missed.">                        if (this.toolTipGenerator != null) {</span>
+<span class="nc" id="L1154">                            tip = this.toolTipGenerator.generateToolTip(</span>
+                                    this.dataset, row, col);
+                        }
+
+<span class="nc" id="L1158">                        String url = null;</span>
+<span class="nc bnc" id="L1159" title="All 2 branches missed.">                        if (this.urlGenerator != null) {</span>
+<span class="nc" id="L1160">                            url = this.urlGenerator.generateURL(this.dataset,</span>
+                                   row, col);
+                        }
+
+<span class="nc" id="L1164">                        Shape area = new Rectangle(</span>
+<span class="nc" id="L1165">                                (int) (point.getX() - headW),</span>
+<span class="nc" id="L1166">                                (int) (point.getY() - headH),</span>
+                                (int) (headW * 2), (int) (headH * 2));
+<span class="nc" id="L1168">                        CategoryItemEntity entity = new CategoryItemEntity(</span>
+                                area, tip, url, this.dataset,
+<span class="nc" id="L1170">                                this.dataset.getRowKey(row),</span>
+<span class="nc" id="L1171">                                this.dataset.getColumnKey(col));</span>
+<span class="nc" id="L1172">                        entities.add(entity);</span>
+                    }
+
+                }
+            }
+        }
+        // Plot the polygon
+
+<span class="fc" id="L1180">        Paint paint = getSeriesPaint(series);</span>
+<span class="fc" id="L1181">        g2.setPaint(paint);</span>
+<span class="fc" id="L1182">        g2.setStroke(getSeriesOutlineStroke(series));</span>
+<span class="fc" id="L1183">        g2.draw(polygon);</span>
+
+        // Lastly, fill the web polygon if this is required
+
+<span class="pc bpc" id="L1187" title="1 of 2 branches missed.">        if (this.webFilled) {</span>
+<span class="fc" id="L1188">            g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,</span>
+                    0.1f));
+<span class="fc" id="L1190">            g2.fill(polygon);</span>
+<span class="fc" id="L1191">            g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,</span>
+<span class="fc" id="L1192">                    getForegroundAlpha()));</span>
+        }
+<span class="fc" id="L1194">    }</span>
+
+    /**
+     * Returns the value to be plotted at the intersection of the
+     * series and the category.  This allows us to plot
+     * {@code BY_ROW} or {@code BY_COLUMN} which basically is just
+     * reversing the definition of the categories and data series being
+     * plotted.
+     *
+     * @param series the series to be plotted.
+     * @param cat the category within the series to be plotted.
+     *
+     * @return The value to be plotted (possibly {@code null}).
+     *
+     * @see #getDataExtractOrder()
+     */
+    protected Number getPlotValue(int series, int cat) {
+<span class="fc" id="L1211">        Number value = null;</span>
+<span class="pc bpc" id="L1212" title="1 of 2 branches missed.">        if (this.dataExtractOrder == TableOrder.BY_ROW) {</span>
+<span class="fc" id="L1213">            value = this.dataset.getValue(series, cat);</span>
+<span class="nc bnc" id="L1214" title="All 2 branches missed.">        } else if (this.dataExtractOrder == TableOrder.BY_COLUMN) {</span>
+<span class="nc" id="L1215">            value = this.dataset.getValue(cat, series);</span>
+        }
+<span class="fc" id="L1217">        return value;</span>
+    }
+
+    /**
+     * Draws the label for one axis.
+     *
+     * @param g2  the graphics device.
+     * @param plotArea  the plot area
+     * @param value  the value of the label (ignored).
+     * @param cat  the category (zero-based index).
+     * @param startAngle  the starting angle.
+     * @param extent  the extent of the arc.
+     */
+    protected void drawLabel(Graphics2D g2, Rectangle2D plotArea, double value,
+                             int cat, double startAngle, double extent) {
+<span class="fc" id="L1232">        FontRenderContext frc = g2.getFontRenderContext();</span>
+
+        String label;
+<span class="pc bpc" id="L1235" title="1 of 2 branches missed.">        if (this.dataExtractOrder == TableOrder.BY_ROW) {</span>
+            // if series are in rows, then the categories are the column keys
+<span class="fc" id="L1237">            label = this.labelGenerator.generateColumnLabel(this.dataset, cat);</span>
+        } else {
+            // if series are in columns, then the categories are the row keys
+<span class="nc" id="L1240">            label = this.labelGenerator.generateRowLabel(this.dataset, cat);</span>
+        }
+
+<span class="fc" id="L1243">        Rectangle2D labelBounds = getLabelFont().getStringBounds(label, frc);</span>
+<span class="fc" id="L1244">        LineMetrics lm = getLabelFont().getLineMetrics(label, frc);</span>
+<span class="fc" id="L1245">        double ascent = lm.getAscent();</span>
+
+<span class="fc" id="L1247">        Point2D labelLocation = calculateLabelLocation(labelBounds, ascent,</span>
+                plotArea, startAngle);
+
+<span class="fc" id="L1250">        Composite saveComposite = g2.getComposite();</span>
+
+<span class="fc" id="L1252">        g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));</span>
+<span class="fc" id="L1253">        g2.setPaint(getLabelPaint());</span>
+<span class="fc" id="L1254">        g2.setFont(getLabelFont());</span>
+<span class="fc" id="L1255">        g2.drawString(label, (float) labelLocation.getX(),</span>
+<span class="fc" id="L1256">                (float) labelLocation.getY());</span>
+<span class="fc" id="L1257">        g2.setComposite(saveComposite);</span>
+<span class="fc" id="L1258">    }</span>
+
+    /**
+     * Returns the location for a label
+     *
+     * @param labelBounds the label bounds.
+     * @param ascent the ascent (height of font).
+     * @param plotArea the plot area
+     * @param startAngle the start angle for the pie series.
+     *
+     * @return The location for a label.
+     */
+    protected Point2D calculateLabelLocation(Rectangle2D labelBounds,
+            double ascent, Rectangle2D plotArea, double startAngle) {
+<span class="fc" id="L1272">        Arc2D arc1 = new Arc2D.Double(plotArea, startAngle, 0, Arc2D.OPEN);</span>
+<span class="fc" id="L1273">        Point2D point1 = arc1.getEndPoint();</span>
+
+<span class="fc" id="L1275">        double deltaX = -(point1.getX() - plotArea.getCenterX())</span>
+                        * this.axisLabelGap;
+<span class="fc" id="L1277">        double deltaY = -(point1.getY() - plotArea.getCenterY())</span>
+                        * this.axisLabelGap;
+
+<span class="fc" id="L1280">        double labelX = point1.getX() - deltaX;</span>
+<span class="fc" id="L1281">        double labelY = point1.getY() - deltaY;</span>
+
+<span class="fc bfc" id="L1283" title="All 2 branches covered.">        if (labelX &lt; plotArea.getCenterX()) {</span>
+<span class="fc" id="L1284">            labelX -= labelBounds.getWidth();</span>
+        }
+
+<span class="fc bfc" id="L1287" title="All 2 branches covered.">        if (labelX == plotArea.getCenterX()) {</span>
+<span class="fc" id="L1288">            labelX -= labelBounds.getWidth() / 2;</span>
+        }
+
+<span class="fc bfc" id="L1291" title="All 2 branches covered.">        if (labelY &gt; plotArea.getCenterY()) {</span>
+<span class="fc" id="L1292">            labelY += ascent;</span>
+        }
+
+<span class="fc" id="L1295">        return new Point2D.Double(labelX, labelY);</span>
+    }
+
+    /**
+     * Tests this plot for equality with an arbitrary object.
+     *
+     * @param obj  the object ({@code null} permitted).
+     *
+     * @return A boolean.
+     */
+    @Override
+    public boolean equals(Object obj) {
+<span class="pc bpc" id="L1307" title="1 of 2 branches missed.">        if (obj == this) {</span>
+<span class="nc" id="L1308">            return true;</span>
+        }
+<span class="pc bpc" id="L1310" title="1 of 2 branches missed.">        if (!(obj instanceof SpiderWebPlot)) {</span>
+<span class="nc" id="L1311">            return false;</span>
+        }
+<span class="pc bpc" id="L1313" title="1 of 2 branches missed.">        if (!super.equals(obj)) {</span>
+<span class="nc" id="L1314">            return false;</span>
+        }
+<span class="fc" id="L1316">        SpiderWebPlot that = (SpiderWebPlot) obj;</span>
+<span class="fc bfc" id="L1317" title="All 2 branches covered.">        if (!this.dataExtractOrder.equals(that.dataExtractOrder)) {</span>
+<span class="fc" id="L1318">            return false;</span>
+        }
+<span class="fc bfc" id="L1320" title="All 2 branches covered.">        if (this.headPercent != that.headPercent) {</span>
+<span class="fc" id="L1321">            return false;</span>
+        }
+<span class="fc bfc" id="L1323" title="All 2 branches covered.">        if (this.interiorGap != that.interiorGap) {</span>
+<span class="fc" id="L1324">            return false;</span>
+        }
+<span class="fc bfc" id="L1326" title="All 2 branches covered.">        if (this.startAngle != that.startAngle) {</span>
+<span class="fc" id="L1327">            return false;</span>
+        }
+<span class="fc bfc" id="L1329" title="All 2 branches covered.">        if (!this.direction.equals(that.direction)) {</span>
+<span class="fc" id="L1330">            return false;</span>
+        }
+<span class="fc bfc" id="L1332" title="All 2 branches covered.">        if (this.maxValue != that.maxValue) {</span>
+<span class="fc" id="L1333">            return false;</span>
+        }
+<span class="fc bfc" id="L1335" title="All 2 branches covered.">        if (this.webFilled != that.webFilled) {</span>
+<span class="fc" id="L1336">            return false;</span>
+        }
+<span class="fc bfc" id="L1338" title="All 2 branches covered.">        if (this.axisLabelGap != that.axisLabelGap) {</span>
+<span class="fc" id="L1339">            return false;</span>
+        }
+<span class="fc bfc" id="L1341" title="All 2 branches covered.">        if (!PaintUtils.equal(this.axisLinePaint, that.axisLinePaint)) {</span>
+<span class="fc" id="L1342">            return false;</span>
+        }
+<span class="fc bfc" id="L1344" title="All 2 branches covered.">        if (!this.axisLineStroke.equals(that.axisLineStroke)) {</span>
+<span class="fc" id="L1345">            return false;</span>
+        }
+<span class="fc bfc" id="L1347" title="All 2 branches covered.">        if (!ShapeUtils.equal(this.legendItemShape, that.legendItemShape)) {</span>
+<span class="fc" id="L1348">            return false;</span>
+        }
+<span class="fc bfc" id="L1350" title="All 2 branches covered.">        if (!PaintUtils.equal(this.seriesPaints, that.seriesPaints)) {</span>
+<span class="fc" id="L1351">            return false;</span>
+        }
+<span class="fc bfc" id="L1353" title="All 2 branches covered.">        if (!PaintUtils.equal(this.defaultSeriesPaint, that.defaultSeriesPaint)) {</span>
+<span class="fc" id="L1354">            return false;</span>
+        }
+<span class="fc bfc" id="L1356" title="All 2 branches covered.">        if (!PaintUtils.equal(this.seriesOutlinePaints, that.seriesOutlinePaints)) {</span>
+<span class="fc" id="L1357">            return false;</span>
+        }
+<span class="fc bfc" id="L1359" title="All 2 branches covered.">        if (!PaintUtils.equal(this.defaultSeriesOutlinePaint,</span>
+                that.defaultSeriesOutlinePaint)) {
+<span class="fc" id="L1361">            return false;</span>
+        }
+
+<span class="fc bfc" id="L1364" title="All 2 branches covered.">        if (!this.seriesOutlineStrokes.equals(that.seriesOutlineStrokes)) {</span>
+<span class="fc" id="L1365">            return false;</span>
+        }
+<span class="fc bfc" id="L1367" title="All 2 branches covered.">        if (!this.defaultSeriesOutlineStroke.equals(that.defaultSeriesOutlineStroke)) {</span>
+<span class="fc" id="L1368">            return false;</span>
+        }
+<span class="fc bfc" id="L1370" title="All 2 branches covered.">        if (!this.labelFont.equals(that.labelFont)) {</span>
+<span class="fc" id="L1371">            return false;</span>
+        }
+<span class="fc bfc" id="L1373" title="All 2 branches covered.">        if (!PaintUtils.equal(this.labelPaint, that.labelPaint)) {</span>
+<span class="fc" id="L1374">            return false;</span>
+        }
+<span class="fc bfc" id="L1376" title="All 2 branches covered.">        if (!this.labelGenerator.equals(that.labelGenerator)) {</span>
+<span class="fc" id="L1377">            return false;</span>
+        }
+<span class="fc bfc" id="L1379" title="All 2 branches covered.">        if (!Objects.equals(this.toolTipGenerator, that.toolTipGenerator)) {</span>
+<span class="fc" id="L1380">            return false;</span>
+        }
+<span class="fc bfc" id="L1382" title="All 2 branches covered.">        if (!Objects.equals(this.urlGenerator, that.urlGenerator)) {</span>
+<span class="fc" id="L1383">            return false;</span>
+        }
+<span class="fc" id="L1385">        return true;</span>
+    }
+
+    /**
+     * Returns a clone of this plot.
+     *
+     * @return A clone of this plot.
+     *
+     * @throws CloneNotSupportedException if the plot cannot be cloned for
+     *         any reason.
+     */
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+<span class="fc" id="L1398">        SpiderWebPlot clone = (SpiderWebPlot) super.clone();</span>
+<span class="fc" id="L1399">        clone.legendItemShape = CloneUtils.clone(this.legendItemShape);</span>
+<span class="fc" id="L1400">        clone.seriesPaints = CloneUtils.cloneMapValues(this.seriesPaints);</span>
+<span class="fc" id="L1401">        clone.seriesOutlinePaints = CloneUtils.cloneMapValues(this.seriesOutlinePaints);</span>
+<span class="fc" id="L1402">        clone.seriesOutlineStrokes = CloneUtils.cloneMapValues(this.seriesOutlineStrokes);</span>
+<span class="fc" id="L1403">        return clone;</span>
+    }
+
+    /**
+     * Provides serialization support.
+     *
+     * @param stream  the output stream.
+     *
+     * @throws IOException  if there is an I/O error.
+     */
+    private void writeObject(ObjectOutputStream stream) throws IOException {
+<span class="fc" id="L1414">        stream.defaultWriteObject();</span>
+
+<span class="fc" id="L1416">        SerialUtils.writeShape(this.legendItemShape, stream);</span>
+<span class="fc" id="L1417">        SerialUtils.writeMapOfPaint(this.seriesPaints, stream);</span>
+<span class="fc" id="L1418">        SerialUtils.writePaint(this.defaultSeriesPaint, stream);</span>
+<span class="fc" id="L1419">        SerialUtils.writeMapOfPaint(this.seriesOutlinePaints, stream);</span>
+<span class="fc" id="L1420">        SerialUtils.writePaint(this.defaultSeriesOutlinePaint, stream);</span>
+<span class="fc" id="L1421">        SerialUtils.writeMapOfStroke(this.seriesOutlineStrokes, stream);</span>
+<span class="fc" id="L1422">        SerialUtils.writeStroke(this.defaultSeriesOutlineStroke, stream);</span>
+<span class="fc" id="L1423">        SerialUtils.writePaint(this.labelPaint, stream);</span>
+<span class="fc" id="L1424">        SerialUtils.writePaint(this.axisLinePaint, stream);</span>
+<span class="fc" id="L1425">        SerialUtils.writeStroke(this.axisLineStroke, stream);</span>
+<span class="fc" id="L1426">    }</span>
+
+    /**
+     * Provides serialization support.
+     *
+     * @param stream  the input stream.
+     *
+     * @throws IOException  if there is an I/O error.
+     * @throws ClassNotFoundException  if there is a classpath problem.
+     */
+    private void readObject(ObjectInputStream stream) throws IOException,
+            ClassNotFoundException {
+<span class="fc" id="L1438">        stream.defaultReadObject();</span>
+
+<span class="fc" id="L1440">        this.legendItemShape = SerialUtils.readShape(stream);</span>
+<span class="fc" id="L1441">        this.seriesPaints = SerialUtils.readMapOfPaint(stream);</span>
+<span class="fc" id="L1442">        this.defaultSeriesPaint = SerialUtils.readPaint(stream);</span>
+<span class="fc" id="L1443">        this.seriesOutlinePaints = SerialUtils.readMapOfPaint(stream);</span>
+<span class="fc" id="L1444">        this.defaultSeriesOutlinePaint = SerialUtils.readPaint(stream);</span>
+<span class="fc" id="L1445">        this.seriesOutlineStrokes = SerialUtils.readMapOfStroke(stream);</span>
+<span class="fc" id="L1446">        this.defaultSeriesOutlineStroke = SerialUtils.readStroke(stream);</span>
+<span class="fc" id="L1447">        this.labelPaint = SerialUtils.readPaint(stream);</span>
+<span class="fc" id="L1448">        this.axisLinePaint = SerialUtils.readPaint(stream);</span>
+<span class="fc" id="L1449">        this.axisLineStroke = SerialUtils.readStroke(stream);</span>
+<span class="pc bpc" id="L1450" title="1 of 2 branches missed.">        if (this.dataset != null) {</span>
+<span class="fc" id="L1451">            this.dataset.addChangeListener(this);</span>
+        }
+<span class="fc" id="L1453">    }</span>
+
+    /**
+     * REFACTOR - USADO PARA CORRIGIR FEATURE ENVY DE org.jfree.chart.StandardChartTheme.applyToSpiderWebPlot
+     * @author Afonso Caniço, Gustavo Ferreira
+     */
+    @Override
+    public void apply(StandardChartTheme theme) {
+<span class="nc" id="L1461">        setLabelFont(theme.getRegularFont());</span>
+<span class="nc" id="L1462">        setLabelPaint(theme.getAxisLabelPaint());</span>
+<span class="nc" id="L1463">        setAxisLinePaint(theme.getAxisLabelPaint());</span>
+<span class="nc" id="L1464">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

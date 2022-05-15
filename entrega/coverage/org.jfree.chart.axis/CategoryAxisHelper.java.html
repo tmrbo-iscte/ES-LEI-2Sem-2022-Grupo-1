@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CategoryAxisHelper.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.chart.axis</a> &gt; <span class="el_source">CategoryAxisHelper.java</span></div><h1>CategoryAxisHelper.java</h1><pre class="source lang-java linenums">package org.jfree.chart.axis;
+
+import org.jfree.chart.event.AxisChangeEvent;
+import org.jfree.chart.internal.Args;
+import java.io.Serializable;
+import java.util.Objects;
+
+/**
+ * Extract Class - refactor God Class CategoryAxis.
+ * @author Afonso Caniço (adapted from JDeodorant suggestion)
+ */
+public class CategoryAxisHelper implements Serializable, Cloneable {
+    private final CategoryAxis axis;
+<span class="pc" id="L14">    private float maximumCategoryLabelWidthRatio = 0.0f;</span>
+<span class="pc" id="L15">    private int categoryLabelPositionOffset = 4;</span>
+<span class="pc" id="L16">    private CategoryLabelPositions categoryLabelPositions = CategoryLabelPositions.STANDARD;</span>
+
+    // Default constructor.
+<span class="fc" id="L19">    public CategoryAxisHelper(CategoryAxis axis) {</span>
+<span class="fc" id="L20">        Args.nullNotPermitted(axis, &quot;axis&quot;);</span>
+<span class="fc" id="L21">        this.axis = axis;</span>
+<span class="fc" id="L22">    }</span>
+
+<span class="nc" id="L24">    public CategoryAxisHelper(CategoryAxis axis, float ratio, int offset, CategoryLabelPositions positions) {</span>
+<span class="nc" id="L25">        Args.nullNotPermitted(axis, &quot;axis&quot;);</span>
+<span class="nc" id="L26">        Args.nullNotPermitted(positions, &quot;positions&quot;);</span>
+<span class="nc" id="L27">        this.axis = axis;</span>
+<span class="nc" id="L28">        this.maximumCategoryLabelWidthRatio = ratio;</span>
+<span class="nc" id="L29">        this.categoryLabelPositionOffset = offset;</span>
+<span class="nc" id="L30">        this.categoryLabelPositions = positions;</span>
+<span class="nc" id="L31">    }</span>
+
+    public float getMaximumCategoryLabelWidthRatio() {
+<span class="fc" id="L34">        return maximumCategoryLabelWidthRatio;</span>
+    }
+
+    /**
+     * Sets the maximum category label width ratio and sends an {@link AxisChangeEvent}  to all registered listeners.
+     * @param ratio   the ratio.
+     * @see #getMaximumCategoryLabelWidthRatio()
+     */
+    public void setMaximumCategoryLabelWidthRatio(float ratio) {
+<span class="fc" id="L43">        this.maximumCategoryLabelWidthRatio = ratio;</span>
+<span class="fc" id="L44">        axis.fireChangeEvent();</span>
+<span class="fc" id="L45">    }</span>
+
+    public int getCategoryLabelPositionOffset() {
+<span class="fc" id="L48">        return categoryLabelPositionOffset;</span>
+    }
+
+    /**
+     * Sets the offset between the axis and the category labels (before label positioning is taken into account) and sends a change event to all  registered listeners.
+     * @param offset   the offset (in Java2D units).
+     * @see #getCategoryLabelPositionOffset()
+     */
+    public void setCategoryLabelPositionOffset(int offset) {
+<span class="fc" id="L57">        this.categoryLabelPositionOffset = offset;</span>
+<span class="fc" id="L58">        axis.fireChangeEvent();</span>
+<span class="fc" id="L59">    }</span>
+
+    public CategoryLabelPositions getCategoryLabelPositions() {
+<span class="fc" id="L62">        return categoryLabelPositions;</span>
+    }
+
+    /**
+     * Sets the category label position specification for the axis and sends an {@link AxisChangeEvent}  to all registered listeners.
+     * @param positions   the positions ( {@code  null}  not permitted).
+     * @see #getCategoryLabelPositions()
+     */
+    public void setCategoryLabelPositions(CategoryLabelPositions positions) {
+<span class="fc" id="L71">        Args.nullNotPermitted(positions, &quot;positions&quot;);</span>
+<span class="fc" id="L72">        this.categoryLabelPositions = positions;</span>
+<span class="fc" id="L73">        axis.fireChangeEvent();</span>
+<span class="fc" id="L74">    }</span>
+
+    public Object clone() throws CloneNotSupportedException {
+<span class="nc" id="L77">        return super.clone();</span>
+    }
+
+    @Override
+    public boolean equals(Object o) {
+<span class="fc bfc" id="L82" title="All 2 branches covered.">        if (this == o) return true;</span>
+<span class="pc bpc" id="L83" title="2 of 4 branches missed.">        if (o == null || getClass() != o.getClass()) return false;</span>
+<span class="fc" id="L84">        CategoryAxisHelper that = (CategoryAxisHelper) o;</span>
+<span class="fc bfc" id="L85" title="All 6 branches covered.">        return Float.compare(that.maximumCategoryLabelWidthRatio, maximumCategoryLabelWidthRatio) == 0 &amp;&amp; categoryLabelPositionOffset == that.categoryLabelPositionOffset &amp;&amp; Objects.equals(categoryLabelPositions, that.categoryLabelPositions);</span>
+    }
+
+    @Override
+    public int hashCode() {
+<span class="nc" id="L90">        return Objects.hash(maximumCategoryLabelWidthRatio, categoryLabelPositionOffset, categoryLabelPositions);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

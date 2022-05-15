@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GrayPaintScale.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.chart.renderer</a> &gt; <span class="el_source">GrayPaintScale.java</span></div><h1>GrayPaintScale.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * -------------------
+ * GrayPaintScale.java
+ * -------------------
+ * (C) Copyright 2006-2022, by David Gilbert.
+ *
+ * Original Author:  David Gilbert;
+ * Contributor(s):   -;
+ *
+ */
+
+package org.jfree.chart.renderer;
+
+import java.awt.Color;
+import java.awt.Paint;
+import java.io.Serializable;
+
+import org.jfree.chart.internal.HashUtils;
+import org.jfree.chart.api.PublicCloneable;
+
+/**
+ * A paint scale that returns shades of gray.
+ */
+public class GrayPaintScale
+        implements PaintScale, PublicCloneable, Serializable {
+
+    /** The lower bound. */
+    private double lowerBound;
+
+    /** The upper bound. */
+    private double upperBound;
+
+    /**
+     * The alpha transparency (0-255).
+     */
+    private int alpha;
+
+    /**
+     * Creates a new {@code GrayPaintScale} instance with default values.
+     */
+    public GrayPaintScale() {
+<span class="fc" id="L67">        this(0.0, 1.0);</span>
+<span class="fc" id="L68">    }</span>
+
+    /**
+     * Creates a new paint scale for values in the specified range.
+     *
+     * @param lowerBound  the lower bound.
+     * @param upperBound  the upper bound.
+     *
+     * @throws IllegalArgumentException if {@code lowerBound} is not
+     *       less than {@code upperBound}.
+     */
+    public GrayPaintScale(double lowerBound, double upperBound) {
+<span class="fc" id="L80">        this(lowerBound, upperBound, 255);</span>
+<span class="fc" id="L81">    }</span>
+
+    /**
+     * Creates a new paint scale for values in the specified range.
+     *
+     * @param lowerBound  the lower bound.
+     * @param upperBound  the upper bound.
+     * @param alpha  the alpha transparency (0-255).
+     *
+     * @throws IllegalArgumentException if {@code lowerBound} is not
+     *       less than {@code upperBound}, or {@code alpha} is not in
+     *       the range 0 to 255.
+     */
+<span class="fc" id="L94">    public GrayPaintScale(double lowerBound, double upperBound, int alpha) {</span>
+<span class="pc bpc" id="L95" title="1 of 2 branches missed.">        if (lowerBound &gt;= upperBound) {</span>
+<span class="nc" id="L96">            throw new IllegalArgumentException(</span>
+                    &quot;Requires lowerBound &lt; upperBound.&quot;);
+        }
+<span class="pc bpc" id="L99" title="2 of 4 branches missed.">        if (alpha &lt; 0 || alpha &gt; 255) {</span>
+<span class="nc" id="L100">            throw new IllegalArgumentException(</span>
+                    &quot;Requires alpha in the range 0 to 255.&quot;);
+
+        }
+<span class="fc" id="L104">        this.lowerBound = lowerBound;</span>
+<span class="fc" id="L105">        this.upperBound = upperBound;</span>
+<span class="fc" id="L106">        this.alpha = alpha;</span>
+<span class="fc" id="L107">    }</span>
+
+    /**
+     * Returns the lower bound.
+     *
+     * @return The lower bound.
+     *
+     * @see #getUpperBound()
+     */
+    @Override
+    public double getLowerBound() {
+<span class="fc" id="L118">        return this.lowerBound;</span>
+    }
+
+    /**
+     * Returns the upper bound.
+     *
+     * @return The upper bound.
+     *
+     * @see #getLowerBound()
+     */
+    @Override
+    public double getUpperBound() {
+<span class="fc" id="L130">        return this.upperBound;</span>
+    }
+
+    /**
+     * Returns the alpha transparency that was specified in the constructor.
+     * 
+     * @return The alpha transparency (in the range 0 to 255).
+     */
+    public int getAlpha() {
+<span class="fc" id="L139">        return this.alpha;</span>
+    }
+
+    /**
+     * Returns a paint for the specified value.
+     *
+     * @param value  the value (must be within the range specified by the
+     *         lower and upper bounds for the scale).
+     *
+     * @return A paint for the specified value.
+     */
+    @Override
+    public Paint getPaint(double value) {
+<span class="fc" id="L152">        double v = Math.max(value, this.lowerBound);</span>
+<span class="fc" id="L153">        v = Math.min(v, this.upperBound);</span>
+<span class="fc" id="L154">        int g = (int) ((v - this.lowerBound) / (this.upperBound</span>
+                - this.lowerBound) * 255.0);
+        // FIXME:  it probably makes sense to allocate an array of 256 Colors
+        // and lazily populate this array...
+<span class="fc" id="L158">        return new Color(g, g, g, this.alpha);</span>
+    }
+
+    /**
+     * Tests this {@code GrayPaintScale} instance for equality with an
+     * arbitrary object.  This method returns {@code true} if and only
+     * if:
+     * &lt;ul&gt;
+     * &lt;li&gt;{@code obj} is not {@code null};&lt;/li&gt;
+     * &lt;li&gt;{@code obj} is an instance of {@code GrayPaintScale};&lt;/li&gt;
+     * &lt;/ul&gt;
+     *
+     * @param obj  the object ({@code null} permitted).
+     *
+     * @return A boolean.
+     */
+    @Override
+    public boolean equals(Object obj) {
+<span class="fc bfc" id="L176" title="All 2 branches covered.">        if (obj == this) {</span>
+<span class="fc" id="L177">            return true;</span>
+        }
+<span class="fc bfc" id="L179" title="All 2 branches covered.">        if (!(obj instanceof GrayPaintScale)) {</span>
+<span class="fc" id="L180">            return false;</span>
+        }
+<span class="fc" id="L182">        GrayPaintScale that = (GrayPaintScale) obj;</span>
+<span class="fc bfc" id="L183" title="All 2 branches covered.">        if (this.lowerBound != that.lowerBound) {</span>
+<span class="fc" id="L184">            return false;</span>
+        }
+<span class="fc bfc" id="L186" title="All 2 branches covered.">        if (this.upperBound != that.upperBound) {</span>
+<span class="fc" id="L187">            return false;</span>
+        }
+<span class="fc bfc" id="L189" title="All 2 branches covered.">        if (this.alpha != that.alpha) {</span>
+<span class="fc" id="L190">            return false;</span>
+        }
+<span class="fc" id="L192">        return true;</span>
+    }
+
+    /**
+     * Returns a hash code for this instance.
+     *
+     * @return A hash code.
+     */
+    @Override
+    public int hashCode() {
+<span class="nc" id="L202">        int hash = 7;</span>
+<span class="nc" id="L203">        hash = HashUtils.hashCode(hash, this.lowerBound);</span>
+<span class="nc" id="L204">        hash = HashUtils.hashCode(hash, this.upperBound);</span>
+<span class="nc" id="L205">        hash = 43 * hash + this.alpha;</span>
+<span class="nc" id="L206">        return hash;</span>
+    }
+
+    /**
+     * Returns a clone of this {@code GrayPaintScale} instance.
+     *
+     * @return A clone.
+     *
+     * @throws CloneNotSupportedException if there is a problem cloning this
+     *     instance.
+     */
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+<span class="fc" id="L219">        return super.clone();</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ChartProgressEvent.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.chart.event</a> &gt; <span class="el_source">ChartProgressEvent.java</span></div><h1>ChartProgressEvent.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * -----------------------
+ * ChartProgressEvent.java
+ * -----------------------
+ * (C) Copyright 2003-2022, by David Gilbert.
+ *
+ * Original Author:  David Gilbert;
+ * Contributor(s):   -;
+ *
+ */
+
+package org.jfree.chart.event;
+
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.internal.Args;
+
+/**
+ * An event that contains information about the drawing progress of a chart.
+ */
+public class ChartProgressEvent extends java.util.EventObject {
+
+    /** The type of event. */
+    private ChartProgressEventType type;
+
+    /** The percentage of completion. */
+    private int percent;
+
+    /** The chart that generated the event. */
+    private JFreeChart chart;
+
+    /**
+     * Creates a new chart change event.
+     *
+     * @param source  the source of the event (could be the chart, a title, an
+     *                axis etc.)
+     * @param chart  the chart that generated the event.
+     * @param type  the type of event ({@code null} not permitted).
+     * @param percent  the percentage of completion.
+     */
+    public ChartProgressEvent(Object source, JFreeChart chart, 
+            ChartProgressEventType type, int percent) {
+<span class="fc" id="L67">        super(source);</span>
+<span class="fc" id="L68">        Args.nullNotPermitted(type, &quot;type&quot;);</span>
+<span class="fc" id="L69">        this.chart = chart;</span>
+<span class="fc" id="L70">        this.type = type;</span>
+<span class="fc" id="L71">        this.percent = percent;</span>
+<span class="fc" id="L72">    }</span>
+
+    /**
+     * Returns the chart that generated the change event.
+     *
+     * @return The chart that generated the change event.
+     */
+    public JFreeChart getChart() {
+<span class="nc" id="L80">        return this.chart;</span>
+    }
+
+    /**
+     * Sets the chart that generated the change event.
+     *
+     * @param chart  the chart that generated the event.
+     */
+    public void setChart(JFreeChart chart) {
+<span class="nc" id="L89">        this.chart = chart;</span>
+<span class="nc" id="L90">    }</span>
+
+    /**
+     * Returns the event type.
+     *
+     * @return The event type (never {@code null}).
+     */
+    public ChartProgressEventType getType() {
+<span class="nc" id="L98">        return this.type;</span>
+    }
+
+    /**
+     * Sets the event type.
+     *
+     * @param type  the event type ({@code null} not permitted).
+     */
+    public void setType(ChartProgressEventType type) {
+<span class="nc" id="L107">        Args.nullNotPermitted(type, &quot;type&quot;);</span>
+<span class="nc" id="L108">        this.type = type;</span>
+<span class="nc" id="L109">    }</span>
+
+    /**
+     * Returns the percentage complete.
+     *
+     * @return The percentage complete.
+     */
+    public int getPercent() {
+<span class="nc" id="L117">        return this.percent;</span>
+    }
+
+    /**
+     * Sets the percentage complete.
+     *
+     * @param percent  the percentage.
+     */
+    public void setPercent(int percent) {
+<span class="nc" id="L126">        this.percent = percent;</span>
+<span class="nc" id="L127">    }</span>
+
+    /**
+     *  author:Gustavo Ferreira -&gt; moved from JFreeChart
+     * Sends a {@link ChartProgressEvent} to all registered listeners.
+     *
+     */
+    public void notifyListeners(JFreeChart jFreeChart) {
+<span class="fc" id="L135">        Object[] listeners = jFreeChart.getProgressListeners().getListenerList();</span>
+<span class="pc bpc" id="L136" title="1 of 2 branches missed.">        for (int i = listeners.length - 2; i &gt;= 0; i -= 2) {</span>
+<span class="nc bnc" id="L137" title="All 2 branches missed.">            if (listeners[i] == ChartProgressListener.class) {</span>
+<span class="nc" id="L138">                ((ChartProgressListener) listeners[i + 1]).chartProgress(this);</span>
+            }
+        }
+<span class="fc" id="L141">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

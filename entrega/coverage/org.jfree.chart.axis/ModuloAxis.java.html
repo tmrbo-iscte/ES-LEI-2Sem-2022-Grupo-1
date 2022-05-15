@@ -1,0 +1,407 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ModuloAxis.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.chart.axis</a> &gt; <span class="el_source">ModuloAxis.java</span></div><h1>ModuloAxis.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * ---------------
+ * ModuloAxis.java
+ * ---------------
+ * (C) Copyright 2004-2022, by David Gilbert.
+ *
+ * Original Author:  David Gilbert;
+ * Contributor(s):   -;
+ *
+ */
+
+package org.jfree.chart.axis;
+
+import java.awt.geom.Rectangle2D;
+
+import org.jfree.chart.event.AxisChangeEvent;
+import org.jfree.chart.api.RectangleEdge;
+import org.jfree.data.Range;
+
+/**
+ * An axis that displays numerical values within a fixed range using a modulo
+ * calculation.
+ */
+public class ModuloAxis extends NumberAxis {
+
+    /**
+     * The fixed range for the axis - all data values will be mapped to this
+     * range using a modulo calculation.
+     */
+    private Range fixedRange;
+
+    /**
+     * The display start value (this will sometimes be &amp;gt; displayEnd, in which
+     * case the axis wraps around at some point in the middle of the axis).
+     */
+    private double displayStart;
+
+    /**
+     * The display end value.
+     */
+    private double displayEnd;
+
+    /**
+     * Creates a new axis.
+     *
+     * @param label  the axis label ({@code null} permitted).
+     * @param fixedRange  the fixed range ({@code null} not permitted).
+     */
+    public ModuloAxis(String label, Range fixedRange) {
+<span class="fc" id="L75">        super(label);</span>
+<span class="fc" id="L76">        this.fixedRange = fixedRange;</span>
+<span class="fc" id="L77">        this.displayStart = 270.0;</span>
+<span class="fc" id="L78">        this.displayEnd = 90.0;</span>
+<span class="fc" id="L79">    }</span>
+
+    /**
+     * Returns the display start value.
+     *
+     * @return The display start value.
+     */
+    public double getDisplayStart() {
+<span class="nc" id="L87">        return this.displayStart;</span>
+    }
+
+    /**
+     * Returns the display end value.
+     *
+     * @return The display end value.
+     */
+    public double getDisplayEnd() {
+<span class="nc" id="L96">        return this.displayEnd;</span>
+    }
+
+    /**
+     * Sets the display range.  The values will be mapped to the fixed range if
+     * necessary.
+     *
+     * @param start  the start value.
+     * @param end  the end value.
+     */
+    public void setDisplayRange(double start, double end) {
+<span class="fc" id="L107">        this.displayStart = this.fixedRange.mapValue(start);</span>
+<span class="fc" id="L108">        this.displayEnd = this.fixedRange.mapValue(end);</span>
+<span class="pc bpc" id="L109" title="1 of 2 branches missed.">        if (this.displayStart &lt; this.displayEnd) {</span>
+<span class="fc" id="L110">            setRange(this.displayStart, this.displayEnd);</span>
+        }
+        else {
+<span class="nc" id="L113">            setRange(this.displayStart, this.fixedRange.getUpperBound()</span>
+<span class="nc" id="L114">                  + (this.displayEnd - this.fixedRange.getLowerBound()));</span>
+        }
+<span class="fc" id="L116">        notifyListeners(new AxisChangeEvent(this));</span>
+<span class="fc" id="L117">    }</span>
+
+    /**
+     * This method should calculate a range that will show all the data values.
+     * For now, it just sets the axis range to the fixedRange.
+     */
+    @Override
+    protected void autoAdjustRange() {
+<span class="nc" id="L125">        setRange(this.fixedRange, false, false);</span>
+<span class="nc" id="L126">    }</span>
+
+    /**
+     * Translates a data value to a Java2D coordinate.
+     *
+     * @param value  the value.
+     * @param area  the area.
+     * @param edge  the edge.
+     *
+     * @return A Java2D coordinate.
+     */
+    @Override
+    public double valueToJava2D(double value, Rectangle2D area, RectangleEdge edge) {
+        double result;
+<span class="nc" id="L140">        double v = this.fixedRange.mapValue(value);</span>
+<span class="nc bnc" id="L141" title="All 2 branches missed.">        if (this.displayStart &lt; this.displayEnd) {  // regular number axis</span>
+<span class="nc" id="L142">            result = trans(v, area, edge);</span>
+        }
+        else {  // displayStart &gt; displayEnd, need to handle split
+<span class="nc" id="L145">            double cutoff = (this.displayStart + this.displayEnd) / 2.0;</span>
+<span class="nc" id="L146">            double length1 = this.fixedRange.getUpperBound() - this.displayStart;</span>
+<span class="nc" id="L147">            double length2 = this.displayEnd - this.fixedRange.getLowerBound();</span>
+<span class="nc bnc" id="L148" title="All 2 branches missed.">            if (v &gt; cutoff) {</span>
+<span class="nc" id="L149">                result = transStart(v, area, edge, length1, length2);</span>
+            }
+            else {
+<span class="nc" id="L152">                result = transEnd(v, area, edge, length1, length2);</span>
+            }
+        }
+<span class="nc" id="L155">        return result;</span>
+    }
+
+    /**
+     * A regular translation from a data value to a Java2D value.
+     *
+     * @param value  the value.
+     * @param area  the data area.
+     * @param edge  the edge along which the axis lies.
+     *
+     * @return The Java2D coordinate.
+     */
+    private double trans(double value, Rectangle2D area, RectangleEdge edge) {
+<span class="nc" id="L168">        double min = 0.0;</span>
+<span class="nc" id="L169">        double max = 0.0;</span>
+<span class="nc bnc" id="L170" title="All 2 branches missed.">        if (RectangleEdge.isTopOrBottom(edge)) {</span>
+<span class="nc" id="L171">            min = area.getX();</span>
+<span class="nc" id="L172">            max = area.getX() + area.getWidth();</span>
+        }
+<span class="nc bnc" id="L174" title="All 2 branches missed.">        else if (RectangleEdge.isLeftOrRight(edge)) {</span>
+<span class="nc" id="L175">            min = area.getMaxY();</span>
+<span class="nc" id="L176">            max = area.getMaxY() - area.getHeight();</span>
+        }
+<span class="nc bnc" id="L178" title="All 2 branches missed.">        if (isInverted()) {</span>
+<span class="nc" id="L179">            return max - ((value - this.displayStart)</span>
+                   / (this.displayEnd - this.displayStart)) * (max - min);
+        }
+        else {
+<span class="nc" id="L183">            return min + ((value - this.displayStart)</span>
+                   / (this.displayEnd - this.displayStart)) * (max - min);
+        }
+
+    }
+
+    /**
+     * Translates a data value to a Java2D value for the first section of the
+     * axis.
+     *
+     * @param value  the value.
+     * @param area  the data area.
+     * @param edge  the edge along which the axis lies.
+     * @param length1  the length of the first section.
+     * @param length2  the length of the second section.
+     *
+     * @return The Java2D coordinate.
+     */
+    private double transStart(double value, Rectangle2D area, RectangleEdge edge,
+            double length1, double length2) {
+<span class="nc" id="L203">        double min = 0.0;</span>
+<span class="nc" id="L204">        double max = 0.0;</span>
+<span class="nc bnc" id="L205" title="All 2 branches missed.">        if (RectangleEdge.isTopOrBottom(edge)) {</span>
+<span class="nc" id="L206">            min = area.getX();</span>
+<span class="nc" id="L207">            max = area.getX() + area.getWidth() * length1 / (length1 + length2);</span>
+        }
+<span class="nc bnc" id="L209" title="All 2 branches missed.">        else if (RectangleEdge.isLeftOrRight(edge)) {</span>
+<span class="nc" id="L210">            min = area.getMaxY();</span>
+<span class="nc" id="L211">            max = area.getMaxY() - area.getHeight() * length1</span>
+                  / (length1 + length2);
+        }
+<span class="nc bnc" id="L214" title="All 2 branches missed.">        if (isInverted()) {</span>
+<span class="nc" id="L215">            return max - ((value - this.displayStart)</span>
+<span class="nc" id="L216">                / (this.fixedRange.getUpperBound() - this.displayStart))</span>
+                * (max - min);
+        }
+        else {
+<span class="nc" id="L220">            return min + ((value - this.displayStart)</span>
+<span class="nc" id="L221">                / (this.fixedRange.getUpperBound() - this.displayStart))</span>
+                * (max - min);
+        }
+
+    }
+
+    /**
+     * Translates a data value to a Java2D value for the second section of the
+     * axis.
+     *
+     * @param value  the value.
+     * @param area  the data area.
+     * @param edge  the edge along which the axis lies.
+     * @param length1  the length of the first section.
+     * @param length2  the length of the second section.
+     *
+     * @return The Java2D coordinate.
+     */
+    private double transEnd(double value, Rectangle2D area, RectangleEdge edge,
+            double length1, double length2) {
+<span class="nc" id="L241">        double min = 0.0;</span>
+<span class="nc" id="L242">        double max = 0.0;</span>
+<span class="nc bnc" id="L243" title="All 2 branches missed.">        if (RectangleEdge.isTopOrBottom(edge)) {</span>
+<span class="nc" id="L244">            max = area.getMaxX();</span>
+<span class="nc" id="L245">            min = area.getMaxX() - area.getWidth() * length2</span>
+                  / (length1 + length2);
+        }
+<span class="nc bnc" id="L248" title="All 2 branches missed.">        else if (RectangleEdge.isLeftOrRight(edge)) {</span>
+<span class="nc" id="L249">            max = area.getMinY();</span>
+<span class="nc" id="L250">            min = area.getMinY() + area.getHeight() * length2</span>
+                  / (length1 + length2);
+        }
+<span class="nc bnc" id="L253" title="All 2 branches missed.">        if (isInverted()) {</span>
+<span class="nc" id="L254">            return max - ((value - this.fixedRange.getLowerBound())</span>
+<span class="nc" id="L255">                    / (this.displayEnd - this.fixedRange.getLowerBound()))</span>
+                    * (max - min);
+        }
+        else {
+<span class="nc" id="L259">            return min + ((value - this.fixedRange.getLowerBound())</span>
+<span class="nc" id="L260">                    / (this.displayEnd - this.fixedRange.getLowerBound()))</span>
+                    * (max - min);
+        }
+
+    }
+
+    /**
+     * Translates a Java2D coordinate into a data value.
+     *
+     * @param java2DValue  the Java2D coordinate.
+     * @param area  the area.
+     * @param edge  the edge.
+     *
+     * @return The Java2D coordinate.
+     */
+    @Override
+    public double java2DToValue(double java2DValue, Rectangle2D area,
+            RectangleEdge edge) {
+<span class="nc" id="L278">        double result = 0.0;</span>
+<span class="nc bnc" id="L279" title="All 2 branches missed.">        if (this.displayStart &lt; this.displayEnd) {  // regular number axis</span>
+<span class="nc" id="L280">            result = super.java2DToValue(java2DValue, area, edge);</span>
+        }
+        else {  // displayStart &gt; displayEnd, need to handle split
+
+        }
+<span class="nc" id="L285">        return result;</span>
+    }
+
+    /**
+     * Returns the display length for the axis.
+     *
+     * @return The display length.
+     */
+    private double getDisplayLength() {
+<span class="nc bnc" id="L294" title="All 2 branches missed.">        if (this.displayStart &lt; this.displayEnd) {</span>
+<span class="nc" id="L295">            return (this.displayEnd - this.displayStart);</span>
+        }
+        else {
+<span class="nc" id="L298">            return (this.fixedRange.getUpperBound() - this.displayStart)</span>
+<span class="nc" id="L299">                + (this.displayEnd - this.fixedRange.getLowerBound());</span>
+        }
+    }
+
+    /**
+     * Returns the central value of the current display range.
+     *
+     * @return The central value.
+     */
+    private double getDisplayCentralValue() {
+<span class="nc" id="L309">        return this.fixedRange.mapValue(this.displayStart + (getDisplayLength() / 2));</span>
+    }
+
+    /**
+     * Increases or decreases the axis range by the specified percentage about
+     * the central value and sends an {@link AxisChangeEvent} to all registered
+     * listeners.
+     * &lt;P&gt;
+     * To double the length of the axis range, use 200% (2.0).
+     * To halve the length of the axis range, use 50% (0.5).
+     *
+     * @param percent  the resize factor.
+     */
+    @Override
+    public void resizeRange(double percent) {
+<span class="nc" id="L324">        resizeRange(percent, getDisplayCentralValue());</span>
+<span class="nc" id="L325">    }</span>
+
+    /**
+     * Increases or decreases the axis range by the specified percentage about
+     * the specified anchor value and sends an {@link AxisChangeEvent} to all
+     * registered listeners.
+     * &lt;P&gt;
+     * To double the length of the axis range, use 200% (2.0).
+     * To halve the length of the axis range, use 50% (0.5).
+     *
+     * @param percent  the resize factor.
+     * @param anchorValue  the new central value after the resize.
+     */
+    @Override
+    public void resizeRange(double percent, double anchorValue) {
+<span class="nc bnc" id="L340" title="All 2 branches missed.">        if (percent &gt; 0.0) {</span>
+<span class="nc" id="L341">            double halfLength = getDisplayLength() * percent / 2;</span>
+<span class="nc" id="L342">            setDisplayRange(anchorValue - halfLength, anchorValue + halfLength);</span>
+<span class="nc" id="L343">        }</span>
+        else {
+<span class="nc" id="L345">            setAutoRange(true);</span>
+        }
+<span class="nc" id="L347">    }</span>
+
+    /**
+     * Converts a length in data coordinates into the corresponding length in
+     * Java2D coordinates.
+     *
+     * @param length  the length.
+     * @param area  the plot area.
+     * @param edge  the edge along which the axis lies.
+     *
+     * @return The length in Java2D coordinates.
+     */
+    @Override
+    public double lengthToJava2D(double length, Rectangle2D area,
+            RectangleEdge edge) {
+        double axisLength;
+<span class="nc bnc" id="L363" title="All 2 branches missed.">        if (this.displayEnd &gt; this.displayStart) {</span>
+<span class="nc" id="L364">            axisLength = this.displayEnd - this.displayStart;</span>
+        } else {
+<span class="nc" id="L366">            axisLength = (this.fixedRange.getUpperBound() - this.displayStart)</span>
+<span class="nc" id="L367">                + (this.displayEnd - this.fixedRange.getLowerBound());</span>
+        }
+        double areaLength;
+<span class="nc bnc" id="L370" title="All 2 branches missed.">        if (RectangleEdge.isLeftOrRight(edge)) {</span>
+<span class="nc" id="L371">            areaLength = area.getHeight();</span>
+        } else {
+<span class="nc" id="L373">            areaLength = area.getWidth();</span>
+        }
+<span class="nc" id="L375">        return (length / axisLength) * areaLength;</span>
+    }
+
+    /**
+     * Tests this axis for equality with an arbitrary object.
+     *
+     * @param obj  the object ({@code null} permitted).
+     *
+     * @return A boolean.
+     */
+    @Override
+    public boolean equals(Object obj) {
+<span class="pc bpc" id="L387" title="1 of 2 branches missed.">        if (obj == this) {</span>
+<span class="nc" id="L388">            return true;</span>
+        }
+<span class="pc bpc" id="L390" title="1 of 2 branches missed.">        if (!(obj instanceof ModuloAxis)) {</span>
+<span class="nc" id="L391">            return false;</span>
+        }
+<span class="fc" id="L393">        ModuloAxis that = (ModuloAxis) obj;</span>
+<span class="fc bfc" id="L394" title="All 2 branches covered.">        if (this.displayStart != that.displayStart) {</span>
+<span class="fc" id="L395">            return false;</span>
+        }
+<span class="pc bpc" id="L397" title="1 of 2 branches missed.">        if (this.displayEnd != that.displayEnd) {</span>
+<span class="nc" id="L398">            return false;</span>
+        }
+<span class="pc bpc" id="L400" title="1 of 2 branches missed.">        if (!this.fixedRange.equals(that.fixedRange)) {</span>
+<span class="nc" id="L401">            return false;</span>
+        }
+<span class="fc" id="L403">        return super.equals(obj);</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

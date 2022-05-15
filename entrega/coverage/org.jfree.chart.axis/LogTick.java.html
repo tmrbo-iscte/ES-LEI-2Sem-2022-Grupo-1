@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LogTick.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.chart.axis</a> &gt; <span class="el_source">LogTick.java</span></div><h1>LogTick.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates.
+ * Other names may be trademarks of their respective owners.]
+ *
+ * ------------
+ * LogTick.java
+ * ------------
+ * (C) Copyright 2014-2022, by David Gilbert and Contributors.
+ *
+ * Original Author:  David Gilbert;
+ * Contributor(s):   -;
+ *
+ * Changes
+ * -------
+ * 18-Mar-2014 : Version 1 (DG);
+ *
+ */
+
+package org.jfree.chart.axis;
+
+import java.awt.*;
+import java.awt.geom.Rectangle2D;
+import java.text.AttributedString;
+
+import org.jfree.chart.text.TextAnchor;
+import org.jfree.chart.util.AttrStringUtils;
+
+/**
+ * A tick from a {@link LogAxis}.
+ */
+public class LogTick extends ValueTick {
+
+    /**
+     * The attributed string for the tick label.
+     */
+    AttributedString attributedLabel;
+
+    /**
+     * Creates a new instance.
+     *
+     * @param type       the type (major or minor tick, {@code null} not
+     *                   permitted).
+     * @param value      the value.
+     * @param label      the label ({@code null} permitted).
+     * @param textAnchor the text anchor.
+     */
+    public LogTick(TickType type, double value, AttributedString label,
+                   TextAnchor textAnchor) {
+<span class="nc" id="L71">        super(type, value, null, textAnchor, textAnchor, 0.0);</span>
+<span class="nc" id="L72">        this.attributedLabel = label;</span>
+<span class="nc" id="L73">    }</span>
+
+    /**
+     * Returns the attributed string for the tick label, or {@code null}
+     * if there is no label.
+     *
+     * @return The attributed string or {@code null}.
+     */
+    public AttributedString getAttributedLabel() {
+<span class="nc" id="L82">        return this.attributedLabel;</span>
+    }
+    
+    /**
+     * Draws this tick's label, if present, at the specified coordinates
+     *
+     * @param g2 Graphics2D context
+     * @param x  x position
+     * @param y  y position
+     */
+    @Override
+    public void drawLabel(Graphics2D g2, float x, float y) {
+<span class="nc bnc" id="L94" title="All 2 branches missed.">        if (getAttributedLabel() == null) return;</span>
+<span class="nc" id="L95">        AttrStringUtils.drawRotatedString(getAttributedLabel(),</span>
+                g2, x, y,
+<span class="nc" id="L97">                getTextAnchor(), getAngle(),</span>
+<span class="nc" id="L98">                getRotationAnchor());</span>
+<span class="nc" id="L99">    }</span>
+
+    /**
+     * Returns the label bounds
+     *
+     * @param g2 Graphics2D context
+     * @param fm FontMetrics object
+     * @return The label bounds when present, or null if this tick has no label
+     */
+    @Override
+    public Rectangle2D getLabelBounds(Graphics2D g2, FontMetrics fm) {
+<span class="nc bnc" id="L110" title="All 2 branches missed.">        if (getAttributedLabel() == null) return null;</span>
+<span class="nc" id="L111">        return AttrStringUtils.getTextBounds(getAttributedLabel(), g2);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

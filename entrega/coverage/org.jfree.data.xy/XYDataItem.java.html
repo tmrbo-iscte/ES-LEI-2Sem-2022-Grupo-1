@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>XYDataItem.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.data.xy</a> &gt; <span class="el_source">XYDataItem.java</span></div><h1>XYDataItem.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * ---------------
+ * XYDataItem.java
+ * ---------------
+ * (C) Copyright 2003-2022, by David Gilbert.
+ *
+ * Original Author:  David Gilbert;
+ * Contributor(s):   -;
+ *
+ */
+
+package org.jfree.data.xy;
+
+import java.io.Serializable;
+import java.util.Objects;
+
+import org.jfree.chart.internal.Args;
+
+/**
+ * Represents one (x, y) data item for an {@link XYSeries}.  Note that
+ * subclasses are REQUIRED to support cloning.
+ */
+public class XYDataItem implements Cloneable, Comparable&lt;XYDataItem&gt;, Serializable {
+
+    /** For serialization. */
+    private static final long serialVersionUID = 2751513470325494890L;
+
+    /** The x-value ({@code null} not permitted). */
+    private Number x;
+
+    /** The y-value. */
+    private Number y;
+
+    /**
+     * Constructs a new data item.
+     *
+     * @param x  the x-value ({@code null} NOT permitted).
+     * @param y  the y-value ({@code null} permitted).
+     */
+<span class="fc" id="L65">    public XYDataItem(Number x, Number y) {</span>
+<span class="fc" id="L66">        Args.nullNotPermitted(x, &quot;x&quot;);</span>
+<span class="fc" id="L67">        this.x = x;</span>
+<span class="fc" id="L68">        this.y = y;</span>
+<span class="fc" id="L69">    }</span>
+
+    /**
+     * Constructs a new data item.
+     *
+     * @param x  the x-value.
+     * @param y  the y-value.
+     */
+    public XYDataItem(double x, double y) {
+<span class="fc" id="L78">        this(Double.valueOf(x), Double.valueOf(y));</span>
+<span class="fc" id="L79">    }</span>
+
+    /**
+     * Returns the x-value.
+     *
+     * @return The x-value (never {@code null}).
+     */
+    public Number getX() {
+<span class="fc" id="L87">        return this.x;</span>
+    }
+
+    /**
+     * Returns the x-value as a double primitive.
+     *
+     * @return The x-value.
+     *
+     * @see #getX()
+     * @see #getYValue()
+     */
+    public double getXValue() {
+        // this.x is not allowed to be null...
+<span class="fc" id="L100">        return this.x.doubleValue();</span>
+    }
+
+    /**
+     * Returns the y-value.
+     *
+     * @return The y-value (possibly {@code null}).
+     */
+    public Number getY() {
+<span class="fc" id="L109">        return this.y;</span>
+    }
+
+    /**
+     * Returns the y-value as a double primitive.
+     *
+     * @return The y-value.
+     *
+     * @see #getY()
+     * @see #getXValue()
+     */
+    public double getYValue() {
+<span class="fc" id="L121">        double result = Double.NaN;</span>
+<span class="pc bpc" id="L122" title="1 of 2 branches missed.">        if (this.y != null) {</span>
+<span class="fc" id="L123">            result = this.y.doubleValue();</span>
+        }
+<span class="fc" id="L125">        return result;</span>
+    }
+
+    /**
+     * Sets the y-value for this data item.  Note that there is no
+     * corresponding method to change the x-value.
+     *
+     * @param y  the new y-value.
+     */
+    public void setY(double y) {
+<span class="fc" id="L135">        setY(Double.valueOf(y));</span>
+<span class="fc" id="L136">    }</span>
+
+    /**
+     * Sets the y-value for this data item.  Note that there is no
+     * corresponding method to change the x-value.
+     *
+     * @param y  the new y-value ({@code null} permitted).
+     */
+    public void setY(Number y) {
+<span class="fc" id="L145">        this.y = y;</span>
+<span class="fc" id="L146">    }</span>
+
+    /**
+     * Returns an integer indicating the order of this object relative to
+     * another object.
+     * &lt;P&gt;
+     * For the order we consider only the x-value:
+     * negative == &quot;less-than&quot;, zero == &quot;equal&quot;, positive == &quot;greater-than&quot;.
+     *
+     * @param other  the data item being compared to.
+     *
+     * @return An integer indicating the order of this data pair object
+     *      relative to another object.
+     */
+    @Override
+    public int compareTo(XYDataItem other) {
+        int result;
+<span class="fc" id="L163">        double compare = this.x.doubleValue() - other.getX().doubleValue();</span>
+<span class="fc bfc" id="L164" title="All 2 branches covered.">        if (compare &gt; 0.0) {</span>
+<span class="fc" id="L165">            result = 1;</span>
+        } else {
+<span class="fc bfc" id="L167" title="All 2 branches covered.">            if (compare &lt; 0.0) {</span>
+<span class="fc" id="L168">                result = -1;</span>
+            } else {
+<span class="fc" id="L170">                result = 0;</span>
+            }
+        }
+<span class="fc" id="L173">        return result;</span>
+    }
+
+    /**
+     * Returns a clone of this object.
+     *
+     * @return A clone.
+     */
+    @Override
+    public Object clone() {
+<span class="fc" id="L183">        Object clone = null;</span>
+        try {
+<span class="fc" id="L185">            clone = super.clone();</span>
+        }
+<span class="nc" id="L187">        catch (CloneNotSupportedException e) { // won't get here...</span>
+<span class="nc" id="L188">            e.printStackTrace();</span>
+<span class="fc" id="L189">        }</span>
+<span class="fc" id="L190">        return clone;</span>
+    }
+
+    /**
+     * Tests if this object is equal to another.
+     *
+     * @param obj  the object to test against for equality ({@code null}
+     *             permitted).
+     *
+     * @return A boolean.
+     */
+    @Override
+    public boolean equals(Object obj) {
+<span class="pc bpc" id="L203" title="1 of 2 branches missed.">        if (obj == this) {</span>
+<span class="nc" id="L204">            return true;</span>
+        }
+<span class="pc bpc" id="L206" title="1 of 2 branches missed.">        if (!(obj instanceof XYDataItem)) {</span>
+<span class="nc" id="L207">            return false;</span>
+        }
+<span class="fc" id="L209">        XYDataItem that = (XYDataItem) obj;</span>
+<span class="pc bpc" id="L210" title="1 of 2 branches missed.">        if (!this.x.equals(that.x)) {</span>
+<span class="nc" id="L211">            return false;</span>
+        }
+<span class="fc bfc" id="L213" title="All 2 branches covered.">        if (!Objects.equals(this.y, that.y)) {</span>
+<span class="fc" id="L214">            return false;</span>
+        }
+<span class="fc" id="L216">        return true;</span>
+    }
+
+    /**
+     * Returns a hash code.
+     *
+     * @return A hash code.
+     */
+    @Override
+    public int hashCode() {
+        int result;
+<span class="fc" id="L227">        result = this.x.hashCode();</span>
+<span class="fc bfc" id="L228" title="All 2 branches covered.">        result = 29 * result + (this.y != null ? this.y.hashCode() : 0);</span>
+<span class="fc" id="L229">        return result;</span>
+    }
+
+    /**
+     * Returns a string representing this instance, primarily for debugging
+     * use.
+     *
+     * @return A string.
+     */
+    @Override
+    public String toString() {
+<span class="nc" id="L240">        return &quot;[&quot; + getXValue() + &quot;, &quot; + getYValue() + &quot;]&quot;;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

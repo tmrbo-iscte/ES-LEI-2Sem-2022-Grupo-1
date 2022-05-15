@@ -1,0 +1,543 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BorderArrangement.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.chart.block</a> &gt; <span class="el_source">BorderArrangement.java</span></div><h1>BorderArrangement.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * ----------------------
+ * BorderArrangement.java
+ * ----------------------
+ * (C) Copyright 2004-2022, by David Gilbert.
+ *
+ * Original Author:  David Gilbert;
+ * Contributor(s):   -;
+ *
+ */
+
+package org.jfree.chart.block;
+
+import java.awt.Graphics2D;
+import java.awt.geom.Rectangle2D;
+import java.io.Serializable;
+import java.util.Objects;
+
+import org.jfree.chart.api.RectangleEdge;
+
+import org.jfree.data.Range;
+
+/**
+ * An arrangement manager that lays out blocks in a similar way to
+ * Swing's BorderLayout class.
+ */
+<span class="pc bpc" id="L52" title="1 of 2 branches missed.">public class BorderArrangement implements Arrangement, Serializable {</span>
+
+    /** For serialization. */
+    private static final long serialVersionUID = 506071142274883745L;
+
+    /** The block (if any) at the center of the layout. */
+    private Block centerBlock;
+
+    /** The block (if any) at the top of the layout. */
+    private Block topBlock;
+
+    /** The block (if any) at the bottom of the layout. */
+    private Block bottomBlock;
+
+    /** The block (if any) at the left of the layout. */
+    private Block leftBlock;
+
+    /** The block (if any) at the right of the layout. */
+    private Block rightBlock;
+
+    /**
+     * Creates a new instance.
+     */
+<span class="fc" id="L75">    public BorderArrangement() {</span>
+<span class="fc" id="L76">    }</span>
+
+    /**
+     * Adds a block to the arrangement manager at the specified edge.
+     * If the key is not an instance of {@link RectangleEdge} the block will
+     * be added in the center.
+     *
+     * @param block  the block ({@code null} permitted).
+     * @param key  the edge (an instance of {@link RectangleEdge}) or
+     *             {@code null} for the center block.
+     */
+    @Override
+    public void add(Block block, Object key) {
+
+<span class="fc bfc" id="L90" title="All 2 branches covered.">        if (!(key instanceof RectangleEdge)) { // catches null also</span>
+<span class="fc" id="L91">            this.centerBlock = block;</span>
+        }
+        else {
+<span class="fc" id="L94">            RectangleEdge edge = (RectangleEdge) key;</span>
+<span class="fc bfc" id="L95" title="All 2 branches covered.">            if (edge == RectangleEdge.TOP) {</span>
+<span class="fc" id="L96">                this.topBlock = block;</span>
+            }
+<span class="fc bfc" id="L98" title="All 2 branches covered.">            else if (edge == RectangleEdge.BOTTOM) {</span>
+<span class="fc" id="L99">                this.bottomBlock = block;</span>
+            }
+<span class="fc bfc" id="L101" title="All 2 branches covered.">            else if (edge == RectangleEdge.LEFT) {</span>
+<span class="fc" id="L102">                this.leftBlock = block;</span>
+            }
+<span class="pc bpc" id="L104" title="1 of 2 branches missed.">            else if (edge == RectangleEdge.RIGHT) {</span>
+<span class="fc" id="L105">                this.rightBlock = block;</span>
+            }
+        }
+<span class="fc" id="L108">    }</span>
+
+    /**
+     * Arranges the items in the specified container, subject to the given
+     * constraint.
+     *
+     * @param container  the container.
+     * @param g2  the graphics device.
+     * @param constraint  the constraint.
+     *
+     * @return The block size.
+     */
+    @Override
+    public Size2D arrange(BlockContainer container, Graphics2D g2,
+            RectangleConstraint constraint) {
+<span class="fc" id="L123">        RectangleConstraint contentConstraint</span>
+<span class="fc" id="L124">                = container.toContentConstraint(constraint);</span>
+<span class="fc" id="L125">        Size2D contentSize = null;</span>
+<span class="fc" id="L126">        LengthConstraintType w = contentConstraint.getWidthConstraintType();</span>
+<span class="fc" id="L127">        LengthConstraintType h = contentConstraint.getHeightConstraintType();</span>
+<span class="fc bfc" id="L128" title="All 2 branches covered.">        if (w == LengthConstraintType.NONE) {</span>
+<span class="pc bpc" id="L129" title="1 of 2 branches missed.">            if (h == LengthConstraintType.NONE) {</span>
+<span class="fc" id="L130">                contentSize = arrangeNN(container, g2);</span>
+            }
+<span class="nc bnc" id="L132" title="All 2 branches missed.">            else if (h == LengthConstraintType.FIXED) {</span>
+<span class="nc" id="L133">                throw new RuntimeException(&quot;Not implemented.&quot;);</span>
+            }
+<span class="nc bnc" id="L135" title="All 2 branches missed.">            else if (h == LengthConstraintType.RANGE) {</span>
+<span class="nc" id="L136">                throw new RuntimeException(&quot;Not implemented.&quot;);</span>
+            }
+        }
+<span class="fc bfc" id="L139" title="All 2 branches covered.">        else if (w == LengthConstraintType.FIXED) {</span>
+<span class="fc bfc" id="L140" title="All 2 branches covered.">            if (h == LengthConstraintType.NONE) {</span>
+<span class="fc" id="L141">                contentSize = arrangeFN(container, g2, constraint.getWidth());</span>
+            }
+<span class="pc bpc" id="L143" title="1 of 2 branches missed.">            else if (h == LengthConstraintType.FIXED) {</span>
+<span class="fc" id="L144">                contentSize = arrangeFF(container, g2, constraint);</span>
+            }
+<span class="nc bnc" id="L146" title="All 2 branches missed.">            else if (h == LengthConstraintType.RANGE) {</span>
+<span class="nc" id="L147">                contentSize = arrangeFR(container, g2, constraint);</span>
+            }
+        }
+<span class="pc bpc" id="L150" title="1 of 2 branches missed.">        else if (w == LengthConstraintType.RANGE) {</span>
+<span class="pc bpc" id="L151" title="1 of 2 branches missed.">            if (h == LengthConstraintType.NONE) {</span>
+<span class="nc" id="L152">                throw new RuntimeException(&quot;Not implemented.&quot;);</span>
+            }
+<span class="pc bpc" id="L154" title="1 of 2 branches missed.">            else if (h == LengthConstraintType.FIXED) {</span>
+<span class="nc" id="L155">                throw new RuntimeException(&quot;Not implemented.&quot;);</span>
+            }
+<span class="pc bpc" id="L157" title="1 of 2 branches missed.">            else if (h == LengthConstraintType.RANGE) {</span>
+<span class="fc" id="L158">                contentSize = arrangeRR(container, constraint.getWidthRange(),</span>
+<span class="fc" id="L159">                        constraint.getHeightRange(), g2);</span>
+            }
+        }
+<span class="pc bpc" id="L162" title="2 of 4 branches missed.">        assert contentSize != null; </span>
+<span class="fc" id="L163">        return new Size2D(container.calculateTotalWidth(contentSize.getWidth()),</span>
+<span class="fc" id="L164">                container.calculateTotalHeight(contentSize.getHeight()));</span>
+    }
+
+    /**
+     * Performs an arrangement without constraints.
+     *
+     * @param container  the container.
+     * @param g2  the graphics device.
+     *
+     * @return The container size after the arrangement.
+     */
+    protected Size2D arrangeNN(BlockContainer container, Graphics2D g2) {
+<span class="fc" id="L176">        double[] w = new double[5];</span>
+<span class="fc" id="L177">        double[] h = new double[5];</span>
+<span class="fc bfc" id="L178" title="All 2 branches covered.">        if (this.topBlock != null) {</span>
+<span class="fc" id="L179">            Size2D size = this.topBlock.arrange(g2, RectangleConstraint.NONE);</span>
+<span class="fc" id="L180">            w[0] = size.getWidth();</span>
+<span class="fc" id="L181">            h[0] = size.getHeight();</span>
+        }
+<span class="fc bfc" id="L183" title="All 2 branches covered.">        if (this.bottomBlock != null) {</span>
+<span class="fc" id="L184">            Size2D size = this.bottomBlock.arrange(g2,</span>
+                    RectangleConstraint.NONE);
+<span class="fc" id="L186">            w[1] = size.getWidth();</span>
+<span class="fc" id="L187">            h[1] = size.getHeight();</span>
+        }
+<span class="fc bfc" id="L189" title="All 2 branches covered.">        if (this.leftBlock != null) {</span>
+<span class="fc" id="L190">            Size2D size = this.leftBlock.arrange(g2, RectangleConstraint.NONE);</span>
+<span class="fc" id="L191">            w[2] = size.getWidth();</span>
+<span class="fc" id="L192">            h[2] = size.getHeight();</span>
+       }
+<span class="fc bfc" id="L194" title="All 2 branches covered.">        if (this.rightBlock != null) {</span>
+<span class="fc" id="L195">            Size2D size = this.rightBlock.arrange(g2, RectangleConstraint.NONE);</span>
+<span class="fc" id="L196">            w[3] = size.getWidth();</span>
+<span class="fc" id="L197">            h[3] = size.getHeight();</span>
+        }
+
+<span class="fc" id="L200">        h[2] = Math.max(h[2], h[3]);</span>
+<span class="fc" id="L201">        h[3] = h[2];</span>
+
+<span class="fc bfc" id="L203" title="All 2 branches covered.">        if (this.centerBlock != null) {</span>
+<span class="fc" id="L204">            Size2D size = this.centerBlock.arrange(g2,</span>
+                    RectangleConstraint.NONE);
+<span class="fc" id="L206">            w[4] = size.getWidth();</span>
+<span class="fc" id="L207">            h[4] = size.getHeight();</span>
+        }
+<span class="fc" id="L209">        double width = Math.max(w[0], Math.max(w[1], w[2] + w[4] + w[3]));</span>
+<span class="fc" id="L210">        double centerHeight = Math.max(h[2], Math.max(h[3], h[4]));</span>
+<span class="fc" id="L211">        double height = h[0] + h[1] + centerHeight;</span>
+<span class="fc bfc" id="L212" title="All 2 branches covered.">        if (this.topBlock != null) {</span>
+<span class="fc" id="L213">            this.topBlock.setBounds(new Rectangle2D.Double(0.0, 0.0, width,</span>
+                    h[0]));
+        }
+<span class="fc bfc" id="L216" title="All 2 branches covered.">        if (this.bottomBlock != null) {</span>
+<span class="fc" id="L217">            this.bottomBlock.setBounds(new Rectangle2D.Double(0.0,</span>
+                    height - h[1], width, h[1]));
+        }
+<span class="fc bfc" id="L220" title="All 2 branches covered.">        if (this.leftBlock != null) {</span>
+<span class="fc" id="L221">            this.leftBlock.setBounds(new Rectangle2D.Double(0.0, h[0], w[2],</span>
+                    centerHeight));
+        }
+<span class="fc bfc" id="L224" title="All 2 branches covered.">        if (this.rightBlock != null) {</span>
+<span class="fc" id="L225">            this.rightBlock.setBounds(new Rectangle2D.Double(width - w[3],</span>
+                    h[0], w[3], centerHeight));
+        }
+
+<span class="fc bfc" id="L229" title="All 2 branches covered.">        if (this.centerBlock != null) {</span>
+<span class="fc" id="L230">            this.centerBlock.setBounds(new Rectangle2D.Double(w[2], h[0],</span>
+                    width - w[2] - w[3], centerHeight));
+        }
+<span class="fc" id="L233">        return new Size2D(width, height);</span>
+    }
+
+    /**
+     * Performs an arrangement with a fixed width and a range for the height.
+     *
+     * @param container  the container.
+     * @param g2  the graphics device.
+     * @param constraint  the constraint.
+     *
+     * @return The container size after the arrangement.
+     */
+    protected Size2D arrangeFR(BlockContainer container, Graphics2D g2,
+                               RectangleConstraint constraint) {
+<span class="nc" id="L247">        Size2D size1 = arrangeFN(container, g2, constraint.getWidth());</span>
+<span class="nc bnc" id="L248" title="All 2 branches missed.">        if (constraint.getHeightRange().contains(size1.getHeight())) {</span>
+<span class="nc" id="L249">            return size1;</span>
+        }
+        else {
+<span class="nc" id="L252">            double h = constraint.getHeightRange().constrain(size1.getHeight());</span>
+<span class="nc" id="L253">            RectangleConstraint c2 = constraint.toFixedHeight(h);</span>
+<span class="nc" id="L254">            return arrange(container, g2, c2);</span>
+        }
+    }
+
+    /**
+     * Arranges the container width a fixed width and no constraint on the
+     * height.
+     *
+     * @param container  the container.
+     * @param g2  the graphics device.
+     * @param width  the fixed width.
+     *
+     * @return The container size after arranging the contents.
+     */
+    protected Size2D arrangeFN(BlockContainer container, Graphics2D g2,
+                               double width) {
+<span class="fc" id="L270">        double[] w = new double[5];</span>
+<span class="fc" id="L271">        double[] h = new double[5];</span>
+<span class="fc" id="L272">        RectangleConstraint c1 = new RectangleConstraint(width, null,</span>
+                LengthConstraintType.FIXED, 0.0, null,
+                LengthConstraintType.NONE);
+<span class="fc bfc" id="L275" title="All 2 branches covered.">        if (this.topBlock != null) {</span>
+<span class="fc" id="L276">            Size2D size = this.topBlock.arrange(g2, c1);</span>
+<span class="fc" id="L277">            w[0] = size.getWidth();</span>
+<span class="fc" id="L278">            h[0] = size.getHeight();</span>
+        }
+<span class="fc bfc" id="L280" title="All 2 branches covered.">        if (this.bottomBlock != null) {</span>
+<span class="fc" id="L281">            Size2D size = this.bottomBlock.arrange(g2, c1);</span>
+<span class="fc" id="L282">            w[1] = size.getWidth();</span>
+<span class="fc" id="L283">            h[1] = size.getHeight();</span>
+        }
+<span class="fc" id="L285">        RectangleConstraint c2 = new RectangleConstraint(0.0,</span>
+                new Range(0.0, width), LengthConstraintType.RANGE,
+                0.0, null, LengthConstraintType.NONE);
+<span class="fc bfc" id="L288" title="All 2 branches covered.">        if (this.leftBlock != null) {</span>
+<span class="fc" id="L289">            Size2D size = this.leftBlock.arrange(g2, c2);</span>
+<span class="fc" id="L290">            w[2] = size.getWidth();</span>
+<span class="fc" id="L291">            h[2] = size.getHeight();</span>
+        }
+<span class="fc bfc" id="L293" title="All 2 branches covered.">        if (this.rightBlock != null) {</span>
+<span class="fc" id="L294">            double maxW = Math.max(width - w[2], 0.0);</span>
+<span class="fc" id="L295">            RectangleConstraint c3 = new RectangleConstraint(0.0,</span>
+<span class="fc" id="L296">                    new Range(Math.min(w[2], maxW), maxW),</span>
+                    LengthConstraintType.RANGE, 0.0, null,
+                    LengthConstraintType.NONE);
+<span class="fc" id="L299">            Size2D size = this.rightBlock.arrange(g2, c3);</span>
+<span class="fc" id="L300">            w[3] = size.getWidth();</span>
+<span class="fc" id="L301">            h[3] = size.getHeight();</span>
+        }
+
+<span class="fc" id="L304">        h[2] = Math.max(h[2], h[3]);</span>
+<span class="fc" id="L305">        h[3] = h[2];</span>
+
+<span class="fc bfc" id="L307" title="All 2 branches covered.">        if (this.centerBlock != null) {</span>
+<span class="fc" id="L308">            RectangleConstraint c4 = new RectangleConstraint(width - w[2]</span>
+                    - w[3], null, LengthConstraintType.FIXED, 0.0, null,
+                    LengthConstraintType.NONE);
+<span class="fc" id="L311">            Size2D size = this.centerBlock.arrange(g2, c4);</span>
+<span class="fc" id="L312">            w[4] = size.getWidth();</span>
+<span class="fc" id="L313">            h[4] = size.getHeight();</span>
+        }
+<span class="fc" id="L315">        double height = h[0] + h[1] + Math.max(h[2], Math.max(h[3], h[4]));</span>
+<span class="fc" id="L316">        return arrange(container, g2, new RectangleConstraint(width, height));</span>
+    }
+
+    /**
+     * Performs an arrangement with range constraints on both the vertical
+     * and horizontal sides.
+     *
+     * @param container  the container.
+     * @param widthRange  the allowable range for the container width.
+     * @param heightRange  the allowable range for the container height.
+     * @param g2  the graphics device.
+     *
+     * @return The container size.
+     */
+    protected Size2D arrangeRR(BlockContainer container,
+                               Range widthRange, Range heightRange,
+                               Graphics2D g2) {
+<span class="fc" id="L333">        double[] w = new double[5];</span>
+<span class="fc" id="L334">        double[] h = new double[5];</span>
+<span class="pc bpc" id="L335" title="1 of 2 branches missed.">        if (this.topBlock != null) {</span>
+<span class="nc" id="L336">            RectangleConstraint c1 = new RectangleConstraint(widthRange,</span>
+                    heightRange);
+<span class="nc" id="L338">            Size2D size = this.topBlock.arrange(g2, c1);</span>
+<span class="nc" id="L339">            w[0] = size.getWidth();</span>
+<span class="nc" id="L340">            h[0] = size.getHeight();</span>
+        }
+<span class="pc bpc" id="L342" title="1 of 2 branches missed.">        if (this.bottomBlock != null) {</span>
+<span class="nc" id="L343">            Range heightRange2 = Range.shift(heightRange, -h[0], false);</span>
+<span class="nc" id="L344">            RectangleConstraint c2 = new RectangleConstraint(widthRange,</span>
+                    heightRange2);
+<span class="nc" id="L346">            Size2D size = this.bottomBlock.arrange(g2, c2);</span>
+<span class="nc" id="L347">            w[1] = size.getWidth();</span>
+<span class="nc" id="L348">            h[1] = size.getHeight();</span>
+        }
+<span class="fc" id="L350">        Range heightRange3 = Range.shift(heightRange, -(h[0] + h[1]));</span>
+<span class="pc bpc" id="L351" title="1 of 2 branches missed.">        if (this.leftBlock != null) {</span>
+<span class="fc" id="L352">            RectangleConstraint c3 = new RectangleConstraint(widthRange,</span>
+                    heightRange3);
+<span class="fc" id="L354">            Size2D size = this.leftBlock.arrange(g2, c3);</span>
+<span class="fc" id="L355">            w[2] = size.getWidth();</span>
+<span class="fc" id="L356">            h[2] = size.getHeight();</span>
+        }
+<span class="fc" id="L358">        Range widthRange2 = Range.shift(widthRange, -w[2], false);</span>
+<span class="pc bpc" id="L359" title="1 of 2 branches missed.">        if (this.rightBlock != null) {</span>
+<span class="fc" id="L360">            RectangleConstraint c4 = new RectangleConstraint(widthRange2,</span>
+                    heightRange3);
+<span class="fc" id="L362">            Size2D size = this.rightBlock.arrange(g2, c4);</span>
+<span class="fc" id="L363">            w[3] = size.getWidth();</span>
+<span class="fc" id="L364">            h[3] = size.getHeight();</span>
+        }
+
+<span class="fc" id="L367">        h[2] = Math.max(h[2], h[3]);</span>
+<span class="fc" id="L368">        h[3] = h[2];</span>
+<span class="fc" id="L369">        Range widthRange3 = Range.shift(widthRange, -(w[2] + w[3]), false);</span>
+<span class="pc bpc" id="L370" title="1 of 2 branches missed.">        if (this.centerBlock != null) {</span>
+<span class="fc" id="L371">            RectangleConstraint c5 = new RectangleConstraint(widthRange3,</span>
+                    heightRange3);
+<span class="fc" id="L373">            Size2D size = this.centerBlock.arrange(g2, c5);</span>
+<span class="fc" id="L374">            w[4] = size.getWidth();</span>
+<span class="fc" id="L375">            h[4] = size.getHeight();</span>
+        }
+<span class="fc" id="L377">        double width = Math.max(w[0], Math.max(w[1], w[2] + w[4] + w[3]));</span>
+<span class="fc" id="L378">        double height = h[0] + h[1] + Math.max(h[2], Math.max(h[3], h[4]));</span>
+<span class="pc bpc" id="L379" title="1 of 2 branches missed.">        if (this.topBlock != null) {</span>
+<span class="nc" id="L380">            this.topBlock.setBounds(new Rectangle2D.Double(0.0, 0.0, width,</span>
+                    h[0]));
+        }
+<span class="pc bpc" id="L383" title="1 of 2 branches missed.">        if (this.bottomBlock != null) {</span>
+<span class="nc" id="L384">            this.bottomBlock.setBounds(new Rectangle2D.Double(0.0,</span>
+                    height - h[1], width, h[1]));
+        }
+<span class="pc bpc" id="L387" title="1 of 2 branches missed.">        if (this.leftBlock != null) {</span>
+<span class="fc" id="L388">            this.leftBlock.setBounds(new Rectangle2D.Double(0.0, h[0], w[2],</span>
+                    h[2]));
+        }
+<span class="pc bpc" id="L391" title="1 of 2 branches missed.">        if (this.rightBlock != null) {</span>
+<span class="fc" id="L392">            this.rightBlock.setBounds(new Rectangle2D.Double(width - w[3],</span>
+                    h[0], w[3], h[3]));
+        }
+
+<span class="pc bpc" id="L396" title="1 of 2 branches missed.">        if (this.centerBlock != null) {</span>
+<span class="fc" id="L397">            this.centerBlock.setBounds(new Rectangle2D.Double(w[2], h[0],</span>
+                    width - w[2] - w[3], height - h[0] - h[1]));
+        }
+<span class="fc" id="L400">        return new Size2D(width, height);</span>
+    }
+
+    /**
+     * Arranges the items within a container.
+     *
+     * @param container  the container.
+     * @param constraint  the constraint.
+     * @param g2  the graphics device.
+     *
+     * @return The container size after the arrangement.
+     */
+    protected Size2D arrangeFF(BlockContainer container, Graphics2D g2,
+                               RectangleConstraint constraint) {
+<span class="fc" id="L414">        double[] w = new double[5];</span>
+<span class="fc" id="L415">        double[] h = new double[5];</span>
+<span class="fc" id="L416">        w[0] = constraint.getWidth();</span>
+<span class="fc bfc" id="L417" title="All 2 branches covered.">        if (this.topBlock != null) {</span>
+<span class="fc" id="L418">            RectangleConstraint c1 = new RectangleConstraint(w[0], null,</span>
+                    LengthConstraintType.FIXED, 0.0,
+<span class="fc" id="L420">                    new Range(0.0, constraint.getHeight()),</span>
+                    LengthConstraintType.RANGE);
+<span class="fc" id="L422">            Size2D size = this.topBlock.arrange(g2, c1);</span>
+<span class="fc" id="L423">            h[0] = size.getHeight();</span>
+        }
+<span class="fc" id="L425">        w[1] = w[0];</span>
+<span class="fc bfc" id="L426" title="All 2 branches covered.">        if (this.bottomBlock != null) {</span>
+<span class="fc" id="L427">            RectangleConstraint c2 = new RectangleConstraint(w[0], null,</span>
+                    LengthConstraintType.FIXED, 0.0, new Range(0.0,
+<span class="fc" id="L429">                    constraint.getHeight() - h[0]), LengthConstraintType.RANGE);</span>
+<span class="fc" id="L430">            Size2D size = this.bottomBlock.arrange(g2, c2);</span>
+<span class="fc" id="L431">            h[1] = size.getHeight();</span>
+        }
+<span class="fc" id="L433">        h[2] = constraint.getHeight() - h[1] - h[0];</span>
+<span class="fc bfc" id="L434" title="All 2 branches covered.">        if (this.leftBlock != null) {</span>
+<span class="fc" id="L435">            RectangleConstraint c3 = new RectangleConstraint(0.0,</span>
+<span class="fc" id="L436">                    new Range(0.0, constraint.getWidth()),</span>
+                    LengthConstraintType.RANGE, h[2], null,
+                    LengthConstraintType.FIXED);
+<span class="fc" id="L439">            Size2D size = this.leftBlock.arrange(g2, c3);</span>
+<span class="fc" id="L440">            w[2] = size.getWidth();</span>
+        }
+<span class="fc" id="L442">        h[3] = h[2];</span>
+<span class="fc bfc" id="L443" title="All 2 branches covered.">        if (this.rightBlock != null) {</span>
+<span class="fc" id="L444">            RectangleConstraint c4 = new RectangleConstraint(0.0,</span>
+<span class="fc" id="L445">                    new Range(0.0, Math.max(constraint.getWidth() - w[2], 0.0)),</span>
+                    LengthConstraintType.RANGE, h[2], null,
+                    LengthConstraintType.FIXED);
+<span class="fc" id="L448">            Size2D size = this.rightBlock.arrange(g2, c4);</span>
+<span class="fc" id="L449">            w[3] = size.getWidth();</span>
+        }
+<span class="fc" id="L451">        h[4] = h[2];</span>
+<span class="fc" id="L452">        w[4] = constraint.getWidth() - w[3] - w[2];</span>
+<span class="fc" id="L453">        RectangleConstraint c5 = new RectangleConstraint(w[4], h[4]);</span>
+<span class="fc bfc" id="L454" title="All 2 branches covered.">        if (this.centerBlock != null) {</span>
+<span class="fc" id="L455">            this.centerBlock.arrange(g2, c5);</span>
+        }
+
+<span class="fc bfc" id="L458" title="All 2 branches covered.">        if (this.topBlock != null) {</span>
+<span class="fc" id="L459">            this.topBlock.setBounds(new Rectangle2D.Double(0.0, 0.0, w[0],</span>
+                    h[0]));
+        }
+<span class="fc bfc" id="L462" title="All 2 branches covered.">        if (this.bottomBlock != null) {</span>
+<span class="fc" id="L463">            this.bottomBlock.setBounds(new Rectangle2D.Double(0.0, h[0] + h[2],</span>
+                    w[1], h[1]));
+        }
+<span class="fc bfc" id="L466" title="All 2 branches covered.">        if (this.leftBlock != null) {</span>
+<span class="fc" id="L467">            this.leftBlock.setBounds(new Rectangle2D.Double(0.0, h[0], w[2],</span>
+                    h[2]));
+        }
+<span class="fc bfc" id="L470" title="All 2 branches covered.">        if (this.rightBlock != null) {</span>
+<span class="fc" id="L471">            this.rightBlock.setBounds(new Rectangle2D.Double(w[2] + w[4], h[0],</span>
+                    w[3], h[3]));
+        }
+<span class="fc bfc" id="L474" title="All 2 branches covered.">        if (this.centerBlock != null) {</span>
+<span class="fc" id="L475">            this.centerBlock.setBounds(new Rectangle2D.Double(w[2], h[0], w[4],</span>
+                    h[4]));
+        }
+<span class="fc" id="L478">        return new Size2D(constraint.getWidth(), constraint.getHeight());</span>
+    }
+
+    /**
+     * Clears the layout.
+     */
+    @Override
+    public void clear() {
+<span class="fc" id="L486">        this.centerBlock = null;</span>
+<span class="fc" id="L487">        this.topBlock = null;</span>
+<span class="fc" id="L488">        this.bottomBlock = null;</span>
+<span class="fc" id="L489">        this.leftBlock = null;</span>
+<span class="fc" id="L490">        this.rightBlock = null;</span>
+<span class="fc" id="L491">    }</span>
+
+    /**
+     * Tests this arrangement for equality with an arbitrary object.
+     *
+     * @param obj  the object ({@code null} permitted).
+     *
+     * @return A boolean.
+     */
+    @Override
+    public boolean equals(Object obj) {
+<span class="pc bpc" id="L502" title="1 of 2 branches missed.">        if (obj == this) {</span>
+<span class="nc" id="L503">            return true;</span>
+        }
+<span class="pc bpc" id="L505" title="1 of 2 branches missed.">        if (!(obj instanceof BorderArrangement)) {</span>
+<span class="nc" id="L506">            return false;</span>
+        }
+<span class="fc" id="L508">        BorderArrangement that = (BorderArrangement) obj;</span>
+<span class="fc bfc" id="L509" title="All 2 branches covered.">        if (!Objects.equals(this.topBlock, that.topBlock)) {</span>
+<span class="fc" id="L510">            return false;</span>
+        }
+<span class="fc bfc" id="L512" title="All 2 branches covered.">        if (!Objects.equals(this.bottomBlock, that.bottomBlock)) {</span>
+<span class="fc" id="L513">            return false;</span>
+        }
+<span class="fc bfc" id="L515" title="All 2 branches covered.">        if (!Objects.equals(this.leftBlock, that.leftBlock)) {</span>
+<span class="fc" id="L516">            return false;</span>
+        }
+<span class="fc bfc" id="L518" title="All 2 branches covered.">        if (!Objects.equals(this.rightBlock, that.rightBlock)) {</span>
+<span class="fc" id="L519">            return false;</span>
+        }
+<span class="fc bfc" id="L521" title="All 2 branches covered.">        if (!Objects.equals(this.centerBlock, that.centerBlock)) {</span>
+<span class="fc" id="L522">            return false;</span>
+        }
+<span class="fc" id="L524">        return true;</span>
+    }
+
+    /**
+     * Returns a hash code for this instance.
+     * 
+     * @return A hash code. 
+     */
+    @Override
+    public int hashCode() {
+<span class="nc" id="L534">        int hash = 5;</span>
+<span class="nc" id="L535">        hash = 31 * hash + Objects.hashCode(this.centerBlock);</span>
+<span class="nc" id="L536">        hash = 31 * hash + Objects.hashCode(this.topBlock);</span>
+<span class="nc" id="L537">        hash = 31 * hash + Objects.hashCode(this.bottomBlock);</span>
+<span class="nc" id="L538">        hash = 31 * hash + Objects.hashCode(this.leftBlock);</span>
+<span class="nc" id="L539">        hash = 31 * hash + Objects.hashCode(this.rightBlock);</span>
+<span class="nc" id="L540">        return hash;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

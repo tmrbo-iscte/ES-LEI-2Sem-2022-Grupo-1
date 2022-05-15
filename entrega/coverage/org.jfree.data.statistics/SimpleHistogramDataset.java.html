@@ -1,0 +1,490 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SimpleHistogramDataset.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.data.statistics</a> &gt; <span class="el_source">SimpleHistogramDataset.java</span></div><h1>SimpleHistogramDataset.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * ---------------------------
+ * SimpleHistogramDataset.java
+ * ---------------------------
+ * (C) Copyright 2005-2022, by David Gilbert and Contributors.
+ *
+ * Original Author:  David Gilbert;
+ * Contributor(s):   Sergei Ivanov;
+ *
+ */
+
+package org.jfree.data.statistics;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Objects;
+import org.jfree.chart.internal.Args;
+import org.jfree.chart.internal.CloneUtils;
+import org.jfree.chart.api.PublicCloneable;
+
+import org.jfree.data.DomainOrder;
+import org.jfree.data.general.DatasetChangeEvent;
+import org.jfree.data.xy.AbstractIntervalXYDataset;
+import org.jfree.data.xy.IntervalXYDataset;
+
+/**
+ * A dataset used for creating simple histograms with custom defined bins.
+ *
+ * @see HistogramDataset
+ */
+public class SimpleHistogramDataset&lt;K extends Comparable&lt;K&gt;&gt; 
+        extends AbstractIntervalXYDataset implements IntervalXYDataset, 
+        Cloneable, PublicCloneable, Serializable {
+
+    /** For serialization. */
+    private static final long serialVersionUID = 7997996479768018443L;
+
+    /** The series key. */
+    private K key;
+
+    /** The bins. */
+    private List&lt;SimpleHistogramBin&gt; bins;
+
+    /**
+     * A flag that controls whether or not the bin count is divided by the
+     * bin size.
+     */
+    private boolean adjustForBinSize;
+
+    /**
+     * Creates a new histogram dataset.  Note that the
+     * {@code adjustForBinSize} flag defaults to {@code true}.
+     *
+     * @param key  the series key ({@code null} not permitted).
+     */
+<span class="fc" id="L84">    public SimpleHistogramDataset(K key) {</span>
+<span class="fc" id="L85">        Args.nullNotPermitted(key, &quot;key&quot;);</span>
+<span class="fc" id="L86">        this.key = key;</span>
+<span class="fc" id="L87">        this.bins = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L88">        this.adjustForBinSize = true;</span>
+<span class="fc" id="L89">    }</span>
+
+    /**
+     * Returns a flag that controls whether or not the bin count is divided by
+     * the bin size in the {@link #getXValue(int, int)} method.
+     *
+     * @return A boolean.
+     *
+     * @see #setAdjustForBinSize(boolean)
+     */
+    public boolean getAdjustForBinSize() {
+<span class="nc" id="L100">        return this.adjustForBinSize;</span>
+    }
+
+    /**
+     * Sets the flag that controls whether or not the bin count is divided by
+     * the bin size in the {@link #getYValue(int, int)} method, and sends a
+     * {@link DatasetChangeEvent} to all registered listeners.
+     *
+     * @param adjust  the flag.
+     *
+     * @see #getAdjustForBinSize()
+     */
+    public void setAdjustForBinSize(boolean adjust) {
+<span class="nc" id="L113">        this.adjustForBinSize = adjust;</span>
+<span class="nc" id="L114">        notifyListeners(new DatasetChangeEvent(this, this));</span>
+<span class="nc" id="L115">    }</span>
+
+    /**
+     * Returns the number of series in the dataset (always 1 for this dataset).
+     *
+     * @return The series count.
+     */
+    @Override
+    public int getSeriesCount() {
+<span class="nc" id="L124">        return 1;</span>
+    }
+
+    /**
+     * Returns the key for a series.  Since this dataset only stores a single
+     * series, the {@code series} argument is ignored.
+     *
+     * @param series  the series (zero-based index, ignored in this dataset).
+     *
+     * @return The key for the series.
+     */
+    @Override
+    public K getSeriesKey(int series) {
+<span class="nc" id="L137">        return this.key;</span>
+    }
+
+    /**
+     * Returns the order of the domain (or X) values returned by the dataset.
+     *
+     * @return The order (never {@code null}).
+     */
+    @Override
+    public DomainOrder getDomainOrder() {
+<span class="nc" id="L147">        return DomainOrder.ASCENDING;</span>
+    }
+
+    /**
+     * Returns the number of items in a series.  Since this dataset only stores
+     * a single series, the {@code series} argument is ignored.
+     *
+     * @param series  the series index (zero-based, ignored in this dataset).
+     *
+     * @return The item count.
+     */
+    @Override
+    public int getItemCount(int series) {
+<span class="fc" id="L160">        return this.bins.size();</span>
+    }
+
+    /**
+     * Adds a bin to the dataset.  An exception is thrown if the bin overlaps
+     * with any existing bin in the dataset.
+     *
+     * @param binToAdd  the bin ({@code null} not permitted).
+     *
+     * @see #removeAllBins()
+     */
+    public void addBin(SimpleHistogramBin binToAdd) {
+        // check that the new bin doesn't overlap with any existing bin
+<span class="fc bfc" id="L173" title="All 2 branches covered.">        for (SimpleHistogramBin bin : this.bins) {</span>
+<span class="pc bpc" id="L174" title="1 of 2 branches missed.">            if (binToAdd.overlapsWith(bin)) {</span>
+<span class="nc" id="L175">                throw new RuntimeException(&quot;Overlapping bin&quot;);</span>
+            }
+<span class="fc" id="L177">        }</span>
+<span class="fc" id="L178">        this.bins.add(binToAdd);</span>
+<span class="fc" id="L179">        Collections.sort(this.bins);</span>
+<span class="fc" id="L180">    }</span>
+
+    /**
+     * Adds an observation to the dataset (by incrementing the item count for
+     * the appropriate bin).  A runtime exception is thrown if the value does
+     * not fit into any bin.
+     *
+     * @param value  the value.
+     */
+    public void addObservation(double value) {
+<span class="fc" id="L190">        addObservation(value, true);</span>
+<span class="fc" id="L191">    }</span>
+
+    /**
+     * Adds an observation to the dataset (by incrementing the item count for
+     * the appropriate bin).  A runtime exception is thrown if the value does
+     * not fit into any bin.
+     *
+     * @param value  the value.
+     * @param notify  send {@link DatasetChangeEvent} to listeners?
+     */
+    public void addObservation(double value, boolean notify) {
+<span class="fc" id="L202">        boolean placed = false;</span>
+<span class="fc" id="L203">        Iterator iterator = this.bins.iterator();</span>
+<span class="pc bpc" id="L204" title="1 of 4 branches missed.">        while (iterator.hasNext() &amp;&amp; !placed) {</span>
+<span class="fc" id="L205">            SimpleHistogramBin bin = (SimpleHistogramBin) iterator.next();</span>
+<span class="pc bpc" id="L206" title="1 of 2 branches missed.">            if (bin.accepts(value)) {</span>
+<span class="fc" id="L207">                bin.setItemCount(bin.getItemCount() + 1);</span>
+<span class="fc" id="L208">                placed = true;</span>
+            }
+<span class="fc" id="L210">        }</span>
+<span class="pc bpc" id="L211" title="1 of 2 branches missed.">        if (!placed) {</span>
+<span class="nc" id="L212">            throw new RuntimeException(&quot;No bin.&quot;);</span>
+        }
+<span class="pc bpc" id="L214" title="1 of 2 branches missed.">        if (notify) {</span>
+<span class="fc" id="L215">            notifyListeners(new DatasetChangeEvent(this, this));</span>
+        }
+<span class="fc" id="L217">    }</span>
+
+    /**
+     * Adds a set of values to the dataset and sends a
+     * {@link DatasetChangeEvent} to all registered listeners.
+     *
+     * @param values  the values ({@code null} not permitted).
+     *
+     * @see #clearObservations()
+     */
+    public void addObservations(double[] values) {
+<span class="nc bnc" id="L228" title="All 2 branches missed.">        for (int i = 0; i &lt; values.length; i++) {</span>
+<span class="nc" id="L229">            addObservation(values[i], false);</span>
+        }
+<span class="nc" id="L231">        notifyListeners(new DatasetChangeEvent(this, this));</span>
+<span class="nc" id="L232">    }</span>
+
+    /**
+     * Removes all current observation data and sends a
+     * {@link DatasetChangeEvent} to all registered listeners.
+     *
+     * @since 1.0.6
+     *
+     * @see #addObservations(double[])
+     * @see #removeAllBins()
+     */
+    public void clearObservations() {
+<span class="pc bpc" id="L244" title="1 of 2 branches missed.">        for (SimpleHistogramBin bin : this.bins) {</span>
+<span class="nc" id="L245">            bin.setItemCount(0);</span>
+<span class="nc" id="L246">        }</span>
+<span class="fc" id="L247">        notifyListeners(new DatasetChangeEvent(this, this));</span>
+<span class="fc" id="L248">    }</span>
+
+    /**
+     * Removes all bins and sends a {@link DatasetChangeEvent} to all
+     * registered listeners.
+     *
+     * @since 1.0.6
+     *
+     * @see #addBin(SimpleHistogramBin)
+     */
+    public void removeAllBins() {
+<span class="fc" id="L259">        this.bins = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L260">        notifyListeners(new DatasetChangeEvent(this, this));</span>
+<span class="fc" id="L261">    }</span>
+
+    /**
+     * Returns the x-value for an item within a series.  The x-values may or
+     * may not be returned in ascending order, that is up to the class
+     * implementing the interface.
+     *
+     * @param series  the series index (zero-based).
+     * @param item  the item index (zero-based).
+     *
+     * @return The x-value (never {@code null}).
+     */
+    @Override
+    public Number getX(int series, int item) {
+<span class="nc" id="L275">        return getXValue(series, item);</span>
+    }
+
+    /**
+     * Returns the x-value (as a double primitive) for an item within a series.
+     *
+     * @param series  the series index (zero-based).
+     * @param item  the item index (zero-based).
+     *
+     * @return The x-value.
+     */
+    @Override
+    public double getXValue(int series, int item) {
+<span class="nc" id="L288">        SimpleHistogramBin bin = this.bins.get(item);</span>
+<span class="nc" id="L289">        return (bin.getLowerBound() + bin.getUpperBound()) / 2.0;</span>
+    }
+
+    /**
+     * Returns the y-value for an item within a series.
+     *
+     * @param series  the series index (zero-based).
+     * @param item  the item index (zero-based).
+     *
+     * @return The y-value (possibly {@code null}).
+     */
+    @Override
+    public Number getY(int series, int item) {
+<span class="nc" id="L302">        return getYValue(series, item);</span>
+    }
+
+    /**
+     * Returns the y-value (as a double primitive) for an item within a series.
+     *
+     * @param series  the series index (zero-based).
+     * @param item  the item index (zero-based).
+     *
+     * @return The y-value.
+     *
+     * @see #getAdjustForBinSize()
+     */
+    @Override
+    public double getYValue(int series, int item) {
+<span class="fc" id="L317">        SimpleHistogramBin bin = this.bins.get(item);</span>
+<span class="pc bpc" id="L318" title="1 of 2 branches missed.">        if (this.adjustForBinSize) {</span>
+<span class="fc" id="L319">            return bin.getItemCount()</span>
+<span class="fc" id="L320">                   / (bin.getUpperBound() - bin.getLowerBound());</span>
+        }
+        else {
+<span class="nc" id="L323">            return bin.getItemCount();</span>
+        }
+    }
+
+    /**
+     * Returns the starting X value for the specified series and item.
+     *
+     * @param series  the series index (zero-based).
+     * @param item  the item index (zero-based).
+     *
+     * @return The value.
+     */
+    @Override
+    public Number getStartX(int series, int item) {
+<span class="nc" id="L337">        return getStartXValue(series, item);</span>
+    }
+
+    /**
+     * Returns the start x-value (as a double primitive) for an item within a
+     * series.
+     *
+     * @param series  the series (zero-based index).
+     * @param item  the item (zero-based index).
+     *
+     * @return The start x-value.
+     */
+    @Override
+    public double getStartXValue(int series, int item) {
+<span class="nc" id="L351">        SimpleHistogramBin bin = this.bins.get(item);</span>
+<span class="nc" id="L352">        return bin.getLowerBound();</span>
+    }
+
+    /**
+     * Returns the ending X value for the specified series and item.
+     *
+     * @param series  the series index (zero-based).
+     * @param item  the item index (zero-based).
+     *
+     * @return The value.
+     */
+    @Override
+    public Number getEndX(int series, int item) {
+<span class="nc" id="L365">        return getEndXValue(series, item);</span>
+    }
+
+    /**
+     * Returns the end x-value (as a double primitive) for an item within a
+     * series.
+     *
+     * @param series  the series index (zero-based).
+     * @param item  the item index (zero-based).
+     *
+     * @return The end x-value.
+     */
+    @Override
+    public double getEndXValue(int series, int item) {
+<span class="nc" id="L379">        SimpleHistogramBin bin = this.bins.get(item);</span>
+<span class="nc" id="L380">        return bin.getUpperBound();</span>
+    }
+
+    /**
+     * Returns the starting Y value for the specified series and item.
+     *
+     * @param series  the series index (zero-based).
+     * @param item  the item index (zero-based).
+     *
+     * @return The value.
+     */
+    @Override
+    public Number getStartY(int series, int item) {
+<span class="nc" id="L393">        return getY(series, item);</span>
+    }
+
+    /**
+     * Returns the start y-value (as a double primitive) for an item within a
+     * series.
+     *
+     * @param series  the series index (zero-based).
+     * @param item  the item index (zero-based).
+     *
+     * @return The start y-value.
+     */
+    @Override
+    public double getStartYValue(int series, int item) {
+<span class="nc" id="L407">        return getYValue(series, item);</span>
+    }
+
+    /**
+     * Returns the ending Y value for the specified series and item.
+     *
+     * @param series  the series index (zero-based).
+     * @param item  the item index (zero-based).
+     *
+     * @return The value.
+     */
+    @Override
+    public Number getEndY(int series, int item) {
+<span class="nc" id="L420">        return getY(series, item);</span>
+    }
+
+    /**
+     * Returns the end y-value (as a double primitive) for an item within a
+     * series.
+     *
+     * @param series  the series index (zero-based).
+     * @param item  the item index (zero-based).
+     *
+     * @return The end y-value.
+     */
+    @Override
+    public double getEndYValue(int series, int item) {
+<span class="nc" id="L434">        return getYValue(series, item);</span>
+    }
+
+    /**
+     * Compares the dataset for equality with an arbitrary object.
+     *
+     * @param obj  the object ({@code null} permitted).
+     *
+     * @return A boolean.
+     */
+    @Override
+    public boolean equals(Object obj) {
+<span class="pc bpc" id="L446" title="1 of 2 branches missed.">        if (obj == this) {</span>
+<span class="nc" id="L447">            return true;</span>
+        }
+<span class="pc bpc" id="L449" title="1 of 2 branches missed.">        if (!(obj instanceof SimpleHistogramDataset)) {</span>
+<span class="nc" id="L450">            return false;</span>
+        }
+<span class="fc" id="L452">        SimpleHistogramDataset that = (SimpleHistogramDataset) obj;</span>
+<span class="pc bpc" id="L453" title="1 of 2 branches missed.">        if (!this.key.equals(that.key)) {</span>
+<span class="nc" id="L454">            return false;</span>
+        }
+<span class="pc bpc" id="L456" title="1 of 2 branches missed.">        if (this.adjustForBinSize != that.adjustForBinSize) {</span>
+<span class="nc" id="L457">            return false;</span>
+        }
+<span class="fc bfc" id="L459" title="All 2 branches covered.">        if (!this.bins.equals(that.bins)) {</span>
+<span class="fc" id="L460">            return false;</span>
+        }
+<span class="fc" id="L462">        return true;</span>
+    }
+
+    @Override
+    public int hashCode(){
+<span class="nc" id="L467">        int hash = 7;</span>
+<span class="nc" id="L468">        hash = 11 * hash + Objects.hashCode(this.key);</span>
+<span class="nc" id="L469">        hash = 11 * hash + Objects.hashCode(this.bins);</span>
+<span class="nc bnc" id="L470" title="All 2 branches missed.">        hash = 11 * hash + (this.adjustForBinSize ? 1 : 0);</span>
+<span class="nc" id="L471">        return hash;</span>
+    }
+
+    /**
+     * Returns a clone of the dataset.
+     *
+     * @return A clone.
+     *
+     * @throws CloneNotSupportedException not thrown by this class, but maybe
+     *         by subclasses (if any).
+     */
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+<span class="fc" id="L484">        SimpleHistogramDataset clone = (SimpleHistogramDataset) super.clone();</span>
+<span class="fc" id="L485">        clone.bins = CloneUtils.cloneList(this.bins);</span>
+<span class="fc" id="L486">        return clone;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

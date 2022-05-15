@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CategoryTick.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.chart.axis</a> &gt; <span class="el_source">CategoryTick.java</span></div><h1>CategoryTick.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * -----------------
+ * CategoryTick.java
+ * -----------------
+ * (C) Copyright 2003-2022, by David Gilbert.
+ *
+ * Original Author:  David Gilbert;
+ * Contributor(s):   -;
+ *
+ */
+
+package org.jfree.chart.axis;
+
+import org.jfree.chart.text.TextBlock;
+import org.jfree.chart.text.TextBlockAnchor;
+import org.jfree.chart.text.TextAnchor;
+
+import java.util.Objects;
+
+/**
+ * A tick for a {@link CategoryAxis}.
+ */
+public class CategoryTick extends Tick {
+
+    /** The category. */
+    private final Comparable&lt;?&gt; category;
+
+    /** The label. */
+    private final TextBlock label;
+
+    /** The label anchor. */
+    private final TextBlockAnchor labelAnchor;
+
+    /**
+     * Creates a new tick.
+     *
+     * @param category  the category.
+     * @param label  the label.
+     * @param labelAnchor  the label anchor.
+     * @param rotationAnchor  the rotation anchor.
+     * @param angle  the rotation angle (in radians).
+     */
+    public CategoryTick(Comparable&lt;?&gt; category, TextBlock label,
+            TextBlockAnchor labelAnchor, TextAnchor rotationAnchor, 
+            double angle) {
+
+<span class="fc" id="L72">        super(&quot;&quot;, TextAnchor.CENTER, rotationAnchor, angle);</span>
+<span class="fc" id="L73">        this.category = category;</span>
+<span class="fc" id="L74">        this.label = label;</span>
+<span class="fc" id="L75">        this.labelAnchor = labelAnchor;</span>
+
+<span class="fc" id="L77">    }</span>
+
+    /**
+     * Returns the category.
+     *
+     * @return The category.
+     */
+    public Comparable&lt;?&gt; getCategory() {
+<span class="fc" id="L85">        return this.category;</span>
+    }
+
+    /**
+     * Returns the label.
+     *
+     * @return The label.
+     */
+    public TextBlock getLabel() {
+<span class="fc" id="L94">        return this.label;</span>
+    }
+
+    /**
+     * Returns the label anchor.
+     *
+     * @return The label anchor.
+     */
+    public TextBlockAnchor getLabelAnchor() {
+<span class="nc" id="L103">        return this.labelAnchor;</span>
+    }
+
+    /**
+     * Tests this category tick for equality with an arbitrary object.
+     *
+     * @param obj  the object ({@code null} permitted).
+     *
+     * @return A boolean.
+     */
+    @Override
+    public boolean equals(Object obj) {
+<span class="pc bpc" id="L115" title="1 of 2 branches missed.">        if (this == obj) {</span>
+<span class="nc" id="L116">            return true;</span>
+        }
+<span class="pc bpc" id="L118" title="1 of 4 branches missed.">        if (obj instanceof CategoryTick &amp;&amp; super.equals(obj)) {</span>
+<span class="fc" id="L119">            CategoryTick that = (CategoryTick) obj;</span>
+<span class="fc bfc" id="L120" title="All 2 branches covered.">            if (!Objects.equals(this.category, that.category)) {</span>
+<span class="fc" id="L121">                return false;</span>
+            }
+<span class="fc bfc" id="L123" title="All 2 branches covered.">            if (!Objects.equals(this.label, that.label)) {</span>
+<span class="fc" id="L124">                return false;</span>
+            }
+<span class="fc" id="L126">            return Objects.equals(this.labelAnchor, that.labelAnchor);</span>
+        }
+<span class="fc" id="L128">        return false;</span>
+    }
+
+    /**
+     * Returns a hash code for this object.
+     *
+     * @return A hash code.
+     */
+    @Override
+    public int hashCode() {
+<span class="fc" id="L138">        int result = 41;</span>
+<span class="fc" id="L139">        result = 37 * result + this.category.hashCode();</span>
+<span class="fc" id="L140">        result = 37 * result + this.label.hashCode();</span>
+<span class="fc" id="L141">        result = 37 * result + this.labelAnchor.hashCode();</span>
+<span class="fc" id="L142">        return result;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

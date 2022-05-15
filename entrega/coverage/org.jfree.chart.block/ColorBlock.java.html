@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ColorBlock.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.chart.block</a> &gt; <span class="el_source">ColorBlock.java</span></div><h1>ColorBlock.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * ---------------
+ * ColorBlock.java
+ * ---------------
+ * (C) Copyright 2004-2022, by David Gilbert.
+ *
+ * Original Author:  David Gilbert;
+ * Contributor(s):   -;
+ *
+ */
+
+package org.jfree.chart.block;
+
+import java.awt.Graphics2D;
+import java.awt.Paint;
+import java.awt.geom.Rectangle2D;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.Objects;
+import org.jfree.chart.internal.PaintUtils;
+import org.jfree.chart.internal.Args;
+import org.jfree.chart.internal.SerialUtils;
+
+/**
+ * A block that is filled with a single color.
+ */
+public class ColorBlock extends AbstractBlock implements Block {
+
+    /** For serialization. */
+    static final long serialVersionUID = 3383866145634010865L;
+
+    /** The paint. */
+    private transient Paint paint;
+
+    /**
+     * Creates a new block.
+     *
+     * @param paint  the paint ({@code null} not permitted).
+     * @param width  the width.
+     * @param height  the height.
+     */
+<span class="fc" id="L68">    public ColorBlock(Paint paint, double width, double height) {</span>
+<span class="fc" id="L69">        Args.nullNotPermitted(paint, &quot;paint&quot;);</span>
+<span class="fc" id="L70">        this.paint = paint;</span>
+<span class="fc" id="L71">        setWidth(width);</span>
+<span class="fc" id="L72">        setHeight(height);</span>
+<span class="fc" id="L73">    }</span>
+
+    /**
+     * Returns the paint.
+     *
+     * @return The paint (never {@code null}).
+     */
+    public Paint getPaint() {
+<span class="nc" id="L81">        return this.paint;</span>
+    }
+
+    /**
+     * Arranges the contents of the block, within the given constraints, and
+     * returns the block size.
+     *
+     * @param g2  the graphics device.
+     * @param constraint  the constraint ({@code null} not permitted).
+     *
+     * @return The block size (in Java2D units, never {@code null}).
+     */
+    @Override
+    public Size2D arrange(Graphics2D g2, RectangleConstraint constraint) {
+<span class="nc" id="L95">        return new Size2D(calculateTotalWidth(getWidth()),</span>
+<span class="nc" id="L96">                calculateTotalHeight(getHeight()));</span>
+    }
+
+    /**
+     * Draws the block.
+     *
+     * @param g2  the graphics device.
+     * @param area  the area.
+     */
+    @Override
+    public void draw(Graphics2D g2, Rectangle2D area) {
+<span class="nc" id="L107">        area = trimMargin(area);</span>
+<span class="nc" id="L108">        drawBorder(g2, area);</span>
+<span class="nc" id="L109">        area = trimBorder(area);</span>
+<span class="nc" id="L110">        area = trimPadding(area);</span>
+<span class="nc" id="L111">        g2.setPaint(this.paint);</span>
+<span class="nc" id="L112">        g2.fill(area);</span>
+<span class="nc" id="L113">    }</span>
+
+    /**
+     * Draws the block within the specified area.
+     *
+     * @param g2  the graphics device.
+     * @param area  the area.
+     * @param params  ignored ({@code null} permitted).
+     *
+     * @return Always {@code null}.
+     */
+    @Override
+    public Object draw(Graphics2D g2, Rectangle2D area, Object params) {
+<span class="nc" id="L126">        draw(g2, area);</span>
+<span class="nc" id="L127">        return null;</span>
+    }
+
+    /**
+     * Tests this block for equality with an arbitrary object.
+     *
+     * @param obj  the object ({@code null} permitted).
+     *
+     * @return A boolean.
+     */
+    @Override
+    public boolean equals(Object obj) {
+<span class="fc bfc" id="L139" title="All 2 branches covered.">        if (obj == this) {</span>
+<span class="fc" id="L140">            return true;</span>
+        }
+<span class="pc bpc" id="L142" title="1 of 2 branches missed.">        if (!(obj instanceof ColorBlock)) {</span>
+<span class="nc" id="L143">            return false;</span>
+        }
+<span class="fc" id="L145">        ColorBlock that = (ColorBlock) obj;</span>
+<span class="fc bfc" id="L146" title="All 2 branches covered.">        if (!PaintUtils.equal(this.paint, that.paint)) {</span>
+<span class="fc" id="L147">            return false;</span>
+        }
+<span class="fc" id="L149">        return super.equals(obj);</span>
+    }
+
+    /**
+     * Returns a hash code for this instance.
+     * 
+     * @return A hash code. 
+     */
+    @Override
+    public int hashCode() {
+<span class="nc" id="L159">        int hash = super.hashCode();</span>
+<span class="nc" id="L160">        hash = 79 * hash + Objects.hashCode(this.paint);</span>
+<span class="nc" id="L161">        return hash;</span>
+    }
+
+    /**
+     * Provides serialization support.
+     *
+     * @param stream  the output stream.
+     *
+     * @throws IOException if there is an I/O error.
+     */
+    private void writeObject(ObjectOutputStream stream) throws IOException {
+<span class="fc" id="L172">        stream.defaultWriteObject();</span>
+<span class="fc" id="L173">        SerialUtils.writePaint(this.paint, stream);</span>
+<span class="fc" id="L174">    }</span>
+
+    /**
+     * Provides serialization support.
+     *
+     * @param stream  the input stream.
+     *
+     * @throws IOException  if there is an I/O error.
+     * @throws ClassNotFoundException  if there is a classpath problem.
+     */
+    private void readObject(ObjectInputStream stream)
+        throws IOException, ClassNotFoundException {
+<span class="fc" id="L186">        stream.defaultReadObject();</span>
+<span class="fc" id="L187">        this.paint = SerialUtils.readPaint(stream);</span>
+<span class="fc" id="L188">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

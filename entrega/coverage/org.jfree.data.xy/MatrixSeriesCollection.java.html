@@ -1,0 +1,314 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MatrixSeriesCollection.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.data.xy</a> &gt; <span class="el_source">MatrixSeriesCollection.java</span></div><h1>MatrixSeriesCollection.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * ---------------------------
+ * MatrixSeriesCollection.java
+ * ---------------------------
+ * (C) Copyright 2003-2021, by Barak Naveh and Contributors.
+ *
+ * Original Author:  Barak Naveh;
+ * Contributor(s):   David Gilbert;
+ *
+ */
+
+package org.jfree.data.xy;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+import org.jfree.chart.internal.Args;
+import org.jfree.chart.internal.CloneUtils;
+import org.jfree.chart.api.PublicCloneable;
+
+/**
+ * Represents a collection of {@link MatrixSeries} that can be used as a
+ * dataset.
+ *
+ * @see org.jfree.data.xy.MatrixSeries
+ */
+public class MatrixSeriesCollection&lt;S extends Comparable&lt;S&gt;&gt; 
+        extends AbstractXYZDataset
+        implements XYZDataset, PublicCloneable, Serializable {
+
+    /** For serialization. */
+    private static final long serialVersionUID = -3197705779242543945L;
+
+    /** The series that are included in the collection. */
+    private List&lt;MatrixSeries&lt;S&gt;&gt; seriesList;
+
+    /**
+     * Constructs an empty dataset.
+     */
+    public MatrixSeriesCollection() {
+<span class="fc" id="L68">        this(null);</span>
+<span class="fc" id="L69">    }</span>
+
+
+    /**
+     * Constructs a dataset and populates it with a single matrix series.
+     *
+     * @param series the time series.
+     */
+<span class="fc" id="L77">    public MatrixSeriesCollection(MatrixSeries&lt;S&gt; series) {</span>
+<span class="fc" id="L78">        this.seriesList = new ArrayList&lt;&gt;();</span>
+
+<span class="pc bpc" id="L80" title="1 of 2 branches missed.">        if (series != null) {</span>
+<span class="nc" id="L81">            this.seriesList.add(series);</span>
+<span class="nc" id="L82">            series.addChangeListener(this);</span>
+        }
+<span class="fc" id="L84">    }</span>
+
+    /**
+     * Returns the number of items in the specified series.
+     *
+     * @param seriesIndex zero-based series index.
+     *
+     * @return The number of items in the specified series.
+     */
+    @Override
+    public int getItemCount(int seriesIndex) {
+<span class="nc" id="L95">        return getSeries(seriesIndex).getItemCount();</span>
+    }
+
+
+    /**
+     * Returns the series having the specified index.
+     *
+     * @param seriesIndex zero-based series index.
+     *
+     * @return The series.
+     */
+    public MatrixSeries&lt;S&gt; getSeries(int seriesIndex) {
+<span class="nc" id="L107">        Args.requireInRange(seriesIndex, &quot;seriesIndex&quot;, 0, this.seriesList.size() - 1);</span>
+<span class="nc" id="L108">        MatrixSeries&lt;S&gt; series = this.seriesList.get(seriesIndex);</span>
+<span class="nc" id="L109">        return series;</span>
+    }
+
+
+    /**
+     * Returns the number of series in the collection.
+     *
+     * @return The number of series in the collection.
+     */
+    @Override
+    public int getSeriesCount() {
+<span class="nc" id="L120">        return this.seriesList.size();</span>
+    }
+
+
+    /**
+     * Returns the key for a series.
+     *
+     * @param seriesIndex zero-based series index.
+     *
+     * @return The key for a series.
+     */
+    @Override
+    public S getSeriesKey(int seriesIndex) {
+<span class="nc" id="L133">        return getSeries(seriesIndex).getKey();</span>
+    }
+
+
+    /**
+     * Returns the j index value of the specified Mij matrix item in the
+     * specified matrix series.
+     *
+     * @param seriesIndex zero-based series index.
+     * @param itemIndex zero-based item index.
+     *
+     * @return The j index value for the specified matrix item.
+     *
+     * @see org.jfree.data.xy.XYDataset#getXValue(int, int)
+     */
+    @Override
+    public Number getX(int seriesIndex, int itemIndex) {
+<span class="nc" id="L150">        MatrixSeries series = this.seriesList.get(seriesIndex);</span>
+<span class="nc" id="L151">        return series.getItemColumn(itemIndex);</span>
+    }
+
+
+    /**
+     * Returns the i index value of the specified Mij matrix item in the
+     * specified matrix series.
+     *
+     * @param seriesIndex zero-based series index.
+     * @param itemIndex zero-based item index.
+     *
+     * @return The i index value for the specified matrix item.
+     *
+     * @see org.jfree.data.xy.XYDataset#getYValue(int, int)
+     */
+    @Override
+    public Number getY(int seriesIndex, int itemIndex) {
+<span class="nc" id="L168">        MatrixSeries series = this.seriesList.get(seriesIndex);</span>
+<span class="nc" id="L169">        return series.getItemRow(itemIndex);</span>
+    }
+
+
+    /**
+     * Returns the Mij item value of the specified Mij matrix item in the
+     * specified matrix series.
+     *
+     * @param seriesIndex the series (zero-based index).
+     * @param itemIndex zero-based item index.
+     *
+     * @return The Mij item value for the specified matrix item.
+     *
+     * @see org.jfree.data.xy.XYZDataset#getZValue(int, int)
+     */
+    @Override
+    public Number getZ(int seriesIndex, int itemIndex) {
+<span class="nc" id="L186">        MatrixSeries series = this.seriesList.get(seriesIndex);</span>
+<span class="nc" id="L187">        return series.getItem(itemIndex);</span>
+    }
+
+    /**
+     * Adds a series to the collection.
+     * &lt;P&gt;
+     * Notifies all registered listeners that the dataset has changed.
+     * &lt;/p&gt;
+     *
+     * @param series the series ({@code null} not permitted).
+     */
+    public void addSeries(MatrixSeries&lt;S&gt; series) {
+<span class="fc" id="L199">        Args.nullNotPermitted(series, &quot;series&quot;);</span>
+        // FIXME: Check that there isn't already a series with the same key
+
+        // add the series...
+<span class="fc" id="L203">        this.seriesList.add(series);</span>
+<span class="fc" id="L204">        series.addChangeListener(this);</span>
+<span class="fc" id="L205">        fireDatasetChanged();</span>
+<span class="fc" id="L206">    }</span>
+
+
+    /**
+     * Tests this collection for equality with an arbitrary object.
+     *
+     * @param obj the object.
+     *
+     * @return A boolean.
+     */
+    @Override
+    public boolean equals(Object obj) {
+<span class="pc bpc" id="L218" title="1 of 2 branches missed.">        if (obj == null) {</span>
+<span class="nc" id="L219">            return false;</span>
+        }
+
+<span class="pc bpc" id="L222" title="1 of 2 branches missed.">        if (obj == this) {</span>
+<span class="nc" id="L223">            return true;</span>
+        }
+
+<span class="pc bpc" id="L226" title="1 of 2 branches missed.">        if (obj instanceof MatrixSeriesCollection) {</span>
+<span class="fc" id="L227">            MatrixSeriesCollection&lt;S&gt; c = (MatrixSeriesCollection) obj;</span>
+
+<span class="fc" id="L229">            return Objects.equals(this.seriesList, c.seriesList);</span>
+        }
+
+<span class="nc" id="L232">        return false;</span>
+    }
+
+    /**
+     * Returns a hash code.
+     *
+     * @return A hash code.
+     */
+    @Override
+    public int hashCode() {
+<span class="nc bnc" id="L242" title="All 2 branches missed.">        return (this.seriesList != null ? this.seriesList.hashCode() : 0);</span>
+    }
+
+    /**
+     * Returns a clone of this instance.
+     *
+     * @return A clone.
+     *
+     * @throws CloneNotSupportedException if there is a problem.
+     */
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+<span class="fc" id="L254">        MatrixSeriesCollection&lt;S&gt; clone = (MatrixSeriesCollection) super.clone();</span>
+<span class="fc" id="L255">        clone.seriesList = CloneUtils.cloneList(this.seriesList);</span>
+<span class="fc" id="L256">        return clone;</span>
+    }
+
+    /**
+     * Removes all the series from the collection.
+     * &lt;P&gt;
+     * Notifies all registered listeners that the dataset has changed.
+     * &lt;/p&gt;
+     */
+    public void removeAllSeries() {
+        // Unregister the collection as a change listener to each series in
+        // the collection.
+<span class="fc bfc" id="L268" title="All 2 branches covered.">        for (MatrixSeries series : this.seriesList) {</span>
+<span class="fc" id="L269">            series.removeChangeListener(this);</span>
+<span class="fc" id="L270">        }</span>
+
+        // Remove all the series from the collection and notify listeners.
+<span class="fc" id="L273">        this.seriesList.clear();</span>
+<span class="fc" id="L274">        fireDatasetChanged();</span>
+<span class="fc" id="L275">    }</span>
+
+
+    /**
+     * Removes a series from the collection.
+     * &lt;P&gt;
+     * Notifies all registered listeners that the dataset has changed.
+     * &lt;/p&gt;
+     *
+     * @param series the series ({@code null}).
+     */
+    public void removeSeries(MatrixSeries&lt;S&gt; series) {
+<span class="nc" id="L287">        Args.nullNotPermitted(series, &quot;series&quot;);</span>
+<span class="nc bnc" id="L288" title="All 2 branches missed.">        if (this.seriesList.contains(series)) {</span>
+<span class="nc" id="L289">            series.removeChangeListener(this);</span>
+<span class="nc" id="L290">            this.seriesList.remove(series);</span>
+<span class="nc" id="L291">            fireDatasetChanged();</span>
+        }
+<span class="nc" id="L293">    }</span>
+
+
+    /**
+     * Removes a series from the collection.
+     * &lt;P&gt;
+     * Notifies all registered listeners that the dataset has changed.
+     *
+     * @param seriesIndex the series (zero based index).
+     */
+    public void removeSeries(int seriesIndex) {
+<span class="nc" id="L304">        Args.requireInRange(seriesIndex, &quot;seriesIndex&quot;, 0, this.seriesList.size() -1);</span>
+
+        // fetch the series, remove the change listener, then remove the series.
+<span class="nc" id="L307">        MatrixSeries series = this.seriesList.get(seriesIndex);</span>
+<span class="nc" id="L308">        series.removeChangeListener(this);</span>
+<span class="nc" id="L309">        this.seriesList.remove(seriesIndex);</span>
+<span class="nc" id="L310">        fireDatasetChanged();</span>
+<span class="nc" id="L311">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

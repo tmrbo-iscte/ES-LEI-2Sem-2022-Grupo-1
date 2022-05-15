@@ -1,0 +1,402 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CategoryLabelPositions.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.chart.axis</a> &gt; <span class="el_source">CategoryLabelPositions.java</span></div><h1>CategoryLabelPositions.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * ---------------------------
+ * CategoryLabelPositions.java
+ * ---------------------------
+ * (C) Copyright 2004-2022, by David Gilbert and Contributors.
+ *
+ * Original Author:  David Gilbert;
+ * Contributor(s):   -;
+ *
+ */
+
+package org.jfree.chart.axis;
+
+import java.io.Serializable;
+import org.jfree.chart.text.TextBlockAnchor;
+import org.jfree.chart.api.RectangleAnchor;
+import org.jfree.chart.api.RectangleEdge;
+import org.jfree.chart.text.TextAnchor;
+import org.jfree.chart.internal.Args;
+
+
+/**
+ * Records the label positions for a category axis.  Instances of this class
+ * are immutable.
+ */
+public class CategoryLabelPositions implements Serializable {
+
+    /** For serialization. */
+    private static final long serialVersionUID = -8999557901920364580L;
+
+    /** STANDARD category label positions. */
+    public static final CategoryLabelPositions
+<span class="fc" id="L58">        STANDARD = new CategoryLabelPositions(</span>
+            new CategoryLabelPosition(
+                RectangleAnchor.BOTTOM, TextBlockAnchor.BOTTOM_CENTER), // TOP
+            new CategoryLabelPosition(
+                RectangleAnchor.TOP, TextBlockAnchor.TOP_CENTER), // BOTTOM
+            new CategoryLabelPosition(
+                RectangleAnchor.RIGHT, TextBlockAnchor.CENTER_RIGHT,
+                CategoryLabelWidthType.RANGE, 0.30f), // LEFT
+            new CategoryLabelPosition(
+                RectangleAnchor.LEFT, TextBlockAnchor.CENTER_LEFT,
+                CategoryLabelWidthType.RANGE, 0.30f) // RIGHT
+        );
+
+    /** UP_90 category label positions. */
+    public static final CategoryLabelPositions
+<span class="fc" id="L73">        UP_90 = new CategoryLabelPositions(</span>
+            new CategoryLabelPosition(
+                RectangleAnchor.BOTTOM, TextBlockAnchor.CENTER_LEFT,
+                TextAnchor.CENTER_LEFT, -Math.PI / 2.0,
+                CategoryLabelWidthType.RANGE, 0.30f), // TOP
+            new CategoryLabelPosition(
+                RectangleAnchor.TOP, TextBlockAnchor.CENTER_RIGHT,
+                TextAnchor.CENTER_RIGHT, -Math.PI / 2.0,
+                CategoryLabelWidthType.RANGE, 0.30f), // BOTTOM
+            new CategoryLabelPosition(
+                RectangleAnchor.RIGHT, TextBlockAnchor.BOTTOM_CENTER,
+                TextAnchor.BOTTOM_CENTER, -Math.PI / 2.0,
+                CategoryLabelWidthType.CATEGORY, 0.9f), // LEFT
+            new CategoryLabelPosition(
+                RectangleAnchor.LEFT, TextBlockAnchor.TOP_CENTER,
+                TextAnchor.TOP_CENTER, -Math.PI / 2.0,
+                CategoryLabelWidthType.CATEGORY, 0.90f) // RIGHT
+        );
+
+    /** DOWN_90 category label positions. */
+    public static final CategoryLabelPositions
+<span class="fc" id="L94">        DOWN_90 = new CategoryLabelPositions(</span>
+            new CategoryLabelPosition(
+                RectangleAnchor.BOTTOM, TextBlockAnchor.CENTER_RIGHT,
+                TextAnchor.CENTER_RIGHT, Math.PI / 2.0,
+                CategoryLabelWidthType.RANGE, 0.30f), // TOP
+            new CategoryLabelPosition(
+                RectangleAnchor.TOP, TextBlockAnchor.CENTER_LEFT,
+                TextAnchor.CENTER_LEFT, Math.PI / 2.0,
+                CategoryLabelWidthType.RANGE, 0.30f), // BOTTOM
+            new CategoryLabelPosition(
+                RectangleAnchor.RIGHT, TextBlockAnchor.TOP_CENTER,
+                TextAnchor.TOP_CENTER, Math.PI / 2.0,
+                CategoryLabelWidthType.CATEGORY, 0.90f), // LEFT
+            new CategoryLabelPosition(
+                RectangleAnchor.LEFT, TextBlockAnchor.BOTTOM_CENTER,
+                TextAnchor.BOTTOM_CENTER, Math.PI / 2.0,
+                CategoryLabelWidthType.CATEGORY, 0.90f) // RIGHT
+        );
+
+    /** UP_45 category label positions. */
+<span class="fc" id="L114">    public static final CategoryLabelPositions UP_45</span>
+<span class="fc" id="L115">        = createUpRotationLabelPositions(Math.PI / 4.0);</span>
+
+    /** DOWN_45 category label positions. */
+<span class="fc" id="L118">    public static final CategoryLabelPositions DOWN_45</span>
+<span class="fc" id="L119">        = createDownRotationLabelPositions(Math.PI / 4.0);</span>
+
+    /**
+     * Creates a new instance where the category labels angled upwards by the
+     * specified amount.
+     *
+     * @param angle  the rotation angle (should be &amp;lt; Math.PI / 2.0).
+     *
+     * @return A category label position specification.
+     */
+    public static CategoryLabelPositions createUpRotationLabelPositions(
+            double angle) {
+<span class="fc" id="L131">        return new CategoryLabelPositions(</span>
+            new CategoryLabelPosition(
+                RectangleAnchor.BOTTOM, TextBlockAnchor.BOTTOM_LEFT,
+                TextAnchor.BOTTOM_LEFT, -angle,
+                CategoryLabelWidthType.RANGE, 0.50f), // TOP
+            new CategoryLabelPosition(
+                RectangleAnchor.TOP, TextBlockAnchor.TOP_RIGHT,
+                TextAnchor.TOP_RIGHT, -angle,
+                CategoryLabelWidthType.RANGE, 0.50f), // BOTTOM
+            new CategoryLabelPosition(
+                RectangleAnchor.RIGHT, TextBlockAnchor.BOTTOM_RIGHT,
+                TextAnchor.BOTTOM_RIGHT, -angle,
+                CategoryLabelWidthType.RANGE, 0.50f), // LEFT
+            new CategoryLabelPosition(
+                RectangleAnchor.LEFT, TextBlockAnchor.TOP_LEFT,
+                TextAnchor.TOP_LEFT, -angle,
+                CategoryLabelWidthType.RANGE, 0.50f) // RIGHT
+        );
+    }
+
+    /**
+     * Creates a new instance where the category labels angled downwards by the
+     * specified amount.
+     *
+     * @param angle  the rotation angle (should be &amp;lt; Math.PI / 2.0).
+     *
+     * @return A category label position specification.
+     */
+    public static CategoryLabelPositions createDownRotationLabelPositions(
+            double angle) {
+<span class="fc" id="L161">        return new CategoryLabelPositions(</span>
+            new CategoryLabelPosition(
+                RectangleAnchor.BOTTOM, TextBlockAnchor.BOTTOM_RIGHT,
+                TextAnchor.BOTTOM_RIGHT, angle,
+                CategoryLabelWidthType.RANGE, 0.50f), // TOP
+            new CategoryLabelPosition(
+                RectangleAnchor.TOP, TextBlockAnchor.TOP_LEFT,
+                TextAnchor.TOP_LEFT, angle,
+                CategoryLabelWidthType.RANGE, 0.50f), // BOTTOM
+            new CategoryLabelPosition(
+                RectangleAnchor.RIGHT, TextBlockAnchor.TOP_RIGHT,
+                TextAnchor.TOP_RIGHT, angle,
+                CategoryLabelWidthType.RANGE, 0.50f), // LEFT
+            new CategoryLabelPosition(
+                RectangleAnchor.LEFT, TextBlockAnchor.BOTTOM_LEFT,
+                TextAnchor.BOTTOM_LEFT, angle,
+                CategoryLabelWidthType.RANGE, 0.50f) // RIGHT
+        );
+    }
+
+    /**
+     * The label positioning details used when an axis is at the top of a
+     * chart.
+     */
+    private final CategoryLabelPosition positionForAxisAtTop;
+
+    /**
+     * The label positioning details used when an axis is at the bottom of a
+     * chart.
+     */
+    private final CategoryLabelPosition positionForAxisAtBottom;
+
+    /**
+     * The label positioning details used when an axis is at the left of a
+     * chart.
+     */
+    private final CategoryLabelPosition positionForAxisAtLeft;
+
+    /**
+     * The label positioning details used when an axis is at the right of a
+     * chart.
+     */
+    private final CategoryLabelPosition positionForAxisAtRight;
+
+    /**
+     * Default constructor.
+     */
+<span class="nc" id="L208">    public CategoryLabelPositions() {</span>
+<span class="nc" id="L209">        this.positionForAxisAtTop = new CategoryLabelPosition();</span>
+<span class="nc" id="L210">        this.positionForAxisAtBottom = new CategoryLabelPosition();</span>
+<span class="nc" id="L211">        this.positionForAxisAtLeft = new CategoryLabelPosition();</span>
+<span class="nc" id="L212">        this.positionForAxisAtRight = new CategoryLabelPosition();</span>
+<span class="nc" id="L213">    }</span>
+
+    /**
+     * Creates a new position specification.
+     *
+     * @param top  the label position info used when an axis is at the top
+     *             ({@code null} not permitted).
+     * @param bottom  the label position info used when an axis is at the
+     *                bottom ({@code null} not permitted).
+     * @param left  the label position info used when an axis is at the left
+     *              ({@code null} not permitted).
+     * @param right  the label position info used when an axis is at the right
+     *               ({@code null} not permitted).
+     */
+    public CategoryLabelPositions(CategoryLabelPosition top,
+            CategoryLabelPosition bottom, CategoryLabelPosition left,
+<span class="fc" id="L229">            CategoryLabelPosition right) {</span>
+
+<span class="fc" id="L231">        Args.nullNotPermitted(top, &quot;top&quot;);</span>
+<span class="fc" id="L232">        Args.nullNotPermitted(bottom, &quot;bottom&quot;);</span>
+<span class="fc" id="L233">        Args.nullNotPermitted(left, &quot;left&quot;);</span>
+<span class="fc" id="L234">        Args.nullNotPermitted(right, &quot;right&quot;);</span>
+
+<span class="fc" id="L236">        this.positionForAxisAtTop = top;</span>
+<span class="fc" id="L237">        this.positionForAxisAtBottom = bottom;</span>
+<span class="fc" id="L238">        this.positionForAxisAtLeft = left;</span>
+<span class="fc" id="L239">        this.positionForAxisAtRight = right;</span>
+<span class="fc" id="L240">    }</span>
+
+    /**
+     * Returns the category label position specification for an axis at the
+     * given location.
+     *
+     * @param edge  the axis location.
+     *
+     * @return The category label position specification.
+     */
+    public CategoryLabelPosition getLabelPosition(RectangleEdge edge) {
+<span class="fc" id="L251">        CategoryLabelPosition result = null;</span>
+<span class="pc bpc" id="L252" title="1 of 2 branches missed.">        if (edge == RectangleEdge.TOP) {</span>
+<span class="nc" id="L253">            result = this.positionForAxisAtTop;</span>
+        }
+<span class="fc bfc" id="L255" title="All 2 branches covered.">        else if (edge == RectangleEdge.BOTTOM) {</span>
+<span class="fc" id="L256">            result = this.positionForAxisAtBottom;</span>
+        }
+<span class="pc bpc" id="L258" title="1 of 2 branches missed.">        else if (edge == RectangleEdge.LEFT) {</span>
+<span class="fc" id="L259">            result = this.positionForAxisAtLeft;</span>
+        }
+<span class="nc bnc" id="L261" title="All 2 branches missed.">        else if (edge == RectangleEdge.RIGHT) {</span>
+<span class="nc" id="L262">            result = this.positionForAxisAtRight;</span>
+        }
+<span class="fc" id="L264">        return result;</span>
+    }
+
+    /**
+     * Returns a new instance based on an existing instance but with the top
+     * position changed.
+     *
+     * @param base  the base ({@code null} not permitted).
+     * @param top  the top position ({@code null} not permitted).
+     *
+     * @return A new instance (never {@code null}).
+     */
+    public static CategoryLabelPositions replaceTopPosition(
+            CategoryLabelPositions base, CategoryLabelPosition top) {
+
+<span class="nc" id="L279">        Args.nullNotPermitted(base, &quot;base&quot;);</span>
+<span class="nc" id="L280">        Args.nullNotPermitted(top, &quot;top&quot;);</span>
+
+<span class="nc" id="L282">        return new CategoryLabelPositions(top,</span>
+<span class="nc" id="L283">            base.getLabelPosition(RectangleEdge.BOTTOM),</span>
+<span class="nc" id="L284">            base.getLabelPosition(RectangleEdge.LEFT),</span>
+<span class="nc" id="L285">            base.getLabelPosition(RectangleEdge.RIGHT));</span>
+    }
+
+    /**
+     * Returns a new instance based on an existing instance but with the bottom
+     * position changed.
+     *
+     * @param base  the base ({@code null} not permitted).
+     * @param bottom  the bottom position ({@code null} not permitted).
+     *
+     * @return A new instance (never {@code null}).
+     */
+    public static CategoryLabelPositions replaceBottomPosition(
+            CategoryLabelPositions base, CategoryLabelPosition bottom) {
+
+<span class="nc" id="L300">        Args.nullNotPermitted(base, &quot;base&quot;);</span>
+<span class="nc" id="L301">        Args.nullNotPermitted(bottom, &quot;bottom&quot;);</span>
+
+<span class="nc" id="L303">        return new CategoryLabelPositions(</span>
+<span class="nc" id="L304">            base.getLabelPosition(RectangleEdge.TOP),</span>
+            bottom,
+<span class="nc" id="L306">            base.getLabelPosition(RectangleEdge.LEFT),</span>
+<span class="nc" id="L307">            base.getLabelPosition(RectangleEdge.RIGHT));</span>
+    }
+
+    /**
+     * Returns a new instance based on an existing instance but with the left
+     * position changed.
+     *
+     * @param base  the base ({@code null} not permitted).
+     * @param left  the left position ({@code null} not permitted).
+     *
+     * @return A new instance (never {@code null}).
+     */
+    public static CategoryLabelPositions replaceLeftPosition(
+            CategoryLabelPositions base, CategoryLabelPosition left) {
+
+<span class="nc" id="L322">        Args.nullNotPermitted(base, &quot;base&quot;);</span>
+<span class="nc" id="L323">        Args.nullNotPermitted(left, &quot;left&quot;);</span>
+
+<span class="nc" id="L325">        return new CategoryLabelPositions(</span>
+<span class="nc" id="L326">            base.getLabelPosition(RectangleEdge.TOP),</span>
+<span class="nc" id="L327">            base.getLabelPosition(RectangleEdge.BOTTOM),</span>
+            left,
+<span class="nc" id="L329">            base.getLabelPosition(RectangleEdge.RIGHT));</span>
+    }
+
+    /**
+     * Returns a new instance based on an existing instance but with the right
+     * position changed.
+     *
+     * @param base  the base ({@code null} not permitted).
+     * @param right  the right position ({@code null} not permitted).
+     *
+     * @return A new instance (never {@code null}).
+     */
+    public static CategoryLabelPositions replaceRightPosition(
+            CategoryLabelPositions base, CategoryLabelPosition right) {
+
+<span class="nc" id="L344">        Args.nullNotPermitted(base, &quot;base&quot;);</span>
+<span class="nc" id="L345">        Args.nullNotPermitted(right, &quot;right&quot;);</span>
+<span class="nc" id="L346">        return new CategoryLabelPositions(</span>
+<span class="nc" id="L347">            base.getLabelPosition(RectangleEdge.TOP),</span>
+<span class="nc" id="L348">            base.getLabelPosition(RectangleEdge.BOTTOM),</span>
+<span class="nc" id="L349">            base.getLabelPosition(RectangleEdge.LEFT),</span>
+            right);
+    }
+
+    /**
+     * Returns {@code true} if this object is equal to the specified
+     * object, and {@code false} otherwise.
+     *
+     * @param obj  the other object.
+     *
+     * @return A boolean.
+     */
+    @Override
+    public boolean equals(Object obj) {
+<span class="pc bpc" id="L363" title="1 of 2 branches missed.">        if (this == obj) {</span>
+<span class="nc" id="L364">            return true;</span>
+        }
+<span class="pc bpc" id="L366" title="1 of 2 branches missed.">        if (!(obj instanceof CategoryLabelPositions)) {</span>
+<span class="nc" id="L367">            return false;</span>
+        }
+
+<span class="fc" id="L370">        CategoryLabelPositions that = (CategoryLabelPositions) obj;</span>
+<span class="fc bfc" id="L371" title="All 2 branches covered.">        if (!this.positionForAxisAtTop.equals(that.positionForAxisAtTop)) {</span>
+<span class="fc" id="L372">            return false;</span>
+        }
+<span class="fc bfc" id="L374" title="All 2 branches covered.">        if (!this.positionForAxisAtBottom.equals(</span>
+                that.positionForAxisAtBottom)) {
+<span class="fc" id="L376">            return false;</span>
+        }
+<span class="fc bfc" id="L378" title="All 2 branches covered.">        if (!this.positionForAxisAtLeft.equals(that.positionForAxisAtLeft)) {</span>
+<span class="fc" id="L379">            return false;</span>
+        }
+<span class="fc bfc" id="L381" title="All 2 branches covered.">        if (!this.positionForAxisAtRight.equals(that.positionForAxisAtRight)) {</span>
+<span class="fc" id="L382">            return false;</span>
+        }
+<span class="fc" id="L384">        return true;</span>
+    }
+
+    /**
+     * Returns a hash code for this object.
+     *
+     * @return A hash code.
+     */
+    @Override
+    public int hashCode() {
+<span class="fc" id="L394">        int result = 19;</span>
+<span class="fc" id="L395">        result = 37 * result + this.positionForAxisAtTop.hashCode();</span>
+<span class="fc" id="L396">        result = 37 * result + this.positionForAxisAtBottom.hashCode();</span>
+<span class="fc" id="L397">        result = 37 * result + this.positionForAxisAtLeft.hashCode();</span>
+<span class="fc" id="L398">        result = 37 * result + this.positionForAxisAtRight.hashCode();</span>
+<span class="fc" id="L399">        return result;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

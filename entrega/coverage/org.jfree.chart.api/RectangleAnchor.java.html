@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RectangleAnchor.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.chart.api</a> &gt; <span class="el_source">RectangleAnchor.java</span></div><h1>RectangleAnchor.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ */
+
+package org.jfree.chart.api;
+
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
+import org.jfree.chart.internal.Args;
+import org.jfree.chart.block.Size2D;
+
+/**
+ * Used to indicate an anchor point for a rectangle.
+ */
+<span class="fc" id="L39">public enum RectangleAnchor {</span>
+
+    /** Center. */
+<span class="fc" id="L42">    CENTER,</span>
+
+    /** Top. */
+<span class="fc" id="L45">    TOP,</span>
+
+    /** Top-Left. */
+<span class="fc" id="L48">    TOP_LEFT,</span>
+
+    /** Top-Right. */
+<span class="fc" id="L51">    TOP_RIGHT,</span>
+
+    /** Bottom. */
+<span class="fc" id="L54">    BOTTOM,</span>
+
+    /** Bottom-Left. */
+<span class="fc" id="L57">    BOTTOM_LEFT,</span>
+
+    /** Bottom-Right. */
+<span class="fc" id="L60">    BOTTOM_RIGHT,</span>
+
+    /** Left. */
+<span class="fc" id="L63">    LEFT,</span>
+
+    /** Right. */
+<span class="fc" id="L66">    RIGHT;</span>
+
+    /**
+     * Returns the anchor point relative to the specified rectangle.
+     * 
+     * @param rectangle  the rectangle (&lt;code&gt;null&lt;/code&gt; not permitted).
+     * 
+     * @return The anchor point (never &lt;code&gt;null&lt;/code&gt;). 
+     */
+    public Point2D getAnchorPoint(Rectangle2D rectangle) {
+<span class="fc" id="L76">        Args.nullNotPermitted(rectangle, &quot;rectangle&quot;);</span>
+<span class="fc" id="L77">        Point2D result = new Point2D.Double();</span>
+<span class="pc bpc" id="L78" title="7 of 10 branches missed.">        switch (this) {</span>
+            case CENTER:
+<span class="fc" id="L80">                result.setLocation(rectangle.getCenterX(), rectangle.getCenterY());</span>
+<span class="fc" id="L81">                break;</span>
+            case TOP:
+<span class="fc" id="L83">                result.setLocation(rectangle.getCenterX(), rectangle.getMinY());</span>
+<span class="fc" id="L84">                break;</span>
+            case BOTTOM:
+<span class="nc" id="L86">                result.setLocation(rectangle.getCenterX(), rectangle.getMaxY());</span>
+<span class="nc" id="L87">                break;</span>
+            case LEFT:
+<span class="nc" id="L89">                result.setLocation(rectangle.getMinX(), rectangle.getCenterY());</span>
+<span class="nc" id="L90">                break;</span>
+            case RIGHT:
+<span class="fc" id="L92">                result.setLocation(rectangle.getMaxX(), rectangle.getCenterY());</span>
+<span class="fc" id="L93">                break;</span>
+            case TOP_LEFT:
+<span class="nc" id="L95">                result.setLocation(rectangle.getMinX(), rectangle.getMinY());</span>
+<span class="nc" id="L96">                break;</span>
+            case TOP_RIGHT:
+<span class="nc" id="L98">                result.setLocation(rectangle.getMaxX(), rectangle.getMinY());</span>
+<span class="nc" id="L99">                break;</span>
+            case BOTTOM_LEFT:
+<span class="nc" id="L101">                result.setLocation(rectangle.getMinX(), rectangle.getMaxY());</span>
+<span class="nc" id="L102">                break;</span>
+            case BOTTOM_RIGHT:
+<span class="nc" id="L104">                result.setLocation(rectangle.getMaxX(), rectangle.getMaxY());</span>
+<span class="nc" id="L105">                break;</span>
+            default:
+                break;
+        }
+<span class="fc" id="L109">        return result;</span>
+    }
+    
+    /**
+     * Creates a new rectangle with the specified dimensions that is aligned to
+     * the given anchor point {@code (anchorX, anchorY)}.
+     * 
+     * @param dimensions  the dimensions ({@code null} not permitted).
+     * @param anchorX  the x-anchor.
+     * @param anchorY  the y-anchor.
+     * @param anchor  the anchor ({@code null} not permitted).
+     * 
+     * @return A rectangle.
+     */
+    public static Rectangle2D createRectangle(Size2D dimensions, 
+            double anchorX, double anchorY, RectangleAnchor anchor) {
+<span class="fc" id="L125">        Args.nullNotPermitted(dimensions, &quot;dimensions&quot;);</span>
+<span class="fc" id="L126">        Args.nullNotPermitted(anchor, &quot;anchor&quot;);</span>
+<span class="fc" id="L127">        Rectangle2D result = null;</span>
+<span class="fc" id="L128">        double w = dimensions.getWidth();</span>
+<span class="fc" id="L129">        double h = dimensions.getHeight();</span>
+<span class="pc bpc" id="L130" title="8 of 10 branches missed.">        switch (anchor) {</span>
+            case CENTER:
+<span class="nc" id="L132">                result = new Rectangle2D.Double(anchorX - w / 2.0,</span>
+                        anchorY - h / 2.0, w, h);
+<span class="nc" id="L134">                break;</span>
+            case TOP:
+<span class="nc" id="L136">                result = new Rectangle2D.Double(anchorX - w / 2.0, anchorY, w, h);</span>
+<span class="nc" id="L137">                break;</span>
+            case BOTTOM:
+<span class="nc" id="L139">                result = new Rectangle2D.Double(anchorX - w / 2.0, anchorY - h,</span>
+                        w, h);
+<span class="nc" id="L141">                break;</span>
+            case LEFT:
+<span class="fc" id="L143">                result = new Rectangle2D.Double(anchorX, anchorY - h / 2.0, w, h);</span>
+<span class="fc" id="L144">                break;</span>
+            case RIGHT:
+<span class="fc" id="L146">                result = new Rectangle2D.Double(anchorX - w, anchorY - h / 2.0,</span>
+                        w, h);
+<span class="fc" id="L148">                break;</span>
+            case TOP_LEFT:
+<span class="nc" id="L150">                result = new Rectangle2D.Double(anchorX, anchorY, w, h);</span>
+<span class="nc" id="L151">                break;</span>
+            case TOP_RIGHT:
+<span class="nc" id="L153">                result = new Rectangle2D.Double(anchorX - w, anchorY, w, h);</span>
+<span class="nc" id="L154">                break;</span>
+            case BOTTOM_LEFT:
+<span class="nc" id="L156">                result = new Rectangle2D.Double(anchorX, anchorY - h, w, h);</span>
+<span class="nc" id="L157">                break;</span>
+            case BOTTOM_RIGHT:
+<span class="nc" id="L159">                result = new Rectangle2D.Double(anchorX - w, anchorY - h, w, h);</span>
+<span class="nc" id="L160">                break;</span>
+            default:
+                break;
+        }
+<span class="fc" id="L164">        return result;</span>
+    }
+    
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

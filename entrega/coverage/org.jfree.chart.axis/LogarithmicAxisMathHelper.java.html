@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LogarithmicAxisMathHelper.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.chart.axis</a> &gt; <span class="el_source">LogarithmicAxisMathHelper.java</span></div><h1>LogarithmicAxisMathHelper.java</h1><pre class="source lang-java linenums">package org.jfree.chart.axis;
+
+import org.jfree.data.Range;
+
+<span class="fc" id="L5">public class LogarithmicAxisMathHelper {</span>
+
+    /** Useful constant for log(10). */
+<span class="fc" id="L8">    public static final double LOG10 = Math.log(10.0);</span>
+
+    /** Smallest arbitrarily-close-to-zero value allowed. */
+    public static final double SMALL_LOG_VALUE = 1e-100;
+
+<span class="fc" id="L13">    private boolean allowNegatives = false;</span>
+
+    /** Helper flag for log axis processing. */
+<span class="fc" id="L16">    private boolean smallLogFlag = false;</span>
+
+    public void setAllowNegativesFlag(boolean flgVal) {
+<span class="fc" id="L19">        this.allowNegatives = flgVal;</span>
+<span class="fc" id="L20">    }</span>
+
+    /**
+     * Returns the 'allowNegativesFlag' flag; true to allow negative values
+     * in data, false to be able to plot positive values arbitrarily close
+     * to zero.
+     *
+     * @return The flag.
+     */
+    public boolean allowsNegatives() {
+<span class="fc" id="L30">        return this.allowNegatives;</span>
+    }
+
+    public void setSmallLogFlag(boolean flag) {
+<span class="nc" id="L34">        this.smallLogFlag = flag;</span>
+<span class="nc" id="L35">    }</span>
+
+    public boolean getSmallLogFlag() {
+<span class="nc" id="L38">        return this.smallLogFlag;</span>
+    }
+
+    public void setupSmallLogFlag(Range range) {
+        // set flag true if negative values not allowed and the
+        // lower bound is between 0 and 10:
+<span class="fc" id="L44">        double lowerVal = range.getLowerBound();</span>
+<span class="pc bpc" id="L45" title="2 of 6 branches missed.">        smallLogFlag = (!allowNegatives &amp;&amp; lowerVal &lt; 10.0 &amp;&amp; lowerVal &gt; 0.0);</span>
+<span class="fc" id="L46">    }</span>
+
+    protected double switchedLog10(double val) {
+<span class="fc bfc" id="L49" title="All 2 branches covered.">        return smallLogFlag ? Math.log10(val) : adjustedLog10(val);</span>
+    }
+
+    public double switchedPow10(double val) {
+<span class="fc bfc" id="L53" title="All 2 branches covered.">        return smallLogFlag ? Math.pow(10.0, val) : adjustedPow10(val);</span>
+    }
+
+    public double adjustedLog10(double val) {
+<span class="pc bpc" id="L57" title="1 of 2 branches missed.">        boolean isNegative = (val &lt; 0.0);</span>
+<span class="pc bpc" id="L58" title="1 of 2 branches missed.">        if (isNegative) val = -val; // if negative then set flag and make positive</span>
+<span class="fc bfc" id="L59" title="All 2 branches covered.">        if (val &lt; 10.0) val += (10.0 - val) / 10.0;  // if &lt; 10 then increase so 0 translates to 0</span>
+
+        //return value; negate if original value was negative:
+<span class="fc" id="L62">        double res = Math.log10(val);</span>
+<span class="pc bpc" id="L63" title="1 of 2 branches missed.">        return isNegative ? (-res) : res;</span>
+    }
+
+    public double adjustedPow10(double val) {
+<span class="pc bpc" id="L67" title="1 of 2 branches missed.">        boolean isNegative = (val &lt; 0.0);</span>
+<span class="pc bpc" id="L68" title="1 of 2 branches missed.">        if (isNegative) val = -val; // if negative then set flag and make positive</span>
+
+        double res;
+<span class="fc bfc" id="L71" title="All 2 branches covered.">        if (val &lt; 1.0) res = (Math.pow(10, val + 1.0) - 10.0) / 9.0; // invert adjustLog10</span>
+<span class="fc" id="L72">        else res = Math.pow(10, val);</span>
+
+<span class="pc bpc" id="L74" title="1 of 2 branches missed.">        return isNegative ? (-res) : res;</span>
+    }
+
+    /**
+     * Returns the smallest (closest to negative infinity) double value that is
+     * not less than the argument, is equal to a mathematical integer and
+     * satisfying the condition that log base 10 of the value is an integer
+     * (i.e., the value returned will be a power of 10: 1, 10, 100, 1000, etc.).
+     *
+     * @param upper a double value above which a ceiling will be calcualted.
+     *
+     * @return 10&lt;sup&gt;N&lt;/sup&gt; with N .. { 1 ... }
+     */
+    public double logCeil(double upper) {
+        double logCeil;
+<span class="nc" id="L89">        double pow = Math.pow(10, Math.ceil(Math.log10(upper)));</span>
+<span class="nc bnc" id="L90" title="All 2 branches missed.">        if (allowNegatives) { // negative values are allowed</span>
+<span class="nc bnc" id="L91" title="All 2 branches missed.">            if (upper &gt; 10.0) logCeil = pow;</span>
+<span class="nc bnc" id="L92" title="All 2 branches missed.">            else if (upper &lt; -10.0) logCeil = -Math.pow(10, -Math.ceil(-Math.log10(-upper)));</span>
+<span class="nc" id="L93">            else logCeil = Math.ceil(upper); // use as-is</span>
+        }
+        else { // negative values not allowed
+<span class="nc bnc" id="L96" title="All 2 branches missed.">            if (upper &gt; 0.0) logCeil = pow;</span>
+<span class="nc" id="L97">            else logCeil = Math.ceil(upper); // use as-is</span>
+        }
+<span class="nc" id="L99">        return logCeil;</span>
+    }
+
+    /**
+     * Returns the largest (closest to positive infinity) double value that is
+     * not greater than the argument, is equal to a mathematical integer and
+     * satisfying the condition that log base 10 of the value is an integer
+     * (i.e., the value returned will be a power of 10: 1, 10, 100, 1000, etc.).
+     *
+     * @param lower a double value below which a floor will be calcualted.
+     *
+     * @return 10&lt;sup&gt;N&lt;/sup&gt; with N .. { 1 ... }
+     */
+    public double logFloor(double lower) {
+        double logFloor;
+<span class="nc" id="L114">        double pow = Math.pow(10, Math.floor(Math.log10(lower)));</span>
+<span class="nc bnc" id="L115" title="All 2 branches missed.">        if (allowNegatives) { // negative values are allowed</span>
+<span class="nc bnc" id="L116" title="All 2 branches missed.">            if (lower &gt; 10.0) logFloor = pow;</span>
+<span class="nc bnc" id="L117" title="All 2 branches missed.">            else if (lower &lt; -10.0) logFloor = -Math.pow(10, -Math.floor(-Math.log10(-lower)));</span>
+<span class="nc" id="L118">            else logFloor = Math.floor(lower); // use as-is</span>
+        }
+        else { // negative values not allowed
+<span class="nc bnc" id="L121" title="All 2 branches missed.">            if (lower &gt; 0.0) logFloor = pow;</span>
+<span class="nc" id="L122">            else logFloor = Math.floor(lower);   // use as-is</span>
+        }
+<span class="nc" id="L124">        return logFloor;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

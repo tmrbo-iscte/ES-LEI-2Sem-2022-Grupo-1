@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TimeSeriesTableModel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.data.time</a> &gt; <span class="el_source">TimeSeriesTableModel.java</span></div><h1>TimeSeriesTableModel.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * -------------------------
+ * TimeSeriesTableModel.java
+ * -------------------------
+ * (C) Copyright 2001-2022, by David Gilbert.
+ *
+ * Original Author:  David Gilbert;
+ * Contributor(s):   -;
+ *
+ */
+
+package org.jfree.data.time;
+
+import javax.swing.table.AbstractTableModel;
+
+import org.jfree.data.general.SeriesChangeEvent;
+import org.jfree.data.general.SeriesChangeListener;
+
+/**
+ * Wrapper around a time series to convert it to a table model for use in
+ * a {@code JTable}.
+ */
+public class TimeSeriesTableModel extends AbstractTableModel
+        implements SeriesChangeListener {
+
+    /** The series. */
+    private TimeSeries series;
+
+    /** A flag that controls whether the series is editable. */
+    private boolean editable;
+
+    /** The new time period. */
+    private RegularTimePeriod newTimePeriod;
+
+    /** The new value. */
+    private Number newValue;
+
+    /**
+     * Default constructor.
+     */
+    public TimeSeriesTableModel() {
+<span class="nc" id="L67">        this(new TimeSeries(&quot;Untitled&quot;));</span>
+<span class="nc" id="L68">    }</span>
+
+    /**
+     * Constructs a table model for a time series.
+     *
+     * @param series  the time series.
+     */
+    public TimeSeriesTableModel(TimeSeries series) {
+<span class="nc" id="L76">        this(series, false);</span>
+<span class="nc" id="L77">    }</span>
+
+    /**
+     * Creates a table model based on a time series.
+     *
+     * @param series  the time series.
+     * @param editable  if {@code true}, the table is editable.
+     */
+<span class="nc" id="L85">    public TimeSeriesTableModel(TimeSeries series, boolean editable) {</span>
+<span class="nc" id="L86">        this.series = series;</span>
+<span class="nc" id="L87">        this.series.addChangeListener(this);</span>
+<span class="nc" id="L88">        this.editable = editable;</span>
+<span class="nc" id="L89">    }</span>
+
+    /**
+     * Returns the number of columns in the table model.  For this particular
+     * model, the column count is fixed at 2.
+     *
+     * @return The column count.
+     */
+    @Override
+    public int getColumnCount() {
+<span class="nc" id="L99">        return 2;</span>
+    }
+
+    /**
+     * Returns the column class in the table model.
+     *
+     * @param column  the column index.
+     *
+     * @return The column class in the table model.
+     */
+    @Override
+    public Class getColumnClass(int column) {
+<span class="nc bnc" id="L111" title="All 2 branches missed.">        if (column == 0) {</span>
+<span class="nc" id="L112">            return String.class;</span>
+        }
+        else {
+<span class="nc bnc" id="L115" title="All 2 branches missed.">            if (column == 1) {</span>
+<span class="nc" id="L116">                return Double.class;</span>
+            }
+            else {
+<span class="nc" id="L119">                return null;</span>
+            }
+        }
+    }
+
+    /**
+     * Returns the name of a column
+     *
+     * @param column  the column index.
+     *
+     * @return The name of a column.
+     */
+    @Override
+    public String getColumnName(int column) {
+
+<span class="nc bnc" id="L134" title="All 2 branches missed.">        if (column == 0) {</span>
+<span class="nc" id="L135">            return &quot;Period:&quot;;</span>
+        }
+        else {
+<span class="nc bnc" id="L138" title="All 2 branches missed.">            if (column == 1) {</span>
+<span class="nc" id="L139">                return &quot;Value:&quot;;</span>
+            }
+            else {
+<span class="nc" id="L142">                return null;</span>
+            }
+        }
+
+    }
+
+    /**
+     * Returns the number of rows in the table model.
+     *
+     * @return The row count.
+     */
+    @Override
+    public int getRowCount() {
+<span class="nc" id="L155">        return this.series.getItemCount();</span>
+    }
+
+    /**
+     * Returns the data value for a cell in the table model.
+     *
+     * @param row  the row number.
+     * @param column  the column number.
+     *
+     * @return The data value for a cell in the table model.
+     */
+    @Override
+    public Object getValueAt(int row, int column) {
+
+<span class="nc bnc" id="L169" title="All 2 branches missed.">        if (row &lt; this.series.getItemCount()) {</span>
+<span class="nc bnc" id="L170" title="All 2 branches missed.">            if (column == 0) {</span>
+<span class="nc" id="L171">                return this.series.getTimePeriod(row);</span>
+            }
+            else {
+<span class="nc bnc" id="L174" title="All 2 branches missed.">                if (column == 1) {</span>
+<span class="nc" id="L175">                    return this.series.getValue(row);</span>
+                }
+                else {
+<span class="nc" id="L178">                    return null;</span>
+                }
+            }
+        }
+        else {
+<span class="nc bnc" id="L183" title="All 2 branches missed.">            if (column == 0) {</span>
+<span class="nc" id="L184">                return this.newTimePeriod;</span>
+            }
+            else {
+<span class="nc bnc" id="L187" title="All 2 branches missed.">                if (column == 1) {</span>
+<span class="nc" id="L188">                    return this.newValue;</span>
+                }
+                else {
+<span class="nc" id="L191">                    return null;</span>
+                }
+            }
+        }
+
+    }
+
+    /**
+     * Returns a flag indicating whether or not the specified cell is editable.
+     *
+     * @param row  the row number.
+     * @param column  the column number.
+     *
+     * @return {@code true} if the specified cell is editable.
+     */
+    @Override
+    public boolean isCellEditable(int row, int column) {
+<span class="nc bnc" id="L208" title="All 2 branches missed.">        if (this.editable) {</span>
+<span class="nc bnc" id="L209" title="All 4 branches missed.">            if ((column == 0) || (column == 1)) {</span>
+<span class="nc" id="L210">                return true;</span>
+            }
+            else {
+<span class="nc" id="L213">                return false;</span>
+            }
+        }
+        else {
+<span class="nc" id="L217">            return false;</span>
+        }
+    }
+
+    /**
+     * Updates the time series.
+     *
+     * @param value  the new value.
+     * @param row  the row.
+     * @param column  the column.
+     */
+    @Override
+    public void setValueAt(Object value, int row, int column) {
+
+<span class="nc bnc" id="L231" title="All 2 branches missed.">        if (row &lt; this.series.getItemCount()) {</span>
+
+            // update the time series appropriately
+<span class="nc bnc" id="L234" title="All 2 branches missed.">            if (column == 1) {</span>
+                try {
+<span class="nc" id="L236">                    Double v = Double.valueOf(value.toString());</span>
+<span class="nc" id="L237">                    this.series.update(row, v);</span>
+
+                }
+<span class="nc" id="L240">                catch (NumberFormatException nfe) {</span>
+<span class="nc" id="L241">                    System.err.println(&quot;Number format exception&quot;);</span>
+<span class="nc" id="L242">                }</span>
+            }
+        }
+        else {
+<span class="nc bnc" id="L246" title="All 2 branches missed.">            if (column == 0) {</span>
+                // this.series.getClass().valueOf(value.toString());
+<span class="nc" id="L248">                this.newTimePeriod = null;</span>
+            }
+<span class="nc bnc" id="L250" title="All 2 branches missed.">            else if (column == 1) {</span>
+<span class="nc" id="L251">                this.newValue = Double.valueOf(value.toString());</span>
+            }
+        }
+<span class="nc" id="L254">    }</span>
+
+    /**
+     * Receives notification that the time series has been changed.  Responds
+     * by firing a table data change event.
+     *
+     * @param event  the event.
+     */
+    @Override
+    public void seriesChanged(SeriesChangeEvent event) {
+<span class="nc" id="L264">        fireTableDataChanged();</span>
+<span class="nc" id="L265">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

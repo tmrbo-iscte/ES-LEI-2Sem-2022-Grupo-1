@@ -1,0 +1,362 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Regression.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.data.statistics</a> &gt; <span class="el_source">Regression.java</span></div><h1>Regression.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * ---------------
+ * Regression.java
+ * ---------------
+ * (C) Copyright 2002-2022, by David Gilbert.
+ *
+ * Original Author:  David Gilbert;
+ * Contributor(s):   Peter Kolb (patch 2795746);
+ *
+ */
+
+package org.jfree.data.statistics;
+
+import org.jfree.chart.internal.Args;
+import org.jfree.data.xy.XYDataset;
+
+/**
+ * A utility class for fitting regression curves to data.
+ */
+<span class="nc" id="L45">public abstract class Regression {</span>
+
+    /**
+     * Returns the parameters 'a' and 'b' for an equation y = a + bx, fitted to
+     * the data using ordinary least squares regression.  The result is
+     * returned as a double[], where result[0] --&amp;gt; a, and result[1] --&amp;gt; b.
+     *
+     * @param data  the data.
+     *
+     * @return The parameters.
+     */
+    public static double[] getOLSRegression(double[][] data) {
+
+<span class="fc" id="L58">        int n = data.length;</span>
+<span class="pc bpc" id="L59" title="1 of 2 branches missed.">        if (n &lt; 2) {</span>
+<span class="nc" id="L60">            throw new IllegalArgumentException(&quot;Not enough data.&quot;);</span>
+        }
+
+<span class="fc" id="L63">        double sumX = 0;</span>
+<span class="fc" id="L64">        double sumY = 0;</span>
+<span class="fc" id="L65">        double sumXX = 0;</span>
+<span class="fc" id="L66">        double sumXY = 0;</span>
+<span class="fc bfc" id="L67" title="All 2 branches covered.">        for (int i = 0; i &lt; n; i++) {</span>
+<span class="fc" id="L68">            double x = data[i][0];</span>
+<span class="fc" id="L69">            double y = data[i][1];</span>
+<span class="fc" id="L70">            sumX += x;</span>
+<span class="fc" id="L71">            sumY += y;</span>
+<span class="fc" id="L72">            double xx = x * x;</span>
+<span class="fc" id="L73">            sumXX += xx;</span>
+<span class="fc" id="L74">            double xy = x * y;</span>
+<span class="fc" id="L75">            sumXY += xy;</span>
+        }
+<span class="fc" id="L77">        double sxx = sumXX - (sumX * sumX) / n;</span>
+<span class="fc" id="L78">        double sxy = sumXY - (sumX * sumY) / n;</span>
+<span class="fc" id="L79">        double xbar = sumX / n;</span>
+<span class="fc" id="L80">        double ybar = sumY / n;</span>
+
+<span class="fc" id="L82">        double[] result = new double[2];</span>
+<span class="fc" id="L83">        result[1] = sxy / sxx;</span>
+<span class="fc" id="L84">        result[0] = ybar - result[1] * xbar;</span>
+
+<span class="fc" id="L86">        return result;</span>
+
+    }
+
+    /**
+     * Returns the parameters 'a' and 'b' for an equation y = a + bx, fitted to
+     * the data using ordinary least squares regression. The result is returned
+     * as a double[], where result[0] --&amp;gt; a, and result[1] --&amp;gt; b.
+     *
+     * @param data  the data.
+     * @param series  the series (zero-based index).
+     *
+     * @return The parameters.
+     */
+    public static double[] getOLSRegression(XYDataset data, int series) {
+
+<span class="fc" id="L102">        int n = data.getItemCount(series);</span>
+<span class="pc bpc" id="L103" title="1 of 2 branches missed.">        if (n &lt; 2) {</span>
+<span class="nc" id="L104">            throw new IllegalArgumentException(&quot;Not enough data.&quot;);</span>
+        }
+
+<span class="fc" id="L107">        double sumX = 0;</span>
+<span class="fc" id="L108">        double sumY = 0;</span>
+<span class="fc" id="L109">        double sumXX = 0;</span>
+<span class="fc" id="L110">        double sumXY = 0;</span>
+<span class="fc bfc" id="L111" title="All 2 branches covered.">        for (int i = 0; i &lt; n; i++) {</span>
+<span class="fc" id="L112">            double x = data.getXValue(series, i);</span>
+<span class="fc" id="L113">            double y = data.getYValue(series, i);</span>
+<span class="fc" id="L114">            sumX += x;</span>
+<span class="fc" id="L115">            sumY += y;</span>
+<span class="fc" id="L116">            double xx = x * x;</span>
+<span class="fc" id="L117">            sumXX += xx;</span>
+<span class="fc" id="L118">            double xy = x * y;</span>
+<span class="fc" id="L119">            sumXY += xy;</span>
+        }
+<span class="fc" id="L121">        double sxx = sumXX - (sumX * sumX) / n;</span>
+<span class="fc" id="L122">        double sxy = sumXY - (sumX * sumY) / n;</span>
+<span class="fc" id="L123">        double xbar = sumX / n;</span>
+<span class="fc" id="L124">        double ybar = sumY / n;</span>
+
+<span class="fc" id="L126">        double[] result = new double[2];</span>
+<span class="fc" id="L127">        result[1] = sxy / sxx;</span>
+<span class="fc" id="L128">        result[0] = ybar - result[1] * xbar;</span>
+
+<span class="fc" id="L130">        return result;</span>
+
+    }
+
+    /**
+     * Returns the parameters 'a' and 'b' for an equation y = ax^b, fitted to
+     * the data using a power regression equation.  The result is returned as
+     * an array, where double[0] --&amp;gt; a, and double[1] --&amp;gt; b.
+     *
+     * @param data  the data.
+     *
+     * @return The parameters.
+     */
+    public static double[] getPowerRegression(double[][] data) {
+
+<span class="fc" id="L145">        int n = data.length;</span>
+<span class="pc bpc" id="L146" title="1 of 2 branches missed.">        if (n &lt; 2) {</span>
+<span class="nc" id="L147">            throw new IllegalArgumentException(&quot;Not enough data.&quot;);</span>
+        }
+
+<span class="fc" id="L150">        double sumX = 0;</span>
+<span class="fc" id="L151">        double sumY = 0;</span>
+<span class="fc" id="L152">        double sumXX = 0;</span>
+<span class="fc" id="L153">        double sumXY = 0;</span>
+<span class="fc bfc" id="L154" title="All 2 branches covered.">        for (int i = 0; i &lt; n; i++) {</span>
+<span class="fc" id="L155">            double x = Math.log(data[i][0]);</span>
+<span class="fc" id="L156">            double y = Math.log(data[i][1]);</span>
+<span class="fc" id="L157">            sumX += x;</span>
+<span class="fc" id="L158">            sumY += y;</span>
+<span class="fc" id="L159">            double xx = x * x;</span>
+<span class="fc" id="L160">            sumXX += xx;</span>
+<span class="fc" id="L161">            double xy = x * y;</span>
+<span class="fc" id="L162">            sumXY += xy;</span>
+        }
+<span class="fc" id="L164">        double sxx = sumXX - (sumX * sumX) / n;</span>
+<span class="fc" id="L165">        double sxy = sumXY - (sumX * sumY) / n;</span>
+<span class="fc" id="L166">        double xbar = sumX / n;</span>
+<span class="fc" id="L167">        double ybar = sumY / n;</span>
+
+<span class="fc" id="L169">        double[] result = new double[2];</span>
+<span class="fc" id="L170">        result[1] = sxy / sxx;</span>
+<span class="fc" id="L171">        result[0] = Math.pow(Math.exp(1.0), ybar - result[1] * xbar);</span>
+
+<span class="fc" id="L173">        return result;</span>
+
+    }
+
+    /**
+     * Returns the parameters 'a' and 'b' for an equation y = ax^b, fitted to
+     * the data using a power regression equation.  The result is returned as
+     * an array, where double[0] --&amp;gt; a, and double[1] --&amp;gt; b.
+     *
+     * @param data  the data.
+     * @param series  the series to fit the regression line against.
+     *
+     * @return The parameters.
+     */
+    public static double[] getPowerRegression(XYDataset data, int series) {
+
+<span class="fc" id="L189">        int n = data.getItemCount(series);</span>
+<span class="pc bpc" id="L190" title="1 of 2 branches missed.">        if (n &lt; 2) {</span>
+<span class="nc" id="L191">            throw new IllegalArgumentException(&quot;Not enough data.&quot;);</span>
+        }
+
+<span class="fc" id="L194">        double sumX = 0;</span>
+<span class="fc" id="L195">        double sumY = 0;</span>
+<span class="fc" id="L196">        double sumXX = 0;</span>
+<span class="fc" id="L197">        double sumXY = 0;</span>
+<span class="fc bfc" id="L198" title="All 2 branches covered.">        for (int i = 0; i &lt; n; i++) {</span>
+<span class="fc" id="L199">            double x = Math.log(data.getXValue(series, i));</span>
+<span class="fc" id="L200">            double y = Math.log(data.getYValue(series, i));</span>
+<span class="fc" id="L201">            sumX += x;</span>
+<span class="fc" id="L202">            sumY += y;</span>
+<span class="fc" id="L203">            double xx = x * x;</span>
+<span class="fc" id="L204">            sumXX += xx;</span>
+<span class="fc" id="L205">            double xy = x * y;</span>
+<span class="fc" id="L206">            sumXY += xy;</span>
+        }
+<span class="fc" id="L208">        double sxx = sumXX - (sumX * sumX) / n;</span>
+<span class="fc" id="L209">        double sxy = sumXY - (sumX * sumY) / n;</span>
+<span class="fc" id="L210">        double xbar = sumX / n;</span>
+<span class="fc" id="L211">        double ybar = sumY / n;</span>
+
+<span class="fc" id="L213">        double[] result = new double[2];</span>
+<span class="fc" id="L214">        result[1] = sxy / sxx;</span>
+<span class="fc" id="L215">        result[0] = Math.pow(Math.exp(1.0), ybar - result[1] * xbar);</span>
+
+<span class="fc" id="L217">        return result;</span>
+
+    }
+
+    /**
+     * Returns the parameters 'a0', 'a1', 'a2', ..., 'an' for a polynomial 
+     * function of order n, y = a0 + a1 * x + a2 * x^2 + ... + an * x^n,
+     * fitted to the data using a polynomial regression equation.
+     * The result is returned as an array with a length of n + 2,
+     * where double[0] --&amp;gt; a0, double[1] --&amp;gt; a1, .., double[n] --&amp;gt; an.
+     * and double[n + 1] is the correlation coefficient R2
+     * Reference: J. D. Faires, R. L. Burden, Numerische Methoden (german
+     * edition), pp. 243ff and 327ff.
+     *
+     * @param dataset  the dataset ({@code null} not permitted).
+     * @param series  the series to fit the regression line against (the series
+     *         must have at least order + 1 non-NaN items).
+     * @param order  the order of the function (&amp;gt; 0).
+     *
+     * @return The parameters.
+     *
+     * @since 1.0.14
+     */
+    public static double[] getPolynomialRegression(XYDataset dataset, 
+            int series, int order) {
+<span class="nc" id="L242">        Args.nullNotPermitted(dataset, &quot;dataset&quot;);</span>
+<span class="nc" id="L243">        int itemCount = dataset.getItemCount(series);</span>
+<span class="nc bnc" id="L244" title="All 2 branches missed.">        if (itemCount &lt; order + 1) {</span>
+<span class="nc" id="L245">            throw new IllegalArgumentException(&quot;Not enough data.&quot;);</span>
+        }
+<span class="nc" id="L247">        int validItems = 0;</span>
+<span class="nc" id="L248">        double[][] data = new double[2][itemCount];</span>
+<span class="nc bnc" id="L249" title="All 2 branches missed.">        for(int item = 0; item &lt; itemCount; item++){</span>
+<span class="nc" id="L250">            double x = dataset.getXValue(series, item);</span>
+<span class="nc" id="L251">            double y = dataset.getYValue(series, item);</span>
+<span class="nc bnc" id="L252" title="All 4 branches missed.">            if (!Double.isNaN(x) &amp;&amp; !Double.isNaN(y)){</span>
+<span class="nc" id="L253">                data[0][validItems] = x;</span>
+<span class="nc" id="L254">                data[1][validItems] = y;</span>
+<span class="nc" id="L255">                validItems++;</span>
+            }
+        }
+<span class="nc bnc" id="L258" title="All 2 branches missed.">        if (validItems &lt; order + 1) {</span>
+<span class="nc" id="L259">            throw new IllegalArgumentException(&quot;Not enough data.&quot;);</span>
+        }
+<span class="nc" id="L261">        int equations = order + 1;</span>
+<span class="nc" id="L262">        int coefficients = order + 2;</span>
+<span class="nc" id="L263">        double[] result = new double[equations + 1];</span>
+<span class="nc" id="L264">        double[][] matrix = new double[equations][coefficients];</span>
+<span class="nc" id="L265">        double sumX = 0.0;</span>
+<span class="nc" id="L266">        double sumY = 0.0;</span>
+
+<span class="nc bnc" id="L268" title="All 2 branches missed.">        for(int item = 0; item &lt; validItems; item++){</span>
+<span class="nc" id="L269">            sumX += data[0][item];</span>
+<span class="nc" id="L270">            sumY += data[1][item];</span>
+<span class="nc bnc" id="L271" title="All 2 branches missed.">            for(int eq = 0; eq &lt; equations; eq++){</span>
+<span class="nc bnc" id="L272" title="All 2 branches missed.">                for(int coe = 0; coe &lt; coefficients - 1; coe++){</span>
+<span class="nc" id="L273">                    matrix[eq][coe] += Math.pow(data[0][item],eq + coe);</span>
+                }
+<span class="nc" id="L275">                matrix[eq][coefficients - 1] += data[1][item]</span>
+<span class="nc" id="L276">                        * Math.pow(data[0][item],eq);</span>
+            }
+        }
+<span class="nc" id="L279">        double[][] subMatrix = calculateSubMatrix(matrix);</span>
+<span class="nc bnc" id="L280" title="All 2 branches missed.">        for (int eq = 1; eq &lt; equations; eq++) {</span>
+<span class="nc" id="L281">            matrix[eq][0] = 0;</span>
+<span class="nc bnc" id="L282" title="All 2 branches missed.">            for (int coe = 1; coe &lt; coefficients; coe++) {</span>
+<span class="nc" id="L283">                matrix[eq][coe] = subMatrix[eq - 1][coe - 1];</span>
+            }
+        }
+<span class="nc bnc" id="L286" title="All 2 branches missed.">        for (int eq = equations - 1; eq &gt; -1; eq--) {</span>
+<span class="nc" id="L287">            double value = matrix[eq][coefficients - 1];</span>
+<span class="nc bnc" id="L288" title="All 2 branches missed.">            for (int coe = eq; coe &lt; coefficients -1; coe++) {</span>
+<span class="nc" id="L289">                value -= matrix[eq][coe] * result[coe];</span>
+            }
+<span class="nc" id="L291">            result[eq] = value / matrix[eq][eq];</span>
+        }
+<span class="nc" id="L293">        double meanY = sumY / validItems;</span>
+<span class="nc" id="L294">        double yObsSquare = 0.0;</span>
+<span class="nc" id="L295">        double yRegSquare = 0.0;</span>
+<span class="nc bnc" id="L296" title="All 2 branches missed.">        for (int item = 0; item &lt; validItems; item++) {</span>
+<span class="nc" id="L297">            double yCalc = 0;</span>
+<span class="nc bnc" id="L298" title="All 2 branches missed.">            for (int eq = 0; eq &lt; equations; eq++) {</span>
+<span class="nc" id="L299">                yCalc += result[eq] * Math.pow(data[0][item],eq);</span>
+            }
+<span class="nc" id="L301">            yRegSquare += Math.pow(yCalc - meanY, 2);</span>
+<span class="nc" id="L302">            yObsSquare += Math.pow(data[1][item] - meanY, 2);</span>
+        }
+<span class="nc" id="L304">        double rSquare = yRegSquare / yObsSquare;</span>
+<span class="nc" id="L305">        result[equations] = rSquare;</span>
+<span class="nc" id="L306">        return result;</span>
+    }
+
+    /**
+     * Returns a matrix with the following features: (1) the number of rows
+     * and columns is 1 less than that of the original matrix; (2)the matrix
+     * is triangular, i.e. all elements a (row, column) with column &amp;gt; row are
+     * zero.  This method is used for calculating a polynomial regression.
+     * 
+     * @param matrix  the start matrix.
+     *
+     * @return The new matrix.
+     */
+    private static double[][] calculateSubMatrix(double[][] matrix){
+<span class="nc" id="L320">        int equations = matrix.length;</span>
+<span class="nc" id="L321">        int coefficients = matrix[0].length;</span>
+<span class="nc" id="L322">        double[][] result = new double[equations - 1][coefficients - 1];</span>
+<span class="nc bnc" id="L323" title="All 2 branches missed.">        for (int eq = 1; eq &lt; equations; eq++) {</span>
+<span class="nc" id="L324">            double factor = matrix[0][0] / matrix[eq][0];</span>
+<span class="nc bnc" id="L325" title="All 2 branches missed.">            for (int coe = 1; coe &lt; coefficients; coe++) {</span>
+<span class="nc" id="L326">                result[eq - 1][coe -1] = matrix[0][coe] - matrix[eq][coe]</span>
+                        * factor;
+            }
+        }
+<span class="nc bnc" id="L330" title="All 2 branches missed.">        if (equations == 1) {</span>
+<span class="nc" id="L331">            return result;</span>
+        }
+        // check for zero pivot element
+<span class="nc bnc" id="L334" title="All 2 branches missed.">        if (result[0][0] == 0) {</span>
+<span class="nc" id="L335">            boolean found = false;</span>
+<span class="nc bnc" id="L336" title="All 2 branches missed.">            for (int i = 0; i &lt; result.length; i ++) {</span>
+<span class="nc bnc" id="L337" title="All 2 branches missed.">                if (result[i][0] != 0) {</span>
+<span class="nc" id="L338">                    found = true;</span>
+<span class="nc" id="L339">                    double[] temp = result[0];</span>
+<span class="nc" id="L340">                    System.arraycopy(result[i], 0, result[0], 0, </span>
+                            result[i].length);
+<span class="nc" id="L342">                    System.arraycopy(temp, 0, result[i], 0, temp.length);</span>
+<span class="nc" id="L343">                    break;</span>
+                }
+            }
+<span class="nc bnc" id="L346" title="All 2 branches missed.">            if (!found) {</span>
+                //System.out.println(&quot;Equation has no solution!&quot;);
+<span class="nc" id="L348">                return new double[equations - 1][coefficients - 1];</span>
+            }
+        }
+<span class="nc" id="L351">        double[][] subMatrix = calculateSubMatrix(result);</span>
+<span class="nc bnc" id="L352" title="All 2 branches missed.">        for (int eq = 1; eq &lt; equations -  1; eq++) {</span>
+<span class="nc" id="L353">            result[eq][0] = 0;</span>
+<span class="nc bnc" id="L354" title="All 2 branches missed.">            for (int coe = 1; coe &lt; coefficients - 1; coe++) {</span>
+<span class="nc" id="L355">                result[eq][coe] = subMatrix[eq - 1][coe - 1];</span>
+            }
+        }
+<span class="nc" id="L358">        return result;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

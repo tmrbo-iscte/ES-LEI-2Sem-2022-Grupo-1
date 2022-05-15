@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StandardXYZToolTipGenerator.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.chart.labels</a> &gt; <span class="el_source">StandardXYZToolTipGenerator.java</span></div><h1>StandardXYZToolTipGenerator.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * --------------------------------
+ * StandardXYZToolTipGenerator.java
+ * --------------------------------
+ * (C) Copyright 2004-2022, by David Gilbert.
+ *
+ * Original Author:  David Gilbert;
+ * Contributor(s):   -;
+ *
+ */
+
+package org.jfree.chart.labels;
+
+import java.io.Serializable;
+import java.text.DateFormat;
+import java.text.MessageFormat;
+import java.text.NumberFormat;
+import java.util.Objects;
+
+import org.jfree.chart.internal.Args;
+
+import org.jfree.data.xy.XYDataset;
+import org.jfree.data.xy.XYZDataset;
+
+/**
+ * A standard item label generator for use with {@link XYZDataset} data.  Each
+ * value can be formatted as a number or as a date.
+ */
+public class StandardXYZToolTipGenerator extends StandardXYToolTipGenerator
+        implements XYZToolTipGenerator, Serializable {
+
+    /** For serialization. */
+    private static final long serialVersionUID = -2961577421889473503L;
+
+    /** The default tooltip format. */
+    public static final String DEFAULT_TOOL_TIP_FORMAT = &quot;{0}: ({1}, {2}, {3})&quot;;
+
+    /**
+     * A number formatter for the z value - if this is null, then zDateFormat
+     * must be non-null.
+     */
+    private NumberFormat zFormat;
+
+    /**
+     * A date formatter for the z-value - if this is null, then zFormat must be
+     * non-null.
+     */
+    private DateFormat zDateFormat;
+
+    /**
+     * Creates a new tool tip generator using default number formatters for the
+     * x, y and z-values.
+     */
+    public StandardXYZToolTipGenerator() {
+<span class="fc" id="L80">        this(</span>
+            DEFAULT_TOOL_TIP_FORMAT,
+<span class="fc" id="L82">            NumberFormat.getNumberInstance(),</span>
+<span class="fc" id="L83">            NumberFormat.getNumberInstance(),</span>
+<span class="fc" id="L84">            NumberFormat.getNumberInstance()</span>
+        );
+<span class="fc" id="L86">    }</span>
+
+    /**
+     * Constructs a new tool tip generator using the specified number
+     * formatters.
+     *
+     * @param formatString  the format string.
+     * @param xFormat  the format object for the x values ({@code null}
+     *                 not permitted).
+     * @param yFormat  the format object for the y values ({@code null}
+     *                 not permitted).
+     * @param zFormat  the format object for the z values ({@code null}
+     *                 not permitted).
+     */
+    public StandardXYZToolTipGenerator(String formatString, 
+            NumberFormat xFormat, NumberFormat yFormat, NumberFormat zFormat) {
+<span class="fc" id="L102">        super(formatString, xFormat, yFormat);</span>
+<span class="fc" id="L103">        Args.nullNotPermitted(zFormat, &quot;zFormat&quot;);</span>
+<span class="fc" id="L104">        this.zFormat = zFormat;</span>
+<span class="fc" id="L105">    }</span>
+
+    /**
+     * Constructs a new tool tip generator using the specified date formatters.
+     *
+     * @param formatString  the format string.
+     * @param xFormat  the format object for the x values ({@code null}
+     *                 not permitted).
+     * @param yFormat  the format object for the y values ({@code null}
+     *                 not permitted).
+     * @param zFormat  the format object for the z values ({@code null}
+     *                 not permitted).
+     */
+    public StandardXYZToolTipGenerator(String formatString, DateFormat xFormat,
+            DateFormat yFormat, DateFormat zFormat) {
+<span class="fc" id="L120">        super(formatString, xFormat, yFormat);</span>
+<span class="fc" id="L121">        Args.nullNotPermitted(zFormat, &quot;zFormat&quot;);</span>
+<span class="fc" id="L122">        this.zDateFormat = zFormat;</span>
+<span class="fc" id="L123">    }</span>
+
+    // TODO:  add constructors for combinations of number and date formatters.
+
+    /**
+     * Returns the number formatter for the z-values.
+     *
+     * @return The number formatter (possibly {@code null}).
+     */
+    public NumberFormat getZFormat() {
+<span class="nc" id="L133">        return this.zFormat;</span>
+    }
+
+    /**
+     * Returns the date formatter for the z-values.
+     *
+     * @return The date formatter (possibly {@code null}).
+     */
+    public DateFormat getZDateFormat() {
+<span class="nc" id="L142">        return this.zDateFormat;</span>
+    }
+
+    /**
+     * Generates a tool tip text item for a particular item within a series.
+     *
+     * @param dataset  the dataset ({@code null} not permitted).
+     * @param series  the series index (zero-based).
+     * @param item  the item index (zero-based).
+     *
+     * @return The tooltip text (possibly {@code null}).
+     */
+    @Override
+    public String generateToolTip(XYZDataset dataset, int series, int item) {
+<span class="nc" id="L156">        return generateLabelString(dataset, series, item);</span>
+    }
+
+    /**
+     * Generates a label string for an item in the dataset.
+     *
+     * @param dataset  the dataset ({@code null} not permitted).
+     * @param series  the series (zero-based index).
+     * @param item  the item (zero-based index).
+     *
+     * @return The label (possibly {@code null}).
+     */
+    @Override
+    public String generateLabelString(XYDataset dataset, int series, int item) {
+        String result;
+<span class="nc" id="L171">        Object[] items = createItemArray((XYZDataset) dataset, series, item);</span>
+<span class="nc" id="L172">        result = MessageFormat.format(getFormatString(), items);</span>
+<span class="nc" id="L173">        return result;</span>
+    }
+
+    /**
+     * Creates the array of items that can be passed to the
+     * {@link MessageFormat} class for creating labels.
+     *
+     * @param dataset  the dataset ({@code null} not permitted).
+     * @param series  the series (zero-based index).
+     * @param item  the item (zero-based index).
+     *
+     * @return The items (never {@code null}).
+     */
+    protected Object[] createItemArray(XYZDataset dataset,
+                                       int series, int item) {
+
+<span class="nc" id="L189">        Object[] result = new Object[4];</span>
+<span class="nc" id="L190">        result[0] = dataset.getSeriesKey(series).toString();</span>
+
+<span class="nc" id="L192">        Number x = dataset.getX(series, item);</span>
+<span class="nc" id="L193">        DateFormat xf = getXDateFormat();</span>
+<span class="nc bnc" id="L194" title="All 2 branches missed.">        if (xf != null) {</span>
+<span class="nc" id="L195">            result[1] = xf.format(x);</span>
+        }
+        else {
+<span class="nc" id="L198">            result[1] = getXFormat().format(x);</span>
+        }
+
+<span class="nc" id="L201">        Number y = dataset.getY(series, item);</span>
+<span class="nc" id="L202">        DateFormat yf = getYDateFormat();</span>
+<span class="nc bnc" id="L203" title="All 2 branches missed.">        if (yf != null) {</span>
+<span class="nc" id="L204">            result[2] = yf.format(y);</span>
+        }
+        else {
+<span class="nc" id="L207">            result[2] = getYFormat().format(y);</span>
+        }
+
+<span class="nc" id="L210">        Number z = dataset.getZ(series, item);</span>
+<span class="nc bnc" id="L211" title="All 2 branches missed.">        if (this.zDateFormat != null) {</span>
+<span class="nc" id="L212">            result[3] = this.zDateFormat.format(z);</span>
+        }
+        else {
+<span class="nc" id="L215">            result[3] = this.zFormat.format(z);</span>
+        }
+
+<span class="nc" id="L218">        return result;</span>
+
+    }
+
+    /**
+     * Tests this object for equality with an arbitrary object.
+     *
+     * @param obj  the other object ({@code null} permitted).
+     *
+     * @return A boolean.
+     */
+    @Override
+    public boolean equals(Object obj) {
+<span class="pc bpc" id="L231" title="1 of 2 branches missed.">        if (obj == this) {</span>
+<span class="nc" id="L232">            return true;</span>
+        }
+<span class="pc bpc" id="L234" title="1 of 2 branches missed.">        if (!(obj instanceof StandardXYZToolTipGenerator)) {</span>
+<span class="nc" id="L235">            return false;</span>
+        }
+<span class="fc bfc" id="L237" title="All 2 branches covered.">        if (!super.equals(obj)) {</span>
+<span class="fc" id="L238">            return false;</span>
+        }
+<span class="fc" id="L240">        StandardXYZToolTipGenerator that = (StandardXYZToolTipGenerator) obj;</span>
+<span class="fc bfc" id="L241" title="All 2 branches covered.">        if (!Objects.equals(this.zFormat, that.zFormat)) {</span>
+<span class="fc" id="L242">            return false;</span>
+        }
+<span class="fc bfc" id="L244" title="All 2 branches covered.">        if (!Objects.equals(this.zDateFormat, that.zDateFormat)) {</span>
+<span class="fc" id="L245">            return false;</span>
+        }
+<span class="fc" id="L247">        return true;</span>
+    }
+
+    @Override
+    public int hashCode() {
+<span class="fc" id="L252">        int hash = super.hashCode();</span>
+<span class="fc" id="L253">        hash = 79 * hash + Objects.hashCode(this.zFormat);</span>
+<span class="fc" id="L254">        hash = 79 * hash + Objects.hashCode(this.zDateFormat);</span>
+<span class="fc" id="L255">        return hash;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

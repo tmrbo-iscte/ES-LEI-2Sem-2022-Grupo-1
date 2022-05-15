@@ -1,0 +1,540 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CategoryPointerAnnotation.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.chart.annotations</a> &gt; <span class="el_source">CategoryPointerAnnotation.java</span></div><h1>CategoryPointerAnnotation.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * ------------------------------
+ * CategoryPointerAnnotation.java
+ * ------------------------------
+ * (C) Copyright 2006-2022, by David Gilbert.
+ *
+ * Original Author:  David Gilbert;
+ * Contributor(s):   Peter Kolb (patch 2809117);
+ *
+ */
+
+package org.jfree.chart.annotations;
+
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Paint;
+import java.awt.Stroke;
+import java.awt.geom.GeneralPath;
+import java.awt.geom.Line2D;
+import java.awt.geom.Rectangle2D;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.util.Objects;
+
+import org.jfree.chart.internal.HashUtils;
+import org.jfree.chart.axis.CategoryAxis;
+import org.jfree.chart.axis.ValueAxis;
+import org.jfree.chart.event.AnnotationChangeEvent;
+import org.jfree.chart.plot.CategoryPlot;
+import org.jfree.chart.plot.Plot;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.text.TextUtils;
+import org.jfree.chart.api.RectangleEdge;
+import org.jfree.chart.internal.Args;
+import org.jfree.chart.api.PublicCloneable;
+import org.jfree.chart.internal.SerialUtils;
+import org.jfree.data.category.CategoryDataset;
+
+/**
+ * An arrow and label that can be placed on a {@link CategoryPlot}.  The arrow
+ * is drawn at a user-definable angle so that it points towards the (category,
+ * value) location for the annotation.
+ * &lt;p&gt;
+ * The arrow length (and its offset from the (category, value) location) is
+ * controlled by the tip radius and the base radius attributes.  Imagine two
+ * circles around the (category, value) coordinate: the inner circle defined by
+ * the tip radius, and the outer circle defined by the base radius.  Now, draw
+ * the arrow starting at some point on the outer circle (the point is
+ * determined by the angle), with the arrow tip being drawn at a corresponding
+ * point on the inner circle.
+ */
+public class CategoryPointerAnnotation extends CategoryTextAnnotation
+        implements Cloneable, PublicCloneable, Serializable {
+
+    /** For serialization. */
+    private static final long serialVersionUID = -4031161445009858551L;
+
+    /** The default tip radius (in Java2D units). */
+    public static final double DEFAULT_TIP_RADIUS = 10.0;
+
+    /** The default base radius (in Java2D units). */
+    public static final double DEFAULT_BASE_RADIUS = 30.0;
+
+    /** The default label offset (in Java2D units). */
+    public static final double DEFAULT_LABEL_OFFSET = 3.0;
+
+    /** The default arrow length (in Java2D units). */
+    public static final double DEFAULT_ARROW_LENGTH = 5.0;
+
+    /** The default arrow width (in Java2D units). */
+    public static final double DEFAULT_ARROW_WIDTH = 3.0;
+
+    /** The angle of the arrow's line (in radians). */
+    private double angle;
+
+    /**
+     * The radius from the (x, y) point to the tip of the arrow (in Java2D
+     * units).
+     */
+    private double tipRadius;
+
+    /**
+     * The radius from the (x, y) point to the start of the arrow line (in
+     * Java2D units).
+     */
+    private double baseRadius;
+
+    /** The length of the arrow head (in Java2D units). */
+    private double arrowLength;
+
+    /** The arrow width (in Java2D units, per side). */
+    private double arrowWidth;
+
+    /** The arrow stroke. */
+    private transient Stroke arrowStroke;
+
+    /** The arrow paint. */
+    private transient Paint arrowPaint;
+
+    /** The radius from the base point to the anchor point for the label. */
+    private double labelOffset;
+
+    /**
+     * Creates a new label and arrow annotation.
+     *
+     * @param label  the label ({@code null} permitted).
+     * @param key  the category key.
+     * @param value  the y-value (measured against the chart's range axis).
+     * @param angle  the angle of the arrow's line (in radians).
+     */
+    public CategoryPointerAnnotation(String label, Comparable key, double value,
+            double angle) {
+
+<span class="fc" id="L142">        super(label, key, value);</span>
+<span class="fc" id="L143">        this.angle = angle;</span>
+<span class="fc" id="L144">        this.tipRadius = DEFAULT_TIP_RADIUS;</span>
+<span class="fc" id="L145">        this.baseRadius = DEFAULT_BASE_RADIUS;</span>
+<span class="fc" id="L146">        this.arrowLength = DEFAULT_ARROW_LENGTH;</span>
+<span class="fc" id="L147">        this.arrowWidth = DEFAULT_ARROW_WIDTH;</span>
+<span class="fc" id="L148">        this.labelOffset = DEFAULT_LABEL_OFFSET;</span>
+<span class="fc" id="L149">        this.arrowStroke = new BasicStroke(1.0f);</span>
+<span class="fc" id="L150">        this.arrowPaint = Color.BLACK;</span>
+
+<span class="fc" id="L152">    }</span>
+
+    /**
+     * Returns the angle of the arrow.
+     *
+     * @return The angle (in radians).
+     *
+     * @see #setAngle(double)
+     */
+    public double getAngle() {
+<span class="nc" id="L162">        return this.angle;</span>
+    }
+
+    /**
+     * Sets the angle of the arrow and sends an
+     * {@link AnnotationChangeEvent} to all registered listeners.
+     *
+     * @param angle  the angle (in radians).
+     *
+     * @see #getAngle()
+     */
+    public void setAngle(double angle) {
+<span class="fc" id="L174">        this.angle = angle;</span>
+<span class="fc" id="L175">        fireAnnotationChanged();</span>
+<span class="fc" id="L176">    }</span>
+
+    /**
+     * Returns the tip radius.
+     *
+     * @return The tip radius (in Java2D units).
+     *
+     * @see #setTipRadius(double)
+     */
+    public double getTipRadius() {
+<span class="nc" id="L186">        return this.tipRadius;</span>
+    }
+
+    /**
+     * Sets the tip radius and sends an
+     * {@link AnnotationChangeEvent} to all registered listeners.
+     *
+     * @param radius  the radius (in Java2D units).
+     *
+     * @see #getTipRadius()
+     */
+    public void setTipRadius(double radius) {
+<span class="fc" id="L198">        this.tipRadius = radius;</span>
+<span class="fc" id="L199">        fireAnnotationChanged();</span>
+<span class="fc" id="L200">    }</span>
+
+    /**
+     * Returns the base radius.
+     *
+     * @return The base radius (in Java2D units).
+     *
+     * @see #setBaseRadius(double)
+     */
+    public double getBaseRadius() {
+<span class="nc" id="L210">        return this.baseRadius;</span>
+    }
+
+    /**
+     * Sets the base radius and sends an
+     * {@link AnnotationChangeEvent} to all registered listeners.
+     *
+     * @param radius  the radius (in Java2D units).
+     *
+     * @see #getBaseRadius()
+     */
+    public void setBaseRadius(double radius) {
+<span class="fc" id="L222">        this.baseRadius = radius;</span>
+<span class="fc" id="L223">        fireAnnotationChanged();</span>
+<span class="fc" id="L224">    }</span>
+
+    /**
+     * Returns the label offset.
+     *
+     * @return The label offset (in Java2D units).
+     *
+     * @see #setLabelOffset(double)
+     */
+    public double getLabelOffset() {
+<span class="nc" id="L234">        return this.labelOffset;</span>
+    }
+
+    /**
+     * Sets the label offset (from the arrow base, continuing in a straight
+     * line, in Java2D units) and sends an
+     * {@link AnnotationChangeEvent} to all registered listeners.
+     *
+     * @param offset  the offset (in Java2D units).
+     *
+     * @see #getLabelOffset()
+     */
+    public void setLabelOffset(double offset) {
+<span class="fc" id="L247">        this.labelOffset = offset;</span>
+<span class="fc" id="L248">        fireAnnotationChanged();</span>
+<span class="fc" id="L249">    }</span>
+
+    /**
+     * Returns the arrow length.
+     *
+     * @return The arrow length.
+     *
+     * @see #setArrowLength(double)
+     */
+    public double getArrowLength() {
+<span class="nc" id="L259">        return this.arrowLength;</span>
+    }
+
+    /**
+     * Sets the arrow length and sends an
+     * {@link AnnotationChangeEvent} to all registered listeners.
+     *
+     * @param length  the length.
+     *
+     * @see #getArrowLength()
+     */
+    public void setArrowLength(double length) {
+<span class="fc" id="L271">        this.arrowLength = length;</span>
+<span class="fc" id="L272">        fireAnnotationChanged();</span>
+<span class="fc" id="L273">    }</span>
+
+    /**
+     * Returns the arrow width.
+     *
+     * @return The arrow width (in Java2D units).
+     *
+     * @see #setArrowWidth(double)
+     */
+    public double getArrowWidth() {
+<span class="nc" id="L283">        return this.arrowWidth;</span>
+    }
+
+    /**
+     * Sets the arrow width and sends an
+     * {@link AnnotationChangeEvent} to all registered listeners.
+     *
+     * @param width  the width (in Java2D units).
+     *
+     * @see #getArrowWidth()
+     */
+    public void setArrowWidth(double width) {
+<span class="fc" id="L295">        this.arrowWidth = width;</span>
+<span class="fc" id="L296">        fireAnnotationChanged();</span>
+<span class="fc" id="L297">    }</span>
+
+    /**
+     * Returns the stroke used to draw the arrow line.
+     *
+     * @return The arrow stroke (never {@code null}).
+     *
+     * @see #setArrowStroke(Stroke)
+     */
+    public Stroke getArrowStroke() {
+<span class="nc" id="L307">        return this.arrowStroke;</span>
+    }
+
+    /**
+     * Sets the stroke used to draw the arrow line and sends an
+     * {@link AnnotationChangeEvent} to all registered listeners.
+     *
+     * @param stroke  the stroke ({@code null} not permitted).
+     *
+     * @see #getArrowStroke()
+     */
+    public void setArrowStroke(Stroke stroke) {
+<span class="fc" id="L319">        Args.nullNotPermitted(stroke, &quot;stroke&quot;);</span>
+<span class="fc" id="L320">        this.arrowStroke = stroke;</span>
+<span class="fc" id="L321">        fireAnnotationChanged();</span>
+<span class="fc" id="L322">    }</span>
+
+    /**
+     * Returns the paint used for the arrow.
+     *
+     * @return The arrow paint (never {@code null}).
+     *
+     * @see #setArrowPaint(Paint)
+     */
+    public Paint getArrowPaint() {
+<span class="nc" id="L332">        return this.arrowPaint;</span>
+    }
+
+    /**
+     * Sets the paint used for the arrow and sends an
+     * {@link AnnotationChangeEvent} to all registered listeners.
+     *
+     * @param paint  the arrow paint ({@code null} not permitted).
+     *
+     * @see #getArrowPaint()
+     */
+    public void setArrowPaint(Paint paint) {
+<span class="fc" id="L344">        Args.nullNotPermitted(paint, &quot;paint&quot;);</span>
+<span class="fc" id="L345">        this.arrowPaint = paint;</span>
+<span class="fc" id="L346">        fireAnnotationChanged();</span>
+<span class="fc" id="L347">    }</span>
+
+    private void drawLine(Graphics2D g2, double j2DX, double j2DY){
+<span class="nc" id="L350">        double startX = j2DX + Math.cos(this.angle) * this.baseRadius;</span>
+<span class="nc" id="L351">        double startY = j2DY + Math.sin(this.angle) * this.baseRadius;</span>
+
+<span class="nc" id="L353">        double endX = j2DX + Math.cos(this.angle) * this.tipRadius;</span>
+<span class="nc" id="L354">        double endY = j2DY + Math.sin(this.angle) * this.tipRadius;</span>
+
+<span class="nc" id="L356">        double arrowBaseX = endX + Math.cos(this.angle) * this.arrowLength;</span>
+<span class="nc" id="L357">        double arrowBaseY = endY + Math.sin(this.angle) * this.arrowLength;</span>
+
+<span class="nc" id="L359">        double arrowLeftX = arrowBaseX</span>
+<span class="nc" id="L360">                + Math.cos(this.angle + Math.PI / 2.0) * this.arrowWidth;</span>
+<span class="nc" id="L361">        double arrowLeftY = arrowBaseY</span>
+<span class="nc" id="L362">                + Math.sin(this.angle + Math.PI / 2.0) * this.arrowWidth;</span>
+
+<span class="nc" id="L364">        double arrowRightX = arrowBaseX</span>
+<span class="nc" id="L365">                - Math.cos(this.angle + Math.PI / 2.0) * this.arrowWidth;</span>
+<span class="nc" id="L366">        double arrowRightY = arrowBaseY</span>
+<span class="nc" id="L367">                - Math.sin(this.angle + Math.PI / 2.0) * this.arrowWidth;</span>
+
+<span class="nc" id="L369">        GeneralPath arrow = new GeneralPath();</span>
+<span class="nc" id="L370">        arrow.moveTo((float) endX, (float) endY);</span>
+<span class="nc" id="L371">        arrow.lineTo((float) arrowLeftX, (float) arrowLeftY);</span>
+<span class="nc" id="L372">        arrow.lineTo((float) arrowRightX, (float) arrowRightY);</span>
+<span class="nc" id="L373">        arrow.closePath();</span>
+
+<span class="nc" id="L375">        g2.setStroke(this.arrowStroke);</span>
+<span class="nc" id="L376">        g2.setPaint(this.arrowPaint);</span>
+<span class="nc" id="L377">        Line2D line = new Line2D.Double(startX, startY, arrowBaseX, arrowBaseY);</span>
+<span class="nc" id="L378">        g2.draw(line);</span>
+<span class="nc" id="L379">        g2.fill(arrow);</span>
+<span class="nc" id="L380">    }</span>
+
+    /**
+     * Draws the annotation.
+     *
+     * @param g2  the graphics device.
+     * @param plot  the plot.
+     * @param dataArea  the data area.
+     * @param domainAxis  the domain axis.
+     * @param rangeAxis  the range axis.
+     */
+    @Override
+    public void draw(Graphics2D g2, CategoryPlot plot, Rectangle2D dataArea,
+            CategoryAxis domainAxis, ValueAxis rangeAxis) {
+
+<span class="nc" id="L395">        PlotOrientation orientation = plot.getOrientation();</span>
+<span class="nc" id="L396">        RectangleEdge domainEdge = Plot.resolveDomainAxisLocation(</span>
+<span class="nc" id="L397">                plot.getDomainAxisLocation(), orientation);</span>
+<span class="nc" id="L398">        RectangleEdge rangeEdge = Plot.resolveRangeAxisLocation(</span>
+<span class="nc" id="L399">                plot.getRangeAxisLocation(), orientation);</span>
+<span class="nc" id="L400">        CategoryDataset dataset = plot.getDataset();</span>
+<span class="nc" id="L401">        int catIndex = dataset.getColumnIndex(getCategory());</span>
+<span class="nc" id="L402">        int catCount = dataset.getColumnCount();</span>
+<span class="nc" id="L403">        double j2DX = domainAxis.getCategoryMiddle(catIndex, catCount,</span>
+                dataArea, domainEdge);
+<span class="nc" id="L405">        double j2DY = rangeAxis.valueToJava2D(getValue(), dataArea, rangeEdge);</span>
+<span class="nc bnc" id="L406" title="All 2 branches missed.">        if (orientation == PlotOrientation.HORIZONTAL) {</span>
+<span class="nc" id="L407">            double temp = j2DX;</span>
+<span class="nc" id="L408">            j2DX = j2DY;</span>
+<span class="nc" id="L409">            j2DY = temp;</span>
+        }
+
+<span class="nc" id="L412">        drawLine(g2, j2DX, j2DY);</span>
+
+        // draw the label
+<span class="nc" id="L415">        g2.setFont(getFont());</span>
+<span class="nc" id="L416">        g2.setPaint(getPaint());</span>
+<span class="nc" id="L417">        double labelX = j2DX</span>
+<span class="nc" id="L418">            + Math.cos(this.angle) * (this.baseRadius + this.labelOffset);</span>
+<span class="nc" id="L419">        double labelY = j2DY</span>
+<span class="nc" id="L420">            + Math.sin(this.angle) * (this.baseRadius + this.labelOffset);</span>
+<span class="nc" id="L421">        /* Rectangle2D hotspot = */ TextUtils.drawAlignedString(getText(),</span>
+<span class="nc" id="L422">                g2, (float) labelX, (float) labelY, getTextAnchor());</span>
+        // TODO: implement the entity for the annotation
+
+<span class="nc" id="L425">    }</span>
+
+    /**
+     * Tests this annotation for equality with an arbitrary object.
+     *
+     * @param obj  the object ({@code null} permitted).
+     *
+     * @return {@code true} or {@code false}.
+     */
+    @Override
+    public boolean equals(Object obj) {
+
+<span class="pc bpc" id="L437" title="1 of 2 branches missed.">        if (obj == this) {</span>
+<span class="nc" id="L438">            return true;</span>
+        }
+<span class="pc bpc" id="L440" title="1 of 2 branches missed.">        if (!(obj instanceof CategoryPointerAnnotation)) {</span>
+<span class="nc" id="L441">            return false;</span>
+        }
+<span class="fc bfc" id="L443" title="All 2 branches covered.">        if (!super.equals(obj)) {</span>
+<span class="fc" id="L444">            return false;</span>
+        }
+<span class="fc" id="L446">        CategoryPointerAnnotation that = (CategoryPointerAnnotation) obj;</span>
+<span class="fc bfc" id="L447" title="All 2 branches covered.">        if (this.angle != that.angle) {</span>
+<span class="fc" id="L448">            return false;</span>
+        }
+<span class="fc bfc" id="L450" title="All 2 branches covered.">        if (this.tipRadius != that.tipRadius) {</span>
+<span class="fc" id="L451">            return false;</span>
+        }
+<span class="fc bfc" id="L453" title="All 2 branches covered.">        if (this.baseRadius != that.baseRadius) {</span>
+<span class="fc" id="L454">            return false;</span>
+        }
+<span class="fc bfc" id="L456" title="All 2 branches covered.">        if (this.arrowLength != that.arrowLength) {</span>
+<span class="fc" id="L457">            return false;</span>
+        }
+<span class="fc bfc" id="L459" title="All 2 branches covered.">        if (this.arrowWidth != that.arrowWidth) {</span>
+<span class="fc" id="L460">            return false;</span>
+        }
+<span class="fc bfc" id="L462" title="All 2 branches covered.">        if (!this.arrowPaint.equals(that.arrowPaint)) {</span>
+<span class="fc" id="L463">            return false;</span>
+        }
+<span class="fc bfc" id="L465" title="All 2 branches covered.">        if (!Objects.equals(this.arrowStroke, that.arrowStroke)) {</span>
+<span class="fc" id="L466">            return false;</span>
+        }
+<span class="fc bfc" id="L468" title="All 2 branches covered.">        if (this.labelOffset != that.labelOffset) {</span>
+<span class="fc" id="L469">            return false;</span>
+        }
+<span class="fc" id="L471">        return true;</span>
+    }
+
+    /**
+     * Returns a hash code for this instance.
+     *
+     * @return A hash code.
+     */
+    @Override
+    public int hashCode() {
+<span class="fc" id="L481">        int result = 193;</span>
+<span class="fc" id="L482">        long temp = Double.doubleToLongBits(this.angle);</span>
+<span class="fc" id="L483">        result = 37 * result + (int) (temp ^ (temp &gt;&gt;&gt; 32));</span>
+<span class="fc" id="L484">        temp = Double.doubleToLongBits(this.tipRadius);</span>
+<span class="fc" id="L485">        result = 37 * result + (int) (temp ^ (temp &gt;&gt;&gt; 32));</span>
+<span class="fc" id="L486">        temp = Double.doubleToLongBits(this.baseRadius);</span>
+<span class="fc" id="L487">        result = 37 * result + (int) (temp ^ (temp &gt;&gt;&gt; 32));</span>
+<span class="fc" id="L488">        temp = Double.doubleToLongBits(this.arrowLength);</span>
+<span class="fc" id="L489">        result = 37 * result + (int) (temp ^ (temp &gt;&gt;&gt; 32));</span>
+<span class="fc" id="L490">        temp = Double.doubleToLongBits(this.arrowWidth);</span>
+<span class="fc" id="L491">        result = 37 * result + (int) (temp ^ (temp &gt;&gt;&gt; 32));</span>
+<span class="fc" id="L492">        result = 37 * result + HashUtils.hashCodeForPaint(this.arrowPaint);</span>
+<span class="fc" id="L493">        result = 37 * result + this.arrowStroke.hashCode();</span>
+<span class="fc" id="L494">        temp = Double.doubleToLongBits(this.labelOffset);</span>
+<span class="fc" id="L495">        result = 37 * result + (int) (temp ^ (temp &gt;&gt;&gt; 32));</span>
+<span class="fc" id="L496">        return result;</span>
+    }
+
+    /**
+     * Returns a clone of the annotation.
+     *
+     * @return A clone.
+     *
+     * @throws CloneNotSupportedException  if the annotation can't be cloned.
+     */
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+<span class="fc" id="L508">        return super.clone();</span>
+    }
+
+    /**
+     * Provides serialization support.
+     *
+     * @param stream  the output stream.
+     *
+     * @throws IOException if there is an I/O error.
+     */
+    private void writeObject(ObjectOutputStream stream) throws IOException {
+<span class="fc" id="L519">        stream.defaultWriteObject();</span>
+<span class="fc" id="L520">        SerialUtils.writePaint(this.arrowPaint, stream);</span>
+<span class="fc" id="L521">        SerialUtils.writeStroke(this.arrowStroke, stream);</span>
+<span class="fc" id="L522">    }</span>
+
+    /**
+     * Provides serialization support.
+     *
+     * @param stream  the input stream.
+     *
+     * @throws IOException  if there is an I/O error.
+     * @throws ClassNotFoundException  if there is a classpath problem.
+     */
+    private void readObject(ObjectInputStream stream)
+        throws IOException, ClassNotFoundException {
+<span class="fc" id="L534">        stream.defaultReadObject();</span>
+<span class="fc" id="L535">        this.arrowPaint = SerialUtils.readPaint(stream);</span>
+<span class="fc" id="L536">        this.arrowStroke = SerialUtils.readStroke(stream);</span>
+<span class="fc" id="L537">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

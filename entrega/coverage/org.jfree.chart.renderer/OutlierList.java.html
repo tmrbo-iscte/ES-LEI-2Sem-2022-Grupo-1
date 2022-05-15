@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OutlierList.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.chart.renderer</a> &gt; <span class="el_source">OutlierList.java</span></div><h1>OutlierList.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * ----------------
+ * OutlierList.java
+ * ----------------
+ * (C) Copyright 2003-2020, by David Browning and Contributors.
+ *
+ * Original Author:  David Browning (for Australian Institute of Marine
+ *                   Science);
+ * Contributor(s):   David Gilbert;
+ *
+ */
+
+package org.jfree.chart.renderer;
+
+import java.awt.geom.Point2D;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * A collection of outliers for a single entity in a box and whisker plot.
+ *
+ * Outliers are grouped in lists for each entity. Lists contain
+ * one or more outliers, determined by whether overlaps have
+ * occured. Overlapping outliers are grouped in the same list.
+ *
+ * Each list contains an averaged outlier, which is the same as a single
+ * outlier if there is only one outlier in the list, but the average of
+ * all the outliers in the list if there is more than one.
+ *
+ * NB This is simply my scheme for displaying outliers, and might not be
+ * acceptable by the wider community.
+ */
+public class OutlierList {
+
+    /** Storage for the outliers. */
+    private final List&lt;Outlier&gt; outliers;
+
+    /** The averaged outlier. */
+    private Outlier averagedOutlier;
+
+    /**
+     * A flag that indicates whether or not there are multiple outliers in the
+     * list.
+     */
+<span class="nc" id="L70">    private boolean multiple = false;</span>
+
+    /**
+     * Creates a new list containing a single outlier.
+     *
+     * @param outlier  the outlier.
+     */
+<span class="nc" id="L77">    public OutlierList(Outlier outlier) {</span>
+<span class="nc" id="L78">        this.outliers = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L79">        setAveragedOutlier(outlier);</span>
+<span class="nc" id="L80">    }</span>
+
+    /**
+     * Adds an outlier to the list.
+     *
+     * @param outlier  the outlier.
+     *
+     * @return A boolean.
+     */
+    public boolean add(Outlier outlier) {
+<span class="nc" id="L90">        return this.outliers.add(outlier);</span>
+    }
+
+    /**
+     * Returns the number of outliers in the list.
+     *
+     * @return The item count.
+     */
+    public int getItemCount() {
+<span class="nc" id="L99">        return this.outliers.size();</span>
+    }
+
+    /**
+     * Returns the averaged outlier.
+     *
+     * @return The averaged outlier.
+     */
+    public Outlier getAveragedOutlier() {
+<span class="nc" id="L108">        return this.averagedOutlier;</span>
+    }
+
+    /**
+     * Sets the averaged outlier.
+     *
+     * @param averagedOutlier  the averaged outlier.
+     */
+    public void setAveragedOutlier(Outlier averagedOutlier) {
+<span class="nc" id="L117">        this.averagedOutlier = averagedOutlier;</span>
+<span class="nc" id="L118">    }</span>
+
+    /**
+     * Returns {@code true} if the list contains multiple outliers, and
+     * {@code false} otherwise.
+     *
+     * @return A boolean.
+     */
+    public boolean isMultiple() {
+<span class="nc" id="L127">        return this.multiple;</span>
+    }
+
+    /**
+     * Sets the flag that indicates whether or not this list represents
+     * multiple outliers.
+     *
+     * @param multiple  the flag.
+     */
+    public void setMultiple(boolean multiple) {
+<span class="nc" id="L137">        this.multiple = multiple;</span>
+<span class="nc" id="L138">    }</span>
+
+    /**
+     * Returns {@code true} if the outlier overlaps, and
+     * {@code false} otherwise.
+     *
+     * @param other  the outlier.
+     *
+     * @return A boolean.
+     */
+    public boolean isOverlapped(Outlier other) {
+<span class="nc bnc" id="L149" title="All 2 branches missed.">        if (other == null) {</span>
+<span class="nc" id="L150">            return false;</span>
+        }
+<span class="nc" id="L152">        boolean result = other.overlaps(getAveragedOutlier());</span>
+<span class="nc" id="L153">        return result;</span>
+
+    }
+
+    /**
+     * Updates the averaged outlier.
+     *
+     */
+    public void updateAveragedOutlier() {
+<span class="nc" id="L162">        double totalXCoords = 0.0;</span>
+<span class="nc" id="L163">        double totalYCoords = 0.0;</span>
+<span class="nc" id="L164">        int size = getItemCount();</span>
+<span class="nc bnc" id="L165" title="All 2 branches missed.">        for (Outlier o : this.outliers) {</span>
+<span class="nc" id="L166">            totalXCoords += o.getX();</span>
+<span class="nc" id="L167">            totalYCoords += o.getY();</span>
+<span class="nc" id="L168">        }</span>
+<span class="nc" id="L169">        getAveragedOutlier().getPoint().setLocation(</span>
+                new Point2D.Double(totalXCoords / size, totalYCoords / size));
+<span class="nc" id="L171">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

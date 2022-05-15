@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PaintScaleLegendStrip.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.chart.legend</a> &gt; <span class="el_source">PaintScaleLegendStrip.java</span></div><h1>PaintScaleLegendStrip.java</h1><pre class="source lang-java linenums">package org.jfree.chart.legend;
+
+import org.jfree.chart.event.TitleChangeEvent;
+import org.jfree.chart.internal.Args;
+import org.jfree.chart.internal.PaintUtils;
+
+import java.awt.*;
+import java.util.Objects;
+
+public class PaintScaleLegendStrip {
+    private final PaintScaleLegend psl;
+
+    /**
+     * The thickness of the paint strip (in Java2D units).
+     */
+    private double stripWidth;
+
+    /**
+     * A flag that controls whether or not an outline is drawn around the
+     * paint strip.
+     */
+    private boolean stripOutlineVisible;
+
+    /**
+     * The paint used to draw an outline around the paint strip.
+     */
+    private transient Paint stripOutlinePaint;
+
+    /**
+     * The stroke used to draw an outline around the paint strip.
+     */
+    private transient Stroke stripOutlineStroke;
+
+<span class="fc" id="L34">    public PaintScaleLegendStrip(PaintScaleLegend psl, double stripWidth, boolean stripOutlineVisible, Paint stripOutlinePaint, Stroke stripOutlineStroke) {</span>
+<span class="fc" id="L35">        Args.nullNotPermitted(psl, &quot;psl&quot;);</span>
+<span class="fc" id="L36">        Args.nullNotPermitted(stripOutlinePaint, &quot;stripOutlinePaint&quot;);</span>
+<span class="fc" id="L37">        Args.nullNotPermitted(stripOutlineStroke, &quot;stripOutlineStroke&quot;);</span>
+<span class="fc" id="L38">        this.psl = psl;</span>
+<span class="fc" id="L39">        this.stripWidth = stripWidth;</span>
+<span class="fc" id="L40">        this.stripOutlineVisible = stripOutlineVisible;</span>
+<span class="fc" id="L41">        this.stripOutlinePaint = stripOutlinePaint;</span>
+<span class="fc" id="L42">        this.stripOutlineStroke = stripOutlineStroke;</span>
+<span class="fc" id="L43">    }</span>
+
+    public double getStripWidth() {
+<span class="nc" id="L46">        return this.stripWidth;</span>
+    }
+
+    public void setStripWidth(double width) {
+<span class="fc" id="L50">        this.stripWidth = width;</span>
+<span class="fc" id="L51">        psl.notifyListeners(new TitleChangeEvent(psl));</span>
+<span class="fc" id="L52">    }</span>
+
+    public boolean isStripOutlineVisible() {
+<span class="fc" id="L55">        return this.stripOutlineVisible;</span>
+    }
+
+    public void setStripOutlineVisible(boolean visible) {
+<span class="fc" id="L59">        this.stripOutlineVisible = visible;</span>
+<span class="fc" id="L60">        psl.notifyListeners(new TitleChangeEvent(psl));</span>
+<span class="fc" id="L61">    }</span>
+
+    public Paint getStripOutlinePaint() {
+<span class="fc" id="L64">        return this.stripOutlinePaint;</span>
+    }
+
+    public void setStripOutlinePaint(Paint paint) {
+<span class="fc" id="L68">        Args.nullNotPermitted(paint, &quot;paint&quot;);</span>
+<span class="fc" id="L69">        this.stripOutlinePaint = paint;</span>
+<span class="fc" id="L70">        psl.notifyListeners(new TitleChangeEvent(psl));</span>
+<span class="fc" id="L71">    }</span>
+
+    public Stroke getStripOutlineStroke() {
+<span class="fc" id="L74">        return this.stripOutlineStroke;</span>
+    }
+
+    public void setStripOutlineStroke(Stroke stroke) {
+<span class="fc" id="L78">        Args.nullNotPermitted(stroke, &quot;stroke&quot;);</span>
+<span class="fc" id="L79">        this.stripOutlineStroke = stroke;</span>
+<span class="fc" id="L80">        psl.notifyListeners(new TitleChangeEvent(psl));</span>
+<span class="fc" id="L81">    }</span>
+
+    @Override
+    public boolean equals(Object o) {
+<span class="fc bfc" id="L85" title="All 2 branches covered.">        if (this == o) return true;</span>
+<span class="pc bpc" id="L86" title="2 of 4 branches missed.">        if (o == null || getClass() != o.getClass()) return false;</span>
+<span class="fc" id="L87">        PaintScaleLegendStrip that = (PaintScaleLegendStrip) o;</span>
+<span class="fc bfc" id="L88" title="All 4 branches covered.">        return Double.compare(that.stripWidth, stripWidth) == 0</span>
+                &amp;&amp; stripOutlineVisible == that.stripOutlineVisible
+<span class="fc bfc" id="L90" title="All 2 branches covered.">                &amp;&amp; PaintUtils.equal(stripOutlinePaint, that.stripOutlinePaint)</span>
+<span class="fc bfc" id="L91" title="All 2 branches covered.">                &amp;&amp; Objects.equals(stripOutlineStroke, that.stripOutlineStroke);</span>
+    }
+
+    @Override
+    public int hashCode() {
+<span class="nc" id="L96">        return Objects.hash(psl, stripWidth, stripOutlineVisible, stripOutlinePaint, stripOutlineStroke);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

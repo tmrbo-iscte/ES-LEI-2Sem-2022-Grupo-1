@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BoxAndWhiskerCalculator.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.data.statistics</a> &gt; <span class="el_source">BoxAndWhiskerCalculator.java</span></div><h1>BoxAndWhiskerCalculator.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * ----------------------------
+ * BoxAndWhiskerCalculator.java
+ * ----------------------------
+ * (C) Copyright 2003-2022, by David Gilbert and Contributors.
+ *
+ * Original Author:  David Gilbert;
+ * Contributor(s):   -;
+ *
+ */
+
+package org.jfree.data.statistics;
+
+import org.jfree.chart.internal.Args;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * A utility class that calculates the mean, median, quartiles Q1 and Q3, plus
+ * a list of outlier values...all from an arbitrary list of
+ * {@code Number} objects.
+ */
+<span class="nc" id="L50">public abstract class BoxAndWhiskerCalculator {</span>
+
+    /**
+     * Calculates the statistics required for a {@link BoxAndWhiskerItem}
+     * from a list of {@code Number} objects.  Any items in the list
+     * that are {@code null}, not an instance of {@code Number}, or
+     * equivalent to {@code Double.NaN}, will be ignored.
+     *
+     * @param values  a list of numbers (a {@code null} list is not
+     *                permitted).
+     *
+     * @return A box-and-whisker item.
+     */
+    public static BoxAndWhiskerItem calculateBoxAndWhiskerStatistics(
+            List&lt;? extends Number&gt; values) {
+<span class="fc" id="L65">        return calculateBoxAndWhiskerStatistics(values, true);</span>
+    }
+
+    /**
+     * Calculates the statistics required for a {@link BoxAndWhiskerItem}
+     * from a list of {@code Number} objects.  Any items in the list
+     * that are {@code null}, not an instance of {@code Number}, or
+     * equivalent to {@code Double.NaN}, will be ignored.
+     *
+     * @param values  a list of numbers (a {@code null} list is not
+     *                permitted).
+     * @param stripNullAndNaNItems  a flag that controls the handling of null
+     *     and NaN items.
+     *
+     * @return A box-and-whisker item.
+     *
+     * @since 1.0.3
+     */
+    public static BoxAndWhiskerItem calculateBoxAndWhiskerStatistics(
+            List&lt;? extends Number&gt; values, boolean stripNullAndNaNItems) {
+
+<span class="fc" id="L86">        Args.nullNotPermitted(values, &quot;values&quot;);</span>
+
+        List vlist;
+<span class="pc bpc" id="L89" title="1 of 2 branches missed.">        if (stripNullAndNaNItems) {</span>
+<span class="fc" id="L90">            vlist = new ArrayList(values.size());</span>
+<span class="fc bfc" id="L91" title="All 2 branches covered.">            for (Object obj : values) {</span>
+<span class="pc bpc" id="L92" title="1 of 2 branches missed.">                if (obj instanceof Number) {</span>
+<span class="fc" id="L93">                    Number n = (Number) obj;</span>
+<span class="fc" id="L94">                    double v = n.doubleValue();</span>
+<span class="fc bfc" id="L95" title="All 2 branches covered.">                    if (!Double.isNaN(v)) {</span>
+<span class="fc" id="L96">                        vlist.add(n);</span>
+                    }
+                }
+<span class="fc" id="L99">            }</span>
+        }
+        else {
+<span class="nc" id="L102">            vlist = values;</span>
+        }
+<span class="fc" id="L104">        Collections.sort(vlist);</span>
+
+<span class="fc" id="L106">        double mean = Statistics.calculateMean(vlist, false);</span>
+<span class="fc" id="L107">        double median = Statistics.calculateMedian(vlist, false);</span>
+<span class="fc" id="L108">        double q1 = calculateQ1(vlist);</span>
+<span class="fc" id="L109">        double q3 = calculateQ3(vlist);</span>
+
+<span class="fc" id="L111">        double interQuartileRange = q3 - q1;</span>
+
+<span class="fc" id="L113">        double upperOutlierThreshold = q3 + (interQuartileRange * 1.5);</span>
+<span class="fc" id="L114">        double lowerOutlierThreshold = q1 - (interQuartileRange * 1.5);</span>
+
+<span class="fc" id="L116">        double upperFaroutThreshold = q3 + (interQuartileRange * 2.0);</span>
+<span class="fc" id="L117">        double lowerFaroutThreshold = q1 - (interQuartileRange * 2.0);</span>
+
+<span class="fc" id="L119">        double minRegularValue = Double.POSITIVE_INFINITY;</span>
+<span class="fc" id="L120">        double maxRegularValue = Double.NEGATIVE_INFINITY;</span>
+<span class="fc" id="L121">        double minOutlier = Double.POSITIVE_INFINITY;</span>
+<span class="fc" id="L122">        double maxOutlier = Double.NEGATIVE_INFINITY;</span>
+<span class="fc" id="L123">        List&lt;Number&gt; outliers = new ArrayList&lt;&gt;();</span>
+
+<span class="fc bfc" id="L125" title="All 2 branches covered.">        for (Object o : vlist) {</span>
+<span class="fc" id="L126">            Number number = (Number) o;</span>
+<span class="fc" id="L127">            double value = number.doubleValue();</span>
+<span class="pc bpc" id="L128" title="1 of 2 branches missed.">            if (value &gt; upperOutlierThreshold) {</span>
+<span class="nc" id="L129">                outliers.add(number);</span>
+<span class="nc bnc" id="L130" title="All 4 branches missed.">                if (value &gt; maxOutlier &amp;&amp; value &lt;= upperFaroutThreshold) {</span>
+<span class="nc" id="L131">                    maxOutlier = value;</span>
+                }
+            }
+<span class="pc bpc" id="L134" title="1 of 2 branches missed.">            else if (value &lt; lowerOutlierThreshold) {</span>
+<span class="nc" id="L135">                outliers.add(number);</span>
+<span class="nc bnc" id="L136" title="All 4 branches missed.">                if (value &lt; minOutlier &amp;&amp; value &gt;= lowerFaroutThreshold) {</span>
+<span class="nc" id="L137">                    minOutlier = value;</span>
+                }
+            }
+            else {
+<span class="fc" id="L141">                minRegularValue = Math.min(minRegularValue, value);</span>
+<span class="fc" id="L142">                maxRegularValue = Math.max(maxRegularValue, value);</span>
+            }
+<span class="fc" id="L144">            minOutlier = Math.min(minOutlier, minRegularValue);</span>
+<span class="fc" id="L145">            maxOutlier = Math.max(maxOutlier, maxRegularValue);</span>
+<span class="fc" id="L146">        }</span>
+
+<span class="fc" id="L148">        return new BoxAndWhiskerItem(mean, median, q1, q3, minRegularValue,</span>
+                maxRegularValue, minOutlier, maxOutlier, outliers);
+
+    }
+
+    /**
+     * Calculates the first quartile for a list of numbers in ascending order.
+     * If the items in the list are not in ascending order, the result is
+     * unspecified.  If the list contains items that are {@code null}, not
+     * an instance of {@code Number}, or equivalent to
+     * {@code Double.NaN}, the result is unspecified.
+     *
+     * @param values  the numbers in ascending order ({@code null} not
+     *     permitted).
+     *
+     * @return The first quartile.
+     */
+    public static double calculateQ1(List values) {
+<span class="fc" id="L166">        Args.nullNotPermitted(values, &quot;values&quot;);</span>
+
+<span class="fc" id="L168">        double result = Double.NaN;</span>
+<span class="fc" id="L169">        int count = values.size();</span>
+<span class="fc bfc" id="L170" title="All 2 branches covered.">        if (count &gt; 0) {</span>
+<span class="fc bfc" id="L171" title="All 2 branches covered.">            if (count % 2 == 1) {</span>
+<span class="fc bfc" id="L172" title="All 2 branches covered.">                if (count &gt; 1) {</span>
+<span class="fc" id="L173">                    result = Statistics.calculateMedian(values, 0, count / 2);</span>
+                }
+                else {
+<span class="fc" id="L176">                    result = Statistics.calculateMedian(values, 0, 0);</span>
+                }
+            }
+            else {
+<span class="fc" id="L180">                result = Statistics.calculateMedian(values, 0, count / 2 - 1);</span>
+            }
+
+        }
+<span class="fc" id="L184">        return result;</span>
+    }
+
+    /**
+     * Calculates the third quartile for a list of numbers in ascending order.
+     * If the items in the list are not in ascending order, the result is
+     * unspecified.  If the list contains items that are {@code null}, not
+     * an instance of {@code Number}, or equivalent to
+     * {@code Double.NaN}, the result is unspecified.
+     *
+     * @param values  the list of values ({@code null} not permitted).
+     *
+     * @return The third quartile.
+     */
+    public static double calculateQ3(List values) {
+<span class="fc" id="L199">        Args.nullNotPermitted(values, &quot;values&quot;);</span>
+<span class="fc" id="L200">        double result = Double.NaN;</span>
+<span class="fc" id="L201">        int count = values.size();</span>
+<span class="fc bfc" id="L202" title="All 2 branches covered.">        if (count &gt; 0) {</span>
+<span class="fc bfc" id="L203" title="All 2 branches covered.">            if (count % 2 == 1) {</span>
+<span class="fc bfc" id="L204" title="All 2 branches covered.">                if (count &gt; 1) {</span>
+<span class="fc" id="L205">                    result = Statistics.calculateMedian(values, count / 2,</span>
+                            count - 1);
+                }
+                else {
+<span class="fc" id="L209">                    result = Statistics.calculateMedian(values, 0, 0);</span>
+                }
+            }
+            else {
+<span class="fc" id="L213">                result = Statistics.calculateMedian(values, count / 2,</span>
+                        count - 1);
+            }
+        }
+<span class="fc" id="L217">        return result;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

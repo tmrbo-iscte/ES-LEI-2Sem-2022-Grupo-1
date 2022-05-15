@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CustomPieURLGenerator.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.chart.urls</a> &gt; <span class="el_source">CustomPieURLGenerator.java</span></div><h1>CustomPieURLGenerator.java</h1><pre class="source lang-java linenums">/* ======================================
+ * JFreeChart : a free Java chart library
+ * ======================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * --------------------------
+ * CustomPieURLGenerator.java
+ * --------------------------
+ * (C) Copyright 2004-2021, by David Basten and Contributors.
+ *
+ * Original Author:  David Basten;
+ * Contributors:     -;
+ *
+ */
+
+package org.jfree.chart.urls;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.jfree.chart.plot.pie.MultiplePiePlot;
+import org.jfree.chart.plot.pie.PiePlot;
+import org.jfree.chart.api.PublicCloneable;
+import org.jfree.data.general.PieDataset;
+
+/**
+ * A custom URL generator for pie charts.  This implementation supports both
+ * the standard {@link PiePlot} as well as {@link MultiplePiePlot}.
+ */
+public class CustomPieURLGenerator implements PieURLGenerator,
+        Cloneable, PublicCloneable, Serializable {
+
+    /** For serialization. */
+    private static final long serialVersionUID = 7100607670144900503L;
+
+    /** Storage for the URLs - a list to support multi pie plots. */
+    private final List&lt;Map&lt;Comparable&lt;?&gt;, String&gt;&gt; urlMaps;
+
+    /**
+     * Creates a new {@code CustomPieURLGenerator} instance, initially
+     * empty.  Call {@link #addURLs(Map)} to specify the URL fragments to be
+     * used.
+     */
+<span class="fc" id="L70">    public CustomPieURLGenerator() {</span>
+<span class="fc" id="L71">        this.urlMaps = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L72">    }</span>
+
+    /**
+     * Generates a URL fragment.
+     *
+     * @param dataset  the dataset (ignored).
+     * @param key  the item key.
+     * @param plotIndex  the plot index.
+     *
+     * @return A string containing the generated URL.
+     *
+     * @see #getURL(Comparable, int)
+     */
+    @Override
+    public String generateURL(PieDataset dataset, Comparable&lt;?&gt; key,
+                              int plotIndex) {
+<span class="nc" id="L88">        return getURL(key, plotIndex);</span>
+    }
+
+    /**
+     * Returns the number of URL maps stored by the generator.  For a standard
+     * pie chart, only one map is required, but for a {@link MultiplePiePlot}
+     * the generator will use multiple maps.
+     *
+     * @return The list count.
+     *
+     * @see #addURLs(Map)
+     */
+    public int getListCount() {
+<span class="fc" id="L101">        return this.urlMaps.size();</span>
+    }
+
+    /**
+     * Returns the number of URLs in a given map (specified by its position
+     * in the map list).
+     *
+     * @param plotIndex  the plot index (zero based).
+     *
+     * @return The URL count.
+     *
+     * @see #getListCount()
+     */
+    public int getURLCount(int plotIndex) {
+<span class="fc" id="L115">        int result = 0;</span>
+<span class="fc" id="L116">        Map&lt;Comparable&lt;?&gt;, String&gt; urlMap = this.urlMaps.get(plotIndex);</span>
+<span class="pc bpc" id="L117" title="1 of 2 branches missed.">        if (urlMap != null) {</span>
+<span class="fc" id="L118">            result = urlMap.size();</span>
+        }
+<span class="fc" id="L120">        return result;</span>
+    }
+
+    /**
+     * Returns the URL for a section in the specified map.
+     *
+     * @param key  the key.
+     * @param plotIndex  the plot index.
+     *
+     * @return The URL.
+     */
+    public String getURL(Comparable&lt;?&gt; key, int plotIndex) {
+<span class="fc" id="L132">        String result = null;</span>
+<span class="pc bpc" id="L133" title="1 of 2 branches missed.">        if (plotIndex &lt; getListCount()) {</span>
+<span class="fc" id="L134">            Map&lt;Comparable&lt;?&gt;, String&gt; urlMap = this.urlMaps.get(plotIndex);</span>
+<span class="pc bpc" id="L135" title="1 of 2 branches missed.">            if (urlMap != null) {</span>
+<span class="fc" id="L136">                result = (String) urlMap.get(key);</span>
+            }
+        }
+<span class="fc" id="L139">        return result;</span>
+    }
+
+    /**
+     * Adds a map containing {@code (key, URL)} mappings where each
+     * {@code key} is an instance of {@code Comparable}
+     * (corresponding to the key for an item in a pie dataset) and each
+     * {@code URL} is a {@code String} representing a URL fragment.
+     * &lt;br&gt;&lt;br&gt;
+     * The map is appended to an internal list...you can add multiple maps
+     * if you are working with, say, a {@link MultiplePiePlot}.
+     *
+     * @param urlMap  the URLs ({@code null} permitted).
+     */
+    public void addURLs(Map urlMap) {
+<span class="fc" id="L154">        this.urlMaps.add(urlMap);</span>
+<span class="fc" id="L155">    }</span>
+
+    /**
+     * Tests if this object is equal to another.
+     *
+     * @param o  the other object.
+     *
+     * @return A boolean.
+     */
+    @Override
+    public boolean equals(Object o) {
+
+<span class="pc bpc" id="L167" title="1 of 2 branches missed.">        if (o == this) {</span>
+<span class="nc" id="L168">            return true;</span>
+        }
+
+<span class="pc bpc" id="L171" title="1 of 2 branches missed.">        if (o instanceof CustomPieURLGenerator) {</span>
+<span class="fc" id="L172">            CustomPieURLGenerator generator = (CustomPieURLGenerator) o;</span>
+<span class="fc bfc" id="L173" title="All 2 branches covered.">            if (getListCount() != generator.getListCount()) {</span>
+<span class="fc" id="L174">                return false;</span>
+            }
+            Set keySet;
+<span class="fc bfc" id="L177" title="All 2 branches covered.">            for (int pieItem = 0; pieItem &lt; getListCount(); pieItem++) {</span>
+<span class="pc bpc" id="L178" title="1 of 2 branches missed.">                if (getURLCount(pieItem) != generator.getURLCount(pieItem)) {</span>
+<span class="nc" id="L179">                    return false;</span>
+                }
+<span class="fc" id="L181">                keySet = this.urlMaps.get(pieItem).keySet();</span>
+                String key;
+<span class="fc bfc" id="L183" title="All 2 branches covered.">                for (Iterator i = keySet.iterator(); i.hasNext();) {</span>
+<span class="fc" id="L184">                key = (String) i.next();</span>
+<span class="pc bpc" id="L185" title="1 of 2 branches missed.">                    if (!getURL(key, pieItem).equals(</span>
+<span class="fc" id="L186">                            generator.getURL(key, pieItem))) {</span>
+<span class="nc" id="L187">                        return false;</span>
+                    }
+                }
+            }
+<span class="fc" id="L191">            return true;</span>
+        }
+<span class="nc" id="L193">        return false;</span>
+    }
+
+    /**
+     * Returns a clone of the generator.
+     *
+     * @return A clone.
+     *
+     * @throws CloneNotSupportedException if cloning is not supported.
+     */
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+<span class="fc" id="L205">        CustomPieURLGenerator urlGen = new CustomPieURLGenerator();</span>
+        Map map;
+        Map newMap;
+        String key;
+
+<span class="fc bfc" id="L210" title="All 2 branches covered.">        for (Iterator i = this.urlMaps.iterator(); i.hasNext();) {</span>
+<span class="fc" id="L211">            map = (Map) i.next();</span>
+
+<span class="fc" id="L213">            newMap = new HashMap();</span>
+<span class="fc bfc" id="L214" title="All 2 branches covered.">            for (Iterator j = map.keySet().iterator(); j.hasNext();) {</span>
+<span class="fc" id="L215">                key = (String) j.next();</span>
+<span class="fc" id="L216">                newMap.put(key, map.get(key));</span>
+            }
+
+<span class="fc" id="L219">            urlGen.addURLs(newMap);</span>
+        }
+
+<span class="fc" id="L222">        return urlGen;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

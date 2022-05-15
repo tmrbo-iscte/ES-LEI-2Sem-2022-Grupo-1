@@ -1,0 +1,746 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LegendGraphic.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.chart.legend</a> &gt; <span class="el_source">LegendGraphic.java</span></div><h1>LegendGraphic.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * ------------------
+ * LegendGraphic.java
+ * ------------------
+ * (C) Copyright 2004-2022, by David Gilbert.
+ *
+ * Original Author:  David Gilbert;
+ * Contributor(s):   -;
+ */
+
+package org.jfree.chart.legend;
+
+import java.awt.GradientPaint;
+import java.awt.Graphics2D;
+import java.awt.Paint;
+import java.awt.Shape;
+import java.awt.Stroke;
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.Objects;
+
+import org.jfree.chart.block.AbstractBlock;
+import org.jfree.chart.block.Block;
+import org.jfree.chart.block.LengthConstraintType;
+import org.jfree.chart.block.RectangleConstraint;
+import org.jfree.chart.util.GradientPaintTransformer;
+import org.jfree.chart.api.RectangleAnchor;
+import org.jfree.chart.block.Size2D;
+import org.jfree.chart.util.StandardGradientPaintTransformer;
+import org.jfree.chart.internal.PaintUtils;
+import org.jfree.chart.internal.Args;
+import org.jfree.chart.api.PublicCloneable;
+import org.jfree.chart.internal.CloneUtils;
+import org.jfree.chart.internal.SerialUtils;
+import org.jfree.chart.internal.ShapeUtils;
+
+/**
+ * The graphical item within a legend item.
+ */
+<span class="pc bpc" id="L68" title="1 of 2 branches missed.">public class LegendGraphic extends AbstractBlock</span>
+                           implements Block, PublicCloneable {
+
+    /** For serialization. */
+    static final long serialVersionUID = -1338791523854985009L;
+
+    /**
+     * A flag that controls whether or not the shape is visible - see also
+     * lineVisible.
+     */
+    private boolean shapeVisible;
+
+    /**
+     * The shape to display.  To allow for accurate positioning, the center
+     * of the shape should be at (0, 0).
+     */
+    private transient Shape shape;
+
+    /**
+     * Defines the location within the block to which the shape will be aligned.
+     */
+    private RectangleAnchor shapeLocation;
+
+    /**
+     * Defines the point on the shape's bounding rectangle that will be
+     * aligned to the drawing location when the shape is rendered.
+     */
+    private RectangleAnchor shapeAnchor;
+
+    /** A flag that controls whether or not the shape is filled. */
+    private boolean shapeFilled;
+
+    /** The fill paint for the shape. */
+    private transient Paint fillPaint;
+
+    /**
+     * The fill paint transformer (used if the fillPaint is an instance of
+     * GradientPaint).
+     */
+    private GradientPaintTransformer fillPaintTransformer;
+
+    /** A flag that controls whether or not the shape outline is visible. */
+    private boolean shapeOutlineVisible;
+
+    /** The outline paint for the shape. */
+    private transient Paint outlinePaint;
+
+    /** The outline stroke for the shape. */
+    private transient Stroke outlineStroke;
+
+    /**
+     * A flag that controls whether or not the line is visible - see also
+     * shapeVisible.
+     */
+    private boolean lineVisible;
+
+    /** The line. */
+    private transient Shape line;
+
+    /** The line stroke. */
+    private transient Stroke lineStroke;
+
+    /** The line paint. */
+    private transient Paint linePaint;
+
+    /**
+     * Creates a new legend graphic.
+     *
+     * @param shape  the shape ({@code null} not permitted).
+     * @param fillPaint  the fill paint ({@code null} not permitted).
+     */
+<span class="fc" id="L139">    public LegendGraphic(Shape shape, Paint fillPaint) {</span>
+<span class="fc" id="L140">        Args.nullNotPermitted(shape, &quot;shape&quot;);</span>
+<span class="fc" id="L141">        Args.nullNotPermitted(fillPaint, &quot;fillPaint&quot;);</span>
+<span class="fc" id="L142">        this.shapeVisible = true;</span>
+<span class="fc" id="L143">        this.shape = shape;</span>
+<span class="fc" id="L144">        this.shapeAnchor = RectangleAnchor.CENTER;</span>
+<span class="fc" id="L145">        this.shapeLocation = RectangleAnchor.CENTER;</span>
+<span class="fc" id="L146">        this.shapeFilled = true;</span>
+<span class="fc" id="L147">        this.fillPaint = fillPaint;</span>
+<span class="fc" id="L148">        this.fillPaintTransformer = new StandardGradientPaintTransformer();</span>
+<span class="fc" id="L149">        setPadding(2.0, 2.0, 2.0, 2.0);</span>
+<span class="fc" id="L150">    }</span>
+
+    /**
+     * Returns a flag that controls whether or not the shape
+     * is visible.
+     *
+     * @return A boolean.
+     *
+     * @see #setShapeVisible(boolean)
+     */
+    public boolean isShapeVisible() {
+<span class="fc" id="L161">        return this.shapeVisible;</span>
+    }
+
+    /**
+     * Sets a flag that controls whether or not the shape is
+     * visible.
+     *
+     * @param visible  the flag.
+     *
+     * @see #isShapeVisible()
+     */
+    public void setShapeVisible(boolean visible) {
+<span class="fc" id="L173">        this.shapeVisible = visible;</span>
+<span class="fc" id="L174">    }</span>
+
+    /**
+     * Returns the shape.
+     *
+     * @return The shape.
+     *
+     * @see #setShape(Shape)
+     */
+    public Shape getShape() {
+<span class="nc" id="L184">        return this.shape;</span>
+    }
+
+    /**
+     * Sets the shape.
+     *
+     * @param shape  the shape.
+     *
+     * @see #getShape()
+     */
+    public void setShape(Shape shape) {
+<span class="fc" id="L195">        this.shape = shape;</span>
+<span class="fc" id="L196">    }</span>
+
+    /**
+     * Returns a flag that controls whether or not the shapes
+     * are filled.
+     *
+     * @return A boolean.
+     *
+     * @see #setShapeFilled(boolean)
+     */
+    public boolean isShapeFilled() {
+<span class="fc" id="L207">        return this.shapeFilled;</span>
+    }
+
+    /**
+     * Sets a flag that controls whether or not the shape is
+     * filled.
+     *
+     * @param filled  the flag.
+     *
+     * @see #isShapeFilled()
+     */
+    public void setShapeFilled(boolean filled) {
+<span class="fc" id="L219">        this.shapeFilled = filled;</span>
+<span class="fc" id="L220">    }</span>
+
+    /**
+     * Returns the paint used to fill the shape.
+     *
+     * @return The fill paint.
+     *
+     * @see #setFillPaint(Paint)
+     */
+    public Paint getFillPaint() {
+<span class="nc" id="L230">        return this.fillPaint;</span>
+    }
+
+    /**
+     * Sets the paint used to fill the shape.
+     *
+     * @param paint  the paint.
+     *
+     * @see #getFillPaint()
+     */
+    public void setFillPaint(Paint paint) {
+<span class="fc" id="L241">        this.fillPaint = paint;</span>
+<span class="fc" id="L242">    }</span>
+
+    /**
+     * Returns the transformer used when the fill paint is an instance of
+     * {@code GradientPaint}.
+     *
+     * @return The transformer (never {@code null}).
+     *
+     * @see #setFillPaintTransformer(GradientPaintTransformer)
+     */
+    public GradientPaintTransformer getFillPaintTransformer() {
+<span class="nc" id="L253">        return this.fillPaintTransformer;</span>
+    }
+
+    /**
+     * Sets the transformer used when the fill paint is an instance of
+     * {@code GradientPaint}.
+     *
+     * @param transformer  the transformer ({@code null} not permitted).
+     *
+     * @see #getFillPaintTransformer()
+     */
+    public void setFillPaintTransformer(GradientPaintTransformer transformer) {
+<span class="fc" id="L265">        Args.nullNotPermitted(transformer, &quot;transformer&quot;);</span>
+<span class="fc" id="L266">        this.fillPaintTransformer = transformer;</span>
+<span class="fc" id="L267">    }</span>
+
+    /**
+     * Returns a flag that controls whether the shape outline is visible.
+     *
+     * @return A boolean.
+     *
+     * @see #setShapeOutlineVisible(boolean)
+     */
+    public boolean isShapeOutlineVisible() {
+<span class="fc" id="L277">        return this.shapeOutlineVisible;</span>
+    }
+
+    /**
+     * Sets a flag that controls whether or not the shape outline
+     * is visible.
+     *
+     * @param visible  the flag.
+     *
+     * @see #isShapeOutlineVisible()
+     */
+    public void setShapeOutlineVisible(boolean visible) {
+<span class="fc" id="L289">        this.shapeOutlineVisible = visible;</span>
+<span class="fc" id="L290">    }</span>
+
+    /**
+     * Returns the outline paint.
+     *
+     * @return The paint.
+     *
+     * @see #setOutlinePaint(Paint)
+     */
+    public Paint getOutlinePaint() {
+<span class="nc" id="L300">        return this.outlinePaint;</span>
+    }
+
+    /**
+     * Sets the outline paint.
+     *
+     * @param paint  the paint.
+     *
+     * @see #getOutlinePaint()
+     */
+    public void setOutlinePaint(Paint paint) {
+<span class="fc" id="L311">        this.outlinePaint = paint;</span>
+<span class="fc" id="L312">    }</span>
+
+    /**
+     * Returns the outline stroke.
+     *
+     * @return The stroke.
+     *
+     * @see #setOutlineStroke(Stroke)
+     */
+    public Stroke getOutlineStroke() {
+<span class="nc" id="L322">        return this.outlineStroke;</span>
+    }
+
+    /**
+     * Sets the outline stroke.
+     *
+     * @param stroke  the stroke.
+     *
+     * @see #getOutlineStroke()
+     */
+    public void setOutlineStroke(Stroke stroke) {
+<span class="fc" id="L333">        this.outlineStroke = stroke;</span>
+<span class="fc" id="L334">    }</span>
+
+    /**
+     * Returns the shape anchor.
+     *
+     * @return The shape anchor.
+     *
+     * @see #getShapeAnchor()
+     */
+    public RectangleAnchor getShapeAnchor() {
+<span class="nc" id="L344">        return this.shapeAnchor;</span>
+    }
+
+    /**
+     * Sets the shape anchor.  This defines a point on the shapes bounding
+     * rectangle that will be used to align the shape to a location.
+     *
+     * @param anchor  the anchor ({@code null} not permitted).
+     *
+     * @see #setShapeAnchor(RectangleAnchor)
+     */
+    public void setShapeAnchor(RectangleAnchor anchor) {
+<span class="fc" id="L356">        Args.nullNotPermitted(anchor, &quot;anchor&quot;);</span>
+<span class="fc" id="L357">        this.shapeAnchor = anchor;</span>
+<span class="fc" id="L358">    }</span>
+
+    /**
+     * Returns the shape location.
+     *
+     * @return The shape location.
+     *
+     * @see #setShapeLocation(RectangleAnchor)
+     */
+    public RectangleAnchor getShapeLocation() {
+<span class="nc" id="L368">        return this.shapeLocation;</span>
+    }
+
+    /**
+     * Sets the shape location.  This defines a point within the drawing
+     * area that will be used to align the shape to.
+     *
+     * @param location  the location ({@code null} not permitted).
+     *
+     * @see #getShapeLocation()
+     */
+    public void setShapeLocation(RectangleAnchor location) {
+<span class="fc" id="L380">        Args.nullNotPermitted(location, &quot;location&quot;);</span>
+<span class="fc" id="L381">        this.shapeLocation = location;</span>
+<span class="fc" id="L382">    }</span>
+
+    /**
+     * Returns the flag that controls whether or not the line is visible.
+     *
+     * @return A boolean.
+     *
+     * @see #setLineVisible(boolean)
+     */
+    public boolean isLineVisible() {
+<span class="fc" id="L392">        return this.lineVisible;</span>
+    }
+
+    /**
+     * Sets the flag that controls whether or not the line is visible.
+     *
+     * @param visible  the flag.
+     *
+     * @see #isLineVisible()
+     */
+    public void setLineVisible(boolean visible) {
+<span class="fc" id="L403">        this.lineVisible = visible;</span>
+<span class="fc" id="L404">    }</span>
+
+    /**
+     * Returns the line centered about (0, 0).
+     *
+     * @return The line.
+     *
+     * @see #setLine(Shape)
+     */
+    public Shape getLine() {
+<span class="fc" id="L414">        return this.line;</span>
+    }
+
+    /**
+     * Sets the line.  A Shape is used here, because then you can use Line2D,
+     * GeneralPath or any other Shape to represent the line.
+     *
+     * @param line  the line.
+     *
+     * @see #getLine()
+     */
+    public void setLine(Shape line) {
+<span class="fc" id="L426">        this.line = line;</span>
+<span class="fc" id="L427">    }</span>
+
+    /**
+     * Returns the line paint.
+     *
+     * @return The paint.
+     *
+     * @see #setLinePaint(Paint)
+     */
+    public Paint getLinePaint() {
+<span class="nc" id="L437">        return this.linePaint;</span>
+    }
+
+    /**
+     * Sets the line paint.
+     *
+     * @param paint  the paint.
+     *
+     * @see #getLinePaint()
+     */
+    public void setLinePaint(Paint paint) {
+<span class="fc" id="L448">        this.linePaint = paint;</span>
+<span class="fc" id="L449">    }</span>
+
+    /**
+     * Returns the line stroke.
+     *
+     * @return The stroke.
+     *
+     * @see #setLineStroke(Stroke)
+     */
+    public Stroke getLineStroke() {
+<span class="nc" id="L459">        return this.lineStroke;</span>
+    }
+
+    /**
+     * Sets the line stroke.
+     *
+     * @param stroke  the stroke.
+     *
+     * @see #getLineStroke()
+     */
+    public void setLineStroke(Stroke stroke) {
+<span class="fc" id="L470">        this.lineStroke = stroke;</span>
+<span class="fc" id="L471">    }</span>
+
+    /**
+     * Arranges the contents of the block, within the given constraints, and
+     * returns the block size.
+     *
+     * @param g2  the graphics device.
+     * @param constraint  the constraint ({@code null} not permitted).
+     *
+     * @return The block size (in Java2D units, never {@code null}).
+     */
+    @Override
+    public Size2D arrange(Graphics2D g2, RectangleConstraint constraint) {
+<span class="fc" id="L484">        RectangleConstraint contentConstraint = toContentConstraint(constraint);</span>
+<span class="fc" id="L485">        LengthConstraintType w = contentConstraint.getWidthConstraintType();</span>
+<span class="fc" id="L486">        LengthConstraintType h = contentConstraint.getHeightConstraintType();</span>
+<span class="fc" id="L487">        Size2D contentSize = null;</span>
+<span class="pc bpc" id="L488" title="3 of 4 branches missed.">        switch (w) {</span>
+            case NONE:
+<span class="pc bpc" id="L490" title="1 of 2 branches missed.">                if (h == LengthConstraintType.NONE) {</span>
+<span class="fc" id="L491">                    contentSize = arrangeNN(g2);</span>
+                }
+<span class="nc bnc" id="L493" title="All 2 branches missed.">                else if (h == LengthConstraintType.RANGE) {</span>
+<span class="nc" id="L494">                    throw new RuntimeException(&quot;Not yet implemented.&quot;);</span>
+                }
+<span class="nc bnc" id="L496" title="All 2 branches missed.">                else if (h == LengthConstraintType.FIXED) {</span>
+<span class="nc" id="L497">                    throw new RuntimeException(&quot;Not yet implemented.&quot;);</span>
+                }   break;
+            case RANGE:
+<span class="nc bnc" id="L500" title="All 2 branches missed.">                if (h == LengthConstraintType.NONE) {</span>
+<span class="nc" id="L501">                    throw new RuntimeException(&quot;Not yet implemented.&quot;);</span>
+                }
+<span class="nc bnc" id="L503" title="All 2 branches missed.">                else if (h == LengthConstraintType.RANGE) {</span>
+<span class="nc" id="L504">                    throw new RuntimeException(&quot;Not yet implemented.&quot;);</span>
+                }
+<span class="nc bnc" id="L506" title="All 2 branches missed.">                else if (h == LengthConstraintType.FIXED) {</span>
+<span class="nc" id="L507">                    throw new RuntimeException(&quot;Not yet implemented.&quot;);</span>
+                }   break;
+            case FIXED:
+<span class="nc bnc" id="L510" title="All 2 branches missed.">                if (h == LengthConstraintType.NONE) {</span>
+<span class="nc" id="L511">                    throw new RuntimeException(&quot;Not yet implemented.&quot;);</span>
+                }
+<span class="nc bnc" id="L513" title="All 2 branches missed.">                else if (h == LengthConstraintType.RANGE) {</span>
+<span class="nc" id="L514">                    throw new RuntimeException(&quot;Not yet implemented.&quot;);</span>
+                }
+<span class="nc bnc" id="L516" title="All 2 branches missed.">                else if (h == LengthConstraintType.FIXED) {</span>
+<span class="nc" id="L517">                    contentSize = new Size2D(contentConstraint.getWidth(),</span>
+<span class="nc" id="L518">                            contentConstraint.getHeight());</span>
+                }   break;
+            default:
+<span class="nc" id="L521">                throw new IllegalStateException(&quot;Unrecognised widthConstraintType.&quot;);</span>
+        }
+<span class="pc bpc" id="L523" title="2 of 4 branches missed.">        assert contentSize != null;</span>
+<span class="fc" id="L524">        return new Size2D(calculateTotalWidth(contentSize.getWidth()),</span>
+<span class="fc" id="L525">                calculateTotalHeight(contentSize.getHeight()));</span>
+    }
+
+    /**
+     * Performs the layout with no constraint, so the content size is
+     * determined by the bounds of the shape and/or line drawn to represent
+     * the series.
+     *
+     * @param g2  the graphics device.
+     *
+     * @return  The content size.
+     */
+    protected Size2D arrangeNN(Graphics2D g2) {
+<span class="fc" id="L538">        Rectangle2D contentSize = new Rectangle2D.Double();</span>
+<span class="pc bpc" id="L539" title="1 of 2 branches missed.">        if (this.line != null) {</span>
+<span class="fc" id="L540">            contentSize.setRect(this.line.getBounds2D());</span>
+        }
+<span class="pc bpc" id="L542" title="1 of 2 branches missed.">        if (this.shape != null) {</span>
+<span class="fc" id="L543">            contentSize = contentSize.createUnion(this.shape.getBounds2D());</span>
+        }
+<span class="fc" id="L545">        return new Size2D(contentSize.getWidth(), contentSize.getHeight());</span>
+    }
+
+    /**
+     * Draws the graphic item within the specified area.
+     *
+     * @param g2  the graphics device.
+     * @param area  the area.
+     */
+    @Override
+    public void draw(Graphics2D g2, Rectangle2D area) {
+
+<span class="fc" id="L557">        area = trimMargin(area);</span>
+<span class="fc" id="L558">        drawBorder(g2, area);</span>
+<span class="fc" id="L559">        area = trimBorder(area);</span>
+<span class="fc" id="L560">        area = trimPadding(area);</span>
+
+<span class="fc bfc" id="L562" title="All 2 branches covered.">        if (this.lineVisible) {</span>
+<span class="fc" id="L563">            Point2D location = this.shapeLocation.getAnchorPoint(area);</span>
+<span class="fc" id="L564">            Shape aLine = ShapeUtils.createTranslatedShape(getLine(),</span>
+<span class="fc" id="L565">                    this.shapeAnchor, location.getX(), location.getY());</span>
+<span class="fc" id="L566">            g2.setPaint(this.linePaint);</span>
+<span class="fc" id="L567">            g2.setStroke(this.lineStroke);</span>
+<span class="fc" id="L568">            g2.draw(aLine);</span>
+        }
+
+<span class="fc bfc" id="L571" title="All 2 branches covered.">        if (this.shapeVisible) {</span>
+<span class="fc" id="L572">            Point2D location = this.shapeLocation.getAnchorPoint(area);</span>
+
+<span class="fc" id="L574">            Shape s = ShapeUtils.createTranslatedShape(this.shape,</span>
+<span class="fc" id="L575">                    this.shapeAnchor, location.getX(), location.getY());</span>
+<span class="pc bpc" id="L576" title="1 of 2 branches missed.">            if (this.shapeFilled) {</span>
+<span class="fc" id="L577">                Paint p = this.fillPaint;</span>
+<span class="pc bpc" id="L578" title="1 of 2 branches missed.">                if (p instanceof GradientPaint) {</span>
+<span class="nc" id="L579">                    GradientPaint gp = (GradientPaint) this.fillPaint;</span>
+<span class="nc" id="L580">                    p = this.fillPaintTransformer.transform(gp, s);</span>
+                }
+<span class="fc" id="L582">                g2.setPaint(p);</span>
+<span class="fc" id="L583">                g2.fill(s);</span>
+            }
+<span class="fc bfc" id="L585" title="All 2 branches covered.">            if (this.shapeOutlineVisible) {</span>
+<span class="fc" id="L586">                g2.setPaint(this.outlinePaint);</span>
+<span class="fc" id="L587">                g2.setStroke(this.outlineStroke);</span>
+<span class="fc" id="L588">                g2.draw(s);</span>
+            }
+        }
+<span class="fc" id="L591">    }</span>
+
+    /**
+     * Draws the block within the specified area.
+     *
+     * @param g2  the graphics device.
+     * @param area  the area.
+     * @param params  ignored ({@code null} permitted).
+     *
+     * @return Always {@code null}.
+     */
+    @Override
+    public Object draw(Graphics2D g2, Rectangle2D area, Object params) {
+<span class="fc" id="L604">        draw(g2, area);</span>
+<span class="fc" id="L605">        return null;</span>
+    }
+
+    /**
+     * Tests this {@code LegendGraphic} instance for equality with an
+     * arbitrary object.
+     *
+     * @param obj  the object ({@code null} permitted).
+     *
+     * @return A boolean.
+     */
+    @Override
+    public boolean equals(Object obj) {
+<span class="pc bpc" id="L618" title="1 of 2 branches missed.">        if (!(obj instanceof LegendGraphic)) {</span>
+<span class="nc" id="L619">            return false;</span>
+        }
+<span class="fc" id="L621">        LegendGraphic that = (LegendGraphic) obj;</span>
+<span class="fc bfc" id="L622" title="All 2 branches covered.">        if (this.shapeVisible != that.shapeVisible) {</span>
+<span class="fc" id="L623">            return false;</span>
+        }
+<span class="fc bfc" id="L625" title="All 2 branches covered.">        if (!ShapeUtils.equal(this.shape, that.shape)) {</span>
+<span class="fc" id="L626">            return false;</span>
+        }
+<span class="fc bfc" id="L628" title="All 2 branches covered.">        if (this.shapeFilled != that.shapeFilled) {</span>
+<span class="fc" id="L629">            return false;</span>
+        }
+<span class="fc bfc" id="L631" title="All 2 branches covered.">        if (!PaintUtils.equal(this.fillPaint, that.fillPaint)) {</span>
+<span class="fc" id="L632">            return false;</span>
+        }
+<span class="fc bfc" id="L634" title="All 2 branches covered.">        if (!Objects.equals(this.fillPaintTransformer, that.fillPaintTransformer)) {</span>
+<span class="fc" id="L635">            return false;</span>
+        }
+<span class="fc bfc" id="L637" title="All 2 branches covered.">        if (this.shapeOutlineVisible != that.shapeOutlineVisible) {</span>
+<span class="fc" id="L638">            return false;</span>
+        }
+<span class="fc bfc" id="L640" title="All 2 branches covered.">        if (!PaintUtils.equal(this.outlinePaint, that.outlinePaint)) {</span>
+<span class="fc" id="L641">            return false;</span>
+        }
+<span class="fc bfc" id="L643" title="All 2 branches covered.">        if (!Objects.equals(this.outlineStroke, that.outlineStroke)) {</span>
+<span class="fc" id="L644">            return false;</span>
+        }
+<span class="fc bfc" id="L646" title="All 2 branches covered.">        if (this.shapeAnchor != that.shapeAnchor) {</span>
+<span class="fc" id="L647">            return false;</span>
+        }
+<span class="fc bfc" id="L649" title="All 2 branches covered.">        if (this.shapeLocation != that.shapeLocation) {</span>
+<span class="fc" id="L650">            return false;</span>
+        }
+<span class="fc bfc" id="L652" title="All 2 branches covered.">        if (this.lineVisible != that.lineVisible) {</span>
+<span class="fc" id="L653">            return false;</span>
+        }
+<span class="fc bfc" id="L655" title="All 2 branches covered.">        if (!ShapeUtils.equal(this.line, that.line)) {</span>
+<span class="fc" id="L656">            return false;</span>
+        }
+<span class="fc bfc" id="L658" title="All 2 branches covered.">        if (!PaintUtils.equal(this.linePaint, that.linePaint)) {</span>
+<span class="fc" id="L659">            return false;</span>
+        }
+<span class="fc bfc" id="L661" title="All 2 branches covered.">        if (!Objects.equals(this.lineStroke, that.lineStroke)) {</span>
+<span class="fc" id="L662">            return false;</span>
+        }
+<span class="fc" id="L664">        return super.equals(obj);</span>
+    }
+
+    /**
+     * Returns a hash code for this instance.
+     *
+     * @return A hash code.
+     */
+    @Override
+    public int hashCode() {
+<span class="fc" id="L674">        int hash = 7;</span>
+<span class="pc bpc" id="L675" title="1 of 2 branches missed.">        hash = 89 * hash + (this.shapeVisible ? 1 : 0);</span>
+<span class="fc" id="L676">        hash = 89 * hash + Objects.hashCode(this.shape);</span>
+<span class="fc" id="L677">        hash = 89 * hash + Objects.hashCode(this.shapeLocation);</span>
+<span class="fc" id="L678">        hash = 89 * hash + Objects.hashCode(this.shapeAnchor);</span>
+<span class="pc bpc" id="L679" title="1 of 2 branches missed.">        hash = 89 * hash + (this.shapeFilled ? 1 : 0);</span>
+<span class="fc" id="L680">        hash = 89 * hash + Objects.hashCode(this.fillPaint);</span>
+<span class="fc" id="L681">        hash = 89 * hash + Objects.hashCode(this.fillPaintTransformer);</span>
+<span class="pc bpc" id="L682" title="1 of 2 branches missed.">        hash = 89 * hash + (this.shapeOutlineVisible ? 1 : 0);</span>
+<span class="fc" id="L683">        hash = 89 * hash + Objects.hashCode(this.outlinePaint);</span>
+<span class="fc" id="L684">        hash = 89 * hash + Objects.hashCode(this.outlineStroke);</span>
+<span class="pc bpc" id="L685" title="1 of 2 branches missed.">        hash = 89 * hash + (this.lineVisible ? 1 : 0);</span>
+<span class="fc" id="L686">        hash = 89 * hash + Objects.hashCode(this.line);</span>
+<span class="fc" id="L687">        hash = 89 * hash + Objects.hashCode(this.lineStroke);</span>
+<span class="fc" id="L688">        hash = 89 * hash + Objects.hashCode(this.linePaint);</span>
+<span class="fc" id="L689">        return hash;</span>
+    }
+
+    /**
+     * Returns a clone of this {@code LegendGraphic} instance.
+     *
+     * @return A clone of this {@code LegendGraphic} instance.
+     *
+     * @throws CloneNotSupportedException if there is a problem cloning.
+     */
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+<span class="fc" id="L701">        LegendGraphic clone = (LegendGraphic) super.clone();</span>
+<span class="fc" id="L702">        clone.shape = CloneUtils.clone(this.shape);</span>
+<span class="fc" id="L703">        clone.line = CloneUtils.clone(this.line);</span>
+<span class="fc" id="L704">        return clone;</span>
+    }
+
+    /**
+     * Provides serialization support.
+     *
+     * @param stream  the output stream.
+     *
+     * @throws IOException  if there is an I/O error.
+     */
+    private void writeObject(ObjectOutputStream stream) throws IOException {
+<span class="fc" id="L715">        stream.defaultWriteObject();</span>
+<span class="fc" id="L716">        SerialUtils.writeShape(this.shape, stream);</span>
+<span class="fc" id="L717">        SerialUtils.writePaint(this.fillPaint, stream);</span>
+<span class="fc" id="L718">        SerialUtils.writePaint(this.outlinePaint, stream);</span>
+<span class="fc" id="L719">        SerialUtils.writeStroke(this.outlineStroke, stream);</span>
+<span class="fc" id="L720">        SerialUtils.writeShape(this.line, stream);</span>
+<span class="fc" id="L721">        SerialUtils.writePaint(this.linePaint, stream);</span>
+<span class="fc" id="L722">        SerialUtils.writeStroke(this.lineStroke, stream);</span>
+<span class="fc" id="L723">    }</span>
+
+    /**
+     * Provides serialization support.
+     *
+     * @param stream  the input stream.
+     *
+     * @throws IOException  if there is an I/O error.
+     * @throws ClassNotFoundException  if there is a classpath problem.
+     */
+    private void readObject(ObjectInputStream stream)
+            throws IOException, ClassNotFoundException {
+<span class="fc" id="L735">        stream.defaultReadObject();</span>
+<span class="fc" id="L736">        this.shape = SerialUtils.readShape(stream);</span>
+<span class="fc" id="L737">        this.fillPaint = SerialUtils.readPaint(stream);</span>
+<span class="fc" id="L738">        this.outlinePaint = SerialUtils.readPaint(stream);</span>
+<span class="fc" id="L739">        this.outlineStroke = SerialUtils.readStroke(stream);</span>
+<span class="fc" id="L740">        this.line = SerialUtils.readShape(stream);</span>
+<span class="fc" id="L741">        this.linePaint = SerialUtils.readPaint(stream);</span>
+<span class="fc" id="L742">        this.lineStroke = SerialUtils.readStroke(stream);</span>
+<span class="fc" id="L743">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

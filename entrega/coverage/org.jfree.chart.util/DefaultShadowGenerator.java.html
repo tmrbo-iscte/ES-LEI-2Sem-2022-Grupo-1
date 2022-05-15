@@ -1,0 +1,327 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DefaultShadowGenerator.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.chart.util</a> &gt; <span class="el_source">DefaultShadowGenerator.java</span></div><h1>DefaultShadowGenerator.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * ---------------------------
+ * DefaultShadowGenerator.java
+ * ---------------------------
+ * (C) Copyright 2009-2022 by David Gilbert and Contributors.
+ *
+ * Original Author:  David Gilbert;
+ * Contributor(s):   -;
+ *
+ */
+
+package org.jfree.chart.util;
+
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferInt;
+import java.io.Serializable;
+import org.jfree.chart.internal.Args;
+import org.jfree.chart.internal.HashUtils;
+
+/**
+ * A default implementation of the {@link ShadowGenerator} interface, based on
+ * code in a 
+ * &lt;a href=&quot;http://www.jroller.com/gfx/entry/fast_or_good_drop_shadows&quot;&gt;blog
+ * post by Romain Guy&lt;/a&gt;.
+ */
+public class DefaultShadowGenerator implements ShadowGenerator, Serializable {
+
+    private static final long serialVersionUID = 2732993885591386064L;
+
+    /** The shadow size. */
+    private int shadowSize;
+
+    /** The shadow color. */
+    private Color shadowColor;
+
+    /** The shadow opacity. */
+    private float shadowOpacity;
+
+    /** The shadow offset angle (in radians). */
+    private double angle;
+
+    /** The shadow offset distance (in Java2D units). */
+    private int distance;
+
+    /**
+     * Creates a new instance with default attributes.
+     */
+    public DefaultShadowGenerator() {
+<span class="nc" id="L76">        this(5, Color.BLACK, 0.5f, 5, -Math.PI / 4);</span>
+<span class="nc" id="L77">    }</span>
+
+    /**
+     * Creates a new instance with the specified attributes.
+     *
+     * @param size  the shadow size.
+     * @param color  the shadow color.
+     * @param opacity  the shadow opacity.
+     * @param distance  the shadow offset distance.
+     * @param angle  the shadow offset angle (in radians).
+     */
+    public DefaultShadowGenerator(int size, Color color, float opacity,
+<span class="fc" id="L89">            int distance, double angle) {</span>
+<span class="fc" id="L90">        Args.nullNotPermitted(color, &quot;color&quot;);</span>
+<span class="fc" id="L91">        this.shadowSize = size;</span>
+<span class="fc" id="L92">        this.shadowColor = color;</span>
+<span class="fc" id="L93">        this.shadowOpacity = opacity;</span>
+<span class="fc" id="L94">        this.distance = distance;</span>
+<span class="fc" id="L95">        this.angle = angle;</span>
+<span class="fc" id="L96">    }</span>
+
+    /**
+     * Returns the shadow size.
+     *
+     * @return The shadow size.
+     */
+    public int getShadowSize() {
+<span class="nc" id="L104">        return this.shadowSize;</span>
+    }
+
+    /**
+     * Returns the shadow color.
+     *
+     * @return The shadow color (never {@code null}).
+     */
+    public Color getShadowColor() {
+<span class="nc" id="L113">        return this.shadowColor;</span>
+    }
+
+    /**
+     * Returns the shadow opacity.
+     *
+     * @return The shadow opacity.
+     */
+    public float getShadowOpacity() {
+<span class="nc" id="L122">        return this.shadowOpacity;</span>
+    }
+
+    /**
+     * Returns the shadow offset distance.
+     *
+     * @return The shadow offset distance (in Java2D units).
+     */
+    public int getDistance() {
+<span class="nc" id="L131">        return this.distance;</span>
+    }
+
+    /**
+     * Returns the shadow offset angle (in radians).
+     *
+     * @return The angle (in radians).
+     */
+    public double getAngle() {
+<span class="nc" id="L140">        return this.angle;</span>
+    }
+
+    /**
+     * Calculates the x-offset for drawing the shadow image relative to the
+     * source.
+     *
+     * @return The x-offset.
+     */
+    @Override
+    public int calculateOffsetX() {
+<span class="nc" id="L151">        return (int) (Math.cos(this.angle) * this.distance) - this.shadowSize;</span>
+    }
+
+    /**
+     * Calculates the y-offset for drawing the shadow image relative to the
+     * source.
+     *
+     * @return The y-offset.
+     */
+    @Override
+    public int calculateOffsetY() {
+<span class="nc" id="L162">        return -(int) (Math.sin(this.angle) * this.distance) - this.shadowSize;</span>
+    }
+
+    /**
+     * Creates and returns an image containing the drop shadow for the
+     * specified source image.
+     *
+     * @param source  the source image.
+     *
+     * @return A new image containing the shadow.
+     */
+    @Override
+    public BufferedImage createDropShadow(BufferedImage source) {
+<span class="nc" id="L175">        BufferedImage subject = new BufferedImage(</span>
+<span class="nc" id="L176">                source.getWidth() + this.shadowSize * 2,</span>
+<span class="nc" id="L177">                source.getHeight() + this.shadowSize * 2,</span>
+                BufferedImage.TYPE_INT_ARGB);
+
+<span class="nc" id="L180">        Graphics2D g2 = subject.createGraphics();</span>
+<span class="nc" id="L181">        g2.drawImage(source, null, this.shadowSize, this.shadowSize);</span>
+<span class="nc" id="L182">        g2.dispose();</span>
+<span class="nc" id="L183">        applyShadow(subject);</span>
+<span class="nc" id="L184">        return subject;</span>
+    }
+
+    /**
+     * Applies a shadow to the image.
+     *
+     * @param image  the image.
+     */
+    protected void applyShadow(BufferedImage image) {
+<span class="nc" id="L193">        int dstWidth = image.getWidth();</span>
+<span class="nc" id="L194">        int dstHeight = image.getHeight();</span>
+
+<span class="nc" id="L196">        int left = (this.shadowSize - 1) &gt;&gt; 1;</span>
+<span class="nc" id="L197">        int right = this.shadowSize - left;</span>
+<span class="nc" id="L198">        int xStart = left;</span>
+<span class="nc" id="L199">        int xStop = dstWidth - right;</span>
+<span class="nc" id="L200">        int yStart = left;</span>
+<span class="nc" id="L201">        int yStop = dstHeight - right;</span>
+
+<span class="nc" id="L203">        int shadowRgb = this.shadowColor.getRGB() &amp; 0x00FFFFFF;</span>
+
+<span class="nc" id="L205">        int[] aHistory = new int[this.shadowSize];</span>
+        int historyIdx;
+
+        int aSum;
+
+<span class="nc" id="L210">        int[] dataBuffer = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();</span>
+<span class="nc" id="L211">        int lastPixelOffset = right * dstWidth;</span>
+<span class="nc" id="L212">        float sumDivider = this.shadowOpacity / this.shadowSize;</span>
+
+        // horizontal pass
+
+<span class="nc bnc" id="L216" title="All 2 branches missed.">        for (int y = 0, bufferOffset = 0; y &lt; dstHeight; y++, bufferOffset = y * dstWidth) {</span>
+<span class="nc" id="L217">            aSum = 0;</span>
+<span class="nc" id="L218">            historyIdx = 0;</span>
+<span class="nc bnc" id="L219" title="All 2 branches missed.">            for (int x = 0; x &lt; this.shadowSize; x++, bufferOffset++) {</span>
+<span class="nc" id="L220">                int a = dataBuffer[bufferOffset] &gt;&gt;&gt; 24;</span>
+<span class="nc" id="L221">                aHistory[x] = a;</span>
+<span class="nc" id="L222">                aSum += a;</span>
+            }
+
+<span class="nc" id="L225">            bufferOffset -= right;</span>
+
+<span class="nc bnc" id="L227" title="All 2 branches missed.">            for (int x = xStart; x &lt; xStop; x++, bufferOffset++) {</span>
+<span class="nc" id="L228">                int a = (int) (aSum * sumDivider);</span>
+<span class="nc" id="L229">                dataBuffer[bufferOffset] = a &lt;&lt; 24 | shadowRgb;</span>
+
+                // substract the oldest pixel from the sum
+<span class="nc" id="L232">                aSum -= aHistory[historyIdx];</span>
+
+                // get the lastest pixel
+<span class="nc" id="L235">                a = dataBuffer[bufferOffset + right] &gt;&gt;&gt; 24;</span>
+<span class="nc" id="L236">                aHistory[historyIdx] = a;</span>
+<span class="nc" id="L237">                aSum += a;</span>
+
+<span class="nc bnc" id="L239" title="All 2 branches missed.">                if (++historyIdx &gt;= this.shadowSize) {</span>
+<span class="nc" id="L240">                    historyIdx -= this.shadowSize;</span>
+                }
+            }
+        }
+
+        // vertical pass
+<span class="nc bnc" id="L246" title="All 2 branches missed.">        for (int x = 0, bufferOffset = 0; x &lt; dstWidth; x++, bufferOffset = x) {</span>
+<span class="nc" id="L247">            aSum = 0;</span>
+<span class="nc" id="L248">            historyIdx = 0;</span>
+<span class="nc bnc" id="L249" title="All 2 branches missed.">            for (int y = 0; y &lt; this.shadowSize; y++,</span>
+<span class="nc" id="L250">                    bufferOffset += dstWidth) {</span>
+<span class="nc" id="L251">                int a = dataBuffer[bufferOffset] &gt;&gt;&gt; 24;</span>
+<span class="nc" id="L252">                aHistory[y] = a;</span>
+<span class="nc" id="L253">                aSum += a;</span>
+            }
+
+<span class="nc" id="L256">            bufferOffset -= lastPixelOffset;</span>
+
+<span class="nc bnc" id="L258" title="All 2 branches missed.">            for (int y = yStart; y &lt; yStop; y++, bufferOffset += dstWidth) {</span>
+<span class="nc" id="L259">                int a = (int) (aSum * sumDivider);</span>
+<span class="nc" id="L260">                dataBuffer[bufferOffset] = a &lt;&lt; 24 | shadowRgb;</span>
+
+                // substract the oldest pixel from the sum
+<span class="nc" id="L263">                aSum -= aHistory[historyIdx];</span>
+
+                // get the lastest pixel
+<span class="nc" id="L266">                a = dataBuffer[bufferOffset + lastPixelOffset] &gt;&gt;&gt; 24;</span>
+<span class="nc" id="L267">                aHistory[historyIdx] = a;</span>
+<span class="nc" id="L268">                aSum += a;</span>
+
+<span class="nc bnc" id="L270" title="All 2 branches missed.">                if (++historyIdx &gt;= this.shadowSize) {</span>
+<span class="nc" id="L271">                    historyIdx -= this.shadowSize;</span>
+                }
+            }
+        }
+<span class="nc" id="L275">    }</span>
+
+    /**
+     * Tests this object for equality with an arbitrary object.
+     * 
+     * @param obj  the object ({@code null} permitted).
+     * 
+     * @return The object.
+     */
+    @Override
+    public boolean equals(Object obj) {
+<span class="pc bpc" id="L286" title="1 of 2 branches missed.">        if (obj == this) {</span>
+<span class="nc" id="L287">            return true;</span>
+        }
+<span class="fc bfc" id="L289" title="All 2 branches covered.">        if (!(obj instanceof DefaultShadowGenerator)) {</span>
+<span class="fc" id="L290">            return false;</span>
+        }
+<span class="fc" id="L292">        DefaultShadowGenerator that = (DefaultShadowGenerator) obj;</span>
+<span class="pc bpc" id="L293" title="1 of 2 branches missed.">        if (this.shadowSize != that.shadowSize) {</span>
+<span class="nc" id="L294">            return false;</span>
+        }
+<span class="pc bpc" id="L296" title="1 of 2 branches missed.">        if (!this.shadowColor.equals(that.shadowColor)) {</span>
+<span class="nc" id="L297">            return false;</span>
+        }
+<span class="pc bpc" id="L299" title="1 of 2 branches missed.">        if (this.shadowOpacity != that.shadowOpacity) {</span>
+<span class="nc" id="L300">            return false;</span>
+        }
+<span class="pc bpc" id="L302" title="1 of 2 branches missed.">        if (this.distance != that.distance) {</span>
+<span class="nc" id="L303">            return false;</span>
+        }
+<span class="pc bpc" id="L305" title="1 of 2 branches missed.">        if (this.angle != that.angle) {</span>
+<span class="nc" id="L306">            return false;</span>
+        }
+<span class="fc" id="L308">        return true;</span>
+    }
+
+    /**
+     * Returns a hash code for this instance.
+     * 
+     * @return The hash code.
+     */
+    @Override
+    public int hashCode() {
+<span class="nc" id="L318">        int hash = HashUtils.hashCode(17, this.shadowSize);</span>
+<span class="nc" id="L319">        hash = HashUtils.hashCode(hash, this.shadowColor);</span>
+<span class="nc" id="L320">        hash = HashUtils.hashCode(hash, this.shadowOpacity);</span>
+<span class="nc" id="L321">        hash = HashUtils.hashCode(hash, this.distance);</span>
+<span class="nc" id="L322">        hash = HashUtils.hashCode(hash, this.angle);</span>
+<span class="nc" id="L323">        return hash;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

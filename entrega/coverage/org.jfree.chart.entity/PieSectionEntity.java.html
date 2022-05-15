@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PieSectionEntity.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.chart.entity</a> &gt; <span class="el_source">PieSectionEntity.java</span></div><h1>PieSectionEntity.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * ---------------------
+ * PieSectionEntity.java
+ * ---------------------
+ * (C) Copyright 2002-2022, by David Gilbert.
+ *
+ * Original Author:  David Gilbert;
+ * Contributor(s):   Richard Atkinson;
+ *                   Christian W. Zuckschwerdt;
+ *
+ */
+
+package org.jfree.chart.entity;
+
+import java.awt.Shape;
+import java.io.Serializable;
+import java.util.Objects;
+
+import org.jfree.chart.internal.HashUtils;
+import org.jfree.data.general.PieDataset;
+
+/**
+ * A chart entity that represents one section within a pie plot.
+ */
+public class PieSectionEntity&lt;K extends Comparable&lt;K&gt;&gt; extends ChartEntity 
+        implements Serializable {
+
+    /** For serialization. */
+    private static final long serialVersionUID = 9199892576531984162L;
+
+    /** The dataset. */
+    private PieDataset&lt;K&gt; dataset;
+
+    /** The pie index. */
+    private int pieIndex;
+
+    /** The section index. */
+    private int sectionIndex;
+
+    /** The section key. */
+    private K sectionKey;
+
+    /**
+     * Creates a new pie section entity.
+     *
+     * @param area  the area.
+     * @param dataset  the pie dataset.
+     * @param pieIndex  the pie index (zero-based).
+     * @param sectionIndex  the section index (zero-based).
+     * @param sectionKey  the section key.
+     * @param toolTipText  the tool tip text.
+     * @param urlText  the URL text for HTML image maps.
+     */
+    public PieSectionEntity(Shape area, PieDataset dataset, int pieIndex, 
+            int sectionIndex, K sectionKey, String toolTipText, String urlText) {
+
+<span class="fc" id="L82">        super(area, toolTipText, urlText);</span>
+<span class="fc" id="L83">        this.dataset = dataset;</span>
+<span class="fc" id="L84">        this.pieIndex = pieIndex;</span>
+<span class="fc" id="L85">        this.sectionIndex = sectionIndex;</span>
+<span class="fc" id="L86">        this.sectionKey = sectionKey;</span>
+
+<span class="fc" id="L88">    }</span>
+
+    /**
+     * Returns the dataset this entity refers to.
+     *
+     * @return The dataset.
+     *
+     * @see #setDataset(PieDataset)
+     */
+    public PieDataset&lt;K&gt; getDataset() {
+<span class="nc" id="L98">        return this.dataset;</span>
+    }
+
+    /**
+     * Sets the dataset this entity refers to.
+     *
+     * @param dataset  the dataset.
+     *
+     * @see #getDataset()
+     */
+    public void setDataset(PieDataset&lt;K&gt; dataset) {
+<span class="fc" id="L109">        this.dataset = dataset;</span>
+<span class="fc" id="L110">    }</span>
+
+    /**
+     * Returns the pie index.  For a regular pie chart, the section index is 0.
+     * For a pie chart containing multiple pie plots, the pie index is the row
+     * or column index from which the pie data is extracted.
+     *
+     * @return The pie index.
+     *
+     * @see #setPieIndex(int)
+     */
+    public int getPieIndex() {
+<span class="nc" id="L122">        return this.pieIndex;</span>
+    }
+
+    /**
+     * Sets the pie index.
+     *
+     * @param index  the new index value.
+     *
+     * @see #getPieIndex()
+     */
+    public void setPieIndex(int index) {
+<span class="fc" id="L133">        this.pieIndex = index;</span>
+<span class="fc" id="L134">    }</span>
+
+    /**
+     * Returns the section index.
+     *
+     * @return The section index.
+     *
+     * @see #setSectionIndex(int)
+     */
+    public int getSectionIndex() {
+<span class="nc" id="L144">        return this.sectionIndex;</span>
+    }
+
+    /**
+     * Sets the section index.
+     *
+     * @param index  the section index.
+     *
+     * @see #getSectionIndex()
+     */
+    public void setSectionIndex(int index) {
+<span class="fc" id="L155">        this.sectionIndex = index;</span>
+<span class="fc" id="L156">    }</span>
+
+    /**
+     * Returns the section key.
+     *
+     * @return The section key.
+     *
+     * @see #setSectionKey(Comparable)
+     */
+    public K getSectionKey() {
+<span class="nc" id="L166">        return this.sectionKey;</span>
+    }
+
+    /**
+     * Sets the section key.
+     *
+     * @param key  the section key.
+     *
+     * @see #getSectionKey()
+     */
+    public void setSectionKey(K key) {
+<span class="fc" id="L177">        this.sectionKey = key;</span>
+<span class="fc" id="L178">    }</span>
+
+    /**
+     * Tests this entity for equality with an arbitrary object.
+     *
+     * @param obj  the object ({@code null} permitted).
+     *
+     * @return A boolean.
+     */
+    @Override
+    public boolean equals(Object obj) {
+<span class="pc bpc" id="L189" title="1 of 2 branches missed.">        if (obj == this) {</span>
+<span class="nc" id="L190">            return true;</span>
+        }
+<span class="pc bpc" id="L192" title="1 of 2 branches missed.">        if (!(obj instanceof PieSectionEntity)) {</span>
+<span class="nc" id="L193">            return false;</span>
+        }
+<span class="fc" id="L195">        PieSectionEntity that = (PieSectionEntity) obj;</span>
+<span class="fc bfc" id="L196" title="All 2 branches covered.">        if (!Objects.equals(this.dataset, that.dataset)) {</span>
+<span class="fc" id="L197">            return false;</span>
+        }
+<span class="fc bfc" id="L199" title="All 2 branches covered.">        if (this.pieIndex != that.pieIndex) {</span>
+<span class="fc" id="L200">            return false;</span>
+        }
+<span class="fc bfc" id="L202" title="All 2 branches covered.">        if (this.sectionIndex != that.sectionIndex) {</span>
+<span class="fc" id="L203">            return false;</span>
+        }
+<span class="fc bfc" id="L205" title="All 2 branches covered.">        if (!Objects.equals(this.sectionKey, that.sectionKey)) {</span>
+<span class="fc" id="L206">            return false;</span>
+        }
+<span class="fc" id="L208">        return super.equals(obj);</span>
+    }
+
+    /**
+     * Returns a hash code for this instance.
+     *
+     * @return A hash code.
+     */
+    @Override
+    public int hashCode() {
+<span class="nc" id="L218">        int result = super.hashCode();</span>
+<span class="nc" id="L219">        result = HashUtils.hashCode(result, this.pieIndex);</span>
+<span class="nc" id="L220">        result = HashUtils.hashCode(result, this.sectionIndex);</span>
+<span class="nc" id="L221">        return result;</span>
+    }
+
+    /**
+     * Returns a string representing the entity.
+     *
+     * @return A string representing the entity.
+     */
+    @Override
+    public String toString() {
+<span class="nc" id="L231">        return &quot;PieSection: &quot; + this.pieIndex + &quot;, &quot; + this.sectionIndex + &quot;(&quot;</span>
+<span class="nc" id="L232">                              + this.sectionKey.toString() + &quot;)&quot;;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

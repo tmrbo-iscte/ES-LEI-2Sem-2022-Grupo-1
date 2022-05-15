@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StandardCategoryItemLabelGenerator.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.chart.labels</a> &gt; <span class="el_source">StandardCategoryItemLabelGenerator.java</span></div><h1>StandardCategoryItemLabelGenerator.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * ---------------------------------------
+ * StandardCategoryItemLabelGenerator.java
+ * ---------------------------------------
+ * (C) Copyright 2004-2022, by David Gilbert.
+ *
+ * Original Author:  David Gilbert;
+ * Contributor(s):   -;
+ *
+ */
+
+package org.jfree.chart.labels;
+
+import java.io.Serializable;
+import java.text.DateFormat;
+import java.text.NumberFormat;
+import org.jfree.chart.api.PublicCloneable;
+
+import org.jfree.data.category.CategoryDataset;
+
+/**
+ * A standard label generator that can be used with a
+ * {@link org.jfree.chart.renderer.category.CategoryItemRenderer}.
+ */
+public class StandardCategoryItemLabelGenerator
+    extends AbstractCategoryItemLabelGenerator
+    implements CategoryItemLabelGenerator, Cloneable, PublicCloneable,
+               Serializable {
+
+    /** For serialization. */
+    private static final long serialVersionUID = 3499701401211412882L;
+
+    /** The default format string. */
+    public static final String DEFAULT_LABEL_FORMAT_STRING = &quot;{2}&quot;;
+
+    /**
+     * Creates a new generator with a default number formatter.
+     */
+    public StandardCategoryItemLabelGenerator() {
+<span class="fc" id="L65">        super(DEFAULT_LABEL_FORMAT_STRING, NumberFormat.getInstance());</span>
+<span class="fc" id="L66">    }</span>
+
+    /**
+     * Creates a new generator with the specified number formatter.
+     *
+     * @param labelFormat  the label format string ({@code null} not
+     *                     permitted).
+     * @param formatter  the number formatter ({@code null} not permitted).
+     */
+    public StandardCategoryItemLabelGenerator(String labelFormat,
+            NumberFormat formatter) {
+<span class="fc" id="L77">        super(labelFormat, formatter);</span>
+<span class="fc" id="L78">    }</span>
+
+    /**
+     * Creates a new generator with the specified number formatter.
+     *
+     * @param labelFormat  the label format string ({@code null} not
+     *                     permitted).
+     * @param formatter  the number formatter ({@code null} not permitted).
+     * @param percentFormatter  the percent formatter ({@code null} not
+     *     permitted).
+     */
+    public StandardCategoryItemLabelGenerator(String labelFormat,
+            NumberFormat formatter, NumberFormat percentFormatter) {
+<span class="nc" id="L91">        super(labelFormat, formatter, percentFormatter);</span>
+<span class="nc" id="L92">    }</span>
+
+    /**
+     * Creates a new generator with the specified date formatter.
+     *
+     * @param labelFormat  the label format string ({@code null} not
+     *                     permitted).
+     * @param formatter  the date formatter ({@code null} not permitted).
+     */
+    public StandardCategoryItemLabelGenerator(String labelFormat,
+                                              DateFormat formatter) {
+<span class="fc" id="L103">        super(labelFormat, formatter);</span>
+<span class="fc" id="L104">    }</span>
+
+    /**
+     * Generates the label for an item in a dataset.  Note: in the current
+     * dataset implementation, each row is a series, and each column contains
+     * values for a particular category.
+     *
+     * @param dataset  the dataset ({@code null} not permitted).
+     * @param row  the row index (zero-based).
+     * @param column  the column index (zero-based).
+     *
+     * @return The label (possibly {@code null}).
+     */
+    @Override
+    public String generateLabel(CategoryDataset dataset, int row, int column) {
+<span class="fc" id="L119">        return generateLabelString(dataset, row, column);</span>
+    }
+
+    /**
+     * Tests this generator for equality with an arbitrary object.
+     *
+     * @param obj  the object ({@code null} permitted).
+     *
+     * @return {@code true} if this generator is equal to
+     *     {@code obj}, and {@code false} otherwise.
+     */
+    @Override
+    public boolean equals(Object obj) {
+<span class="fc bfc" id="L132" title="All 2 branches covered.">        if (obj == this) {</span>
+<span class="fc" id="L133">            return true;</span>
+        }
+<span class="fc bfc" id="L135" title="All 2 branches covered.">        if (!(obj instanceof StandardCategoryItemLabelGenerator)) {</span>
+<span class="fc" id="L136">            return false;</span>
+        }
+<span class="fc" id="L138">        return super.equals(obj);</span>
+    }
+
+    @Override
+    public int hashCode() {
+<span class="fc" id="L143">        int hash = 3;</span>
+<span class="fc" id="L144">        return hash;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

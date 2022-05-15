@@ -1,0 +1,480 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CyclicXYItemRenderer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.chart.renderer.xy</a> &gt; <span class="el_source">CyclicXYItemRenderer.java</span></div><h1>CyclicXYItemRenderer.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * ---------------------------
+ * CyclicXYItemRenderer.java
+ * ---------------------------
+ * (C) Copyright 2003-2021, by Nicolas Brodu and Contributors.
+ *
+ * Original Author:  Nicolas Brodu;
+ * Contributor(s):   David Gilbert;
+ *
+ */
+
+package org.jfree.chart.renderer.xy;
+
+import java.awt.Graphics2D;
+import java.awt.geom.Rectangle2D;
+import java.io.Serializable;
+
+import org.jfree.chart.axis.CyclicNumberAxis;
+import org.jfree.chart.axis.ValueAxis;
+import org.jfree.chart.labels.XYToolTipGenerator;
+import org.jfree.chart.plot.CrosshairState;
+import org.jfree.chart.plot.PlotRenderingInfo;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.urls.XYURLGenerator;
+import org.jfree.data.DomainOrder;
+import org.jfree.data.general.DatasetChangeListener;
+import org.jfree.data.xy.XYDataset;
+
+/**
+ * The Cyclic XY item renderer is specially designed to handle cyclic axis.
+ * While the standard renderer would draw a line across the plot when a cycling
+ * occurs, the cyclic renderer splits the line at each cycle end instead. This
+ * is done by interpolating new points at cycle boundary. Thus, correct
+ * appearance is restored.
+ *
+ * The Cyclic XY item renderer works exactly like a standard XY item renderer
+ * with non-cyclic axis.
+ */
+public class CyclicXYItemRenderer extends StandardXYItemRenderer
+                                  implements Serializable {
+
+    /** For serialization. */
+    private static final long serialVersionUID = 4035912243303764892L;
+
+    /**
+     * Default constructor.
+     */
+    public CyclicXYItemRenderer() {
+<span class="nc" id="L74">        super();</span>
+<span class="nc" id="L75">    }</span>
+
+    /**
+     * Creates a new renderer.
+     *
+     * @param type  the renderer type.
+     */
+    public CyclicXYItemRenderer(int type) {
+<span class="nc" id="L83">        super(type);</span>
+<span class="nc" id="L84">    }</span>
+
+    /**
+     * Creates a new renderer.
+     *
+     * @param type  the renderer type.
+     * @param labelGenerator  the tooltip generator.
+     */
+    public CyclicXYItemRenderer(int type, XYToolTipGenerator labelGenerator) {
+<span class="nc" id="L93">        super(type, labelGenerator);</span>
+<span class="nc" id="L94">    }</span>
+
+    /**
+     * Creates a new renderer.
+     *
+     * @param type  the renderer type.
+     * @param labelGenerator  the tooltip generator.
+     * @param urlGenerator  the url generator.
+     */
+    public CyclicXYItemRenderer(int type,
+                                XYToolTipGenerator labelGenerator,
+                                XYURLGenerator urlGenerator) {
+<span class="nc" id="L106">        super(type, labelGenerator, urlGenerator);</span>
+<span class="nc" id="L107">    }</span>
+
+
+    /**
+     * Draws the visual representation of a single data item.
+     * When using cyclic axis, do not draw a line from right to left when
+     * cycling as would a standard XY item renderer, but instead draw a line
+     * from the previous point to the cycle bound in the last cycle, and a line
+     * from the cycle bound to current point in the current cycle.
+     *
+     * @param g2  the graphics device.
+     * @param state  the renderer state.
+     * @param dataArea  the data area.
+     * @param info  the plot rendering info.
+     * @param plot  the plot.
+     * @param domainAxis  the domain axis.
+     * @param rangeAxis  the range axis.
+     * @param dataset  the dataset.
+     * @param series  the series index.
+     * @param item  the item index.
+     * @param crosshairState  crosshair information for the plot
+     *                        ({@code null} permitted).
+     * @param pass  the current pass index.
+     */
+    @Override
+    public void drawItem(Graphics2D g2, XYItemRendererState state, 
+            Rectangle2D dataArea, PlotRenderingInfo info, XYPlot plot,
+            ValueAxis domainAxis, ValueAxis rangeAxis, XYDataset dataset,
+            int series, int item, CrosshairState crosshairState, int pass) {
+
+<span class="nc bnc" id="L137" title="All 8 branches missed.">        if ((!getPlotLines()) || ((!(domainAxis instanceof CyclicNumberAxis))</span>
+                &amp;&amp; (!(rangeAxis instanceof CyclicNumberAxis))) || (item &lt;= 0)) {
+<span class="nc" id="L139">            super.drawItem(g2, state, dataArea, info, plot, domainAxis,</span>
+                    rangeAxis, dataset, series, item, crosshairState, pass);
+<span class="nc" id="L141">            return;</span>
+        }
+
+        // get the previous data point...
+<span class="nc" id="L145">        double xn = dataset.getXValue(series, item - 1);</span>
+<span class="nc" id="L146">        double yn = dataset.getYValue(series, item - 1);</span>
+        // If null, don't draw line =&gt; then delegate to parent
+<span class="nc bnc" id="L148" title="All 2 branches missed.">        if (Double.isNaN(yn)) {</span>
+<span class="nc" id="L149">            super.drawItem(g2, state, dataArea, info, plot, domainAxis,</span>
+                    rangeAxis, dataset, series, item, crosshairState, pass);
+<span class="nc" id="L151">            return;</span>
+        }
+<span class="nc" id="L153">        double[] x = new double[2];</span>
+<span class="nc" id="L154">        double[] y = new double[2];</span>
+<span class="nc" id="L155">        x[0] = xn;</span>
+<span class="nc" id="L156">        y[0] = yn;</span>
+
+        // get the data point...
+<span class="nc" id="L159">        xn = dataset.getXValue(series, item);</span>
+<span class="nc" id="L160">        yn = dataset.getYValue(series, item);</span>
+        // If null, don't draw line at all
+<span class="nc bnc" id="L162" title="All 2 branches missed.">        if (Double.isNaN(yn)) {</span>
+<span class="nc" id="L163">            return;</span>
+        }
+<span class="nc" id="L165">        x[1] = xn;</span>
+<span class="nc" id="L166">        y[1] = yn;</span>
+
+        // Now split the segment as needed
+<span class="nc" id="L169">        double xcycleBound = Double.NaN;</span>
+<span class="nc" id="L170">        double ycycleBound = Double.NaN;</span>
+<span class="nc" id="L171">        boolean xBoundMapping = false, yBoundMapping = false;</span>
+<span class="nc" id="L172">        CyclicNumberAxis cnax = null, cnay = null;</span>
+
+<span class="nc bnc" id="L174" title="All 2 branches missed.">        if (domainAxis instanceof CyclicNumberAxis) {</span>
+<span class="nc" id="L175">            cnax = (CyclicNumberAxis) domainAxis;</span>
+<span class="nc" id="L176">            xcycleBound = cnax.getCycleBound();</span>
+<span class="nc" id="L177">            xBoundMapping = cnax.isBoundMappedToLastCycle();</span>
+            // If the segment must be splitted, insert a new point
+            // Strict test forces to have real segments (not 2 equal points)
+            // and avoids division by 0
+<span class="nc bnc" id="L181" title="All 10 branches missed.">            if ((x[0] != x[1])</span>
+                    &amp;&amp; ((xcycleBound &gt;= x[0])
+                    &amp;&amp; (xcycleBound &lt;= x[1])
+                    || (xcycleBound &gt;= x[1])
+                    &amp;&amp; (xcycleBound &lt;= x[0]))) {
+<span class="nc" id="L186">                double[] nx = new double[3];</span>
+<span class="nc" id="L187">                double[] ny = new double[3];</span>
+<span class="nc" id="L188">                nx[0] = x[0]; nx[2] = x[1]; ny[0] = y[0]; ny[2] = y[1];</span>
+<span class="nc" id="L189">                nx[1] = xcycleBound;</span>
+<span class="nc" id="L190">                ny[1] = (y[1] - y[0]) * (xcycleBound - x[0])</span>
+                        / (x[1] - x[0]) + y[0];
+<span class="nc" id="L192">                x = nx; y = ny;</span>
+            }
+        }
+
+<span class="nc bnc" id="L196" title="All 2 branches missed.">        if (rangeAxis instanceof CyclicNumberAxis) {</span>
+<span class="nc" id="L197">            cnay = (CyclicNumberAxis) rangeAxis;</span>
+<span class="nc" id="L198">            ycycleBound = cnay.getCycleBound();</span>
+<span class="nc" id="L199">            yBoundMapping = cnay.isBoundMappedToLastCycle();</span>
+            // The split may occur in either x splitted segments, if any, but
+            // not in both
+<span class="nc bnc" id="L202" title="All 10 branches missed.">            if ((y[0] != y[1]) &amp;&amp; ((ycycleBound &gt;= y[0])</span>
+                    &amp;&amp; (ycycleBound &lt;= y[1])
+                    || (ycycleBound &gt;= y[1]) &amp;&amp; (ycycleBound &lt;= y[0]))) {
+<span class="nc" id="L205">                double[] nx = new double[x.length + 1];</span>
+<span class="nc" id="L206">                double[] ny = new double[y.length + 1];</span>
+<span class="nc" id="L207">                nx[0] = x[0]; nx[2] = x[1]; ny[0] = y[0]; ny[2] = y[1];</span>
+<span class="nc" id="L208">                ny[1] = ycycleBound;</span>
+<span class="nc" id="L209">                nx[1] = (x[1] - x[0]) * (ycycleBound - y[0])</span>
+                        / (y[1] - y[0]) + x[0];
+<span class="nc bnc" id="L211" title="All 2 branches missed.">                if (x.length == 3) {</span>
+<span class="nc" id="L212">                    nx[3] = x[2]; ny[3] = y[2];</span>
+                }
+<span class="nc" id="L214">                x = nx; y = ny;</span>
+<span class="nc" id="L215">            }</span>
+<span class="nc bnc" id="L216" title="All 12 branches missed.">            else if ((x.length == 3) &amp;&amp; (y[1] != y[2]) &amp;&amp; ((ycycleBound &gt;= y[1])</span>
+                    &amp;&amp; (ycycleBound &lt;= y[2])
+                    || (ycycleBound &gt;= y[2]) &amp;&amp; (ycycleBound &lt;= y[1]))) {
+<span class="nc" id="L219">                double[] nx = new double[4];</span>
+<span class="nc" id="L220">                double[] ny = new double[4];</span>
+<span class="nc" id="L221">                nx[0] = x[0]; nx[1] = x[1]; nx[3] = x[2];</span>
+<span class="nc" id="L222">                ny[0] = y[0]; ny[1] = y[1]; ny[3] = y[2];</span>
+<span class="nc" id="L223">                ny[2] = ycycleBound;</span>
+<span class="nc" id="L224">                nx[2] = (x[2] - x[1]) * (ycycleBound - y[1])</span>
+                        / (y[2] - y[1]) + x[1];
+<span class="nc" id="L226">                x = nx; y = ny;</span>
+            }
+        }
+
+        // If the line is not wrapping, then parent is OK
+<span class="nc bnc" id="L231" title="All 2 branches missed.">        if (x.length == 2) {</span>
+<span class="nc" id="L232">            super.drawItem(g2, state, dataArea, info, plot, domainAxis,</span>
+                    rangeAxis, dataset, series, item, crosshairState, pass);
+<span class="nc" id="L234">            return;</span>
+        }
+
+<span class="nc" id="L237">        OverwriteDataSet newset = new OverwriteDataSet(x, y, dataset);</span>
+
+<span class="nc bnc" id="L239" title="All 2 branches missed.">        if (cnax != null) {</span>
+<span class="nc bnc" id="L240" title="All 2 branches missed.">            if (xcycleBound == x[0]) {</span>
+<span class="nc bnc" id="L241" title="All 2 branches missed.">                cnax.setBoundMappedToLastCycle(x[1] &lt;= xcycleBound);</span>
+            }
+<span class="nc bnc" id="L243" title="All 2 branches missed.">            if (xcycleBound == x[1]) {</span>
+<span class="nc bnc" id="L244" title="All 2 branches missed.">                cnax.setBoundMappedToLastCycle(x[0] &lt;= xcycleBound);</span>
+            }
+        }
+<span class="nc bnc" id="L247" title="All 2 branches missed.">        if (cnay != null) {</span>
+<span class="nc bnc" id="L248" title="All 2 branches missed.">            if (ycycleBound == y[0]) {</span>
+<span class="nc bnc" id="L249" title="All 2 branches missed.">                cnay.setBoundMappedToLastCycle(y[1] &lt;= ycycleBound);</span>
+            }
+<span class="nc bnc" id="L251" title="All 2 branches missed.">            if (ycycleBound == y[1]) {</span>
+<span class="nc bnc" id="L252" title="All 2 branches missed.">                cnay.setBoundMappedToLastCycle(y[0] &lt;= ycycleBound);</span>
+            }
+        }
+<span class="nc" id="L255">        super.drawItem(</span>
+            g2, state, dataArea, info, plot, domainAxis, rangeAxis,
+            newset, series, 1, crosshairState, pass
+        );
+
+<span class="nc bnc" id="L260" title="All 2 branches missed.">        if (cnax != null) {</span>
+<span class="nc bnc" id="L261" title="All 2 branches missed.">            if (xcycleBound == x[1]) {</span>
+<span class="nc bnc" id="L262" title="All 2 branches missed.">                cnax.setBoundMappedToLastCycle(x[2] &lt;= xcycleBound);</span>
+            }
+<span class="nc bnc" id="L264" title="All 2 branches missed.">            if (xcycleBound == x[2]) {</span>
+<span class="nc bnc" id="L265" title="All 2 branches missed.">                cnax.setBoundMappedToLastCycle(x[1] &lt;= xcycleBound);</span>
+            }
+        }
+<span class="nc bnc" id="L268" title="All 2 branches missed.">        if (cnay != null) {</span>
+<span class="nc bnc" id="L269" title="All 2 branches missed.">            if (ycycleBound == y[1]) {</span>
+<span class="nc bnc" id="L270" title="All 2 branches missed.">                cnay.setBoundMappedToLastCycle(y[2] &lt;= ycycleBound);</span>
+            }
+<span class="nc bnc" id="L272" title="All 2 branches missed.">            if (ycycleBound == y[2]) {</span>
+<span class="nc bnc" id="L273" title="All 2 branches missed.">                cnay.setBoundMappedToLastCycle(y[1] &lt;= ycycleBound);</span>
+            }
+        }
+<span class="nc" id="L276">        super.drawItem(g2, state, dataArea, info, plot, domainAxis, rangeAxis,</span>
+                newset, series, 2, crosshairState, pass);
+
+<span class="nc bnc" id="L279" title="All 2 branches missed.">        if (x.length == 4) {</span>
+<span class="nc bnc" id="L280" title="All 2 branches missed.">            if (cnax != null) {</span>
+<span class="nc bnc" id="L281" title="All 2 branches missed.">                if (xcycleBound == x[2]) {</span>
+<span class="nc bnc" id="L282" title="All 2 branches missed.">                    cnax.setBoundMappedToLastCycle(x[3] &lt;= xcycleBound);</span>
+                }
+<span class="nc bnc" id="L284" title="All 2 branches missed.">                if (xcycleBound == x[3]) {</span>
+<span class="nc bnc" id="L285" title="All 2 branches missed.">                    cnax.setBoundMappedToLastCycle(x[2] &lt;= xcycleBound);</span>
+                }
+            }
+<span class="nc bnc" id="L288" title="All 2 branches missed.">            if (cnay != null) {</span>
+<span class="nc bnc" id="L289" title="All 2 branches missed.">                if (ycycleBound == y[2]) {</span>
+<span class="nc bnc" id="L290" title="All 2 branches missed.">                    cnay.setBoundMappedToLastCycle(y[3] &lt;= ycycleBound);</span>
+                }
+<span class="nc bnc" id="L292" title="All 2 branches missed.">                if (ycycleBound == y[3]) {</span>
+<span class="nc bnc" id="L293" title="All 2 branches missed.">                    cnay.setBoundMappedToLastCycle(y[2] &lt;= ycycleBound);</span>
+                }
+            }
+<span class="nc" id="L296">            super.drawItem(g2, state, dataArea, info, plot, domainAxis,</span>
+                    rangeAxis, newset, series, 3, crosshairState, pass);
+        }
+
+<span class="nc bnc" id="L300" title="All 2 branches missed.">        if (cnax != null) {</span>
+<span class="nc" id="L301">            cnax.setBoundMappedToLastCycle(xBoundMapping);</span>
+        }
+<span class="nc bnc" id="L303" title="All 2 branches missed.">        if (cnay != null) {</span>
+<span class="nc" id="L304">            cnay.setBoundMappedToLastCycle(yBoundMapping);</span>
+        }
+<span class="nc" id="L306">    }</span>
+
+    /**
+     * A dataset to hold the interpolated points when drawing new lines.
+     */
+    protected static class OverwriteDataSet implements XYDataset {
+
+        /** The delegate dataset. */
+        protected XYDataset delegateSet;
+
+        /** Storage for the x and y values. */
+        Double[] x, y;
+
+        /**
+         * Creates a new dataset.
+         *
+         * @param x  the x values.
+         * @param y  the y values.
+         * @param delegateSet  the dataset.
+         */
+<span class="nc" id="L326">        public OverwriteDataSet(double[] x, double[] y, XYDataset delegateSet) {</span>
+<span class="nc" id="L327">            this.delegateSet = delegateSet;</span>
+<span class="nc" id="L328">            this.x = new Double[x.length]; this.y = new Double[y.length];</span>
+<span class="nc bnc" id="L329" title="All 2 branches missed.">            for (int i = 0; i &lt; x.length; ++i) {</span>
+<span class="nc" id="L330">                this.x[i] = x[i];</span>
+<span class="nc" id="L331">                this.y[i] = y[i];</span>
+            }
+<span class="nc" id="L333">        }</span>
+
+        /**
+         * Returns the order of the domain (X) values.
+         *
+         * @return The domain order.
+         */
+        @Override
+        public DomainOrder getDomainOrder() {
+<span class="nc" id="L342">            return DomainOrder.NONE;</span>
+        }
+
+        /**
+         * Returns the number of items for the given series.
+         *
+         * @param series  the series index (zero-based).
+         *
+         * @return The item count.
+         */
+        @Override
+        public int getItemCount(int series) {
+<span class="nc" id="L354">            return this.x.length;</span>
+        }
+
+        /**
+         * Returns the x-value.
+         *
+         * @param series  the series index (zero-based).
+         * @param item  the item index (zero-based).
+         *
+         * @return The x-value.
+         */
+        @Override
+        public Number getX(int series, int item) {
+<span class="nc" id="L367">            return this.x[item];</span>
+        }
+
+        /**
+         * Returns the x-value (as a double primitive) for an item within a
+         * series.
+         *
+         * @param series  the series (zero-based index).
+         * @param item  the item (zero-based index).
+         *
+         * @return The x-value.
+         */
+        @Override
+        public double getXValue(int series, int item) {
+<span class="nc" id="L381">            double result = Double.NaN;</span>
+<span class="nc" id="L382">            Number xx = getX(series, item);</span>
+<span class="nc bnc" id="L383" title="All 2 branches missed.">            if (xx != null) {</span>
+<span class="nc" id="L384">                result = xx.doubleValue();</span>
+            }
+<span class="nc" id="L386">            return result;</span>
+        }
+
+        /**
+         * Returns the y-value.
+         *
+         * @param series  the series index (zero-based).
+         * @param item  the item index (zero-based).
+         *
+         * @return The y-value.
+         */
+        @Override
+        public Number getY(int series, int item) {
+<span class="nc" id="L399">            return this.y[item];</span>
+        }
+
+        /**
+         * Returns the y-value (as a double primitive) for an item within a
+         * series.
+         *
+         * @param series  the series (zero-based index).
+         * @param item  the item (zero-based index).
+         *
+         * @return The y-value.
+         */
+        @Override
+        public double getYValue(int series, int item) {
+<span class="nc" id="L413">            double result = Double.NaN;</span>
+<span class="nc" id="L414">            Number yy = getY(series, item);</span>
+<span class="nc bnc" id="L415" title="All 2 branches missed.">            if (yy != null) {</span>
+<span class="nc" id="L416">                result = yy.doubleValue();</span>
+            }
+<span class="nc" id="L418">            return result;</span>
+        }
+
+        /**
+         * Returns the number of series in the dataset.
+         *
+         * @return The series count.
+         */
+        @Override
+        public int getSeriesCount() {
+<span class="nc" id="L428">            return this.delegateSet.getSeriesCount();</span>
+        }
+
+        /**
+         * Returns the name of the given series.
+         *
+         * @param series  the series index (zero-based).
+         *
+         * @return The series name.
+         */
+        @Override
+        public Comparable getSeriesKey(int series) {
+<span class="nc" id="L440">            return this.delegateSet.getSeriesKey(series);</span>
+        }
+
+        /**
+         * Returns the index of the named series, or -1.
+         *
+         * @param seriesName  the series name.
+         *
+         * @return The index.
+         */
+        @Override
+        public int indexOf(Comparable seriesName) {
+<span class="nc" id="L452">            return this.delegateSet.indexOf(seriesName);</span>
+        }
+
+        /**
+         * Does nothing.
+         *
+         * @param listener  ignored.
+         */
+        @Override
+        public void addChangeListener(DatasetChangeListener listener) {
+            // unused in parent
+<span class="nc" id="L463">        }</span>
+
+        /**
+         * Does nothing.
+         *
+         * @param listener  ignored.
+         */
+        @Override
+        public void removeChangeListener(DatasetChangeListener listener) {
+            // unused in parent
+<span class="nc" id="L473">        }</span>
+
+    }
+
+}
+
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

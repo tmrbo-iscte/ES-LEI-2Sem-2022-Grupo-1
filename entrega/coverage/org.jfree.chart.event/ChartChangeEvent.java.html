@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ChartChangeEvent.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.chart.event</a> &gt; <span class="el_source">ChartChangeEvent.java</span></div><h1>ChartChangeEvent.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * ---------------------
+ * ChartChangeEvent.java
+ * ---------------------
+ * (C) Copyright 2000-2022, by David Gilbert.
+ *
+ * Original Author:  David Gilbert;
+ * Contributor(s):   -;
+ *
+ */
+
+package org.jfree.chart.event;
+
+import java.util.EventObject;
+
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.internal.Args;
+
+/**
+ * A change event that encapsulates information about a change to a chart.
+ */
+public class ChartChangeEvent extends EventObject {
+
+    /** The type of event. */
+    private ChartChangeEventType type;
+
+    /** The chart that generated the event. */
+    private JFreeChart chart;
+
+    /**
+     * Creates a new chart change event.
+     *
+     * @param source  the source of the event (could be the chart, a title,
+     *                an axis etc., {@code null} not permitted).
+     */
+    public ChartChangeEvent(Object source) {
+<span class="fc" id="L62">        this(source, null, ChartChangeEventType.GENERAL);</span>
+<span class="fc" id="L63">    }</span>
+
+    /**
+     * Creates a new chart change event.
+     *
+     * @param source  the source of the event (could be the chart, a title, an
+     *                axis etc., {@code null} not permitted).
+     * @param chart  the chart that generated the event.
+     */
+    public ChartChangeEvent(Object source, JFreeChart chart) {
+<span class="nc" id="L73">        this(source, chart, ChartChangeEventType.GENERAL);</span>
+<span class="nc" id="L74">    }</span>
+
+    /**
+     * Creates a new chart change event.
+     *
+     * @param source  the source of the event (could be the chart, a title, an
+                      axis etc., {@code null} not permitted).
+     * @param chart  the chart that generated the event.
+     * @param type  the type of event ({@code null} not permitted).
+     */
+    public ChartChangeEvent(Object source, JFreeChart chart,
+            ChartChangeEventType type) {
+<span class="fc" id="L86">        super(source);</span>
+<span class="fc" id="L87">        Args.nullNotPermitted(type, &quot;type&quot;);</span>
+<span class="fc" id="L88">        this.chart = chart;</span>
+<span class="fc" id="L89">        this.type = type;</span>
+<span class="fc" id="L90">    }</span>
+
+    /**
+     * Returns the chart that generated the change event.
+     *
+     * @return The chart that generated the change event.
+     */
+    public JFreeChart getChart() {
+<span class="nc" id="L98">        return this.chart;</span>
+    }
+
+    /**
+     * Sets the chart that generated the change event.
+     *
+     * @param chart  the chart that generated the event.
+     */
+    public void setChart(JFreeChart chart) {
+<span class="fc" id="L107">        this.chart = chart;</span>
+<span class="fc" id="L108">    }</span>
+
+    /**
+     * Returns the event type.
+     *
+     * @return The event type (never {@code null}).
+     */
+    public ChartChangeEventType getType() {
+<span class="nc" id="L116">        return this.type;</span>
+    }
+
+    /**
+     * Sets the event type.
+     *
+     * @param type  the event type ({@code null} not permitted).
+     */
+    public void setType(ChartChangeEventType type) {
+<span class="fc" id="L125">        Args.nullNotPermitted(type, &quot;type&quot;);</span>
+<span class="fc" id="L126">        this.type = type;</span>
+<span class="fc" id="L127">    }</span>
+
+    /**
+     * author:Gustavo Ferreira-&gt; moved from JFreeChart
+     * Sends a {@link ChartChangeEvent} to all registered listeners.
+     *
+     */
+    public void notifyListeners(JFreeChart jFreeChart) {
+<span class="pc bpc" id="L135" title="1 of 2 branches missed.">        if (jFreeChart.isNotify()) {</span>
+<span class="fc" id="L136">            Object[] listeners = jFreeChart.getChangeListeners().getListenerList();</span>
+<span class="fc bfc" id="L137" title="All 2 branches covered.">            for (int i = listeners.length - 2; i &gt;= 0; i -= 2) {</span>
+<span class="pc bpc" id="L138" title="1 of 2 branches missed.">                if (listeners[i] == ChartChangeListener.class) {</span>
+<span class="fc" id="L139">                    ((ChartChangeListener) listeners[i + 1]).chartChanged(</span>
+                            this);
+                }
+            }
+        }
+<span class="fc" id="L144">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

@@ -1,0 +1,387 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>XYIntervalSeriesCollection.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.data.xy</a> &gt; <span class="el_source">XYIntervalSeriesCollection.java</span></div><h1>XYIntervalSeriesCollection.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * -------------------------------
+ * XYIntervalSeriesCollection.java
+ * -------------------------------
+ * (C) Copyright 2006-2022, by David Gilbert.
+ *
+ * Original Author:  David Gilbert;
+ * Contributor(s):   -;
+ *
+ */
+
+package org.jfree.data.xy;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+import org.jfree.chart.internal.Args;
+import org.jfree.chart.internal.CloneUtils;
+import org.jfree.chart.api.PublicCloneable;
+
+import org.jfree.data.general.DatasetChangeEvent;
+
+/**
+ * A collection of {@link XYIntervalSeries} objects.
+ *
+ * @param &lt;S&gt; The type for the series keys.
+ * 
+ * @since 1.0.3
+ *
+ * @see XYIntervalSeries
+ */
+public class XYIntervalSeriesCollection&lt;S extends Comparable&lt;S&gt;&gt; 
+        extends AbstractIntervalXYDataset&lt;S&gt;
+        implements IntervalXYDataset&lt;S&gt;, PublicCloneable, Serializable {
+
+    /** Storage for the data series. */
+    private List&lt;XYIntervalSeries&lt;S&gt;&gt; data;
+
+    /**
+     * Creates a new instance of {@code XIntervalSeriesCollection}.
+     */
+<span class="fc" id="L69">    public XYIntervalSeriesCollection() {</span>
+<span class="fc" id="L70">        this.data = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L71">    }</span>
+
+    /**
+     * Adds a series to the collection and sends a {@link DatasetChangeEvent}
+     * to all registered listeners.
+     *
+     * @param series  the series ({@code null} not permitted).
+     */
+    public void addSeries(XYIntervalSeries&lt;S&gt; series) {
+<span class="fc" id="L80">        Args.nullNotPermitted(series, &quot;series&quot;);</span>
+<span class="fc" id="L81">        this.data.add(series);</span>
+<span class="fc" id="L82">        series.addChangeListener(this);</span>
+<span class="fc" id="L83">        fireDatasetChanged();</span>
+<span class="fc" id="L84">    }</span>
+
+    /**
+     * Returns the number of series in the collection.
+     *
+     * @return The series count.
+     */
+    @Override
+    public int getSeriesCount() {
+<span class="fc" id="L93">        return this.data.size();</span>
+    }
+
+    /**
+     * Returns a series from the collection.
+     *
+     * @param series  the series index (zero-based).
+     *
+     * @return The series.
+     *
+     * @throws IllegalArgumentException if {@code series} is not in the
+     *     range {@code 0} to {@code getSeriesCount() - 1}.
+     */
+    public XYIntervalSeries&lt;S&gt; getSeries(int series) {
+<span class="fc" id="L107">        Args.requireInRange(series, &quot;series&quot;, 0, this.data.size() - 1);</span>
+<span class="fc" id="L108">        return this.data.get(series);</span>
+    }
+
+    /**
+     * Returns the key for a series.
+     *
+     * @param series  the series index (in the range {@code 0} to
+     *     {@code getSeriesCount() - 1}).
+     *
+     * @return The key for a series.
+     *
+     * @throws IllegalArgumentException if {@code series} is not in the
+     *     specified range.
+     */
+    @Override
+    public S getSeriesKey(int series) {
+        // defer argument checking
+<span class="fc" id="L125">        return getSeries(series).getKey();</span>
+    }
+
+    /**
+     * Returns the number of items in the specified series.
+     *
+     * @param series  the series (zero-based index).
+     *
+     * @return The item count.
+     *
+     * @throws IllegalArgumentException if {@code series} is not in the
+     *     range {@code 0} to {@code getSeriesCount() - 1}.
+     */
+    @Override
+    public int getItemCount(int series) {
+        // defer argument checking
+<span class="fc" id="L141">        return getSeries(series).getItemCount();</span>
+    }
+
+    /**
+     * Returns the x-value for an item within a series.
+     *
+     * @param series  the series index.
+     * @param item  the item index.
+     *
+     * @return The x-value.
+     */
+    @Override
+    public Number getX(int series, int item) {
+<span class="fc" id="L154">        XYIntervalSeries&lt;S&gt; s = this.data.get(series);</span>
+<span class="fc" id="L155">        return s.getX(item);</span>
+    }
+
+    /**
+     * Returns the start x-value (as a double primitive) for an item within a
+     * series.
+     *
+     * @param series  the series index (zero-based).
+     * @param item  the item index (zero-based).
+     *
+     * @return The value.
+     */
+    @Override
+    public double getStartXValue(int series, int item) {
+<span class="fc" id="L169">        XYIntervalSeries&lt;S&gt; s = this.data.get(series);</span>
+<span class="fc" id="L170">        return s.getXLowValue(item);</span>
+    }
+
+    /**
+     * Returns the end x-value (as a double primitive) for an item within a
+     * series.
+     *
+     * @param series  the series index (zero-based).
+     * @param item  the item index (zero-based).
+     *
+     * @return The value.
+     */
+    @Override
+    public double getEndXValue(int series, int item) {
+<span class="fc" id="L184">        XYIntervalSeries&lt;S&gt; s = this.data.get(series);</span>
+<span class="fc" id="L185">        return s.getXHighValue(item);</span>
+    }
+
+    /**
+     * Returns the y-value (as a double primitive) for an item within a
+     * series.
+     *
+     * @param series  the series index (zero-based).
+     * @param item  the item index (zero-based).
+     *
+     * @return The value.
+     */
+    @Override
+    public double getYValue(int series, int item) {
+<span class="fc" id="L199">        XYIntervalSeries&lt;S&gt; s = this.data.get(series);</span>
+<span class="fc" id="L200">        return s.getYValue(item);</span>
+    }
+
+    /**
+     * Returns the start y-value (as a double primitive) for an item within a
+     * series.
+     *
+     * @param series  the series index (zero-based).
+     * @param item  the item index (zero-based).
+     *
+     * @return The value.
+     */
+    @Override
+    public double getStartYValue(int series, int item) {
+<span class="fc" id="L214">        XYIntervalSeries&lt;S&gt; s = this.data.get(series);</span>
+<span class="fc" id="L215">        return s.getYLowValue(item);</span>
+    }
+
+    /**
+     * Returns the end y-value (as a double primitive) for an item within a
+     * series.
+     *
+     * @param series  the series (zero-based index).
+     * @param item  the item (zero-based index).
+     *
+     * @return The value.
+     */
+    @Override
+    public double getEndYValue(int series, int item) {
+<span class="fc" id="L229">        XYIntervalSeries&lt;S&gt; s = this.data.get(series);</span>
+<span class="fc" id="L230">        return s.getYHighValue(item);</span>
+    }
+
+    /**
+     * Returns the y-value for an item within a series.
+     *
+     * @param series  the series index.
+     * @param item  the item index.
+     *
+     * @return The y-value.
+     */
+    @Override
+    public Number getY(int series, int item) {
+<span class="nc" id="L243">        return getYValue(series, item);</span>
+    }
+
+    /**
+     * Returns the start x-value for an item within a series.
+     *
+     * @param series  the series index.
+     * @param item  the item index.
+     *
+     * @return The x-value.
+     */
+    @Override
+    public Number getStartX(int series, int item) {
+<span class="nc" id="L256">        return getStartXValue(series, item);</span>
+    }
+
+    /**
+     * Returns the end x-value for an item within a series.
+     *
+     * @param series  the series index.
+     * @param item  the item index.
+     *
+     * @return The x-value.
+     */
+    @Override
+    public Number getEndX(int series, int item) {
+<span class="nc" id="L269">        return getEndXValue(series, item);</span>
+    }
+
+    /**
+     * Returns the start y-value for an item within a series.  This method
+     * maps directly to {@link #getY(int, int)}.
+     *
+     * @param series  the series index.
+     * @param item  the item index.
+     *
+     * @return The start y-value.
+     */
+    @Override
+    public Number getStartY(int series, int item) {
+<span class="nc" id="L283">        return getStartYValue(series, item);</span>
+    }
+
+    /**
+     * Returns the end y-value for an item within a series.  This method
+     * maps directly to {@link #getY(int, int)}.
+     *
+     * @param series  the series index.
+     * @param item  the item index.
+     *
+     * @return The end y-value.
+     */
+    @Override
+    public Number getEndY(int series, int item) {
+<span class="nc" id="L297">        return getEndYValue(series, item);</span>
+    }
+
+    /**
+     * Removes a series from the collection and sends a
+     * {@link DatasetChangeEvent} to all registered listeners.
+     *
+     * @param series  the series index (zero-based).
+     *
+     * @since 1.0.10
+     */
+    public void removeSeries(int series) {
+<span class="fc bfc" id="L309" title="All 4 branches covered.">        if ((series &lt; 0) || (series &gt;= getSeriesCount())) {</span>
+<span class="fc" id="L310">            throw new IllegalArgumentException(&quot;Series index out of bounds.&quot;);</span>
+        }
+<span class="fc" id="L312">        XYIntervalSeries&lt;S&gt; ts = this.data.get(series);</span>
+<span class="fc" id="L313">        ts.removeChangeListener(this);</span>
+<span class="fc" id="L314">        this.data.remove(series);</span>
+<span class="fc" id="L315">        fireDatasetChanged();</span>
+<span class="fc" id="L316">    }</span>
+
+    /**
+     * Removes a series from the collection and sends a
+     * {@link DatasetChangeEvent} to all registered listeners.
+     *
+     * @param series  the series ({@code null} not permitted).
+     *
+     * @since 1.0.10
+     */
+    public void removeSeries(XYIntervalSeries&lt;S&gt; series) {
+<span class="nc" id="L327">        Args.nullNotPermitted(series, &quot;series&quot;);</span>
+<span class="nc bnc" id="L328" title="All 2 branches missed.">        if (this.data.contains(series)) {</span>
+<span class="nc" id="L329">            series.removeChangeListener(this);</span>
+<span class="nc" id="L330">            this.data.remove(series);</span>
+<span class="nc" id="L331">            fireDatasetChanged();</span>
+        }
+<span class="nc" id="L333">    }</span>
+
+    /**
+     * Removes all the series from the collection and sends a
+     * {@link DatasetChangeEvent} to all registered listeners.
+     *
+     * @since 1.0.10
+     */
+    public void removeAllSeries() {
+        // Unregister the collection as a change listener to each series in
+        // the collection.
+<span class="nc bnc" id="L344" title="All 2 branches missed.">        for (int i = 0; i &lt; this.data.size(); i++) {</span>
+<span class="nc" id="L345">          XYIntervalSeries&lt;S&gt; series = this.data.get(i);</span>
+<span class="nc" id="L346">          series.removeChangeListener(this);</span>
+        }
+<span class="nc" id="L348">        this.data.clear();</span>
+<span class="nc" id="L349">        fireDatasetChanged();</span>
+<span class="nc" id="L350">    }</span>
+
+    /**
+     * Tests this instance for equality with an arbitrary object.
+     *
+     * @param obj  the object ({@code null} permitted).
+     *
+     * @return A boolean.
+     */
+    @Override
+    public boolean equals(Object obj) {
+<span class="fc bfc" id="L361" title="All 2 branches covered.">        if (obj == this) {</span>
+<span class="fc" id="L362">            return true;</span>
+        }
+<span class="pc bpc" id="L364" title="1 of 2 branches missed.">        if (!(obj instanceof XYIntervalSeriesCollection)) {</span>
+<span class="nc" id="L365">            return false;</span>
+        }
+<span class="fc" id="L367">        XYIntervalSeriesCollection&lt;S&gt; that = (XYIntervalSeriesCollection) obj;</span>
+<span class="fc" id="L368">        return Objects.equals(this.data, that.data);</span>
+    }
+
+    /**
+     * Returns a clone of this dataset.
+     *
+     * @return A clone of this dataset.
+     *
+     * @throws CloneNotSupportedException if there is a problem cloning.
+     */
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+<span class="fc" id="L380">        XYIntervalSeriesCollection clone</span>
+<span class="fc" id="L381">                = (XYIntervalSeriesCollection) super.clone();</span>
+<span class="fc" id="L382">        clone.data = CloneUtils.cloneList(this.data);</span>
+<span class="fc" id="L383">        return clone;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

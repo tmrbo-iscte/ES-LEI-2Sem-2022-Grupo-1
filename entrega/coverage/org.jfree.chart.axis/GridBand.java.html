@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GridBand.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.chart.axis</a> &gt; <span class="el_source">GridBand.java</span></div><h1>GridBand.java</h1><pre class="source lang-java linenums">package org.jfree.chart.axis;
+
+import org.jfree.chart.api.RectangleEdge;
+import org.jfree.chart.internal.Args;
+import org.jfree.chart.internal.PaintUtils;
+import org.jfree.chart.internal.SerialUtils;
+
+import java.awt.*;
+import java.awt.geom.Rectangle2D;
+import java.io.*;
+import java.util.List;
+
+public class GridBand implements Serializable, Cloneable {
+    /**
+     * The default grid band paint.
+     */
+<span class="fc" id="L17">    public static final Paint DEFAULT_GRID_BAND_PAINT</span>
+            = new Color(232, 234, 232, 128);
+    /**
+     * The default paint for alternate grid bands.
+     */
+<span class="fc" id="L22">    public static final Paint DEFAULT_GRID_BAND_ALTERNATE_PAINT</span>
+            = new Color(0, 0, 0, 0);  // transparent/** Flag that indicates whether or not grid bands are visible. */
+    public boolean gridBandsVisible;
+    /**
+     * The paint used to color the grid bands (if the bands are visible).
+     */
+    public transient Paint gridBandPaint;
+    /**
+     * The paint used to fill the alternate grid bands.
+     */
+    public transient Paint gridBandAlternatePaint;
+
+    SymbolAxis saxis;
+
+<span class="fc" id="L36">    public GridBand(SymbolAxis saxis) {</span>
+<span class="fc" id="L37">        this.saxis = saxis;</span>
+<span class="fc" id="L38">    }</span>
+
+    /**
+     * Returns the flag that controls whether or not grid bands are drawn for
+     * the axis.  The default value is {@code true}.
+     *
+     * @return A boolean.
+     * @see #setGridBandsVisible(boolean)
+     */
+    public boolean isGridBandsVisible() {
+<span class="fc" id="L48">        return this.gridBandsVisible;</span>
+    }
+
+    /**
+     * Sets the flag that controls whether or not grid bands are drawn for this
+     * axis and notifies registered listeners that the axis has been modified.
+     * Each band is the area between two adjacent gridlines
+     * running perpendicular to the axis.  When the bands are drawn they are
+     * filled with the colors {@link #getGridBandPaint()} and
+     * {@link #getGridBandAlternatePaint()} in an alternating sequence.
+     *
+     * @param flag the new setting.
+     * @see #isGridBandsVisible()
+     */
+    public void setGridBandsVisible(boolean flag) {
+<span class="fc" id="L63">        this.gridBandsVisible = flag;</span>
+<span class="fc" id="L64">        saxis.fireChangeEvent();</span>
+<span class="fc" id="L65">    }</span>
+
+    /**
+     * Returns the paint used to color grid bands (two colors are used
+     * alternately, the other is returned by
+     * {@link #getGridBandAlternatePaint()}).  The default value is
+     * {@link #DEFAULT_GRID_BAND_PAINT}.
+     *
+     * @return The paint (never {@code null}).
+     * @see #setGridBandPaint(Paint)
+     * @see #isGridBandsVisible()
+     */
+    public Paint getGridBandPaint() {
+<span class="fc" id="L78">        return this.gridBandPaint;</span>
+    }
+
+    /**
+     * Sets the grid band paint and notifies registered listeners that the
+     * axis has been changed.  See the {@link #setGridBandsVisible(boolean)}
+     * method for more information about grid bands.
+     *
+     * @param paint the paint ({@code null} not permitted).
+     * @see #getGridBandPaint()
+     */
+    public void setGridBandPaint(Paint paint) {
+<span class="fc" id="L90">        Args.nullNotPermitted(paint, &quot;paint&quot;);</span>
+<span class="fc" id="L91">        this.gridBandPaint = paint;</span>
+<span class="fc" id="L92">        saxis.fireChangeEvent();</span>
+<span class="fc" id="L93">    }</span>
+
+    /**
+     * Returns the second paint used to color grid bands (two colors are used
+     * alternately, the other is returned by {@link #getGridBandPaint()}).
+     * The default value is {@link #DEFAULT_GRID_BAND_ALTERNATE_PAINT}
+     * (transparent).
+     *
+     * @return The paint (never {@code null}).
+     * @see #setGridBandAlternatePaint(Paint)
+     */
+    public Paint getGridBandAlternatePaint() {
+<span class="fc" id="L105">        return this.gridBandAlternatePaint;</span>
+    }
+
+    /**
+     * Sets the grid band paint and notifies registered listeners that the
+     * axis has been changed.  See the {@link #setGridBandsVisible(boolean)}
+     * method for more information about grid bands.
+     *
+     * @param paint the paint ({@code null} not permitted).
+     * @see #getGridBandAlternatePaint()
+     * @see #setGridBandPaint(Paint)
+     */
+    public void setGridBandAlternatePaint(Paint paint) {
+<span class="fc" id="L118">        Args.nullNotPermitted(paint, &quot;paint&quot;);</span>
+<span class="fc" id="L119">        this.gridBandAlternatePaint = paint;</span>
+<span class="fc" id="L120">        saxis.fireChangeEvent();</span>
+<span class="fc" id="L121">    }</span>
+
+    /**
+     * Draws the grid bands (alternate bands are colored using
+     * {@link #getGridBandPaint()} and {@link #getGridBandAlternatePaint()}.
+     *
+     * @param g2       the graphics target ({@code null} not permitted).
+     * @param dataArea the data area to which the axes are aligned
+     *                 ({@code null} not permitted).
+     * @param edge     the edge to which the axis is aligned ({@code null} not
+     *                 permitted).
+     * @param ticks    the ticks ({@code null} not permitted).
+     */
+    public void drawGridBands(Graphics2D g2,
+                              Rectangle2D dataArea, RectangleEdge edge, List ticks) {
+<span class="nc" id="L136">        Shape savedClip = g2.getClip();</span>
+<span class="nc" id="L137">        g2.clip(dataArea);</span>
+<span class="nc bnc" id="L138" title="All 2 branches missed.">        if (RectangleEdge.isTopOrBottom(edge)) {</span>
+<span class="nc" id="L139">            saxis.drawGridBandsHorizontal(g2, dataArea, true, ticks, this);</span>
+<span class="nc bnc" id="L140" title="All 2 branches missed.">        } else if (RectangleEdge.isLeftOrRight(edge)) {</span>
+<span class="nc" id="L141">            saxis.drawGridBandsVertical(g2, dataArea, true, ticks, this);</span>
+        }
+<span class="nc" id="L143">        g2.setClip(savedClip);</span>
+<span class="nc" id="L144">    }</span>
+
+    @Override
+    public GridBand clone() {
+        try {
+<span class="nc" id="L149">            return (GridBand) super.clone();</span>
+<span class="nc" id="L150">        } catch (CloneNotSupportedException e) {</span>
+<span class="nc" id="L151">            throw new AssertionError();</span>
+        }
+    }
+
+    /**
+     * Provides serialization support.
+     *
+     * @param stream  the output stream.
+     *
+     * @throws IOException  if there is an I/O error.
+     */
+
+    private void writeObject(ObjectOutputStream stream) throws IOException {
+<span class="fc" id="L164">        stream.defaultWriteObject();</span>
+<span class="fc" id="L165">        SerialUtils.writePaint(getGridBandPaint(), stream);</span>
+<span class="fc" id="L166">        SerialUtils.writePaint(getGridBandAlternatePaint(), stream);</span>
+<span class="fc" id="L167">    }</span>
+
+    /**
+     * Provides serialization support.
+     *
+     * @param stream  the input stream.
+     *
+     * @throws IOException  if there is an I/O error.
+     * @throws ClassNotFoundException  if there is a classpath problem.
+     */
+
+    private void readObject(ObjectInputStream stream)
+            throws IOException, ClassNotFoundException {
+<span class="fc" id="L180">        stream.defaultReadObject();</span>
+<span class="fc" id="L181">        setGridBandPaint(SerialUtils.readPaint(stream));</span>
+<span class="fc" id="L182">        setGridBandAlternatePaint(SerialUtils.readPaint(stream));</span>
+<span class="fc" id="L183">    }</span>
+
+    @Override
+    public boolean equals(Object obj) {
+<span class="fc bfc" id="L187" title="All 2 branches covered.">        if (obj == this) {</span>
+<span class="fc" id="L188">            return true;</span>
+        }
+<span class="pc bpc" id="L190" title="1 of 2 branches missed.">        if (!(obj instanceof GridBand)) {</span>
+<span class="nc" id="L191">            return false;</span>
+        }
+<span class="fc" id="L193">        GridBand that = (GridBand) obj;</span>
+<span class="fc bfc" id="L194" title="All 2 branches covered.">        if (isGridBandsVisible() != that.isGridBandsVisible()) {</span>
+<span class="fc" id="L195">            return false;</span>
+        }
+<span class="fc bfc" id="L197" title="All 2 branches covered.">        if (!PaintUtils.equal(getGridBandPaint(), that.getGridBandPaint())) {</span>
+<span class="fc" id="L198">            return false;</span>
+        }
+<span class="fc bfc" id="L200" title="All 2 branches covered.">        if (!PaintUtils.equal(getGridBandAlternatePaint(),</span>
+<span class="fc" id="L201">                that.getGridBandAlternatePaint())) {</span>
+<span class="fc" id="L202">            return false;</span>
+        }
+<span class="fc" id="L204">        return true;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

@@ -1,0 +1,553 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DefaultIntervalXYDataset.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.data.xy</a> &gt; <span class="el_source">DefaultIntervalXYDataset.java</span></div><h1>DefaultIntervalXYDataset.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * -----------------------------
+ * DefaultIntervalXYDataset.java
+ * -----------------------------
+ * (C) Copyright 2006-2022, by David Gilbert and Contributors.
+ *
+ * Original Author:  David Gilbert;
+ * Contributor(s):   -;
+ *
+ */
+
+package org.jfree.data.xy;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import org.jfree.chart.internal.Args;
+import org.jfree.chart.api.PublicCloneable;
+
+import org.jfree.data.general.DatasetChangeEvent;
+
+/**
+ * A dataset that defines a range (interval) for both the x-values and the
+ * y-values.  This implementation uses six arrays to store the x, start-x,
+ * end-x, y, start-y and end-y values.
+ * &lt;br&gt;&lt;br&gt;
+ * An alternative implementation of the {@link IntervalXYDataset} interface
+ * is provided by the {@link XYIntervalSeriesCollection} class.
+ *
+ * @since 1.0.3
+ */
+public class DefaultIntervalXYDataset&lt;S extends Comparable&lt;S&gt;&gt; 
+        extends AbstractIntervalXYDataset&lt;S&gt;
+        implements PublicCloneable {
+
+    /**
+     * Storage for the series keys.  This list must be kept in sync with the
+     * seriesList.
+     */
+    private List&lt;S&gt; seriesKeys;
+
+    /**
+     * Storage for the series in the dataset.  We use a list because the
+     * order of the series is significant.  This list must be kept in sync
+     * with the seriesKeys list.
+     */
+    private List&lt;double[][]&gt; seriesList;
+
+    /**
+     * Creates a new {@code DefaultIntervalXYDataset} instance, initially
+     * containing no data.
+     */
+<span class="fc" id="L78">    public DefaultIntervalXYDataset() {</span>
+<span class="fc" id="L79">        this.seriesKeys = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L80">        this.seriesList = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L81">    }</span>
+
+    /**
+     * Returns the number of series in the dataset.
+     *
+     * @return The series count.
+     */
+    @Override
+    public int getSeriesCount() {
+<span class="fc" id="L90">        return this.seriesList.size();</span>
+    }
+
+    /**
+     * Returns the key for a series.
+     *
+     * @param series  the series index (in the range {@code 0} to
+     *     {@code getSeriesCount() - 1}).
+     *
+     * @return The key for the series.
+     *
+     * @throws IllegalArgumentException if {@code series} is not in the
+     *     specified range.
+     */
+    @Override
+    public S getSeriesKey(int series) {
+<span class="fc" id="L106">        Args.requireInRange(series, &quot;series&quot;, 0, this.seriesKeys.size() - 1);</span>
+<span class="fc" id="L107">        return this.seriesKeys.get(series);</span>
+    }
+
+    /**
+     * Returns the number of items in the specified series.
+     *
+     * @param series  the series index (in the range {@code 0} to
+     *     {@code getSeriesCount() - 1}).
+     *
+     * @return The item count.
+     *
+     * @throws IllegalArgumentException if {@code series} is not in the
+     *     specified range.
+     */
+    @Override
+    public int getItemCount(int series) {
+<span class="fc" id="L123">        Args.requireInRange(series, &quot;series&quot;, 0, this.seriesList.size() - 1);</span>
+<span class="fc" id="L124">        double[][] seriesArray = this.seriesList.get(series);</span>
+<span class="fc" id="L125">        return seriesArray[0].length;</span>
+    }
+
+    /**
+     * Returns the x-value for an item within a series.
+     *
+     * @param series  the series index (in the range {@code 0} to
+     *     {@code getSeriesCount() - 1}).
+     * @param item  the item index (in the range {@code 0} to
+     *     {@code getItemCount(series)}).
+     *
+     * @return The x-value.
+     *
+     * @throws ArrayIndexOutOfBoundsException if {@code series} is not
+     *     within the specified range.
+     * @throws ArrayIndexOutOfBoundsException if {@code item} is not
+     *     within the specified range.
+     *
+     * @see #getX(int, int)
+     */
+    @Override
+    public double getXValue(int series, int item) {
+<span class="fc" id="L147">        double[][] seriesData = this.seriesList.get(series);</span>
+<span class="fc" id="L148">        return seriesData[0][item];</span>
+    }
+
+    /**
+     * Returns the y-value for an item within a series.
+     *
+     * @param series  the series index (in the range {@code 0} to
+     *     {@code getSeriesCount() - 1}).
+     * @param item  the item index (in the range {@code 0} to
+     *     {@code getItemCount(series)}).
+     *
+     * @return The y-value.
+     *
+     * @throws ArrayIndexOutOfBoundsException if {@code series} is not
+     *     within the specified range.
+     * @throws ArrayIndexOutOfBoundsException if {@code item} is not
+     *     within the specified range.
+     *
+     * @see #getY(int, int)
+     */
+    @Override
+    public double getYValue(int series, int item) {
+<span class="fc" id="L170">        double[][] seriesData = this.seriesList.get(series);</span>
+<span class="fc" id="L171">        return seriesData[3][item];</span>
+    }
+
+    /**
+     * Returns the starting x-value for an item within a series.
+     *
+     * @param series  the series index (in the range {@code 0} to
+     *     {@code getSeriesCount() - 1}).
+     * @param item  the item index (in the range {@code 0} to
+     *     {@code getItemCount(series)}).
+     *
+     * @return The starting x-value.
+     *
+     * @throws ArrayIndexOutOfBoundsException if {@code series} is not
+     *     within the specified range.
+     * @throws ArrayIndexOutOfBoundsException if {@code item} is not
+     *     within the specified range.
+     *
+     * @see #getStartX(int, int)
+     */
+    @Override
+    public double getStartXValue(int series, int item) {
+<span class="fc" id="L193">        double[][] seriesData = this.seriesList.get(series);</span>
+<span class="fc" id="L194">        return seriesData[1][item];</span>
+    }
+
+    /**
+     * Returns the ending x-value for an item within a series.
+     *
+     * @param series  the series index (in the range {@code 0} to
+     *     {@code getSeriesCount() - 1}).
+     * @param item  the item index (in the range {@code 0} to
+     *     {@code getItemCount(series)}).
+     *
+     * @return The ending x-value.
+     *
+     * @throws ArrayIndexOutOfBoundsException if {@code series} is not
+     *     within the specified range.
+     * @throws ArrayIndexOutOfBoundsException if {@code item} is not
+     *     within the specified range.
+     *
+     * @see #getEndX(int, int)
+     */
+    @Override
+    public double getEndXValue(int series, int item) {
+<span class="fc" id="L216">        double[][] seriesData = this.seriesList.get(series);</span>
+<span class="fc" id="L217">        return seriesData[2][item];</span>
+    }
+
+    /**
+     * Returns the starting y-value for an item within a series.
+     *
+     * @param series  the series index (in the range {@code 0} to
+     *     {@code getSeriesCount() - 1}).
+     * @param item  the item index (in the range {@code 0} to
+     *     {@code getItemCount(series)}).
+     *
+     * @return The starting y-value.
+     *
+     * @throws ArrayIndexOutOfBoundsException if {@code series} is not
+     *     within the specified range.
+     * @throws ArrayIndexOutOfBoundsException if {@code item} is not
+     *     within the specified range.
+     *
+     * @see #getStartY(int, int)
+     */
+    @Override
+    public double getStartYValue(int series, int item) {
+<span class="fc" id="L239">        double[][] seriesData = this.seriesList.get(series);</span>
+<span class="fc" id="L240">        return seriesData[4][item];</span>
+    }
+
+    /**
+     * Returns the ending y-value for an item within a series.
+     *
+     * @param series  the series index (in the range {@code 0} to
+     *     {@code getSeriesCount() - 1}).
+     * @param item  the item index (in the range {@code 0} to
+     *     {@code getItemCount(series)}).
+     *
+     * @return The ending y-value.
+     *
+     * @throws ArrayIndexOutOfBoundsException if {@code series} is not
+     *     within the specified range.
+     * @throws ArrayIndexOutOfBoundsException if {@code item} is not
+     *     within the specified range.
+     *
+     * @see #getEndY(int, int)
+     */
+    @Override
+    public double getEndYValue(int series, int item) {
+<span class="fc" id="L262">        double[][] seriesData = this.seriesList.get(series);</span>
+<span class="fc" id="L263">        return seriesData[5][item];</span>
+    }
+
+    /**
+     * Returns the ending x-value for an item within a series.
+     *
+     * @param series  the series index (in the range {@code 0} to
+     *     {@code getSeriesCount() - 1}).
+     * @param item  the item index (in the range {@code 0} to
+     *     {@code getItemCount(series)}).
+     *
+     * @return The ending x-value.
+     *
+     * @throws ArrayIndexOutOfBoundsException if {@code series} is not
+     *     within the specified range.
+     * @throws ArrayIndexOutOfBoundsException if {@code item} is not
+     *     within the specified range.
+     *
+     * @see #getEndXValue(int, int)
+     */
+    @Override
+    public Number getEndX(int series, int item) {
+<span class="nc" id="L285">        return getEndXValue(series, item);</span>
+    }
+
+    /**
+     * Returns the ending y-value for an item within a series.
+     *
+     * @param series  the series index (in the range {@code 0} to
+     *     {@code getSeriesCount() - 1}).
+     * @param item  the item index (in the range {@code 0} to
+     *     {@code getItemCount(series)}).
+     *
+     * @return The ending y-value.
+     *
+     * @throws ArrayIndexOutOfBoundsException if {@code series} is not
+     *     within the specified range.
+     * @throws ArrayIndexOutOfBoundsException if {@code item} is not
+     *     within the specified range.
+     *
+     * @see #getEndYValue(int, int)
+     */
+    @Override
+    public Number getEndY(int series, int item) {
+<span class="nc" id="L307">        return getEndYValue(series, item);</span>
+    }
+
+    /**
+     * Returns the starting x-value for an item within a series.
+     *
+     * @param series  the series index (in the range {@code 0} to
+     *     {@code getSeriesCount() - 1}).
+     * @param item  the item index (in the range {@code 0} to
+     *     {@code getItemCount(series)}).
+     *
+     * @return The starting x-value.
+     *
+     * @throws ArrayIndexOutOfBoundsException if {@code series} is not
+     *     within the specified range.
+     * @throws ArrayIndexOutOfBoundsException if {@code item} is not
+     *     within the specified range.
+     *
+     * @see #getStartXValue(int, int)
+     */
+    @Override
+    public Number getStartX(int series, int item) {
+<span class="nc" id="L329">        return getStartXValue(series, item);</span>
+    }
+
+    /**
+     * Returns the starting y-value for an item within a series.
+     *
+     * @param series  the series index (in the range {@code 0} to
+     *     {@code getSeriesCount() - 1}).
+     * @param item  the item index (in the range {@code 0} to
+     *     {@code getItemCount(series)}).
+     *
+     * @return The starting y-value.
+     *
+     * @throws ArrayIndexOutOfBoundsException if {@code series} is not
+     *     within the specified range.
+     * @throws ArrayIndexOutOfBoundsException if {@code item} is not
+     *     within the specified range.
+     *
+     * @see #getStartYValue(int, int)
+     */
+    @Override
+    public Number getStartY(int series, int item) {
+<span class="nc" id="L351">        return getStartYValue(series, item);</span>
+    }
+
+    /**
+     * Returns the x-value for an item within a series.
+     *
+     * @param series  the series index (in the range {@code 0} to
+     *     {@code getSeriesCount() - 1}).
+     * @param item  the item index (in the range {@code 0} to
+     *     {@code getItemCount(series)}).
+     *
+     * @return The x-value.
+     *
+     * @throws ArrayIndexOutOfBoundsException if {@code series} is not
+     *     within the specified range.
+     * @throws ArrayIndexOutOfBoundsException if {@code item} is not
+     *     within the specified range.
+     *
+     * @see #getXValue(int, int)
+     */
+    @Override
+    public Number getX(int series, int item) {
+<span class="nc" id="L373">        return getXValue(series, item);</span>
+    }
+
+    /**
+     * Returns the y-value for an item within a series.
+     *
+     * @param series  the series index (in the range {@code 0} to
+     *     {@code getSeriesCount() - 1}).
+     * @param item  the item index (in the range {@code 0} to
+     *     {@code getItemCount(series)}).
+     *
+     * @return The y-value.
+     *
+     * @throws ArrayIndexOutOfBoundsException if {@code series} is not
+     *     within the specified range.
+     * @throws ArrayIndexOutOfBoundsException if {@code item} is not
+     *     within the specified range.
+     *
+     * @see #getYValue(int, int)
+     */
+    @Override
+    public Number getY(int series, int item) {
+<span class="nc" id="L395">        return getYValue(series, item);</span>
+    }
+
+    /**
+     * Adds a series or if a series with the same key already exists replaces
+     * the data for that series, then sends a {@link DatasetChangeEvent} to
+     * all registered listeners.
+     *
+     * @param seriesKey  the series key ({@code null} not permitted).
+     * @param data  the data (must be an array with length 6, containing six
+     *     arrays of equal length, the first three containing the x-values
+     *     (x, xLow and xHigh) and the last three containing the y-values
+     *     (y, yLow and yHigh)).
+     */
+    public void addSeries(S seriesKey, double[][] data) {
+<span class="fc" id="L410">        Args.nullNotPermitted(seriesKey, &quot;seriesKey&quot;);</span>
+<span class="fc" id="L411">        Args.nullNotPermitted(data, &quot;data&quot;);</span>
+<span class="pc bpc" id="L412" title="1 of 2 branches missed.">        if (data.length != 6) {</span>
+<span class="nc" id="L413">            throw new IllegalArgumentException(</span>
+                    &quot;The 'data' array must have length == 6.&quot;);
+        }
+<span class="fc" id="L416">        int length = data[0].length;</span>
+<span class="pc bpc" id="L417" title="5 of 10 branches missed.">        if (length != data[1].length || length != data[2].length</span>
+                || length != data[3].length || length != data[4].length
+                || length != data[5].length) {
+<span class="nc" id="L420">            throw new IllegalArgumentException(</span>
+                &quot;The 'data' array must contain six arrays with equal length.&quot;);
+        }
+<span class="fc" id="L423">        int seriesIndex = indexOf(seriesKey);</span>
+<span class="fc bfc" id="L424" title="All 2 branches covered.">        if (seriesIndex == -1) {  // add a new series</span>
+<span class="fc" id="L425">            this.seriesKeys.add(seriesKey);</span>
+<span class="fc" id="L426">            this.seriesList.add(data);</span>
+        }
+        else {  // replace an existing series
+<span class="fc" id="L429">            this.seriesList.remove(seriesIndex);</span>
+<span class="fc" id="L430">            this.seriesList.add(seriesIndex, data);</span>
+        }
+<span class="fc" id="L432">        notifyListeners(new DatasetChangeEvent(this, this));</span>
+<span class="fc" id="L433">    }</span>
+
+    /**
+     * Tests this {@code DefaultIntervalXYDataset} instance for equality
+     * with an arbitrary object.  This method returns {@code true} if and
+     * only if:
+     * &lt;ul&gt;
+     * &lt;li&gt;{@code obj} is not {@code null};&lt;/li&gt;
+     * &lt;li&gt;{@code obj} is an instance of {@code DefaultIntervalXYDataset};&lt;/li&gt;
+     * &lt;li&gt;both datasets have the same number of series, each containing
+     *         exactly the same values.&lt;/li&gt;
+     * &lt;/ul&gt;
+     *
+     * @param obj  the object ({@code null} permitted).
+     *
+     * @return A boolean.
+     */
+    @Override
+    public boolean equals(Object obj) {
+<span class="pc bpc" id="L452" title="1 of 2 branches missed.">        if (obj == this) {</span>
+<span class="nc" id="L453">            return true;</span>
+        }
+<span class="pc bpc" id="L455" title="1 of 2 branches missed.">        if (!(obj instanceof DefaultIntervalXYDataset)) {</span>
+<span class="nc" id="L456">            return false;</span>
+        }
+<span class="fc" id="L458">        DefaultIntervalXYDataset&lt;String&gt; that = (DefaultIntervalXYDataset) obj;</span>
+<span class="fc bfc" id="L459" title="All 2 branches covered.">        if (!this.seriesKeys.equals(that.seriesKeys)) {</span>
+<span class="fc" id="L460">            return false;</span>
+        }
+<span class="fc bfc" id="L462" title="All 2 branches covered.">        for (int i = 0; i &lt; this.seriesList.size(); i++) {</span>
+<span class="fc" id="L463">            double[][] d1 = (double[][]) this.seriesList.get(i);</span>
+<span class="fc" id="L464">            double[][] d2 = (double[][]) that.seriesList.get(i);</span>
+<span class="fc" id="L465">            double[] d1x = d1[0];</span>
+<span class="fc" id="L466">            double[] d2x = d2[0];</span>
+<span class="fc bfc" id="L467" title="All 2 branches covered.">            if (!Arrays.equals(d1x, d2x)) {</span>
+<span class="fc" id="L468">                return false;</span>
+            }
+<span class="fc" id="L470">            double[] d1xs = d1[1];</span>
+<span class="fc" id="L471">            double[] d2xs = d2[1];</span>
+<span class="pc bpc" id="L472" title="1 of 2 branches missed.">            if (!Arrays.equals(d1xs, d2xs)) {</span>
+<span class="nc" id="L473">                return false;</span>
+            }
+<span class="fc" id="L475">            double[] d1xe = d1[2];</span>
+<span class="fc" id="L476">            double[] d2xe = d2[2];</span>
+<span class="pc bpc" id="L477" title="1 of 2 branches missed.">            if (!Arrays.equals(d1xe, d2xe)) {</span>
+<span class="nc" id="L478">                return false;</span>
+            }
+<span class="fc" id="L480">            double[] d1y = d1[3];</span>
+<span class="fc" id="L481">            double[] d2y = d2[3];</span>
+<span class="pc bpc" id="L482" title="1 of 2 branches missed.">            if (!Arrays.equals(d1y, d2y)) {</span>
+<span class="nc" id="L483">                return false;</span>
+            }
+<span class="fc" id="L485">            double[] d1ys = d1[4];</span>
+<span class="fc" id="L486">            double[] d2ys = d2[4];</span>
+<span class="pc bpc" id="L487" title="1 of 2 branches missed.">            if (!Arrays.equals(d1ys, d2ys)) {</span>
+<span class="nc" id="L488">                return false;</span>
+            }
+<span class="fc" id="L490">            double[] d1ye = d1[5];</span>
+<span class="fc" id="L491">            double[] d2ye = d2[5];</span>
+<span class="pc bpc" id="L492" title="1 of 2 branches missed.">            if (!Arrays.equals(d1ye, d2ye)) {</span>
+<span class="nc" id="L493">                return false;</span>
+            }
+        }
+<span class="fc" id="L496">        return true;</span>
+    }
+
+    /**
+     * Returns a hash code for this instance.
+     *
+     * @return A hash code.
+     */
+    @Override
+    public int hashCode() {
+        int result;
+<span class="nc" id="L507">        result = this.seriesKeys.hashCode();</span>
+<span class="nc" id="L508">        result = 29 * result + this.seriesList.hashCode();</span>
+<span class="nc" id="L509">        return result;</span>
+    }
+
+    /**
+     * Returns a clone of this dataset.
+     *
+     * @return A clone.
+     *
+     * @throws CloneNotSupportedException if the dataset contains a series with
+     *         a key that cannot be cloned.
+     */
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+<span class="fc" id="L522">        DefaultIntervalXYDataset clone</span>
+<span class="fc" id="L523">                = (DefaultIntervalXYDataset) super.clone();</span>
+<span class="fc" id="L524">        clone.seriesKeys = new ArrayList&lt;&gt;(this.seriesKeys);</span>
+<span class="fc" id="L525">        clone.seriesList = new ArrayList&lt;&gt;(this.seriesList.size());</span>
+<span class="fc bfc" id="L526" title="All 2 branches covered.">        for (int i = 0; i &lt; this.seriesList.size(); i++) {</span>
+<span class="fc" id="L527">            double[][] data = (double[][]) this.seriesList.get(i);</span>
+<span class="fc" id="L528">            double[] x = data[0];</span>
+<span class="fc" id="L529">            double[] xStart = data[1];</span>
+<span class="fc" id="L530">            double[] xEnd = data[2];</span>
+<span class="fc" id="L531">            double[] y = data[3];</span>
+<span class="fc" id="L532">            double[] yStart = data[4];</span>
+<span class="fc" id="L533">            double[] yEnd = data[5];</span>
+<span class="fc" id="L534">            double[] xx = new double[x.length];</span>
+<span class="fc" id="L535">            double[] xxStart = new double[xStart.length];</span>
+<span class="fc" id="L536">            double[] xxEnd = new double[xEnd.length];</span>
+<span class="fc" id="L537">            double[] yy = new double[y.length];</span>
+<span class="fc" id="L538">            double[] yyStart = new double[yStart.length];</span>
+<span class="fc" id="L539">            double[] yyEnd = new double[yEnd.length];</span>
+<span class="fc" id="L540">            System.arraycopy(x, 0, xx, 0, x.length);</span>
+<span class="fc" id="L541">            System.arraycopy(xStart, 0, xxStart, 0, xStart.length);</span>
+<span class="fc" id="L542">            System.arraycopy(xEnd, 0, xxEnd, 0, xEnd.length);</span>
+<span class="fc" id="L543">            System.arraycopy(y, 0, yy, 0, y.length);</span>
+<span class="fc" id="L544">            System.arraycopy(yStart, 0, yyStart, 0, yStart.length);</span>
+<span class="fc" id="L545">            System.arraycopy(yEnd, 0, yyEnd, 0, yEnd.length);</span>
+<span class="fc" id="L546">            clone.seriesList.add(i, new double[][] {xx, xxStart, xxEnd, yy,</span>
+                    yyStart, yyEnd});
+        }
+<span class="fc" id="L549">        return clone;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

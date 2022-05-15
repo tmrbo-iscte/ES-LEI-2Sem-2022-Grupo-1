@@ -1,0 +1,391 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TickMarks.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.chart.axis</a> &gt; <span class="el_source">TickMarks.java</span></div><h1>TickMarks.java</h1><pre class="source lang-java linenums">package org.jfree.chart.axis;
+
+import org.jfree.chart.event.AxisChangeEvent;
+import org.jfree.chart.internal.Args;
+import org.jfree.chart.internal.PaintUtils;
+import org.jfree.chart.internal.SerialUtils;
+
+import javax.swing.event.EventListenerList;
+import java.awt.*;
+import java.io.*;
+import java.util.Objects;
+
+public class TickMarks implements Serializable, Cloneable {
+
+    private final Axis axis;
+
+    /** The default tick marks visible ({@code true}). */
+    public static final boolean DEFAULT_TICK_MARKS_VISIBLE = true;
+
+    /** The default tick stroke ({@code BasicStroke(0.5f)}). */
+<span class="fc" id="L21">    public static final Stroke DEFAULT_TICK_MARK_STROKE = new BasicStroke(0.5f);</span>
+
+    /** The default tick paint ({@code Color.GRAY}). */
+<span class="fc" id="L24">    public static final Paint DEFAULT_TICK_MARK_PAINT = Color.GRAY;</span>
+
+    /** The default tick mark inside length ({@code 0.0f}). */
+    public static final float DEFAULT_TICK_MARK_INSIDE_LENGTH = 0.0f;
+
+    /** The default tick mark outside length ({@code 2.0f}). */
+    public static final float DEFAULT_TICK_MARK_OUTSIDE_LENGTH = 2.0f;
+
+    /**
+     * A flag that indicates whether or not major tick marks are visible for
+     * the axis.
+     */
+    private boolean tickMarksVisible;
+
+    /**
+     * The length of the major tick mark inside the data area (zero
+     * permitted).
+     */
+    private float tickMarkInsideLength;
+
+    /**
+     * The length of the major tick mark outside the data area (zero
+     * permitted).
+     */
+    private float tickMarkOutsideLength;
+
+    /**
+     * A flag that indicates whether or not minor tick marks are visible for the
+     * axis.
+     */
+    private boolean minorTickMarksVisible;
+
+    /**
+     * The length of the minor tick mark inside the data area (zero permitted).
+     */
+    private float minorTickMarkInsideLength;
+
+    /**
+     * The length of the minor tick mark outside the data area (zero permitted).
+     */
+    private float minorTickMarkOutsideLength;
+
+    /** The stroke used to draw tick marks. */
+    private transient Stroke tickMarkStroke;
+
+    /** The paint used to draw tick marks. */
+    private transient Paint tickMarkPaint;
+
+    /** The stroke used to draw tick marks. */
+<span class="fc" id="L73">    private transient Stroke minorTickMarkStroke = new BasicStroke(0.5f);</span>
+
+    /** The paint used to draw tick marks. */
+<span class="fc" id="L76">    private transient Paint minorTickMarkPaint = Color.BLACK;</span>
+
+<span class="fc" id="L78">    public TickMarks(Axis axis) {</span>
+<span class="fc" id="L79">        this.axis = axis;</span>
+<span class="fc" id="L80">        this.tickMarksVisible = DEFAULT_TICK_MARKS_VISIBLE;</span>
+<span class="fc" id="L81">        this.tickMarkStroke = DEFAULT_TICK_MARK_STROKE;</span>
+<span class="fc" id="L82">        this.tickMarkPaint = DEFAULT_TICK_MARK_PAINT;</span>
+<span class="fc" id="L83">        this.tickMarkInsideLength = DEFAULT_TICK_MARK_INSIDE_LENGTH;</span>
+<span class="fc" id="L84">        this.tickMarkOutsideLength = DEFAULT_TICK_MARK_OUTSIDE_LENGTH;</span>
+<span class="fc" id="L85">        this.minorTickMarksVisible = false;</span>
+<span class="fc" id="L86">        this.minorTickMarkInsideLength = 0.0f;</span>
+<span class="fc" id="L87">        this.minorTickMarkOutsideLength = 2.0f;</span>
+<span class="fc" id="L88">    }</span>
+
+    public Stroke getMinorTickMarkStroke() {
+<span class="nc" id="L91">        return minorTickMarkStroke;</span>
+    }
+
+    public void setMinorTickMarkStroke(Stroke minorTickMarkStroke) {
+<span class="fc" id="L95">        this.minorTickMarkStroke = minorTickMarkStroke;</span>
+<span class="fc" id="L96">    }</span>
+
+    public Paint getMinorTickMarkPaint() {
+<span class="nc" id="L99">        return minorTickMarkPaint;</span>
+    }
+
+    public void setMinorTickMarkPaint(Paint minorTickMarkPaint) {
+<span class="fc" id="L103">        this.minorTickMarkPaint = minorTickMarkPaint;</span>
+<span class="fc" id="L104">    }</span>
+
+
+    /**
+     * Returns the flag that indicates whether or not the minor tick marks are
+     * showing.
+     *
+     * @return The flag that indicates whether or not the minor tick marks are
+     *         showing.
+     *
+     */
+    public boolean isMinorTickMarksVisible() {
+<span class="fc" id="L116">        return this.minorTickMarksVisible;</span>
+    }
+
+    /**
+     * Sets the flag that indicates whether or not the minor tick marks are
+     * showing and sends an {@link AxisChangeEvent} to all registered
+     * listeners.
+     *
+     * @param flag  the flag.
+     *
+     * @see #isMinorTickMarksVisible()
+     */
+    public void setMinorTickMarksVisible(boolean flag) {
+<span class="pc bpc" id="L129" title="1 of 2 branches missed.">        if (flag != this.minorTickMarksVisible) {</span>
+<span class="fc" id="L130">            this.minorTickMarksVisible = flag;</span>
+<span class="fc" id="L131">            axis.fireChangeEvent();</span>
+        }
+<span class="fc" id="L133">    }</span>
+
+    /**
+     * Returns the flag that indicates whether or not the tick marks are
+     * showing.
+     *
+     * @return The flag that indicates whether or not the tick marks are
+     *         showing.
+     *
+     */
+    public boolean isTickMarksVisible() {
+<span class="fc" id="L144">        return this.tickMarksVisible;</span>
+    }
+
+    /**
+     * Sets the flag that indicates whether or not the tick marks are showing
+     * and sends an {@link AxisChangeEvent} to all registered listeners.
+     *
+     * @param flag  the flag.
+     *
+     * @see #isTickMarksVisible()
+     */
+    public void setTickMarksVisible(boolean flag) {
+<span class="pc bpc" id="L156" title="1 of 2 branches missed.">        if (flag != this.tickMarksVisible) {</span>
+<span class="fc" id="L157">            this.tickMarksVisible = flag;</span>
+<span class="fc" id="L158">            axis.fireChangeEvent();</span>
+        }
+<span class="fc" id="L160">    }</span>
+
+    /**
+     * Returns the inside length of the tick marks.
+     *
+     * @return The length.
+     *
+     * @see #getTickMarkOutsideLength()
+     */
+    public float getTickMarkInsideLength() {
+<span class="fc" id="L170">        return this.tickMarkInsideLength;</span>
+    }
+
+    /**
+     * Sets the inside length of the tick marks and sends
+     * an {@link AxisChangeEvent} to all registered listeners.
+     *
+     * @param length  the new length.
+     *
+     * @see #getTickMarkInsideLength()
+     */
+    public void setTickMarkInsideLength(float length) {
+<span class="fc" id="L182">        this.tickMarkInsideLength = length;</span>
+<span class="fc" id="L183">        axis.fireChangeEvent();</span>
+<span class="fc" id="L184">    }</span>
+
+    /**
+     * Returns the outside length of the tick marks.
+     *
+     * @return The length.
+     *
+     * @see #getTickMarkInsideLength()
+     */
+    public float getTickMarkOutsideLength() {
+<span class="fc" id="L194">        return this.tickMarkOutsideLength;</span>
+    }
+
+    /**
+     * Sets the outside length of the tick marks and sends
+     * an {@link AxisChangeEvent} to all registered listeners.
+     *
+     * @param length  the new length.
+     *
+     * @see #getTickMarkInsideLength()
+     */
+    public void setTickMarkOutsideLength(float length) {
+<span class="fc" id="L206">        this.tickMarkOutsideLength = length;</span>
+<span class="fc" id="L207">        axis.fireChangeEvent();</span>
+<span class="fc" id="L208">    }</span>
+
+    /**
+     * Returns the stroke used to draw tick marks.
+     *
+     * @return The stroke (never {@code null}).
+     *
+     */
+    public Stroke getTickMarkStroke() {
+<span class="fc" id="L217">        return this.tickMarkStroke;</span>
+    }
+
+    /**
+     * Sets the stroke used to draw tick marks and sends
+     * an {@link AxisChangeEvent} to all registered listeners.
+     *
+     * @param stroke  the stroke ({@code null} not permitted).
+     *
+     * @see #getTickMarkStroke()
+     */
+    public void setTickMarkStroke(Stroke stroke) {
+<span class="fc" id="L229">        Args.nullNotPermitted(stroke, &quot;stroke&quot;);</span>
+<span class="pc bpc" id="L230" title="1 of 2 branches missed.">        if (!this.tickMarkStroke.equals(stroke)) {</span>
+<span class="fc" id="L231">            this.tickMarkStroke = stroke;</span>
+<span class="fc" id="L232">            axis.fireChangeEvent();</span>
+        }
+<span class="fc" id="L234">    }</span>
+
+    /**
+     * Returns the paint used to draw tick marks (if they are showing).
+     *
+     * @return The paint (never {@code null}).
+     *
+     */
+    public Paint getTickMarkPaint() {
+<span class="fc" id="L243">        return this.tickMarkPaint;</span>
+    }
+
+    /**
+     * Sets the paint used to draw tick marks and sends an
+     * {@link AxisChangeEvent} to all registered listeners.
+     *
+     * @param paint  the paint ({@code null} not permitted).
+     *
+     * @see #getTickMarkPaint()
+     */
+    public void setTickMarkPaint(Paint paint) {
+<span class="fc" id="L255">        Args.nullNotPermitted(paint, &quot;paint&quot;);</span>
+<span class="fc" id="L256">        this.tickMarkPaint = paint;</span>
+<span class="fc" id="L257">        axis.fireChangeEvent();</span>
+<span class="fc" id="L258">    }</span>
+
+    /**
+     * Returns the inside length of the minor tick marks.
+     *
+     * @return The length.
+     *
+     * @see #getMinorTickMarkOutsideLength()
+     */
+    public float getMinorTickMarkInsideLength() {
+<span class="nc" id="L268">        return this.minorTickMarkInsideLength;</span>
+    }
+
+    /**
+     * Sets the inside length of the minor tick marks and sends
+     * an {@link AxisChangeEvent} to all registered listeners.
+     *
+     * @param length  the new length.
+     *
+     * @see #getMinorTickMarkInsideLength()
+     */
+    public void setMinorTickMarkInsideLength(float length) {
+<span class="fc" id="L280">        this.minorTickMarkInsideLength = length;</span>
+<span class="fc" id="L281">        axis.fireChangeEvent();</span>
+<span class="fc" id="L282">    }</span>
+
+    /**
+     * Returns the outside length of the minor tick marks.
+     *
+     * @return The length.
+     *
+     * @see #getMinorTickMarkInsideLength()
+     */
+    public float getMinorTickMarkOutsideLength() {
+<span class="nc" id="L292">        return this.minorTickMarkOutsideLength;</span>
+    }
+
+    /**
+     * Sets the outside length of the minor tick marks and sends
+     * an {@link AxisChangeEvent} to all registered listeners.
+     *
+     * @param length  the new length.
+     *
+     * @see #getMinorTickMarkInsideLength()
+     */
+    public void setMinorTickMarkOutsideLength(float length) {
+<span class="fc" id="L304">        this.minorTickMarkOutsideLength = length;</span>
+<span class="fc" id="L305">        axis.fireChangeEvent();</span>
+<span class="fc" id="L306">    }</span>
+
+    @Override
+    public boolean equals(Object obj) {
+<span class="fc bfc" id="L310" title="All 2 branches covered.">        if (obj == this) {</span>
+<span class="fc" id="L311">            return true;</span>
+        }
+<span class="pc bpc" id="L313" title="1 of 2 branches missed.">        if (!(obj instanceof TickMarks)) {</span>
+<span class="nc" id="L314">            return false;</span>
+        }
+<span class="fc" id="L316">        TickMarks that = (TickMarks) obj;</span>
+<span class="fc bfc" id="L317" title="All 2 branches covered.">        if (this.tickMarksVisible != that.tickMarksVisible) {</span>
+<span class="fc" id="L318">            return false;</span>
+        }
+<span class="fc bfc" id="L320" title="All 2 branches covered.">        if (this.tickMarkInsideLength != that.tickMarkInsideLength) {</span>
+<span class="fc" id="L321">            return false;</span>
+        }
+<span class="fc bfc" id="L323" title="All 2 branches covered.">        if (this.tickMarkOutsideLength != that.tickMarkOutsideLength) {</span>
+<span class="fc" id="L324">            return false;</span>
+        }
+<span class="fc bfc" id="L326" title="All 2 branches covered.">        if (!PaintUtils.equal(this.tickMarkPaint, that.tickMarkPaint)) {</span>
+<span class="fc" id="L327">            return false;</span>
+        }
+<span class="fc bfc" id="L329" title="All 2 branches covered.">        if (!Objects.equals(this.tickMarkStroke, that.tickMarkStroke)) {</span>
+<span class="fc" id="L330">            return false;</span>
+        }
+<span class="fc bfc" id="L332" title="All 2 branches covered.">        if (this.minorTickMarksVisible != that.minorTickMarksVisible) {</span>
+<span class="fc" id="L333">            return false;</span>
+        }
+<span class="fc bfc" id="L335" title="All 2 branches covered.">        if (this.minorTickMarkInsideLength != that.minorTickMarkInsideLength) {</span>
+<span class="fc" id="L336">            return false;</span>
+        }
+<span class="fc bfc" id="L338" title="All 2 branches covered.">        if (this.minorTickMarkOutsideLength != that.minorTickMarkOutsideLength) {</span>
+<span class="fc" id="L339">            return false;</span>
+        }
+<span class="fc bfc" id="L341" title="All 2 branches covered.">        if (!PaintUtils.equal(this.minorTickMarkPaint, that.minorTickMarkPaint)) {</span>
+<span class="fc" id="L342">            return false;</span>
+        }
+<span class="fc" id="L344">        return this.minorTickMarkStroke.equals(that.minorTickMarkStroke);</span>
+    }
+
+    @Override
+    public TickMarks clone() {
+        try {
+<span class="nc" id="L350">            return (TickMarks) super.clone();</span>
+<span class="nc" id="L351">        } catch (CloneNotSupportedException e) {</span>
+<span class="nc" id="L352">            throw new AssertionError();</span>
+        }
+    }
+
+    /**
+     * Provides serialization support.
+     *
+     * @param stream  the output stream.
+     *
+     * @throws IOException  if there is an I/O error.
+     */
+
+    private void writeObject(ObjectOutputStream stream) throws IOException {
+<span class="fc" id="L365">        stream.defaultWriteObject();</span>
+<span class="fc" id="L366">        SerialUtils.writeStroke(tickMarkStroke, stream);</span>
+<span class="fc" id="L367">        SerialUtils.writePaint(tickMarkPaint, stream);</span>
+<span class="fc" id="L368">        SerialUtils.writePaint(minorTickMarkPaint, stream);</span>
+<span class="fc" id="L369">        SerialUtils.writeStroke(minorTickMarkStroke, stream);</span>
+<span class="fc" id="L370">    }</span>
+
+    /**
+     * Provides serialization support.
+     *
+     * @param stream  the input stream.
+     *
+     * @throws IOException  if there is an I/O error.
+     * @throws ClassNotFoundException  if there is a classpath problem.
+     */
+
+    private void readObject(ObjectInputStream stream)
+            throws IOException, ClassNotFoundException {
+<span class="fc" id="L383">        stream.defaultReadObject();</span>
+<span class="fc" id="L384">        tickMarkStroke = SerialUtils.readStroke(stream);</span>
+<span class="fc" id="L385">        tickMarkPaint = SerialUtils.readPaint(stream);</span>
+<span class="fc" id="L386">        minorTickMarkPaint = SerialUtils.readPaint(stream);</span>
+<span class="fc" id="L387">        minorTickMarkStroke = SerialUtils.readStroke(stream);</span>
+<span class="fc" id="L388">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

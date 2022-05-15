@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LegendItemCollection.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.chart.legend</a> &gt; <span class="el_source">LegendItemCollection.java</span></div><h1>LegendItemCollection.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * -------------------------
+ * LegendItemCollection.java
+ * -------------------------
+ * (C) Copyright 2002-2022, by David Gilbert.
+ *
+ * Original Author:  David Gilbert;
+ * Contributor(s):   -;
+ *
+ */
+
+package org.jfree.chart.legend;
+
+import org.jfree.chart.legend.LegendItem;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Objects;
+
+import org.jfree.chart.internal.CloneUtils;
+
+/**
+ * A collection of legend items.
+ */
+public class LegendItemCollection implements Cloneable, Serializable {
+
+    /** For serialization. */
+    private static final long serialVersionUID = 1365215565589815953L;
+
+    /** Storage for the legend items. */
+    private List&lt;LegendItem&gt; items;
+
+    /**
+     * Constructs a new legend item collection, initially empty.
+     */
+<span class="fc" id="L62">    public LegendItemCollection() {</span>
+<span class="fc" id="L63">        this.items = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L64">    }</span>
+
+    /**
+     * Adds a legend item to the collection.
+     *
+     * @param item  the item to add.
+     */
+    public void add(LegendItem item) {
+<span class="fc" id="L72">        this.items.add(item);</span>
+<span class="fc" id="L73">    }</span>
+
+    /**
+     * Adds the legend items from another collection to this collection.
+     *
+     * @param collection  the other collection ({@code null} not
+     *     permitted).
+     */
+    public void addAll(LegendItemCollection collection) {
+<span class="fc" id="L82">        this.items.addAll(collection.items);</span>
+<span class="fc" id="L83">    }</span>
+
+    /**
+     * Returns a legend item from the collection.
+     *
+     * @param index  the legend item index (zero-based).
+     *
+     * @return The legend item.
+     */
+    public LegendItem get(int index) {
+<span class="fc" id="L93">        return this.items.get(index);</span>
+    }
+
+    /**
+     * Returns the number of legend items in the collection.
+     *
+     * @return The item count.
+     */
+    public int getItemCount() {
+<span class="fc" id="L102">        return this.items.size();</span>
+    }
+
+    /**
+     * Returns an iterator that provides access to all the legend items.
+     *
+     * @return An iterator.
+     */
+    public Iterator&lt;LegendItem&gt; iterator() {
+<span class="nc" id="L111">        return this.items.iterator();</span>
+    }
+
+    /**
+     * Tests this collection for equality with an arbitrary object.
+     *
+     * @param obj  the object ({@code null} permitted).
+     *
+     * @return A boolean.
+     */
+    @Override
+    public boolean equals(Object obj) {
+<span class="pc bpc" id="L123" title="1 of 2 branches missed.">        if (obj == this) {</span>
+<span class="nc" id="L124">            return true;</span>
+        }
+<span class="fc bfc" id="L126" title="All 2 branches covered.">        if (!(obj instanceof LegendItemCollection)) {</span>
+<span class="fc" id="L127">            return false;</span>
+        }
+<span class="fc" id="L129">        LegendItemCollection that = (LegendItemCollection) obj;</span>
+<span class="fc bfc" id="L130" title="All 2 branches covered.">        if (!this.items.equals(that.items)) {</span>
+<span class="fc" id="L131">            return false;</span>
+        }
+<span class="fc" id="L133">        return true;</span>
+    }
+
+    @Override
+    public int hashCode() {
+<span class="nc" id="L138">        int hash = 7;</span>
+<span class="nc" id="L139">        hash = 17 * hash + Objects.hashCode( this.items );</span>
+<span class="nc" id="L140">        return hash;</span>
+    }
+
+    /**
+     * Returns a clone of the collection.
+     *
+     * @return A clone.
+     *
+     * @throws CloneNotSupportedException if an item in the collection is not
+     *         cloneable.
+     */
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+<span class="fc" id="L153">        LegendItemCollection clone = (LegendItemCollection) super.clone();</span>
+<span class="fc" id="L154">        clone.items = CloneUtils.cloneList(this.items);</span>
+<span class="fc" id="L155">        return clone;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

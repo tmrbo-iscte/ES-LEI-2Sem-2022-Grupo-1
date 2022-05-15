@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Tick.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.chart.axis</a> &gt; <span class="el_source">Tick.java</span></div><h1>Tick.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates.
+ * Other names may be trademarks of their respective owners.]
+ *
+ * ---------
+ * Tick.java
+ * ---------
+ * (C) Copyright 2000-2022, by David Gilbert.
+ *
+ * Original Author:  David Gilbert;
+ * Contributor(s):   Nicolas Brodu;
+ *
+ */
+
+package org.jfree.chart.axis;
+
+import java.awt.*;
+import java.awt.geom.Rectangle2D;
+import java.io.Serializable;
+import java.util.Objects;
+
+import org.jfree.chart.text.TextAnchor;
+import org.jfree.chart.internal.Args;
+import org.jfree.chart.text.TextUtils;
+
+/**
+ * The base class used to represent labeled ticks along an axis.
+ */
+public abstract class Tick implements Serializable, Cloneable {
+
+    /**
+     * For serialization.
+     */
+    private static final long serialVersionUID = 6668230383875149773L;
+
+    /**
+     * A text version of the tick value.
+     */
+    private final String text;
+
+    /**
+     * The text anchor for the tick label.
+     */
+    private final TextAnchor textAnchor;
+
+    /**
+     * The rotation anchor for the tick label.
+     */
+    private final TextAnchor rotationAnchor;
+
+    /**
+     * The rotation angle.
+     */
+    private final double angle;
+
+    /**
+     * Creates a new tick.
+     *
+     * @param text           the formatted version of the tick value.
+     * @param textAnchor     the text anchor ({@code null} not permitted).
+     * @param rotationAnchor the rotation anchor ({@code null} not
+     *                       permitted).
+     * @param angle          the angle.
+     */
+<span class="fc" id="L87">    public Tick(String text, TextAnchor textAnchor, TextAnchor rotationAnchor, double angle) {</span>
+<span class="fc" id="L88">        Args.nullNotPermitted(textAnchor, &quot;textAnchor&quot;);</span>
+<span class="fc" id="L89">        Args.nullNotPermitted(rotationAnchor, &quot;rotationAnchor&quot;);</span>
+<span class="fc" id="L90">        this.text = text;</span>
+<span class="fc" id="L91">        this.textAnchor = textAnchor;</span>
+<span class="fc" id="L92">        this.rotationAnchor = rotationAnchor;</span>
+<span class="fc" id="L93">        this.angle = angle;</span>
+<span class="fc" id="L94">    }</span>
+
+    /**
+     * Returns the text version of the tick value.
+     *
+     * @return A string (possibly {@code null});
+     */
+    public String getText() {
+<span class="fc" id="L102">        return this.text;</span>
+    }
+
+    /**
+     * Returns the text anchor.
+     *
+     * @return The text anchor (never {@code null}).
+     */
+    public TextAnchor getTextAnchor() {
+<span class="fc" id="L111">        return this.textAnchor;</span>
+    }
+
+    /**
+     * Returns the text anchor that defines the point around which the label is
+     * rotated.
+     *
+     * @return A text anchor (never {@code null}).
+     */
+    public TextAnchor getRotationAnchor() {
+<span class="fc" id="L121">        return this.rotationAnchor;</span>
+    }
+
+    /**
+     * Returns the angle.
+     *
+     * @return The angle.
+     */
+    public double getAngle() {
+<span class="fc" id="L130">        return this.angle;</span>
+    }
+
+    /**
+     * Draws this tick's label, if present, at the specified coordinates
+     *
+     * @param g2 Graphics2D context
+     * @param x  x position
+     * @param y  y position
+     */
+    public void drawLabel(Graphics2D g2, float x, float y) {
+<span class="nc bnc" id="L141" title="All 2 branches missed.">        if (getText() == null) return;</span>
+<span class="nc" id="L142">        TextUtils.drawRotatedString(getText(), g2, x, y, getTextAnchor(), getAngle(), getRotationAnchor());</span>
+<span class="nc" id="L143">    }</span>
+
+    /**
+     * Returns the label bounds
+     *
+     * @param g2 Graphics2D context
+     * @param fm FontMetrics object
+     * @return The label bounds when present, or null if this tick has no label
+     */
+    public Rectangle2D getLabelBounds(Graphics2D g2, FontMetrics fm) {
+<span class="nc bnc" id="L153" title="All 2 branches missed.">        if (getText() == null) return null;</span>
+<span class="nc" id="L154">        return TextUtils.getTextBounds(getText(), g2, fm);</span>
+    }
+
+    /**
+     * Tests this tick for equality with an arbitrary object.
+     *
+     * @param obj the object ({@code null} permitted).
+     * @return A boolean.
+     */
+    @Override
+    public boolean equals(Object obj) {
+<span class="pc bpc" id="L165" title="1 of 2 branches missed.">        if (this == obj) {</span>
+<span class="nc" id="L166">            return true;</span>
+        }
+<span class="pc bpc" id="L168" title="1 of 2 branches missed.">        if (obj instanceof Tick) {</span>
+<span class="fc" id="L169">            Tick t = (Tick) obj;</span>
+<span class="fc bfc" id="L170" title="All 2 branches covered.">            if (!Objects.equals(this.text, t.text)) {</span>
+<span class="fc" id="L171">                return false;</span>
+            }
+<span class="fc bfc" id="L173" title="All 2 branches covered.">            if (!Objects.equals(this.textAnchor, t.textAnchor)) {</span>
+<span class="fc" id="L174">                return false;</span>
+            }
+<span class="fc bfc" id="L176" title="All 2 branches covered.">            if (!Objects.equals(this.rotationAnchor, t.rotationAnchor)) {</span>
+<span class="fc" id="L177">                return false;</span>
+            }
+<span class="fc bfc" id="L179" title="All 2 branches covered.">            return this.angle == t.angle;</span>
+        }
+<span class="nc" id="L181">        return false;</span>
+    }
+
+    /**
+     * Returns a clone of the tick.
+     *
+     * @return A clone.
+     * @throws CloneNotSupportedException if there is a problem cloning.
+     */
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+<span class="fc" id="L192">        Tick clone = (Tick) super.clone();</span>
+<span class="fc" id="L193">        return clone;</span>
+    }
+
+    /**
+     * Returns a string representation of the tick.
+     *
+     * @return A string.
+     */
+    @Override
+    public String toString() {
+<span class="nc" id="L203">        return this.text;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

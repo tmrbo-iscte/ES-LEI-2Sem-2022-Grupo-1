@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TextAnchor.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.chart.text</a> &gt; <span class="el_source">TextAnchor.java</span></div><h1>TextAnchor.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ */
+
+package org.jfree.chart.text;
+
+/**
+ * Used to indicate the position of an anchor point for a text string.  This is
+ * frequently used to align a string to a fixed point in some coordinate space.
+ */
+<span class="fc" id="L35">public enum TextAnchor {</span>
+
+    /** Top/left. */
+<span class="fc" id="L38">    TOP_LEFT,</span>
+
+    /** Top/center. */
+<span class="fc" id="L41">    TOP_CENTER,</span>
+
+    /** Top/right. */
+<span class="fc" id="L44">    TOP_RIGHT,</span>
+
+    /** Half-ascent/left. */
+<span class="fc" id="L47">    HALF_ASCENT_LEFT,</span>
+
+    /** Half-ascent/center. */
+<span class="fc" id="L50">    HALF_ASCENT_CENTER,</span>
+
+    /** Half-ascent/right. */
+<span class="fc" id="L53">    HALF_ASCENT_RIGHT,</span>
+
+    /** Middle/left. */
+<span class="fc" id="L56">    CENTER_LEFT,</span>
+
+    /** Middle/center. */
+<span class="fc" id="L59">    CENTER ,</span>
+
+    /** Middle/right. */
+<span class="fc" id="L62">    CENTER_RIGHT,</span>
+
+    /** Baseline/left. */
+<span class="fc" id="L65">    BASELINE_LEFT,</span>
+
+    /** Baseline/center. */
+<span class="fc" id="L68">    BASELINE_CENTER,</span>
+
+    /** Baseline/right. */
+<span class="fc" id="L71">    BASELINE_RIGHT,</span>
+
+    /** Bottom/left. */
+<span class="fc" id="L74">    BOTTOM_LEFT,</span>
+
+    /** Bottom/center. */
+<span class="fc" id="L77">    BOTTOM_CENTER,</span>
+
+    /** Bottom/right. */
+<span class="fc" id="L80">    BOTTOM_RIGHT;</span>
+
+    /** 
+     * Returns {@code true} if the anchor is a left-side anchor, and
+     * {@code false} otherwise.
+     * 
+     * @return A boolean.
+     */
+    public boolean isLeft() {
+<span class="pc bpc" id="L89" title="5 of 10 branches missed.">        return this == BASELINE_LEFT || this == BOTTOM_LEFT </span>
+                || this == CENTER_LEFT || this == HALF_ASCENT_LEFT 
+                || this == TOP_LEFT;
+    }
+
+    /** 
+     * Returns {@code true} if the anchor is a right-side anchor, and
+     * {@code false} otherwise.
+     * 
+     * @return A boolean.
+     */
+    public boolean isRight() {
+<span class="pc bpc" id="L101" title="4 of 10 branches missed.">        return this == BASELINE_RIGHT || this == BOTTOM_RIGHT </span>
+                || this == CENTER_RIGHT || this == HALF_ASCENT_RIGHT 
+                || this == TOP_RIGHT;
+    }
+
+    /** 
+     * Returns {@code true} if the anchor is a center anchor, and
+     * {@code false} otherwise.
+     * 
+     * @return A boolean.
+     */
+    public boolean isHorizontalCenter() {
+<span class="pc bpc" id="L113" title="2 of 10 branches missed.">        return this == BASELINE_CENTER || this == BOTTOM_CENTER </span>
+                || this == CENTER || this == HALF_ASCENT_CENTER 
+                || this == TOP_CENTER;
+    }
+
+    /** 
+     * Returns {@code true} if the anchor is a top anchor, and
+     * {@code false} otherwise.
+     * 
+     * @return A boolean.
+     */
+    public boolean isTop() {
+<span class="pc bpc" id="L125" title="1 of 6 branches missed.">        return this == TOP_LEFT || this == TOP_CENTER || this == TOP_RIGHT;</span>
+    }
+
+    /** 
+     * Returns {@code true} if the anchor is a bottom anchor, and
+     * {@code false} otherwise.
+     * 
+     * @return A boolean.
+     */
+    public boolean isBottom() {
+<span class="pc bpc" id="L135" title="4 of 6 branches missed.">        return this == BOTTOM_LEFT || this == BOTTOM_CENTER </span>
+                || this == BOTTOM_RIGHT;
+    }
+    
+    /** 
+     * Returns {@code true} if the anchor is a baseline anchor, and
+     * {@code false} otherwise.
+     * 
+     * @return A boolean.
+     */
+    public boolean isBaseline() {
+<span class="pc bpc" id="L146" title="2 of 6 branches missed.">        return this == BASELINE_LEFT || this == BASELINE_CENTER </span>
+                || this == BASELINE_RIGHT;
+    }
+    
+    /** 
+     * Returns {@code true} if the anchor is a half-ascent anchor, and
+     * {@code false} otherwise.
+     * 
+     * @return A boolean.
+     */
+    public boolean isHalfAscent() {
+<span class="pc bpc" id="L157" title="3 of 6 branches missed.">        return this == HALF_ASCENT_LEFT || this == HALF_ASCENT_CENTER </span>
+                || this == HALF_ASCENT_RIGHT;
+    }
+    
+    /** 
+     * Returns {@code true} if the anchor is a half-ascent anchor, and
+     * {@code false} otherwise.
+     * 
+     * @return A boolean.
+     */
+    public boolean isVerticalCenter() {
+<span class="pc bpc" id="L168" title="1 of 6 branches missed.">        return this == CENTER_LEFT || this == CENTER  || this == CENTER_RIGHT;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

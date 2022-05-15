@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Series.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.data.general</a> &gt; <span class="el_source">Series.java</span></div><h1>Series.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * -----------
+ * Series.java
+ * -----------
+ * (C) Copyright 2001-2022, by David Gilbert.
+ *
+ * Original Author:  David Gilbert;
+ * Contributor(s):   -;
+ * 
+ */
+
+package org.jfree.data.general;
+
+import org.jfree.chart.internal.Args;
+
+import javax.swing.event.EventListenerList;
+import java.io.Serializable;
+
+/**
+ * Base class representing a data series.  Subclasses are left to implement the
+ * actual data structures.
+ * &lt;P&gt;
+ * The series has two properties (&quot;Key&quot; and &quot;Description&quot;) for which you can
+ * register a {@code PropertyChangeListener}.
+ * &lt;P&gt;
+ * You can also register a {@link SeriesChangeListener} to receive notification
+ * of changes to the series data.
+ */
+public abstract class Series&lt;K extends Comparable&lt;K&gt;&gt; 
+        implements Cloneable, Serializable {
+
+    /** For serialization. */
+    private static final long serialVersionUID = -6906561437538683581L;
+
+    /** The key for the series. */
+    private final K key;
+
+    /** Storage for registered change listeners. */
+    private EventListenerList listeners;
+
+    /** A flag that controls whether changes are notified. */
+    private boolean notify;
+
+    /**
+     * Creates a new series with the specified key and description.
+     *
+     * @param key  the series key ({@code null} not permitted).
+     */
+<span class="fc" id="L74">    protected Series(K key) {</span>
+<span class="fc" id="L75">        Args.nullNotPermitted(key, &quot;key&quot;);</span>
+<span class="fc" id="L76">        this.key = key;</span>
+<span class="fc" id="L77">        this.listeners = new EventListenerList();</span>
+<span class="fc" id="L78">        this.notify = true;</span>
+<span class="fc" id="L79">    }</span>
+
+    /**
+     * Returns the key for the series.
+     *
+     * @return The series key (never {@code null}).
+     */
+    public K getKey() {
+<span class="fc" id="L87">        return this.key;</span>
+    }
+
+    /**
+     * Returns the flag that controls whether change events are sent to
+     * registered listeners.
+     *
+     * @return A boolean.
+     *
+     * @see #setNotify(boolean)
+     */
+    public boolean getNotify() {
+<span class="nc" id="L99">        return this.notify;</span>
+    }
+
+    /**
+     * Sets the flag that controls whether change events are sent to
+     * registered listeners.
+     *
+     * @param notify  the new value of the flag.
+     *
+     * @see #getNotify()
+     */
+    public void setNotify(boolean notify) {
+<span class="nc bnc" id="L111" title="All 2 branches missed.">        if (this.notify != notify) {</span>
+<span class="nc" id="L112">            this.notify = notify;</span>
+<span class="nc" id="L113">            fireSeriesChanged();</span>
+        }
+<span class="nc" id="L115">    }</span>
+
+    /**
+     * Returns {@code true} if the series contains no data items, and
+     * {@code false} otherwise.
+     *
+     * @return A boolean.
+     *
+     * @since 1.0.7
+     */
+    public boolean isEmpty() {
+<span class="fc bfc" id="L126" title="All 2 branches covered.">        return (getItemCount() == 0);</span>
+    }
+
+    /**
+     * Returns the number of data items in the series.
+     *
+     * @return The number of data items in the series.
+     */
+    public abstract int getItemCount();
+
+    /**
+     * Returns a clone of the series.
+     * &lt;P&gt;
+     * Notes:
+     * &lt;ul&gt;
+     * &lt;li&gt;No need to clone the name or description, since String object is
+     * immutable.&lt;/li&gt;
+     * &lt;li&gt;We set the listener list to empty, since the listeners did not
+     * register with the clone.&lt;/li&gt;
+     * &lt;li&gt;Same applies to the PropertyChangeSupport instance.&lt;/li&gt;
+     * &lt;/ul&gt;
+     *
+     * @return A clone of the series.
+     *
+     * @throws CloneNotSupportedException  not thrown by this class, but
+     *         subclasses may differ.
+     */
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        @SuppressWarnings(&quot;unchecked&quot;)
+<span class="fc" id="L156">        Series&lt;K&gt; clone = (Series) super.clone();</span>
+<span class="fc" id="L157">        clone.listeners = new EventListenerList();</span>
+<span class="fc" id="L158">        return clone;</span>
+    }
+
+    /**
+     * Tests the series for equality with another object.
+     *
+     * @param obj  the object ({@code null} permitted).
+     *
+     * @return {@code true} or {@code false}.
+     */
+    @Override
+    public boolean equals(Object obj) {
+<span class="pc bpc" id="L170" title="1 of 2 branches missed.">        if (obj == this) {</span>
+<span class="nc" id="L171">            return true;</span>
+        }
+<span class="pc bpc" id="L173" title="1 of 2 branches missed.">        if (!(obj instanceof Series)) {</span>
+<span class="nc" id="L174">            return false;</span>
+        }
+        @SuppressWarnings(&quot;unchecked&quot;)
+<span class="fc" id="L177">        Series&lt;K&gt; that = (Series) obj;</span>
+<span class="fc bfc" id="L178" title="All 2 branches covered.">        if (!getKey().equals(that.getKey())) {</span>
+<span class="fc" id="L179">            return false;</span>
+        }
+<span class="fc" id="L181">        return true;</span>
+    }
+
+    /**
+     * Returns a hash code.
+     *
+     * @return A hash code.
+     */
+    @Override
+    public int hashCode() {
+<span class="fc" id="L191">        return this.key.hashCode();</span>
+    }
+
+    /**
+     * Registers an object with this series, to receive notification whenever
+     * the series changes.
+     * &lt;P&gt;
+     * Objects being registered must implement the {@link SeriesChangeListener}
+     * interface.
+     *
+     * @param listener  the listener to register.
+     */
+    public void addChangeListener(SeriesChangeListener listener) {
+<span class="fc" id="L204">        this.listeners.add(SeriesChangeListener.class, listener);</span>
+<span class="fc" id="L205">    }</span>
+
+    /**
+     * Deregisters an object, so that it no longer receives notification
+     * whenever the series changes.
+     *
+     * @param listener  the listener to deregister.
+     */
+    public void removeChangeListener(SeriesChangeListener listener) {
+<span class="fc" id="L214">        this.listeners.remove(SeriesChangeListener.class, listener);</span>
+<span class="fc" id="L215">    }</span>
+
+    /**
+     * General method for signalling to registered listeners that the series
+     * has been changed.
+     */
+    public void fireSeriesChanged() {
+<span class="pc bpc" id="L222" title="1 of 2 branches missed.">        if (this.notify) {</span>
+<span class="fc" id="L223">            notifyListeners(new SeriesChangeEvent(this));</span>
+        }
+<span class="fc" id="L225">    }</span>
+
+    /**
+     * Sends a change event to all registered listeners.
+     *
+     * @param event  contains information about the event that triggered the
+     *               notification.
+     */
+    protected void notifyListeners(SeriesChangeEvent event) {
+<span class="fc" id="L234">        Object[] listenerList = this.listeners.getListenerList();</span>
+<span class="fc bfc" id="L235" title="All 2 branches covered.">        for (int i = listenerList.length - 2; i &gt;= 0; i -= 2) {</span>
+<span class="pc bpc" id="L236" title="1 of 2 branches missed.">            if (listenerList[i] == SeriesChangeListener.class) {</span>
+<span class="fc" id="L237">                ((SeriesChangeListener) listenerList[i + 1]).seriesChanged(</span>
+                        event);
+            }
+        }
+<span class="fc" id="L241">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

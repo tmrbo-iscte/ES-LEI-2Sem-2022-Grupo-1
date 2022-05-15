@@ -1,0 +1,1085 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LegendItem.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.chart.legend</a> &gt; <span class="el_source">LegendItem.java</span></div><h1>LegendItem.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * ---------------
+ * LegendItem.java
+ * ---------------
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Original Author:  David Gilbert;
+ * Contributor(s):   Andrzej Porebski;
+ *                   David Li;
+ *                   Wolfgang Irler;
+ *                   Luke Quinane;
+ *
+ */
+
+package org.jfree.chart.legend;
+
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Paint;
+import java.awt.Shape;
+import java.awt.Stroke;
+import java.awt.geom.Line2D;
+import java.awt.geom.Rectangle2D;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.text.AttributedString;
+import java.text.CharacterIterator;
+import java.util.Objects;
+import org.jfree.chart.text.AttributedStringUtils;
+import org.jfree.chart.util.GradientPaintTransformer;
+import org.jfree.chart.util.StandardGradientPaintTransformer;
+import org.jfree.chart.internal.Args;
+import org.jfree.chart.internal.PaintUtils;
+import org.jfree.chart.api.PublicCloneable;
+import org.jfree.chart.internal.CloneUtils;
+import org.jfree.chart.internal.SerialUtils;
+import org.jfree.chart.internal.ShapeUtils;
+
+import org.jfree.data.general.Dataset;
+
+/**
+ * A temporary storage object for recording the properties of a legend item,
+ * without any consideration for layout issues.
+ */
+public class LegendItem implements Cloneable, Serializable {
+
+    /** For serialization. */
+    private static final long serialVersionUID = -797214582948827144L;
+
+    /** The dataset. */
+    private Dataset dataset;
+
+    /** The series key. */
+    private Comparable seriesKey;
+
+    /** The dataset index. */
+    private int datasetIndex;
+
+    /** The series index. */
+    private int series;
+
+    /** The label. */
+    private final String label;
+
+    /** The label font ({@code null} is permitted). */
+    private Font labelFont;
+
+    /** The label paint ({@code null} is permitted). */
+    private transient Paint labelPaint;
+
+    /** The attributed label (if null, fall back to the regular label). */
+    private transient AttributedString attributedLabel;
+
+    /**
+     * The description (not currently used - could be displayed as a tool tip).
+     */
+    private String description;
+
+    /** The tool tip text. */
+    private String toolTipText;
+
+    /** The url text. */
+    private String urlText;
+
+    /** A flag that controls whether or not the shape is visible. */
+    private boolean shapeVisible;
+
+    /** The shape. */
+    private transient Shape shape;
+
+    /** A flag that controls whether or not the shape is filled. */
+    private final boolean shapeFilled;
+
+    /** The paint. */
+    private transient Paint fillPaint;
+
+    /** A gradient paint transformer. */
+    private GradientPaintTransformer fillPaintTransformer;
+
+    /** A flag that controls whether or not the shape outline is visible. */
+    private final boolean shapeOutlineVisible;
+
+    /** The outline paint. */
+    private transient Paint outlinePaint;
+
+    /** The outline stroke. */
+    private transient Stroke outlineStroke;
+
+    /** A flag that controls whether or not the line is visible. */
+    private boolean lineVisible;
+
+    /** The line. */
+    private transient Shape line;
+
+    /** The stroke. */
+    private transient Stroke lineStroke;
+
+    /** The line paint. */
+    private transient Paint linePaint;
+
+    /**
+     * The shape must be non-null for a LegendItem - if no shape is required,
+     * use this.
+     */
+<span class="fc" id="L153">    private static final Shape UNUSED_SHAPE = new Line2D.Float();</span>
+
+    /**
+     * The stroke must be non-null for a LegendItem - if no stroke is required,
+     * use this.
+     */
+<span class="fc" id="L159">    private static final Stroke UNUSED_STROKE = new BasicStroke(0.0f);</span>
+
+    /**
+     * Creates a legend item with the specified label.  The remaining
+     * attributes take default values.
+     *
+     * @param label  the label ({@code null} not permitted).
+     */
+    public LegendItem(String label) {
+<span class="fc" id="L168">        this(label, Color.BLACK);</span>
+<span class="fc" id="L169">    }</span>
+
+    /**
+     * Creates a legend item with the specified label and fill paint.  The
+     * remaining attributes take default values.
+     *
+     * @param label  the label ({@code null} not permitted).
+     * @param paint  the paint ({@code null} not permitted).
+     */
+    public LegendItem(String label, Paint paint) {
+<span class="fc" id="L179">        this(label, null, null, null, new Rectangle2D.Double(-4.0, -4.0, 8.0,</span>
+                8.0), paint);
+<span class="fc" id="L181">    }</span>
+
+    /**
+     * Creates a legend item with a filled shape.  The shape is not outlined,
+     * and no line is visible.
+     *
+     * @param label  the label ({@code null} not permitted).
+     * @param description  the description ({@code null} permitted).
+     * @param toolTipText  the tool tip text ({@code null} permitted).
+     * @param urlText  the URL text ({@code null} permitted).
+     * @param shape  the shape ({@code null} not permitted).
+     * @param fillPaint  the paint used to fill the shape ({@code null}
+     *                   not permitted).
+     */
+    public LegendItem(String label, String description,
+                      String toolTipText, String urlText,
+                      Shape shape, Paint fillPaint) {
+
+<span class="fc" id="L199">        this(label, description, toolTipText, urlText,</span>
+                /* shape visible = */ true, shape,
+                /* shape filled = */ true, fillPaint,
+                /* shape outlined */ false, Color.BLACK, UNUSED_STROKE,
+                /* line visible */ false, UNUSED_SHAPE, UNUSED_STROKE,
+                Color.BLACK);
+
+<span class="fc" id="L206">    }</span>
+
+    /**
+     * Creates a legend item with a filled and outlined shape.
+     *
+     * @param label  the label ({@code null} not permitted).
+     * @param description  the description ({@code null} permitted).
+     * @param toolTipText  the tool tip text ({@code null} permitted).
+     * @param urlText  the URL text ({@code null} permitted).
+     * @param shape  the shape ({@code null} not permitted).
+     * @param fillPaint  the paint used to fill the shape ({@code null}
+     *                   not permitted).
+     * @param outlineStroke  the outline stroke ({@code null} not
+     *                       permitted).
+     * @param outlinePaint  the outline paint ({@code null} not
+     *                      permitted).
+     */
+    public LegendItem(String label, String description, String toolTipText, 
+            String urlText, Shape shape, Paint fillPaint, Stroke outlineStroke, 
+            Paint outlinePaint) {
+
+<span class="fc" id="L227">        this(label, description, toolTipText, urlText,</span>
+                /* shape visible = */ true, shape,
+                /* shape filled = */ true, fillPaint,
+                /* shape outlined = */ true, outlinePaint, outlineStroke,
+                /* line visible */ false, UNUSED_SHAPE, UNUSED_STROKE,
+                Color.BLACK);
+
+<span class="fc" id="L234">    }</span>
+
+    /**
+     * Creates a legend item using a line.
+     *
+     * @param label  the label ({@code null} not permitted).
+     * @param description  the description ({@code null} permitted).
+     * @param toolTipText  the tool tip text ({@code null} permitted).
+     * @param urlText  the URL text ({@code null} permitted).
+     * @param line  the line ({@code null} not permitted).
+     * @param lineStroke  the line stroke ({@code null} not permitted).
+     * @param linePaint  the line paint ({@code null} not permitted).
+     */
+    public LegendItem(String label, String description, String toolTipText, 
+            String urlText, Shape line, Stroke lineStroke, Paint linePaint) {
+
+<span class="fc" id="L250">        this(label, description, toolTipText, urlText,</span>
+                /* shape visible = */ false, UNUSED_SHAPE,
+                /* shape filled = */ false, Color.BLACK,
+                /* shape outlined = */ false, Color.BLACK, UNUSED_STROKE,
+                /* line visible = */ true, line, lineStroke, linePaint);
+<span class="fc" id="L255">    }</span>
+
+    /**
+     * Creates a new legend item.
+     *
+     * @param label  the label ({@code null} not permitted).
+     * @param description  the description (not currently used,
+     *        {@code null} permitted).
+     * @param toolTipText  the tool tip text ({@code null} permitted).
+     * @param urlText  the URL text ({@code null} permitted).
+     * @param shapeVisible  a flag that controls whether or not the shape is
+     *                      displayed.
+     * @param shape  the shape ({@code null} permitted).
+     * @param shapeFilled  a flag that controls whether or not the shape is
+     *                     filled.
+     * @param fillPaint  the fill paint ({@code null} not permitted).
+     * @param shapeOutlineVisible  a flag that controls whether or not the
+     *                             shape is outlined.
+     * @param outlinePaint  the outline paint ({@code null} not permitted).
+     * @param outlineStroke  the outline stroke ({@code null} not
+     *                       permitted).
+     * @param lineVisible  a flag that controls whether or not the line is
+     *                     visible.
+     * @param line  the line.
+     * @param lineStroke  the stroke ({@code null} not permitted).
+     * @param linePaint  the line paint ({@code null} not permitted).
+     */
+    public LegendItem(String label, String description,
+                      String toolTipText, String urlText,
+                      boolean shapeVisible, Shape shape,
+                      boolean shapeFilled, Paint fillPaint,
+                      boolean shapeOutlineVisible, Paint outlinePaint,
+                      Stroke outlineStroke,
+                      boolean lineVisible, Shape line,
+<span class="fc" id="L289">                      Stroke lineStroke, Paint linePaint) {</span>
+
+<span class="fc" id="L291">        Args.nullNotPermitted(label, &quot;label&quot;);</span>
+<span class="fc" id="L292">        Args.nullNotPermitted(fillPaint, &quot;fillPaint&quot;);</span>
+<span class="fc" id="L293">        Args.nullNotPermitted(lineStroke, &quot;lineStroke&quot;);</span>
+<span class="fc" id="L294">        Args.nullNotPermitted(outlinePaint, &quot;outlinePaint&quot;);</span>
+<span class="fc" id="L295">        Args.nullNotPermitted(outlineStroke, &quot;outlineStroke&quot;);</span>
+<span class="fc" id="L296">        this.label = label;</span>
+<span class="fc" id="L297">        this.labelPaint = null;</span>
+<span class="fc" id="L298">        this.attributedLabel = null;</span>
+<span class="fc" id="L299">        this.description = description;</span>
+<span class="fc" id="L300">        this.shapeVisible = shapeVisible;</span>
+<span class="fc" id="L301">        this.shape = shape;</span>
+<span class="fc" id="L302">        this.shapeFilled = shapeFilled;</span>
+<span class="fc" id="L303">        this.fillPaint = fillPaint;</span>
+<span class="fc" id="L304">        this.fillPaintTransformer = new StandardGradientPaintTransformer();</span>
+<span class="fc" id="L305">        this.shapeOutlineVisible = shapeOutlineVisible;</span>
+<span class="fc" id="L306">        this.outlinePaint = outlinePaint;</span>
+<span class="fc" id="L307">        this.outlineStroke = outlineStroke;</span>
+<span class="fc" id="L308">        this.lineVisible = lineVisible;</span>
+<span class="fc" id="L309">        this.line = line;</span>
+<span class="fc" id="L310">        this.lineStroke = lineStroke;</span>
+<span class="fc" id="L311">        this.linePaint = linePaint;</span>
+<span class="fc" id="L312">        this.toolTipText = toolTipText;</span>
+<span class="fc" id="L313">        this.urlText = urlText;</span>
+<span class="fc" id="L314">    }</span>
+
+    /**
+     * Creates a legend item with a filled shape.  The shape is not outlined,
+     * and no line is visible.
+     *
+     * @param label  the label ({@code null} not permitted).
+     * @param description  the description ({@code null} permitted).
+     * @param toolTipText  the tool tip text ({@code null} permitted).
+     * @param urlText  the URL text ({@code null} permitted).
+     * @param shape  the shape ({@code null} not permitted).
+     * @param fillPaint  the paint used to fill the shape ({@code null}
+     *                   not permitted).
+     */
+    public LegendItem(AttributedString label, String description,
+                      String toolTipText, String urlText,
+                      Shape shape, Paint fillPaint) {
+
+<span class="fc" id="L332">        this(label, description, toolTipText, urlText,</span>
+                /* shape visible = */ true, shape,
+                /* shape filled = */ true, fillPaint,
+                /* shape outlined = */ false, Color.BLACK, UNUSED_STROKE,
+                /* line visible = */ false, UNUSED_SHAPE, UNUSED_STROKE,
+                Color.BLACK);
+
+<span class="fc" id="L339">    }</span>
+
+    /**
+     * Creates a legend item with a filled and outlined shape.
+     *
+     * @param label  the label ({@code null} not permitted).
+     * @param description  the description ({@code null} permitted).
+     * @param toolTipText  the tool tip text ({@code null} permitted).
+     * @param urlText  the URL text ({@code null} permitted).
+     * @param shape  the shape ({@code null} not permitted).
+     * @param fillPaint  the paint used to fill the shape ({@code null}
+     *                   not permitted).
+     * @param outlineStroke  the outline stroke ({@code null} not
+     *                       permitted).
+     * @param outlinePaint  the outline paint ({@code null} not
+     *                      permitted).
+     */
+    public LegendItem(AttributedString label, String description,
+                      String toolTipText, String urlText,
+                      Shape shape, Paint fillPaint,
+                      Stroke outlineStroke, Paint outlinePaint) {
+
+<span class="nc" id="L361">        this(label, description, toolTipText, urlText,</span>
+                /* shape visible = */ true, shape,
+                /* shape filled = */ true, fillPaint,
+                /* shape outlined = */ true, outlinePaint, outlineStroke,
+                /* line visible = */ false, UNUSED_SHAPE, UNUSED_STROKE,
+                Color.BLACK);
+<span class="nc" id="L367">    }</span>
+
+    /**
+     * Creates a legend item using a line.
+     *
+     * @param label  the label ({@code null} not permitted).
+     * @param description  the description ({@code null} permitted).
+     * @param toolTipText  the tool tip text ({@code null} permitted).
+     * @param urlText  the URL text ({@code null} permitted).
+     * @param line  the line ({@code null} not permitted).
+     * @param lineStroke  the line stroke ({@code null} not permitted).
+     * @param linePaint  the line paint ({@code null} not permitted).
+     */
+    public LegendItem(AttributedString label, String description,
+                      String toolTipText, String urlText,
+                      Shape line, Stroke lineStroke, Paint linePaint) {
+
+<span class="nc" id="L384">        this(label, description, toolTipText, urlText,</span>
+                /* shape visible = */ false, UNUSED_SHAPE,
+                /* shape filled = */ false, Color.BLACK,
+                /* shape outlined = */ false, Color.BLACK, UNUSED_STROKE,
+                /* line visible = */ true, line, lineStroke, linePaint);
+<span class="nc" id="L389">    }</span>
+
+    /**
+     * Creates a new legend item.
+     *
+     * @param label  the label ({@code null} not permitted).
+     * @param description  the description (not currently used,
+     *        {@code null} permitted).
+     * @param toolTipText  the tool tip text ({@code null} permitted).
+     * @param urlText  the URL text ({@code null} permitted).
+     * @param shapeVisible  a flag that controls whether or not the shape is
+     *                      displayed.
+     * @param shape  the shape ({@code null} permitted).
+     * @param shapeFilled  a flag that controls whether or not the shape is
+     *                     filled.
+     * @param fillPaint  the fill paint ({@code null} not permitted).
+     * @param shapeOutlineVisible  a flag that controls whether or not the
+     *                             shape is outlined.
+     * @param outlinePaint  the outline paint ({@code null} not permitted).
+     * @param outlineStroke  the outline stroke ({@code null} not
+     *                       permitted).
+     * @param lineVisible  a flag that controls whether or not the line is
+     *                     visible.
+     * @param line  the line ({@code null} not permitted).
+     * @param lineStroke  the stroke ({@code null} not permitted).
+     * @param linePaint  the line paint ({@code null} not permitted).
+     */
+    public LegendItem(AttributedString label, String description,
+                      String toolTipText, String urlText,
+                      boolean shapeVisible, Shape shape,
+                      boolean shapeFilled, Paint fillPaint,
+                      boolean shapeOutlineVisible, Paint outlinePaint,
+                      Stroke outlineStroke,
+                      boolean lineVisible, Shape line, Stroke lineStroke,
+<span class="fc" id="L423">                      Paint linePaint) {</span>
+
+<span class="fc" id="L425">        Args.nullNotPermitted(label, &quot;label&quot;);</span>
+<span class="fc" id="L426">        Args.nullNotPermitted(fillPaint, &quot;fillPaint&quot;);</span>
+<span class="fc" id="L427">        Args.nullNotPermitted(lineStroke, &quot;lineStroke&quot;);</span>
+<span class="fc" id="L428">        Args.nullNotPermitted(line, &quot;line&quot;);</span>
+<span class="fc" id="L429">        Args.nullNotPermitted(linePaint, &quot;linePaint&quot;);</span>
+<span class="fc" id="L430">        Args.nullNotPermitted(outlinePaint, &quot;outlinePaint&quot;);</span>
+<span class="fc" id="L431">        Args.nullNotPermitted(outlineStroke, &quot;outlineStroke&quot;);</span>
+<span class="fc" id="L432">        this.label = characterIteratorToString(label.getIterator());</span>
+<span class="fc" id="L433">        this.attributedLabel = label;</span>
+<span class="fc" id="L434">        this.description = description;</span>
+<span class="fc" id="L435">        this.shapeVisible = shapeVisible;</span>
+<span class="fc" id="L436">        this.shape = shape;</span>
+<span class="fc" id="L437">        this.shapeFilled = shapeFilled;</span>
+<span class="fc" id="L438">        this.fillPaint = fillPaint;</span>
+<span class="fc" id="L439">        this.fillPaintTransformer = new StandardGradientPaintTransformer();</span>
+<span class="fc" id="L440">        this.shapeOutlineVisible = shapeOutlineVisible;</span>
+<span class="fc" id="L441">        this.outlinePaint = outlinePaint;</span>
+<span class="fc" id="L442">        this.outlineStroke = outlineStroke;</span>
+<span class="fc" id="L443">        this.lineVisible = lineVisible;</span>
+<span class="fc" id="L444">        this.line = line;</span>
+<span class="fc" id="L445">        this.lineStroke = lineStroke;</span>
+<span class="fc" id="L446">        this.linePaint = linePaint;</span>
+<span class="fc" id="L447">        this.toolTipText = toolTipText;</span>
+<span class="fc" id="L448">        this.urlText = urlText;</span>
+<span class="fc" id="L449">    }</span>
+
+    /**
+     * Returns a string containing the characters from the given iterator.
+     *
+     * @param iterator  the iterator ({@code null} not permitted).
+     *
+     * @return A string.
+     */
+    private String characterIteratorToString(CharacterIterator iterator) {
+<span class="fc" id="L459">        int endIndex = iterator.getEndIndex();</span>
+<span class="fc" id="L460">        int beginIndex = iterator.getBeginIndex();</span>
+<span class="fc" id="L461">        int count = endIndex - beginIndex;</span>
+<span class="pc bpc" id="L462" title="1 of 2 branches missed.">        if (count &lt;= 0) {</span>
+<span class="nc" id="L463">            return &quot;&quot;;</span>
+        }
+<span class="fc" id="L465">        char[] chars = new char[count];</span>
+<span class="fc" id="L466">        int i = 0;</span>
+<span class="fc" id="L467">        char c = iterator.first();</span>
+<span class="fc bfc" id="L468" title="All 2 branches covered.">        while (c != CharacterIterator.DONE) {</span>
+<span class="fc" id="L469">            chars[i] = c;</span>
+<span class="fc" id="L470">            i++;</span>
+<span class="fc" id="L471">            c = iterator.next();</span>
+        }
+<span class="fc" id="L473">        return new String(chars);</span>
+    }
+
+    /**
+     * Returns the dataset.
+     *
+     * @return The dataset.
+     *
+     * @see #setDatasetIndex(int)
+     */
+    public Dataset getDataset() {
+<span class="fc" id="L484">        return this.dataset;</span>
+    }
+
+    /**
+     * Sets the dataset.
+     *
+     * @param dataset  the dataset.
+     */
+    public void setDataset(Dataset dataset) {
+<span class="fc" id="L493">        this.dataset = dataset;</span>
+<span class="fc" id="L494">    }</span>
+
+    /**
+     * Returns the dataset index for this legend item.
+     *
+     * @return The dataset index.
+     *
+     * @see #setDatasetIndex(int)
+     * @see #getDataset()
+     */
+    public int getDatasetIndex() {
+<span class="fc" id="L505">        return this.datasetIndex;</span>
+    }
+
+    /**
+     * Sets the dataset index for this legend item.
+     *
+     * @param index  the index.
+     *
+     * @see #getDatasetIndex()
+     */
+    public void setDatasetIndex(int index) {
+<span class="fc" id="L516">        this.datasetIndex = index;</span>
+<span class="fc" id="L517">    }</span>
+
+    /**
+     * Returns the series key.
+     *
+     * @return The series key.
+     *
+     * @see #setSeriesKey(Comparable)
+     */
+    public Comparable getSeriesKey() {
+<span class="fc" id="L527">        return this.seriesKey;</span>
+    }
+
+    /**
+     * Sets the series key.
+     *
+     * @param key  the series key.
+     */
+    public void setSeriesKey(Comparable key) {
+<span class="fc" id="L536">        this.seriesKey = key;</span>
+<span class="fc" id="L537">    }</span>
+
+    /**
+     * Returns the series index for this legend item.
+     *
+     * @return The series index.
+     */
+    public int getSeriesIndex() {
+<span class="fc" id="L545">        return this.series;</span>
+    }
+
+    /**
+     * Sets the series index for this legend item.
+     *
+     * @param index  the index.
+     */
+    public void setSeriesIndex(int index) {
+<span class="fc" id="L554">        this.series = index;</span>
+<span class="fc" id="L555">    }</span>
+
+    /**
+     * Returns the label.
+     *
+     * @return The label (never {@code null}).
+     */
+    public String getLabel() {
+<span class="fc" id="L563">        return this.label;</span>
+    }
+
+    /**
+     * Returns the label font.
+     *
+     * @return The label font (possibly {@code null}).
+     */
+    public Font getLabelFont() {
+<span class="fc" id="L572">        return this.labelFont;</span>
+    }
+
+    /**
+     * Sets the label font.
+     *
+     * @param font  the font ({@code null} permitted).
+     */
+    public void setLabelFont(Font font) {
+<span class="fc" id="L581">        this.labelFont = font;</span>
+<span class="fc" id="L582">    }</span>
+
+    /**
+     * Returns the paint used to draw the label.
+     *
+     * @return The paint (possibly {@code null}).
+     */
+    public Paint getLabelPaint() {
+<span class="fc" id="L590">        return this.labelPaint;</span>
+    }
+
+    /**
+     * Sets the paint used to draw the label.
+     *
+     * @param paint  the paint ({@code null} permitted).
+     */
+    public void setLabelPaint(Paint paint) {
+<span class="fc" id="L599">        this.labelPaint = paint;</span>
+<span class="fc" id="L600">    }</span>
+
+    /**
+     * Returns the attributed label.
+     *
+     * @return The attributed label (possibly {@code null}).
+     */
+    public AttributedString getAttributedLabel() {
+<span class="nc" id="L608">        return this.attributedLabel;</span>
+    }
+
+    /**
+     * Returns the description for the legend item.
+     *
+     * @return The description (possibly {@code null}).
+     *
+     * @see #setDescription(java.lang.String) 
+     */
+    public String getDescription() {
+<span class="nc" id="L619">        return this.description;</span>
+    }
+
+    /**
+     * Sets the description for this legend item.
+     *
+     * @param text  the description ({@code null} permitted).
+     *
+     * @see #getDescription()
+     */
+    public void setDescription(String text) {
+<span class="nc" id="L630">        this.description = text;</span>
+<span class="nc" id="L631">    }</span>
+
+    /**
+     * Returns the tool tip text.
+     *
+     * @return The tool tip text (possibly {@code null}).
+     *
+     * @see #setToolTipText(java.lang.String) 
+     */
+    public String getToolTipText() {
+<span class="fc" id="L641">        return this.toolTipText;</span>
+    }
+
+    /**
+     * Sets the tool tip text for this legend item.
+     *
+     * @param text  the text ({@code null} permitted).
+     *
+     * @see #getToolTipText()
+     */
+    public void setToolTipText(String text) {
+<span class="fc" id="L652">        this.toolTipText = text;</span>
+<span class="fc" id="L653">    }</span>
+
+    /**
+     * Returns the URL text.
+     *
+     * @return The URL text (possibly {@code null}).
+     *
+     * @see #setURLText(java.lang.String) 
+     */
+    public String getURLText() {
+<span class="fc" id="L663">        return this.urlText;</span>
+    }
+
+    /**
+     * Sets the URL text.
+     *
+     * @param text  the text ({@code null} permitted).
+     *
+     * @see #getURLText()
+     */
+    public void setURLText(String text) {
+<span class="fc" id="L674">        this.urlText = text;</span>
+<span class="fc" id="L675">    }</span>
+
+    /**
+     * Returns a flag that indicates whether or not the shape is visible.
+     *
+     * @return A boolean.
+     *
+     * @see #setShapeVisible(boolean)
+     */
+    public boolean isShapeVisible() {
+<span class="fc" id="L685">        return this.shapeVisible;</span>
+    }
+
+    /**
+     * Sets the flag that controls whether or not the shape is visible.
+     *
+     * @param visible  the new flag value.
+     *
+     * @see #isShapeVisible()
+     * @see #isLineVisible()
+     */
+    public void setShapeVisible(boolean visible) {
+<span class="nc" id="L697">        this.shapeVisible = visible;</span>
+<span class="nc" id="L698">    }</span>
+
+    /**
+     * Returns the shape used to label the series represented by this legend
+     * item.
+     *
+     * @return The shape (never {@code null}).
+     *
+     * @see #setShape(java.awt.Shape) 
+     */
+    public Shape getShape() {
+<span class="fc" id="L709">        return this.shape;</span>
+    }
+
+    /**
+     * Sets the shape for the legend item.
+     *
+     * @param shape  the shape ({@code null} not permitted).
+     *
+     * @see #getShape()
+     */
+    public void setShape(Shape shape) {
+<span class="nc" id="L720">        Args.nullNotPermitted(shape, &quot;shape&quot;);</span>
+<span class="nc" id="L721">        this.shape = shape;</span>
+<span class="nc" id="L722">    }</span>
+
+    /**
+     * Returns a flag that controls whether or not the shape is filled.
+     *
+     * @return A boolean.
+     */
+    public boolean isShapeFilled() {
+<span class="fc" id="L730">        return this.shapeFilled;</span>
+    }
+
+    /**
+     * Returns the fill paint.
+     *
+     * @return The fill paint (never {@code null}).
+     */
+    public Paint getFillPaint() {
+<span class="fc" id="L739">        return this.fillPaint;</span>
+    }
+
+    /**
+     * Sets the fill paint.
+     *
+     * @param paint  the paint ({@code null} not permitted).
+     */
+    public void setFillPaint(Paint paint) {
+<span class="fc" id="L748">        Args.nullNotPermitted(paint, &quot;paint&quot;);</span>
+<span class="fc" id="L749">        this.fillPaint = paint;</span>
+<span class="fc" id="L750">    }</span>
+
+    /**
+     * Returns the flag that controls whether or not the shape outline
+     * is visible.
+     *
+     * @return A boolean.
+     */
+    public boolean isShapeOutlineVisible() {
+<span class="fc" id="L759">        return this.shapeOutlineVisible;</span>
+    }
+
+    /**
+     * Returns the line stroke for the series.
+     *
+     * @return The stroke (never {@code null}).
+     */
+    public Stroke getLineStroke() {
+<span class="fc" id="L768">        return this.lineStroke;</span>
+    }
+    
+    /**
+     * Sets the line stroke.
+     * 
+     * @param stroke  the stroke ({@code null} not permitted).
+     */
+    public void setLineStroke(Stroke stroke) {
+<span class="nc" id="L777">        Args.nullNotPermitted(stroke, &quot;stroke&quot;);</span>
+<span class="nc" id="L778">        this.lineStroke = stroke;</span>
+<span class="nc" id="L779">    }</span>
+
+    /**
+     * Returns the paint used for lines.
+     *
+     * @return The paint (never {@code null}).
+     */
+    public Paint getLinePaint() {
+<span class="fc" id="L787">        return this.linePaint;</span>
+    }
+
+    /**
+     * Sets the line paint.
+     *
+     * @param paint  the paint ({@code null} not permitted).
+     */
+    public void setLinePaint(Paint paint) {
+<span class="fc" id="L796">        Args.nullNotPermitted(paint, &quot;paint&quot;);</span>
+<span class="fc" id="L797">        this.linePaint = paint;</span>
+<span class="fc" id="L798">    }</span>
+
+    /**
+     * Returns the outline paint.
+     *
+     * @return The outline paint (never {@code null}).
+     */
+    public Paint getOutlinePaint() {
+<span class="fc" id="L806">        return this.outlinePaint;</span>
+    }
+
+    /**
+     * Sets the outline paint.
+     *
+     * @param paint  the paint ({@code null} not permitted).
+     */
+    public void setOutlinePaint(Paint paint) {
+<span class="fc" id="L815">        Args.nullNotPermitted(paint, &quot;paint&quot;);</span>
+<span class="fc" id="L816">        this.outlinePaint = paint;</span>
+<span class="fc" id="L817">    }</span>
+
+    /**
+     * Returns the outline stroke.
+     *
+     * @return The outline stroke (never {@code null}).
+     *
+     * @see #setOutlineStroke(java.awt.Stroke) 
+     */
+    public Stroke getOutlineStroke() {
+<span class="fc" id="L827">        return this.outlineStroke;</span>
+    }
+
+    /**
+     * Sets the outline stroke.
+     *
+     * @param stroke  the stroke ({@code null} not permitted).
+     *
+     * @see #getOutlineStroke()
+     */
+    public void setOutlineStroke(Stroke stroke) {
+<span class="fc" id="L838">        Args.nullNotPermitted(stroke, &quot;stroke&quot;);</span>
+<span class="fc" id="L839">        this.outlineStroke = stroke;</span>
+<span class="fc" id="L840">    }</span>
+
+    /**
+     * Returns a flag that indicates whether or not the line is visible.
+     *
+     * @return A boolean.
+     *
+     * @see #setLineVisible(boolean) 
+     */
+    public boolean isLineVisible() {
+<span class="fc" id="L850">        return this.lineVisible;</span>
+    }
+
+    /**
+     * Sets the flag that controls whether or not the line shape is visible for
+     * this legend item.
+     *
+     * @param visible  the new flag value.
+     *
+     * @see #isLineVisible()
+     */
+    public void setLineVisible(boolean visible) {
+<span class="nc" id="L862">        this.lineVisible = visible;</span>
+<span class="nc" id="L863">    }</span>
+
+    /**
+     * Returns the line.
+     *
+     * @return The line (never {@code null}).
+     *
+     * @see #setLine(java.awt.Shape)
+     * @see #isLineVisible() 
+     */
+    public Shape getLine() {
+<span class="fc" id="L874">        return this.line;</span>
+    }
+
+    /**
+     * Sets the line.
+     *
+     * @param line  the line ({@code null} not permitted).
+     *
+     * @see #getLine()
+     */
+    public void setLine(Shape line) {
+<span class="nc" id="L885">        Args.nullNotPermitted(line, &quot;line&quot;);</span>
+<span class="nc" id="L886">        this.line = line;</span>
+<span class="nc" id="L887">    }</span>
+
+    /**
+     * Returns the transformer used when the fill paint is an instance of
+     * {@code GradientPaint}.
+     *
+     * @return The transformer (never {@code null}).
+     *
+     * @see #setFillPaintTransformer(GradientPaintTransformer)
+     */
+    public GradientPaintTransformer getFillPaintTransformer() {
+<span class="fc" id="L898">        return this.fillPaintTransformer;</span>
+    }
+
+    /**
+     * Sets the transformer used when the fill paint is an instance of
+     * {@code GradientPaint}.
+     *
+     * @param transformer  the transformer ({@code null} not permitted).
+     *
+     * @see #getFillPaintTransformer()
+     */
+    public void setFillPaintTransformer(GradientPaintTransformer transformer) {
+<span class="fc" id="L910">        Args.nullNotPermitted(transformer, &quot;transformer&quot;);</span>
+<span class="fc" id="L911">        this.fillPaintTransformer = transformer;</span>
+<span class="fc" id="L912">    }</span>
+
+    /**
+     * Tests this item for equality with an arbitrary object.
+     *
+     * @param obj  the object ({@code null} permitted).
+     *
+     * @return A boolean.
+     */
+    @Override
+    public boolean equals(Object obj) {
+<span class="pc bpc" id="L923" title="1 of 2 branches missed.">        if (obj == this) {</span>
+<span class="nc" id="L924">            return true;</span>
+        }
+<span class="pc bpc" id="L926" title="1 of 2 branches missed.">        if (!(obj instanceof LegendItem)) {</span>
+<span class="nc" id="L927">            return false;</span>
+        }
+<span class="fc" id="L929">        LegendItem that = (LegendItem) obj;</span>
+<span class="pc bpc" id="L930" title="1 of 2 branches missed.">        if (this.datasetIndex != that.datasetIndex) {</span>
+<span class="nc" id="L931">            return false;</span>
+        }
+<span class="pc bpc" id="L933" title="1 of 2 branches missed.">        if (this.series != that.series) {</span>
+<span class="nc" id="L934">            return false;</span>
+        }
+<span class="fc bfc" id="L936" title="All 2 branches covered.">        if (!this.label.equals(that.label)) {</span>
+<span class="fc" id="L937">            return false;</span>
+        }
+<span class="pc bpc" id="L939" title="1 of 2 branches missed.">        if (!AttributedStringUtils.equal(this.attributedLabel,</span>
+                that.attributedLabel)) {
+<span class="nc" id="L941">            return false;</span>
+        }
+<span class="fc bfc" id="L943" title="All 2 branches covered.">        if (!Objects.equals(this.description, that.description)) {</span>
+<span class="fc" id="L944">            return false;</span>
+        }
+<span class="fc bfc" id="L946" title="All 2 branches covered.">        if (this.shapeVisible != that.shapeVisible) {</span>
+<span class="fc" id="L947">            return false;</span>
+        }
+<span class="fc bfc" id="L949" title="All 2 branches covered.">        if (!ShapeUtils.equal(this.shape, that.shape)) {</span>
+<span class="fc" id="L950">            return false;</span>
+        }
+<span class="fc bfc" id="L952" title="All 2 branches covered.">        if (this.shapeFilled != that.shapeFilled) {</span>
+<span class="fc" id="L953">            return false;</span>
+        }
+<span class="fc bfc" id="L955" title="All 2 branches covered.">        if (!PaintUtils.equal(this.fillPaint, that.fillPaint)) {</span>
+<span class="fc" id="L956">            return false;</span>
+        }
+<span class="fc bfc" id="L958" title="All 2 branches covered.">        if (!Objects.equals(this.fillPaintTransformer, that.fillPaintTransformer)) {</span>
+<span class="fc" id="L959">            return false;</span>
+        }
+<span class="fc bfc" id="L961" title="All 2 branches covered.">        if (this.shapeOutlineVisible != that.shapeOutlineVisible) {</span>
+<span class="fc" id="L962">            return false;</span>
+        }
+<span class="fc bfc" id="L964" title="All 2 branches covered.">        if (!this.outlineStroke.equals(that.outlineStroke)) {</span>
+<span class="fc" id="L965">            return false;</span>
+        }
+<span class="fc bfc" id="L967" title="All 2 branches covered.">        if (!PaintUtils.equal(this.outlinePaint, that.outlinePaint)) {</span>
+<span class="fc" id="L968">            return false;</span>
+        }
+<span class="fc bfc" id="L970" title="All 4 branches covered.">        if (!this.lineVisible == that.lineVisible) {</span>
+<span class="fc" id="L971">            return false;</span>
+        }
+<span class="fc bfc" id="L973" title="All 2 branches covered.">        if (!ShapeUtils.equal(this.line, that.line)) {</span>
+<span class="fc" id="L974">            return false;</span>
+        }
+<span class="fc bfc" id="L976" title="All 2 branches covered.">        if (!this.lineStroke.equals(that.lineStroke)) {</span>
+<span class="fc" id="L977">            return false;</span>
+        }
+<span class="fc bfc" id="L979" title="All 2 branches covered.">        if (!PaintUtils.equal(this.linePaint, that.linePaint)) {</span>
+<span class="fc" id="L980">            return false;</span>
+        }
+<span class="fc bfc" id="L982" title="All 2 branches covered.">        if (!Objects.equals(this.labelFont, that.labelFont)) {</span>
+<span class="fc" id="L983">            return false;</span>
+        }
+<span class="fc bfc" id="L985" title="All 2 branches covered.">        if (!PaintUtils.equal(this.labelPaint, that.labelPaint)) {</span>
+<span class="fc" id="L986">            return false;</span>
+        }
+<span class="fc" id="L988">        return true;</span>
+    }
+
+    @Override
+    public int hashCode() {
+<span class="nc" id="L993">        int hash = 7;</span>
+<span class="nc" id="L994">        hash = 79 * hash + this.datasetIndex;</span>
+<span class="nc" id="L995">        hash = 79 * hash + this.series;</span>
+<span class="nc" id="L996">        hash = 79 * hash + Objects.hashCode(this.label);</span>
+<span class="nc" id="L997">        hash = 79 * hash + Objects.hashCode(this.labelFont);</span>
+<span class="nc" id="L998">        hash = 79 * hash + Objects.hashCode(this.labelPaint);</span>
+<span class="nc" id="L999">        hash = 79 * hash + Objects.hashCode(this.attributedLabel);</span>
+<span class="nc" id="L1000">        hash = 79 * hash + Objects.hashCode(this.description);</span>
+<span class="nc bnc" id="L1001" title="All 2 branches missed.">        hash = 79 * hash + (this.shapeVisible ? 1 : 0);</span>
+<span class="nc" id="L1002">        hash = 79 * hash + Objects.hashCode(this.shape);</span>
+<span class="nc bnc" id="L1003" title="All 2 branches missed.">        hash = 79 * hash + (this.shapeFilled ? 1 : 0);</span>
+<span class="nc" id="L1004">        hash = 79 * hash + Objects.hashCode(this.fillPaint);</span>
+<span class="nc" id="L1005">        hash = 79 * hash + Objects.hashCode(this.fillPaintTransformer);</span>
+<span class="nc bnc" id="L1006" title="All 2 branches missed.">        hash = 79 * hash + (this.shapeOutlineVisible ? 1 : 0);</span>
+<span class="nc" id="L1007">        hash = 79 * hash + Objects.hashCode(this.outlinePaint);</span>
+<span class="nc" id="L1008">        hash = 79 * hash + Objects.hashCode(this.outlineStroke);</span>
+<span class="nc bnc" id="L1009" title="All 2 branches missed.">        hash = 79 * hash + (this.lineVisible ? 1 : 0);</span>
+<span class="nc" id="L1010">        hash = 79 * hash + Objects.hashCode(this.line);</span>
+<span class="nc" id="L1011">        hash = 79 * hash + Objects.hashCode(this.lineStroke);</span>
+<span class="nc" id="L1012">        hash = 79 * hash + Objects.hashCode(this.linePaint);</span>
+<span class="nc" id="L1013">        return hash;</span>
+    }
+
+    /**
+     * Returns an independent copy of this object (except that the clone will
+     * still reference the same dataset as the original {@code LegendItem}).
+     *
+     * @return A clone.
+     *
+     * @throws CloneNotSupportedException if the legend item cannot be cloned.
+     */
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+<span class="fc" id="L1026">        LegendItem clone = (LegendItem) super.clone();</span>
+<span class="pc bpc" id="L1027" title="1 of 2 branches missed.">        if (this.seriesKey instanceof PublicCloneable) {</span>
+<span class="nc" id="L1028">            PublicCloneable pc = (PublicCloneable) this.seriesKey;</span>
+<span class="nc" id="L1029">            clone.seriesKey = (Comparable) pc.clone();</span>
+        }
+        // FIXME: Clone the attributed string if it is not null
+<span class="fc" id="L1032">        clone.shape = CloneUtils.clone(this.shape);</span>
+<span class="pc bpc" id="L1033" title="1 of 2 branches missed.">        if (this.fillPaintTransformer instanceof PublicCloneable) {</span>
+<span class="fc" id="L1034">            PublicCloneable pc = (PublicCloneable) this.fillPaintTransformer;</span>
+<span class="fc" id="L1035">            clone.fillPaintTransformer = (GradientPaintTransformer) pc.clone();</span>
+
+        }
+<span class="fc" id="L1038">        clone.line = CloneUtils.clone(this.line);</span>
+<span class="fc" id="L1039">        return clone;</span>
+    }
+
+    /**
+     * Provides serialization support.
+     *
+     * @param stream  the output stream ({@code null} not permitted).
+     *
+     * @throws IOException  if there is an I/O error.
+     */
+    private void writeObject(ObjectOutputStream stream) throws IOException {
+<span class="fc" id="L1050">        stream.defaultWriteObject();</span>
+<span class="fc" id="L1051">        SerialUtils.writeAttributedString(this.attributedLabel, stream);</span>
+<span class="fc" id="L1052">        SerialUtils.writeShape(this.shape, stream);</span>
+<span class="fc" id="L1053">        SerialUtils.writePaint(this.fillPaint, stream);</span>
+<span class="fc" id="L1054">        SerialUtils.writeStroke(this.outlineStroke, stream);</span>
+<span class="fc" id="L1055">        SerialUtils.writePaint(this.outlinePaint, stream);</span>
+<span class="fc" id="L1056">        SerialUtils.writeShape(this.line, stream);</span>
+<span class="fc" id="L1057">        SerialUtils.writeStroke(this.lineStroke, stream);</span>
+<span class="fc" id="L1058">        SerialUtils.writePaint(this.linePaint, stream);</span>
+<span class="fc" id="L1059">        SerialUtils.writePaint(this.labelPaint, stream);</span>
+<span class="fc" id="L1060">    }</span>
+
+    /**
+     * Provides serialization support.
+     *
+     * @param stream  the input stream ({@code null} not permitted).
+     *
+     * @throws IOException  if there is an I/O error.
+     * @throws ClassNotFoundException  if there is a classpath problem.
+     */
+    private void readObject(ObjectInputStream stream)
+        throws IOException, ClassNotFoundException {
+<span class="fc" id="L1072">        stream.defaultReadObject();</span>
+<span class="fc" id="L1073">        this.attributedLabel = SerialUtils.readAttributedString(stream);</span>
+<span class="fc" id="L1074">        this.shape = SerialUtils.readShape(stream);</span>
+<span class="fc" id="L1075">        this.fillPaint = SerialUtils.readPaint(stream);</span>
+<span class="fc" id="L1076">        this.outlineStroke = SerialUtils.readStroke(stream);</span>
+<span class="fc" id="L1077">        this.outlinePaint = SerialUtils.readPaint(stream);</span>
+<span class="fc" id="L1078">        this.line = SerialUtils.readShape(stream);</span>
+<span class="fc" id="L1079">        this.lineStroke = SerialUtils.readStroke(stream);</span>
+<span class="fc" id="L1080">        this.linePaint = SerialUtils.readPaint(stream);</span>
+<span class="fc" id="L1081">        this.labelPaint = SerialUtils.readPaint(stream);</span>
+<span class="fc" id="L1082">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

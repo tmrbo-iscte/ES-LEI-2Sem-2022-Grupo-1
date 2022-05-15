@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FlowDatasetUtils.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.data.flow</a> &gt; <span class="el_source">FlowDatasetUtils.java</span></div><h1>FlowDatasetUtils.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * ---------------------
+ * FlowDatasetUtils.java
+ * ---------------------
+ * (C) Copyright 2021-2022, by David Gilbert and Contributors.
+ *
+ * Original Author:  David Gilbert;
+ * Contributor(s):   -;
+ *
+ */
+
+package org.jfree.data.flow;
+
+import java.util.List;
+import org.jfree.chart.internal.Args;
+
+/**
+ * Utility methods related to {@link FlowDataset}.
+ * 
+ * @since 1.5.3
+ */
+public class FlowDatasetUtils {
+    
+    private FlowDatasetUtils() {
+        // no need for instantiation
+    }
+
+    /**
+     * Returns the total inflow for the specified node (a destination node for
+     * the specified stage).
+     * 
+     * @param &lt;K&gt; the type for the flow identifiers.
+     * @param dataset  the dataset ({@code null} not permitted).
+     * @param node  the node ({@code null} not permitted).
+     * @param stage  the stage.
+     * 
+     * @return The total inflow volume. 
+     */
+    public static &lt;K extends Comparable&lt;K&gt;&gt; double calculateInflow(FlowDataset&lt;K&gt; dataset, K node, int stage) {
+<span class="nc" id="L65">        Args.nullNotPermitted(dataset, &quot;dataset&quot;);</span>
+<span class="nc" id="L66">        Args.nullNotPermitted(node, &quot;node&quot;);</span>
+<span class="nc" id="L67">        Args.requireInRange(stage, &quot;stage&quot;, 0, dataset.getStageCount());</span>
+<span class="nc bnc" id="L68" title="All 2 branches missed.">        if (stage == 0) {</span>
+<span class="nc" id="L69">            return 0.0;  // there are no inflows for stage 0</span>
+        }
+<span class="nc" id="L71">        double inflow = 0.0;</span>
+<span class="nc" id="L72">        List&lt;K&gt; sourceKeys = dataset.getSources(stage - 1);</span>
+<span class="nc bnc" id="L73" title="All 2 branches missed.">        for (K key : sourceKeys) {</span>
+<span class="nc" id="L74">            Number n = dataset.getFlow(stage - 1, key, node);</span>
+<span class="nc bnc" id="L75" title="All 2 branches missed.">            if (n != null) {</span>
+<span class="nc" id="L76">                inflow = inflow + n.doubleValue();</span>
+            }
+<span class="nc" id="L78">        }</span>
+<span class="nc" id="L79">        return inflow;</span>
+    }
+
+    /**
+     * Returns the total outflow for the specified node (a source node for the
+     * specified stage).
+     * 
+     * @param &lt;K&gt; the type for the flow identifiers.
+     * @param dataset  the dataset ({@code null} not permitted).
+     * @param source  the source node ({@code null} not permitted).
+     * @param stage  the stage.
+     * 
+     * @return The total outflow volume.
+     */
+    public static &lt;K extends Comparable&lt;K&gt;&gt; double calculateOutflow(FlowDataset&lt;K&gt; dataset, K source, int stage) {
+<span class="nc" id="L94">        Args.nullNotPermitted(dataset, &quot;dataset&quot;);</span>
+<span class="nc" id="L95">        Args.nullNotPermitted(source, &quot;source&quot;);</span>
+<span class="nc" id="L96">        Args.requireInRange(stage, &quot;stage&quot;, 0, dataset.getStageCount());</span>
+<span class="nc bnc" id="L97" title="All 2 branches missed.">        if (stage == dataset.getStageCount()) {</span>
+<span class="nc" id="L98">            return 0.0;  // there are no outflows for the last stage</span>
+        }
+<span class="nc" id="L100">        double outflow = 0.0;</span>
+<span class="nc" id="L101">        List&lt;K&gt; destinationKeys = dataset.getDestinations(stage);</span>
+<span class="nc bnc" id="L102" title="All 2 branches missed.">        for (K key : destinationKeys) {</span>
+<span class="nc" id="L103">            Number n = dataset.getFlow(stage, source, key);</span>
+<span class="nc bnc" id="L104" title="All 2 branches missed.">            if (n != null) {</span>
+<span class="nc" id="L105">                outflow = outflow + n.doubleValue();</span>
+            }
+<span class="nc" id="L107">        }</span>
+<span class="nc" id="L108">        return outflow;</span>
+    }
+
+    /**
+     * Returns the total flow from all sources to all destinations at the 
+     * specified stage.
+     * 
+     * @param &lt;K&gt; the type for the flow identifiers.
+     * @param dataset  the dataset ({@code null} not permitted).
+     * @param stage  the stage.
+     * 
+     * @return The total flow.
+     */
+    public static &lt;K extends Comparable&lt;K&gt;&gt; double calculateTotalFlow(FlowDataset&lt;K&gt; dataset, int stage) {
+<span class="nc" id="L122">        Args.nullNotPermitted(dataset, &quot;dataset&quot;);</span>
+<span class="nc" id="L123">        double total = 0.0;</span>
+<span class="nc bnc" id="L124" title="All 2 branches missed.">        for (K source : dataset.getSources(stage)) {</span>
+<span class="nc bnc" id="L125" title="All 2 branches missed.">            for (K destination : dataset.getDestinations(stage)) {</span>
+<span class="nc" id="L126">                Number flow = dataset.getFlow(stage, source, destination);</span>
+<span class="nc bnc" id="L127" title="All 2 branches missed.">                if (flow != null) {</span>
+<span class="nc" id="L128">                    total = total + flow.doubleValue();</span>
+                }
+<span class="nc" id="L130">            }</span>
+<span class="nc" id="L131">        }</span>
+<span class="nc" id="L132">        return total;</span>
+    }
+    
+    /**
+     * Returns {@code true} if any of the nodes in the dataset have a property 
+     * 'selected' with the value {@code Boolean.TRUE}, and 
+     * {@code false} otherwise.
+     * 
+     * @param &lt;K&gt; the type for the node identifiers.
+     * @param dataset  the dataset ({@code null} not permitted).
+     * 
+     * @return A boolean. 
+     */
+    public static &lt;K extends Comparable&lt;K&gt;&gt; boolean hasNodeSelections(FlowDataset&lt;K&gt; dataset) {
+<span class="nc" id="L146">        Args.nullNotPermitted(dataset, &quot;dataset&quot;);</span>
+<span class="nc bnc" id="L147" title="All 2 branches missed.">        for (int stage = 0; stage &lt; dataset.getStageCount() + 1; stage++) { // '+1' to include final destination nodes </span>
+<span class="nc bnc" id="L148" title="All 2 branches missed.">            for (K source : dataset.getSources(stage)) {</span>
+<span class="nc" id="L149">                NodeKey&lt;K&gt; nodeKey = new NodeKey&lt;&gt;(stage, source);</span>
+<span class="nc bnc" id="L150" title="All 2 branches missed.">                if (Boolean.TRUE.equals(dataset.getNodeProperty(nodeKey, NodeKey.SELECTED_PROPERTY_KEY))) {</span>
+<span class="nc" id="L151">                    return true;</span>
+                }
+<span class="nc" id="L153">            }</span>
+        }
+<span class="nc" id="L155">        return false;</span>
+    }
+    
+    /**
+     * Returns the number of selected nodes.
+     * 
+     * @param &lt;K&gt; the type for the node keys.
+     * @param dataset  the dataset ({@code null} not permitted).
+     * 
+     * @return The number of selected nodes. 
+     */
+    public static &lt;K extends Comparable&lt;K&gt;&gt; int selectedNodeCount(FlowDataset&lt;K&gt; dataset) {
+<span class="nc" id="L167">        Args.nullNotPermitted(dataset, &quot;dataset&quot;);</span>
+<span class="nc" id="L168">        int result = 0;</span>
+<span class="nc bnc" id="L169" title="All 2 branches missed.">        for (int stage = 0; stage &lt; dataset.getStageCount() + 1; stage++) { // '+1' to include final destination nodes </span>
+<span class="nc bnc" id="L170" title="All 2 branches missed.">            for (K source : dataset.getSources(stage)) {</span>
+<span class="nc" id="L171">                NodeKey&lt;K&gt; nodeKey = new NodeKey&lt;&gt;(stage, source);</span>
+<span class="nc bnc" id="L172" title="All 2 branches missed.">                if (Boolean.TRUE.equals(dataset.getNodeProperty(nodeKey, NodeKey.SELECTED_PROPERTY_KEY))) {</span>
+<span class="nc" id="L173">                    result++;</span>
+                }
+<span class="nc" id="L175">            }</span>
+        }
+<span class="nc" id="L177">        return result;</span>
+    }
+
+    /**
+     * Returns {@code true} if any of the flows in the dataset have a property 
+     * 'selected' with the value {@code Boolean.TRUE}, and 
+     * {@code false} otherwise.
+     * 
+     * @param &lt;K&gt; the type for the flow keys.
+     * @param dataset  the dataset ({@code null} not permitted).
+     * 
+     * @return A boolean. 
+     */
+    public static &lt;K extends Comparable&lt;K&gt;&gt; boolean hasFlowSelections(FlowDataset&lt;K&gt; dataset) {
+<span class="nc" id="L191">        Args.nullNotPermitted(dataset, &quot;dataset&quot;);</span>
+<span class="nc bnc" id="L192" title="All 2 branches missed.">        for (int s = 0; s &lt; dataset.getStageCount(); s++) { </span>
+<span class="nc bnc" id="L193" title="All 2 branches missed.">            for (K source : dataset.getSources(s)) {</span>
+<span class="nc bnc" id="L194" title="All 2 branches missed.">                for (K destination : dataset.getDestinations(s)) {</span>
+<span class="nc" id="L195">                    FlowKey&lt;K&gt; flowKey = new FlowKey&lt;&gt;(s, source, destination);</span>
+<span class="nc bnc" id="L196" title="All 2 branches missed.">                    if (Boolean.TRUE.equals(dataset.getFlowProperty(flowKey, FlowKey.SELECTED_PROPERTY_KEY))) {</span>
+<span class="nc" id="L197">                        return true;</span>
+                    }
+<span class="nc" id="L199">                }</span>
+<span class="nc" id="L200">            }</span>
+        }
+<span class="nc" id="L202">        return false;</span>
+    }
+
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

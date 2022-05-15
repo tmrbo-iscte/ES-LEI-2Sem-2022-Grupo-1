@@ -1,0 +1,525 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RectangleInsets.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.chart.api</a> &gt; <span class="el_source">RectangleInsets.java</span></div><h1>RectangleInsets.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ */
+
+package org.jfree.chart.api;
+
+import java.awt.geom.Rectangle2D;
+import java.io.Serializable;
+import org.jfree.chart.internal.Args;
+
+/**
+ * Represents the insets for a rectangle, specified in absolute or relative 
+ * terms. This class is immutable.
+ */
+public class RectangleInsets implements Serializable {
+
+    /** For serialization. */
+    private static final long serialVersionUID = 1902273207559319996L;
+    
+    /**
+     * A useful constant representing zero insets.
+     */
+<span class="fc" id="L47">    public static final RectangleInsets ZERO_INSETS = new RectangleInsets(</span>
+        UnitType.ABSOLUTE, 0.0, 0.0, 0.0, 0.0);
+    
+    /** Absolute or relative units. */
+    private UnitType unitType;
+    
+    /** The top insets. */
+    private double top;
+    
+    /** The left insets. */
+    private double left;
+    
+    /** The bottom insets. */
+    private double bottom;
+    
+    /** The right insets. */
+    private double right;
+    
+    /**
+     * Creates a new instance with all insets initialised to {@code 1.0}.
+     */
+    public RectangleInsets() {
+<span class="nc" id="L69">        this(1.0, 1.0, 1.0, 1.0);</span>
+<span class="nc" id="L70">    }</span>
+    
+    /**
+     * Creates a new instance with the specified insets (as 'absolute' units).
+     * 
+     * @param top  the top insets.
+     * @param left  the left insets.
+     * @param bottom  the bottom insets.
+     * @param right  the right insets.
+     */
+    public RectangleInsets(double top, double left, double bottom, 
+            double right) {
+<span class="fc" id="L82">        this(UnitType.ABSOLUTE, top, left, bottom, right);   </span>
+<span class="fc" id="L83">    }</span>
+    
+    /**
+     * Creates a new instance.
+     * 
+     * @param unitType  absolute or relative units ({@code null} not permitted).
+     * @param top  the top insets.
+     * @param left  the left insets.
+     * @param bottom  the bottom insets.
+     * @param right  the right insets.
+     */
+    public RectangleInsets(UnitType unitType, double top, double left, 
+<span class="fc" id="L95">            double bottom, double right) {</span>
+<span class="fc" id="L96">        Args.nullNotPermitted(unitType, &quot;unitType&quot;);</span>
+<span class="fc" id="L97">        this.unitType = unitType;</span>
+<span class="fc" id="L98">        this.top = top;</span>
+<span class="fc" id="L99">        this.bottom = bottom;</span>
+<span class="fc" id="L100">        this.left = left;</span>
+<span class="fc" id="L101">        this.right = right;</span>
+<span class="fc" id="L102">    }</span>
+    
+    /**
+     * Returns the unit type (absolute or relative).  This specifies whether 
+     * the insets are measured as Java2D units or percentages.
+     * 
+     * @return The unit type (never {@code null}).
+     */
+    public UnitType getUnitType() {
+<span class="nc" id="L111">        return this.unitType;</span>
+    }
+  
+    /**
+     * Returns the top insets.
+     * 
+     * @return The top insets.
+     */
+    public double getTop() {
+<span class="fc" id="L120">        return this.top;</span>
+    }
+    
+    /**
+     * Returns the bottom insets.
+     * 
+     * @return The bottom insets.
+     */
+    public double getBottom() {
+<span class="fc" id="L129">        return this.bottom;</span>
+    }
+    
+    /**
+     * Returns the left insets.
+     * 
+     * @return The left insets.
+     */
+    public double getLeft() {
+<span class="fc" id="L138">        return this.left;</span>
+    }
+    
+    /**
+     * Returns the right insets.
+     * 
+     * @return The right insets.
+     */
+    public double getRight() {
+<span class="fc" id="L147">        return this.right;</span>
+    }
+    
+    /**
+     * Tests this instance for equality with an arbitrary object.
+     * 
+     * @param obj  the object ({@code null} permitted).
+     * 
+     * @return A boolean.
+     */
+    @Override
+    public boolean equals(Object obj) {
+<span class="fc bfc" id="L159" title="All 2 branches covered.">        if (obj == this) {</span>
+<span class="fc" id="L160">            return true;   </span>
+        }
+<span class="pc bpc" id="L162" title="1 of 2 branches missed.">        if (!(obj instanceof RectangleInsets)) {</span>
+<span class="nc" id="L163">                return false;</span>
+        }
+<span class="fc" id="L165">        final RectangleInsets that = (RectangleInsets) obj;</span>
+<span class="fc bfc" id="L166" title="All 2 branches covered.">        if (that.unitType != this.unitType) {</span>
+<span class="fc" id="L167">            return false;   </span>
+        }
+<span class="fc bfc" id="L169" title="All 2 branches covered.">        if (this.left != that.left) {</span>
+<span class="fc" id="L170">            return false;   </span>
+        }
+<span class="pc bpc" id="L172" title="1 of 2 branches missed.">        if (this.right != that.right) {</span>
+<span class="nc" id="L173">            return false;   </span>
+        }
+<span class="pc bpc" id="L175" title="1 of 2 branches missed.">        if (this.top != that.top) {</span>
+<span class="nc" id="L176">            return false;   </span>
+        }
+<span class="pc bpc" id="L178" title="1 of 2 branches missed.">        if (this.bottom != that.bottom) {</span>
+<span class="nc" id="L179">            return false;   </span>
+        }
+<span class="fc" id="L181">        return true;   </span>
+    }
+
+    /**
+     * Returns a hash code for the object.
+     * 
+     * @return A hash code.
+     */
+    @Override
+    public int hashCode() {
+        int result;
+        long temp;
+<span class="nc bnc" id="L193" title="All 2 branches missed.">        result = (this.unitType != null ? this.unitType.hashCode() : 0);</span>
+<span class="nc bnc" id="L194" title="All 2 branches missed.">        temp = this.top != +0.0d ? Double.doubleToLongBits(this.top) : 0L;</span>
+<span class="nc" id="L195">        result = 29 * result + (int) (temp ^ (temp &gt;&gt;&gt; 32));</span>
+<span class="nc bnc" id="L196" title="All 2 branches missed.">        temp = this.bottom != +0.0d ? Double.doubleToLongBits(this.bottom) : 0L;</span>
+<span class="nc" id="L197">        result = 29 * result + (int) (temp ^ (temp &gt;&gt;&gt; 32));</span>
+<span class="nc bnc" id="L198" title="All 2 branches missed.">        temp = this.left != +0.0d ? Double.doubleToLongBits(this.left) : 0L;</span>
+<span class="nc" id="L199">        result = 29 * result + (int) (temp ^ (temp &gt;&gt;&gt; 32));</span>
+<span class="nc bnc" id="L200" title="All 2 branches missed.">        temp = this.right != +0.0d ? Double.doubleToLongBits(this.right) : 0L;</span>
+<span class="nc" id="L201">        result = 29 * result + (int) (temp ^ (temp &gt;&gt;&gt; 32));</span>
+<span class="nc" id="L202">        return result;</span>
+    }
+
+    /**
+     * Returns a textual representation of this instance, useful for debugging
+     * purposes.
+     * 
+     * @return A string representing this instance.
+     */
+    @Override
+    public String toString() {
+<span class="nc" id="L213">        return &quot;RectangleInsets[t=&quot; + this.top + &quot;,l=&quot; + this.left</span>
+                + &quot;,b=&quot; + this.bottom + &quot;,r=&quot; + this.right + &quot;]&quot;;
+    }
+    
+    /**
+     * Creates an adjusted rectangle using the supplied rectangle, the insets
+     * specified by this instance, and the horizontal and vertical 
+     * adjustment types.
+     * 
+     * @param base  the base rectangle ({@code null} not permitted).
+     * @param horizontal  the horizontal adjustment type ({@code null} not
+     *                    permitted).
+     * @param vertical  the vertical adjustment type ({@code null} not 
+     *                  permitted).
+     * 
+     * @return The inset rectangle.
+     */
+    public Rectangle2D createAdjustedRectangle(Rectangle2D base,
+            LengthAdjustmentType horizontal, LengthAdjustmentType vertical) {
+<span class="nc" id="L232">        Args.nullNotPermitted(base, &quot;base&quot;);</span>
+<span class="nc" id="L233">        double x = base.getX();</span>
+<span class="nc" id="L234">        double y = base.getY();</span>
+<span class="nc" id="L235">        double w = base.getWidth();</span>
+<span class="nc" id="L236">        double h = base.getHeight();</span>
+<span class="nc bnc" id="L237" title="All 2 branches missed.">        if (horizontal == LengthAdjustmentType.EXPAND) {</span>
+<span class="nc" id="L238">            final double leftOutset = calculateLeftOutset(w);</span>
+<span class="nc" id="L239">            x = x - leftOutset;</span>
+<span class="nc" id="L240">            w = w + leftOutset + calculateRightOutset(w);</span>
+<span class="nc" id="L241">        }</span>
+<span class="nc bnc" id="L242" title="All 2 branches missed.">        else if (horizontal == LengthAdjustmentType.CONTRACT) {</span>
+<span class="nc" id="L243">            final double leftMargin = calculateLeftInset(w);</span>
+<span class="nc" id="L244">            x = x + leftMargin;</span>
+<span class="nc" id="L245">            w = w - leftMargin - calculateRightInset(w);</span>
+        }
+<span class="nc bnc" id="L247" title="All 2 branches missed.">        if (vertical == LengthAdjustmentType.EXPAND) {</span>
+<span class="nc" id="L248">            final double topMargin = calculateTopOutset(h);</span>
+<span class="nc" id="L249">            y = y - topMargin;</span>
+<span class="nc" id="L250">            h = h + topMargin + calculateBottomOutset(h);</span>
+<span class="nc" id="L251">        }</span>
+<span class="nc bnc" id="L252" title="All 2 branches missed.">        else if (vertical == LengthAdjustmentType.CONTRACT) {</span>
+<span class="nc" id="L253">            final double topMargin = calculateTopInset(h);</span>
+<span class="nc" id="L254">            y = y + topMargin;</span>
+<span class="nc" id="L255">            h = h - topMargin - calculateBottomInset(h);</span>
+        }
+<span class="nc" id="L257">        return new Rectangle2D.Double(x, y, w, h);</span>
+    }
+    
+    /**
+     * Creates an 'inset' rectangle.
+     * 
+     * @param base  the base rectangle ({@code null} not permitted).
+     * 
+     * @return The inset rectangle.
+     */
+    public Rectangle2D createInsetRectangle(Rectangle2D base) {
+<span class="nc" id="L268">        return createInsetRectangle(base, true, true);</span>
+    }
+    
+    /**
+     * Creates an 'inset' rectangle.
+     * 
+     * @param base  the base rectangle ({@code null} not permitted).
+     * @param horizontal  apply horizontal insets?
+     * @param vertical  apply vertical insets?
+     * 
+     * @return The inset rectangle.
+     */
+    public Rectangle2D createInsetRectangle(Rectangle2D base,
+            boolean horizontal, boolean vertical) {
+<span class="nc" id="L282">        Args.nullNotPermitted(base, &quot;base&quot;);</span>
+<span class="nc" id="L283">        double topMargin = 0.0;</span>
+<span class="nc" id="L284">        double bottomMargin = 0.0;</span>
+<span class="nc bnc" id="L285" title="All 2 branches missed.">        if (vertical) {</span>
+<span class="nc" id="L286">            topMargin = calculateTopInset(base.getHeight());</span>
+<span class="nc" id="L287">            bottomMargin = calculateBottomInset(base.getHeight());</span>
+        }
+<span class="nc" id="L289">        double leftMargin = 0.0;</span>
+<span class="nc" id="L290">        double rightMargin = 0.0;</span>
+<span class="nc bnc" id="L291" title="All 2 branches missed.">        if (horizontal) {</span>
+<span class="nc" id="L292">            leftMargin = calculateLeftInset(base.getWidth());</span>
+<span class="nc" id="L293">            rightMargin = calculateRightInset(base.getWidth());</span>
+        }
+<span class="nc" id="L295">        return new Rectangle2D.Double(base.getX() + leftMargin, </span>
+<span class="nc" id="L296">                base.getY() + topMargin,</span>
+<span class="nc" id="L297">                base.getWidth() - leftMargin - rightMargin,</span>
+<span class="nc" id="L298">                base.getHeight() - topMargin - bottomMargin);</span>
+    }
+    
+    /**
+     * Creates an outset rectangle.
+     * 
+     * @param base  the base rectangle ({@code null} not permitted).
+     * 
+     * @return An outset rectangle.
+     */
+    public Rectangle2D createOutsetRectangle(Rectangle2D base) {
+<span class="fc" id="L309">        return createOutsetRectangle(base, true, true);</span>
+    }
+    
+    /**
+     * Creates an outset rectangle.
+     * 
+     * @param base  the base rectangle ({@code null} not permitted).
+     * @param horizontal  apply horizontal insets?
+     * @param vertical  apply vertical insets? 
+     * 
+     * @return An outset rectangle.
+     */
+    public Rectangle2D createOutsetRectangle(Rectangle2D base,
+            boolean horizontal, boolean vertical) {
+<span class="fc" id="L323">        Args.nullNotPermitted(base, &quot;base&quot;);</span>
+<span class="fc" id="L324">        double topMargin = 0.0;</span>
+<span class="fc" id="L325">        double bottomMargin = 0.0;</span>
+<span class="pc bpc" id="L326" title="1 of 2 branches missed.">        if (vertical) {</span>
+<span class="fc" id="L327">            topMargin = calculateTopOutset(base.getHeight());</span>
+<span class="fc" id="L328">            bottomMargin = calculateBottomOutset(base.getHeight());</span>
+        }
+<span class="fc" id="L330">        double leftMargin = 0.0;</span>
+<span class="fc" id="L331">        double rightMargin = 0.0;</span>
+<span class="pc bpc" id="L332" title="1 of 2 branches missed.">        if (horizontal) {</span>
+<span class="fc" id="L333">            leftMargin = calculateLeftOutset(base.getWidth());</span>
+<span class="fc" id="L334">            rightMargin = calculateRightOutset(base.getWidth());</span>
+        }
+<span class="fc" id="L336">        return new Rectangle2D.Double(base.getX() - leftMargin, </span>
+<span class="fc" id="L337">                base.getY() - topMargin,</span>
+<span class="fc" id="L338">                base.getWidth() + leftMargin + rightMargin,</span>
+<span class="fc" id="L339">                base.getHeight() + topMargin + bottomMargin);</span>
+    }
+    
+    /**
+     * Returns the top margin.
+     * 
+     * @param height  the height of the base rectangle.
+     * 
+     * @return The top margin (in Java2D units).
+     */
+    public double calculateTopInset(double height) {
+<span class="fc" id="L350">        double result = this.top;</span>
+<span class="pc bpc" id="L351" title="1 of 2 branches missed.">        if (this.unitType == UnitType.RELATIVE) {</span>
+<span class="nc" id="L352">            result = (this.top * height);</span>
+        }
+<span class="fc" id="L354">        return result;</span>
+    }
+    
+    /**
+     * Returns the top margin.
+     * 
+     * @param height  the height of the base rectangle.
+     * 
+     * @return The top margin (in Java2D units).
+     */
+    public double calculateTopOutset(double height) {
+<span class="fc" id="L365">        double result = this.top;</span>
+<span class="pc bpc" id="L366" title="1 of 2 branches missed.">        if (this.unitType == UnitType.RELATIVE) {</span>
+<span class="nc" id="L367">            result = (height / (1 - this.top - this.bottom)) * this.top;</span>
+        }
+<span class="fc" id="L369">        return result;</span>
+    }
+    
+    /**
+     * Returns the bottom margin.
+     * 
+     * @param height  the height of the base rectangle.
+     * 
+     * @return The bottom margin (in Java2D units).
+     */
+    public double calculateBottomInset(double height) {
+<span class="fc" id="L380">        double result = this.bottom;</span>
+<span class="pc bpc" id="L381" title="1 of 2 branches missed.">        if (this.unitType == UnitType.RELATIVE) {</span>
+<span class="nc" id="L382">            result = (this.bottom * height);</span>
+        }
+<span class="fc" id="L384">        return result;</span>
+    }
+
+    /**
+     * Returns the bottom margin.
+     * 
+     * @param height  the height of the base rectangle.
+     * 
+     * @return The bottom margin (in Java2D units).
+     */
+    public double calculateBottomOutset(double height) {
+<span class="fc" id="L395">        double result = this.bottom;</span>
+<span class="pc bpc" id="L396" title="1 of 2 branches missed.">        if (this.unitType == UnitType.RELATIVE) {</span>
+<span class="nc" id="L397">            result = (height / (1 - this.top - this.bottom)) * this.bottom;</span>
+        }
+<span class="fc" id="L399">        return result;</span>
+    }
+
+    /**
+     * Returns the left margin.
+     * 
+     * @param width  the width of the base rectangle.
+     * 
+     * @return The left margin (in Java2D units).
+     */
+    public double calculateLeftInset(double width) {
+<span class="fc" id="L410">        double result = this.left;</span>
+<span class="pc bpc" id="L411" title="1 of 2 branches missed.">        if (this.unitType == UnitType.RELATIVE) {</span>
+<span class="nc" id="L412">            result = (this.left * width);</span>
+        }
+<span class="fc" id="L414">        return result;</span>
+    }
+    
+    /**
+     * Returns the left margin.
+     * 
+     * @param width  the width of the base rectangle.
+     * 
+     * @return The left margin (in Java2D units).
+     */
+    public double calculateLeftOutset(double width) {
+<span class="fc" id="L425">        double result = this.left;</span>
+<span class="pc bpc" id="L426" title="1 of 2 branches missed.">        if (this.unitType == UnitType.RELATIVE) {</span>
+<span class="nc" id="L427">            result = (width / (1 - this.left - this.right)) * this.left;</span>
+        }
+<span class="fc" id="L429">        return result;</span>
+    }
+    
+    /**
+     * Returns the right margin.
+     * 
+     * @param width  the width of the base rectangle.
+     * 
+     * @return The right margin (in Java2D units).
+     */
+    public double calculateRightInset(double width) {
+<span class="fc" id="L440">        double result = this.right;</span>
+<span class="pc bpc" id="L441" title="1 of 2 branches missed.">        if (this.unitType == UnitType.RELATIVE) {</span>
+<span class="nc" id="L442">            result = (this.right * width);</span>
+        }
+<span class="fc" id="L444">        return result;</span>
+    }
+    
+    /**
+     * Returns the right margin.
+     * 
+     * @param width  the width of the base rectangle.
+     * 
+     * @return The right margin (in Java2D units).
+     */
+    public double calculateRightOutset(double width) {
+<span class="fc" id="L455">        double result = this.right;</span>
+<span class="pc bpc" id="L456" title="1 of 2 branches missed.">        if (this.unitType == UnitType.RELATIVE) {</span>
+<span class="nc" id="L457">            result = (width / (1 - this.left - this.right)) * this.right;</span>
+        }
+<span class="fc" id="L459">        return result;</span>
+    }
+    
+    /**
+     * Trims the given width to allow for the insets.
+     * 
+     * @param width  the width.
+     * 
+     * @return The trimmed width.
+     */
+    public double trimWidth(double width) {
+<span class="fc" id="L470">        return width - calculateLeftInset(width) - calculateRightInset(width);   </span>
+    }
+    
+    /**
+     * Extends the given width to allow for the insets.
+     * 
+     * @param width  the width.
+     * 
+     * @return The extended width.
+     */
+    public double extendWidth(double width) {
+<span class="fc" id="L481">        return width + calculateLeftOutset(width) + calculateRightOutset(width);   </span>
+    }
+
+    /**
+     * Trims the given height to allow for the insets.
+     * 
+     * @param height  the height.
+     * 
+     * @return The trimmed height.
+     */
+    public double trimHeight(double height) {
+<span class="fc" id="L492">        return height - calculateTopInset(height) </span>
+<span class="fc" id="L493">                - calculateBottomInset(height);   </span>
+    }
+    
+    /**
+     * Extends the given height to allow for the insets.
+     * 
+     * @param height  the height.
+     * 
+     * @return The extended height.
+     */
+    public double extendHeight(double height) {
+<span class="fc" id="L504">        return height + calculateTopOutset(height) </span>
+<span class="fc" id="L505">                + calculateBottomOutset(height);   </span>
+    }
+
+    /**
+     * Shrinks the given rectangle by the amount of these insets.
+     * 
+     * @param area  the area ({@code null} not permitted).
+     */
+    public void trim(Rectangle2D area) {
+<span class="fc" id="L514">        double w = area.getWidth();</span>
+<span class="fc" id="L515">        double h = area.getHeight();</span>
+<span class="fc" id="L516">        double l = calculateLeftInset(w);</span>
+<span class="fc" id="L517">        double r = calculateRightInset(w);</span>
+<span class="fc" id="L518">        double t = calculateTopInset(h);</span>
+<span class="fc" id="L519">        double b = calculateBottomInset(h);</span>
+<span class="fc" id="L520">        area.setRect(area.getX() + l, area.getY() + t, w - l - r, h - t - b);    </span>
+<span class="fc" id="L521">    }</span>
+    
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

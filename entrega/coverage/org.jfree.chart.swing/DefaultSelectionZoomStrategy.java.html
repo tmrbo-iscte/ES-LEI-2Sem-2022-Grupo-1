@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DefaultSelectionZoomStrategy.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.chart.swing</a> &gt; <span class="el_source">DefaultSelectionZoomStrategy.java</span></div><h1>DefaultSelectionZoomStrategy.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * ---------------------------------
+ * DefaultSelectionZoomStrategy.java
+ * ---------------------------------
+ * (C) Copyright 2021-2022 by David Gilbert and Contributors.
+ *
+ * Original Author:  -;
+ * Contributor(s):   David Gilbert;
+ *              
+ *
+ */
+
+package org.jfree.chart.swing;
+
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Paint;
+import java.awt.event.MouseEvent;
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import org.jfree.chart.internal.SerialUtils;
+
+/**
+ * {@inheritDoc}
+ *
+ * This implementation can be extended to override default behavior.
+ */
+public class DefaultSelectionZoomStrategy implements SelectionZoomStrategy {
+
+    private static final long serialVersionUID = -8042265475645652131L;
+
+    /** The minimum size required to perform a zoom on a rectangle */
+    public static final int DEFAULT_ZOOM_TRIGGER_DISTANCE = 10;
+
+    /**
+     * The zoom rectangle starting point (selected by the user with a mouse
+     * click).  This is a point on the screen, not the chart (which may have
+     * been scaled up or down to fit the panel).
+     */
+<span class="fc" id="L68">    protected Point2D zoomPoint = null;</span>
+
+    /**
+     * The zoom rectangle (selected by the user with the mouse).
+     */
+<span class="fc" id="L73">    protected transient Rectangle2D zoomRectangle = null;</span>
+
+    /**
+     * Controls if the zoom rectangle is drawn as an outline or filled.
+     */
+<span class="fc" id="L78">    private boolean fillZoomRectangle = true;</span>
+
+    /**
+     * The minimum distance required to drag the mouse to trigger a zoom.
+     */
+    private int zoomTriggerDistance;
+
+    /**
+     * The paint used to draw the zoom rectangle outline.
+     */
+    private transient Paint zoomOutlinePaint;
+
+    /**
+     * The zoom fill paint (should use transparency).
+     */
+    private transient Paint zoomFillPaint;
+
+<span class="fc" id="L95">    public DefaultSelectionZoomStrategy() {</span>
+<span class="fc" id="L96">        zoomTriggerDistance = DEFAULT_ZOOM_TRIGGER_DISTANCE;</span>
+<span class="fc" id="L97">        this.zoomOutlinePaint = Color.BLUE;</span>
+<span class="fc" id="L98">        this.zoomFillPaint = new Color(0, 0, 255, 63);</span>
+<span class="fc" id="L99">    }</span>
+
+    @Override
+    public boolean isActivated() {
+<span class="nc bnc" id="L103" title="All 2 branches missed.">        return zoomRectangle != null;</span>
+    }
+
+    @Override
+    public Point2D getZoomPoint() {
+<span class="fc" id="L108">        return zoomPoint;</span>
+    }
+
+    @Override
+    public void setZoomPoint(Point2D zoomPoint) {
+<span class="nc" id="L113">        this.zoomPoint = zoomPoint;</span>
+<span class="nc" id="L114">    }</span>
+
+    @Override
+    public void setZoomTriggerDistance(int distance) {
+<span class="nc" id="L118">        this.zoomTriggerDistance = distance;</span>
+<span class="nc" id="L119">    }</span>
+
+    @Override
+    public int getZoomTriggerDistance() {
+<span class="nc" id="L123">        return zoomTriggerDistance;</span>
+    }
+
+    @Override
+    public Paint getZoomOutlinePaint() {
+<span class="fc" id="L128">        return zoomOutlinePaint;</span>
+    }
+
+    @Override
+    public void setZoomOutlinePaint(Paint paint) {
+<span class="fc" id="L133">        this.zoomOutlinePaint = paint;</span>
+<span class="fc" id="L134">    }</span>
+
+    @Override
+    public Paint getZoomFillPaint() {
+<span class="fc" id="L138">        return zoomFillPaint;</span>
+    }
+
+    @Override
+    public void setZoomFillPaint(Paint paint) {
+<span class="fc" id="L143">        this.zoomFillPaint = paint;</span>
+<span class="fc" id="L144">    }</span>
+
+    @Override
+    public boolean getFillZoomRectangle() {
+<span class="nc" id="L148">        return this.fillZoomRectangle;</span>
+    }
+
+    @Override
+    public void setFillZoomRectangle(boolean flag) {
+<span class="nc" id="L153">        this.fillZoomRectangle = flag;</span>
+<span class="nc" id="L154">    }</span>
+
+    @Override
+    public void updateZoomRectangleSelection(MouseEvent e, boolean hZoom, boolean vZoom, Rectangle2D scaledDataArea) {
+<span class="nc bnc" id="L158" title="All 4 branches missed.">        if (hZoom &amp;&amp; vZoom) {</span>
+            // selected rectangle shouldn't extend outside the data area...
+<span class="nc" id="L160">            double xMax = Math.min(e.getX(), scaledDataArea.getMaxX());</span>
+<span class="nc" id="L161">            double yMax = Math.min(e.getY(), scaledDataArea.getMaxY());</span>
+<span class="nc" id="L162">            zoomRectangle = new Rectangle2D.Double(</span>
+<span class="nc" id="L163">                    zoomPoint.getX(), zoomPoint.getY(),</span>
+<span class="nc" id="L164">                    xMax - zoomPoint.getX(), yMax - zoomPoint.getY());</span>
+<span class="nc" id="L165">        }</span>
+<span class="nc bnc" id="L166" title="All 2 branches missed.">        else if (hZoom) {</span>
+<span class="nc" id="L167">            double xMax = Math.min(e.getX(), scaledDataArea.getMaxX());</span>
+<span class="nc" id="L168">            zoomRectangle = new Rectangle2D.Double(</span>
+<span class="nc" id="L169">                    zoomPoint.getX(), scaledDataArea.getMinY(),</span>
+<span class="nc" id="L170">                    xMax - zoomPoint.getX(), scaledDataArea.getHeight());</span>
+<span class="nc" id="L171">        }</span>
+<span class="nc bnc" id="L172" title="All 2 branches missed.">        else if (vZoom) {</span>
+<span class="nc" id="L173">            double yMax = Math.min(e.getY(), scaledDataArea.getMaxY());</span>
+<span class="nc" id="L174">            zoomRectangle = new Rectangle2D.Double(</span>
+<span class="nc" id="L175">                    scaledDataArea.getMinX(), zoomPoint.getY(),</span>
+<span class="nc" id="L176">                    scaledDataArea.getWidth(), yMax - zoomPoint.getY());</span>
+        }
+<span class="nc" id="L178">    }</span>
+
+    @Override
+    public Rectangle2D getZoomRectangle(boolean hZoom, boolean vZoom, Rectangle2D screenDataArea) {
+        double x, y, w, h;
+<span class="nc" id="L183">        double maxX = screenDataArea.getMaxX();</span>
+<span class="nc" id="L184">        double maxY = screenDataArea.getMaxY();</span>
+        // for mouseReleased event, (horizontalZoom || verticalZoom)
+        // will be true, so we can just test for either being false;
+        // otherwise both are true
+<span class="nc bnc" id="L188" title="All 2 branches missed.">        if (!vZoom) {</span>
+<span class="nc" id="L189">            x = zoomPoint.getX();</span>
+<span class="nc" id="L190">            y = screenDataArea.getMinY();</span>
+<span class="nc" id="L191">            w = Math.min(zoomRectangle.getWidth(),</span>
+<span class="nc" id="L192">                    maxX - zoomPoint.getX());</span>
+<span class="nc" id="L193">            h = screenDataArea.getHeight();</span>
+        }
+<span class="nc bnc" id="L195" title="All 2 branches missed.">        else if (!hZoom) {</span>
+<span class="nc" id="L196">            x = screenDataArea.getMinX();</span>
+<span class="nc" id="L197">            y = zoomPoint.getY();</span>
+<span class="nc" id="L198">            w = screenDataArea.getWidth();</span>
+<span class="nc" id="L199">            h = Math.min(zoomRectangle.getHeight(),</span>
+<span class="nc" id="L200">                    maxY - zoomPoint.getY());</span>
+        }
+        else {
+<span class="nc" id="L203">            x = zoomPoint.getX();</span>
+<span class="nc" id="L204">            y = zoomPoint.getY();</span>
+<span class="nc" id="L205">            w = Math.min(zoomRectangle.getWidth(),</span>
+<span class="nc" id="L206">                    maxX - zoomPoint.getX());</span>
+<span class="nc" id="L207">            h = Math.min(zoomRectangle.getHeight(),</span>
+<span class="nc" id="L208">                    maxY - zoomPoint.getY());</span>
+        }
+<span class="nc" id="L210">        return new Rectangle2D.Double(x, y, w, h);</span>
+    }
+
+    @Override
+    public void reset() {
+<span class="nc" id="L215">        zoomPoint = null;</span>
+<span class="nc" id="L216">        zoomRectangle = null;</span>
+<span class="nc" id="L217">    }</span>
+
+    @Override
+    public void drawZoomRectangle(Graphics2D g2, boolean xor) {
+<span class="nc bnc" id="L221" title="All 2 branches missed.">        if (zoomRectangle != null) {</span>
+<span class="nc bnc" id="L222" title="All 2 branches missed.">            if (xor) {</span>
+                 // Set XOR mode to draw the zoom rectangle
+<span class="nc" id="L224">                g2.setXORMode(Color.GRAY);</span>
+            }
+<span class="nc bnc" id="L226" title="All 2 branches missed.">            if (fillZoomRectangle) {</span>
+<span class="nc" id="L227">                g2.setPaint(zoomFillPaint);</span>
+<span class="nc" id="L228">                g2.fill(zoomRectangle);</span>
+            }
+            else {
+<span class="nc" id="L231">                g2.setPaint(zoomOutlinePaint);</span>
+<span class="nc" id="L232">                g2.draw(zoomRectangle);</span>
+            }
+<span class="nc bnc" id="L234" title="All 2 branches missed.">            if (xor) {</span>
+                // Reset to the default 'overwrite' mode
+<span class="nc" id="L236">                g2.setPaintMode();</span>
+            }
+        }
+<span class="nc" id="L239">    }</span>
+
+    /**
+     * Provides serialization support.
+     *
+     * @param stream  the output stream.
+     *
+     * @throws IOException  if there is an I/O error.
+     */
+    private void writeObject(ObjectOutputStream stream) throws IOException {
+<span class="fc" id="L249">        stream.defaultWriteObject();</span>
+<span class="fc" id="L250">        SerialUtils.writePaint(this.zoomFillPaint, stream);</span>
+<span class="fc" id="L251">        SerialUtils.writePaint(this.zoomOutlinePaint, stream);</span>
+<span class="fc" id="L252">    }</span>
+
+    /**
+     * Provides serialization support.
+     *
+     * @param stream  the input stream.
+     *
+     * @throws IOException  if there is an I/O error.
+     * @throws ClassNotFoundException  if there is a classpath problem.
+     */
+    private void readObject(ObjectInputStream stream)
+            throws IOException, ClassNotFoundException {
+<span class="fc" id="L264">        stream.defaultReadObject();</span>
+<span class="fc" id="L265">        this.zoomFillPaint = SerialUtils.readPaint(stream);</span>
+<span class="fc" id="L266">        this.zoomOutlinePaint = SerialUtils.readPaint(stream);</span>
+<span class="fc" id="L267">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>XYShapeAnnotation.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.chart.annotations</a> &gt; <span class="el_source">XYShapeAnnotation.java</span></div><h1>XYShapeAnnotation.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * ----------------------
+ * XYShapeAnnotation.java
+ * ----------------------
+ * (C) Copyright 2003-2021, by Ondax, Inc. and Contributors.
+ *
+ * Original Author:  Greg Steckman (for Ondax, Inc.);
+ * Contributor(s):   David Gilbert;
+ *                   Peter Kolb (patch 2809117);
+ *
+ */
+
+package org.jfree.chart.annotations;
+
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Paint;
+import java.awt.Shape;
+import java.awt.Stroke;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Rectangle2D;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.util.Objects;
+
+import org.jfree.chart.internal.HashUtils;
+import org.jfree.chart.axis.ValueAxis;
+import org.jfree.chart.plot.Plot;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.plot.PlotRenderingInfo;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.api.RectangleEdge;
+import org.jfree.chart.internal.PaintUtils;
+import org.jfree.chart.internal.Args;
+import org.jfree.chart.api.PublicCloneable;
+import org.jfree.chart.internal.SerialUtils;
+
+/**
+ * A simple {@code Shape} annotation that can be placed on an
+ * {@link XYPlot}.  The shape coordinates are specified in data space.
+ */
+public class XYShapeAnnotation extends AbstractXYAnnotation
+        implements Cloneable, PublicCloneable, Serializable {
+
+    /** For serialization. */
+    private static final long serialVersionUID = -8553218317600684041L;
+
+    /** The shape. */
+    private transient Shape shape;
+
+    /** The stroke used to draw the shape's outline. */
+    private transient Stroke stroke;
+
+    /** The paint used to draw the shape's outline. */
+    private transient Paint outlinePaint;
+
+    /** The paint used to fill the shape. */
+    private transient Paint fillPaint;
+
+    /**
+     * Creates a new annotation (where, by default, the shape is drawn
+     * with a black outline).
+     *
+     * @param shape  the shape (coordinates in data space, {@code null}
+     *     not permitted).
+     */
+    public XYShapeAnnotation(Shape shape) {
+<span class="nc" id="L96">        this(shape, new BasicStroke(1.0f), Color.BLACK);</span>
+<span class="nc" id="L97">    }</span>
+
+    /**
+     * Creates a new annotation where the shape is drawn as an outline using
+     * the specified {@code stroke} and {@code outlinePaint}.
+     *
+     * @param shape  the shape ({@code null} not permitted).
+     * @param stroke  the shape stroke ({@code null} permitted).
+     * @param outlinePaint  the shape color ({@code null} permitted).
+     */
+    public XYShapeAnnotation(Shape shape, Stroke stroke, Paint outlinePaint) {
+<span class="nc" id="L108">        this(shape, stroke, outlinePaint, null);</span>
+<span class="nc" id="L109">    }</span>
+
+    /**
+     * Creates a new annotation.
+     *
+     * @param shape  the shape ({@code null} not permitted).
+     * @param stroke  the shape stroke ({@code null} permitted).
+     * @param outlinePaint  the shape color ({@code null} permitted).
+     * @param fillPaint  the paint used to fill the shape ({@code null}
+     *                   permitted.
+     */
+    public XYShapeAnnotation(Shape shape, Stroke stroke, Paint outlinePaint,
+                             Paint fillPaint) {
+<span class="fc" id="L122">        super();</span>
+<span class="fc" id="L123">        Args.nullNotPermitted(shape, &quot;shape&quot;);</span>
+<span class="fc" id="L124">        this.shape = shape;</span>
+<span class="fc" id="L125">        this.stroke = stroke;</span>
+<span class="fc" id="L126">        this.outlinePaint = outlinePaint;</span>
+<span class="fc" id="L127">        this.fillPaint = fillPaint;</span>
+<span class="fc" id="L128">    }</span>
+
+    /**
+     * Made by Rodrigo Paulo
+     * @param orientation
+     * @param m02
+     * @param m11
+     * @param m00
+     * @param m12
+     * @return
+     */
+    private Shape getShape(PlotOrientation orientation, double m02, double m11, double m00, double m12){
+        Shape s;
+<span class="nc bnc" id="L141" title="All 2 branches missed.">        if (orientation == PlotOrientation.HORIZONTAL) {</span>
+<span class="nc" id="L142">            AffineTransform t1 = new AffineTransform(0.0f, 1.0f, 1.0f, 0.0f,</span>
+                    0.0f, 0.0f);
+<span class="nc" id="L144">            AffineTransform t2 = new AffineTransform(m11, 0.0f, 0.0f, m00,</span>
+                    m12, m02);
+<span class="nc" id="L146">            s = t1.createTransformedShape(this.shape);</span>
+<span class="nc" id="L147">            s = t2.createTransformedShape(s);</span>
+<span class="nc" id="L148">        }</span>
+        else {
+<span class="nc" id="L150">            AffineTransform t = new AffineTransform(m00, 0, 0, m11, m02, m12);</span>
+<span class="nc" id="L151">            s = t.createTransformedShape(this.shape);</span>
+        }
+<span class="nc" id="L153">        return s;</span>
+    }
+
+
+
+    /**
+     * Draws the annotation.  This method is usually called by the
+     * {@link XYPlot} class, you shouldn't need to call it directly.
+     *
+     * @param g2  the graphics device.
+     * @param plot  the plot.
+     * @param dataArea  the data area.
+     * @param domainAxis  the domain axis.
+     * @param rangeAxis  the range axis.
+     * @param rendererIndex  the renderer index.
+     * @param info  the plot rendering info.
+     */
+    @Override
+    public void draw(Graphics2D g2, XYPlot plot, Rectangle2D dataArea,
+                     ValueAxis domainAxis, ValueAxis rangeAxis,
+                     int rendererIndex,
+                     PlotRenderingInfo info) {
+
+<span class="nc" id="L176">        PlotOrientation orientation = plot.getOrientation();</span>
+<span class="nc" id="L177">        RectangleEdge domainEdge = Plot.resolveDomainAxisLocation(plot.getDomainAxisLocation(), orientation);</span>
+<span class="nc" id="L178">        RectangleEdge rangeEdge = Plot.resolveRangeAxisLocation(plot.getRangeAxisLocation(), orientation);</span>
+
+        // compute transform matrix elements via sample points. Assume no
+        // rotation or shear.
+<span class="nc" id="L182">        Rectangle2D bounds = this.shape.getBounds2D();</span>
+<span class="nc" id="L183">        double x0 = bounds.getMinX();</span>
+<span class="nc" id="L184">        double x1 = bounds.getMaxX();</span>
+<span class="nc" id="L185">        double xx0 = domainAxis.valueToJava2D(x0, dataArea, domainEdge);</span>
+<span class="nc" id="L186">        double xx1 = domainAxis.valueToJava2D(x1, dataArea, domainEdge);</span>
+<span class="nc" id="L187">        double m00 = (xx1 - xx0) / (x1 - x0);</span>
+<span class="nc" id="L188">        double m02 = xx0 - x0 * m00;</span>
+
+<span class="nc" id="L190">        double y0 = bounds.getMaxY();</span>
+<span class="nc" id="L191">        double y1 = bounds.getMinY();</span>
+<span class="nc" id="L192">        double yy0 = rangeAxis.valueToJava2D(y0, dataArea, rangeEdge);</span>
+<span class="nc" id="L193">        double yy1 = rangeAxis.valueToJava2D(y1, dataArea, rangeEdge);</span>
+<span class="nc" id="L194">        double m11 = (yy1 - yy0) / (y1 - y0);</span>
+<span class="nc" id="L195">        double m12 = yy0 - m11 * y0;</span>
+
+        //  create transform &amp; transform shape
+<span class="nc" id="L198">        Shape s = getShape(orientation, m02, m11, m00, m12);</span>
+<span class="nc" id="L199">        Painter p = new Painter(shape, stroke, outlinePaint, fillPaint);</span>
+<span class="nc" id="L200">        p.paintShape(g2);</span>
+<span class="nc" id="L201">        addEntity(info, s, rendererIndex, getToolTipText(), getURL());</span>
+
+
+<span class="nc" id="L204">    }</span>
+
+
+    /**
+     * Tests this annotation for equality with an arbitrary object.
+     *
+     * @param obj  the object ({@code null} permitted).
+     *
+     * @return A boolean.
+     */
+    @Override
+    public boolean equals(Object obj) {
+<span class="pc bpc" id="L216" title="1 of 2 branches missed.">        if (obj == this) {</span>
+<span class="nc" id="L217">            return true;</span>
+        }
+        // now try to reject equality
+<span class="pc bpc" id="L220" title="1 of 2 branches missed.">        if (!super.equals(obj)) {</span>
+<span class="nc" id="L221">            return false;</span>
+        }
+<span class="pc bpc" id="L223" title="1 of 2 branches missed.">        if (!(obj instanceof XYShapeAnnotation)) {</span>
+<span class="nc" id="L224">            return false;</span>
+        }
+<span class="fc" id="L226">        XYShapeAnnotation that = (XYShapeAnnotation) obj;</span>
+<span class="fc bfc" id="L227" title="All 2 branches covered.">        if (!this.shape.equals(that.shape)) {</span>
+<span class="fc" id="L228">            return false;</span>
+        }
+<span class="fc bfc" id="L230" title="All 2 branches covered.">        if (!Objects.equals(this.stroke, that.stroke)) {</span>
+<span class="fc" id="L231">            return false;</span>
+        }
+<span class="fc bfc" id="L233" title="All 2 branches covered.">        if (!PaintUtils.equal(this.outlinePaint, that.outlinePaint)) {</span>
+<span class="fc" id="L234">            return false;</span>
+        }
+<span class="fc bfc" id="L236" title="All 2 branches covered.">        if (!PaintUtils.equal(this.fillPaint, that.fillPaint)) {</span>
+<span class="fc" id="L237">            return false;</span>
+        }
+        // seem to be the same
+<span class="fc" id="L240">        return true;</span>
+    }
+
+    /**
+     * Returns a hash code for this instance.
+     *
+     * @return A hash code.
+     */
+    @Override
+    public int hashCode() {
+<span class="fc" id="L250">        int result = 193;</span>
+<span class="fc" id="L251">        result = 37 * result + this.shape.hashCode();</span>
+<span class="pc bpc" id="L252" title="1 of 2 branches missed.">        if (this.stroke != null) {</span>
+<span class="fc" id="L253">            result = 37 * result + this.stroke.hashCode();</span>
+        }
+<span class="fc" id="L255">        result = 37 * result + HashUtils.hashCodeForPaint(</span>
+                this.outlinePaint);
+<span class="fc" id="L257">        result = 37 * result + HashUtils.hashCodeForPaint(this.fillPaint);</span>
+<span class="fc" id="L258">        return result;</span>
+    }
+
+    /**
+     * Returns a clone.
+     *
+     * @return A clone.
+     *
+     * @throws CloneNotSupportedException ???.
+     */
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+<span class="fc" id="L270">        return super.clone();</span>
+    }
+
+    /**
+     * Provides serialization support.
+     *
+     * @param stream  the output stream.
+     *
+     * @throws IOException if there is an I/O error.
+     */
+    private void writeObject(ObjectOutputStream stream) throws IOException {
+<span class="fc" id="L281">        stream.defaultWriteObject();</span>
+<span class="fc" id="L282">        SerialUtils.writeShape(this.shape, stream);</span>
+<span class="fc" id="L283">        SerialUtils.writeStroke(this.stroke, stream);</span>
+<span class="fc" id="L284">        SerialUtils.writePaint(this.outlinePaint, stream);</span>
+<span class="fc" id="L285">        SerialUtils.writePaint(this.fillPaint, stream);</span>
+<span class="fc" id="L286">    }</span>
+
+    /**
+     * Provides serialization support.
+     *
+     * @param stream  the input stream.
+     *
+     * @throws IOException  if there is an I/O error.
+     * @throws ClassNotFoundException  if there is a classpath problem.
+     */
+    private void readObject(ObjectInputStream stream)
+        throws IOException, ClassNotFoundException {
+<span class="fc" id="L298">        stream.defaultReadObject();</span>
+<span class="fc" id="L299">        this.shape = SerialUtils.readShape(stream);</span>
+<span class="fc" id="L300">        this.stroke = SerialUtils.readStroke(stream);</span>
+<span class="fc" id="L301">        this.outlinePaint = SerialUtils.readPaint(stream);</span>
+<span class="fc" id="L302">        this.fillPaint = SerialUtils.readPaint(stream);</span>
+<span class="fc" id="L303">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Arrow.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.chart.axis</a> &gt; <span class="el_source">Arrow.java</span></div><h1>Arrow.java</h1><pre class="source lang-java linenums">package org.jfree.chart.axis;
+
+import org.jfree.chart.event.AxisChangeEvent;
+import org.jfree.chart.internal.Args;
+import org.jfree.chart.internal.SerialUtils;
+
+import java.awt.*;
+import java.io.*;
+
+public class Arrow implements Serializable {
+    /**
+     * A flag that controls whether an arrow is drawn at the positive end of
+     * the axis line.
+     */
+    private boolean positiveArrowVisible;
+    /**
+     * A flag that controls whether an arrow is drawn at the negative end of
+     * the axis line.
+     */
+    private boolean negativeArrowVisible;
+    /**
+     * The shape used for an up arrow.
+     */
+    private transient Shape upArrow;
+    /**
+     * The shape used for a down arrow.
+     */
+    private transient Shape downArrow;
+    /**
+     * The shape used for a left arrow.
+     */
+    private transient Shape leftArrow;
+    /**
+     * The shape used for a right arrow.
+     */
+    transient Shape rightArrow;
+
+    private final ValueAxis vaxis;
+
+<span class="fc" id="L40">    public Arrow(ValueAxis vaxis) {</span>
+<span class="fc" id="L41">        this.vaxis = vaxis;</span>
+<span class="fc" id="L42">        positiveArrowVisible = false;</span>
+<span class="fc" id="L43">        negativeArrowVisible = false;</span>
+<span class="fc" id="L44">    }</span>
+
+    /**
+     * Returns a flag that controls whether or not the axis line has an arrow
+     * drawn that points in the positive direction for the axis.
+     *
+     * @return A boolean.
+     * @see #setPositiveArrowVisible(boolean)
+     */
+    public boolean isPositiveArrowVisible() {
+<span class="fc" id="L54">        return this.positiveArrowVisible;</span>
+    }
+
+    /**
+     * Sets a flag that controls whether or not the axis lines has an arrow
+     * drawn that points in the positive direction for the axis, and sends an
+     * {@link AxisChangeEvent} to all registered listeners.
+     *
+     * @param visible the flag.
+     * @see #isPositiveArrowVisible()
+     */
+    public void setPositiveArrowVisible(boolean visible) {
+<span class="fc" id="L66">        this.positiveArrowVisible = visible;</span>
+<span class="fc" id="L67">        vaxis.fireChangeEvent();</span>
+<span class="fc" id="L68">    }</span>
+
+    /**
+     * Returns a flag that controls whether or not the axis line has an arrow
+     * drawn that points in the negative direction for the axis.
+     *
+     * @return A boolean.
+     * @see #setNegativeArrowVisible(boolean)
+     */
+    public boolean isNegativeArrowVisible() {
+<span class="fc" id="L78">        return this.negativeArrowVisible;</span>
+    }
+
+    /**
+     * Sets a flag that controls whether or not the axis lines has an arrow
+     * drawn that points in the negative direction for the axis, and sends an
+     * {@link AxisChangeEvent} to all registered listeners.
+     *
+     * @param visible the flag.
+     * @see #setNegativeArrowVisible(boolean)
+     */
+    public void setNegativeArrowVisible(boolean visible) {
+<span class="fc" id="L90">        this.negativeArrowVisible = visible;</span>
+<span class="fc" id="L91">        vaxis.fireChangeEvent();</span>
+<span class="fc" id="L92">    }</span>
+
+    /**
+     * Returns a shape that can be displayed as an arrow pointing upwards at
+     * the end of an axis line.
+     *
+     * @return A shape (never {@code null}).
+     * @see #setUpArrow(Shape)
+     */
+    public Shape getUpArrow() {
+<span class="nc" id="L102">        return this.upArrow;</span>
+    }
+
+    /**
+     * Sets the shape that can be displayed as an arrow pointing upwards at
+     * the end of an axis line and sends an {@link AxisChangeEvent} to all
+     * registered listeners.
+     *
+     * @param arrow the arrow shape ({@code null} not permitted).
+     * @see #getUpArrow()
+     */
+    public void setUpArrow(Shape arrow) {
+<span class="fc" id="L114">        Args.nullNotPermitted(arrow, &quot;arrow&quot;);</span>
+<span class="fc" id="L115">        this.upArrow = arrow;</span>
+<span class="fc" id="L116">        vaxis.fireChangeEvent();</span>
+<span class="fc" id="L117">    }</span>
+
+    /**
+     * Returns a shape that can be displayed as an arrow pointing downwards at
+     * the end of an axis line.
+     *
+     * @return A shape (never {@code null}).
+     * @see #setDownArrow(Shape)
+     */
+    public Shape getDownArrow() {
+<span class="nc" id="L127">        return this.downArrow;</span>
+    }
+
+    /**
+     * Sets the shape that can be displayed as an arrow pointing downwards at
+     * the end of an axis line and sends an {@link AxisChangeEvent} to all
+     * registered listeners.
+     *
+     * @param arrow the arrow shape ({@code null} not permitted).
+     * @see #getDownArrow()
+     */
+    public void setDownArrow(Shape arrow) {
+<span class="fc" id="L139">        Args.nullNotPermitted(arrow, &quot;arrow&quot;);</span>
+<span class="fc" id="L140">        this.downArrow = arrow;</span>
+<span class="fc" id="L141">        vaxis.fireChangeEvent();</span>
+<span class="fc" id="L142">    }</span>
+
+    /**
+     * Returns a shape that can be displayed as an arrow pointing left at the
+     * end of an axis line.
+     *
+     * @return A shape (never {@code null}).
+     * @see #setLeftArrow(Shape)
+     */
+    public Shape getLeftArrow() {
+<span class="nc" id="L152">        return this.leftArrow;</span>
+    }
+
+    /**
+     * Sets the shape that can be displayed as an arrow pointing left at the
+     * end of an axis line and sends an {@link AxisChangeEvent} to all
+     * registered listeners.
+     *
+     * @param arrow the arrow shape ({@code null} not permitted).
+     * @see #getLeftArrow()
+     */
+    public void setLeftArrow(Shape arrow) {
+<span class="fc" id="L164">        Args.nullNotPermitted(arrow, &quot;arrow&quot;);</span>
+<span class="fc" id="L165">        this.leftArrow = arrow;</span>
+<span class="fc" id="L166">        vaxis.fireChangeEvent();</span>
+<span class="fc" id="L167">    }</span>
+
+    /**
+     * Returns a shape that can be displayed as an arrow pointing right at the
+     * end of an axis line.
+     *
+     * @return A shape (never {@code null}).
+     * @see #setRightArrow(Shape)
+     */
+    public Shape getRightArrow() {
+<span class="nc" id="L177">        return this.rightArrow;</span>
+    }
+
+    /**
+     * Sets the shape that can be displayed as an arrow pointing rightwards at
+     * the end of an axis line and sends an {@link AxisChangeEvent} to all
+     * registered listeners.
+     *
+     * @param arrow the arrow shape ({@code null} not permitted).
+     * @see #getRightArrow()
+     */
+    public void setRightArrow(Shape arrow) {
+<span class="fc" id="L189">        Args.nullNotPermitted(arrow, &quot;arrow&quot;);</span>
+<span class="fc" id="L190">        this.rightArrow = arrow;</span>
+<span class="fc" id="L191">        vaxis.fireChangeEvent();</span>
+<span class="fc" id="L192">    }</span>
+
+    @Override
+    public boolean equals(Object obj) {
+<span class="fc bfc" id="L196" title="All 2 branches covered.">        if (obj == this) {</span>
+<span class="fc" id="L197">            return true;</span>
+        }
+<span class="pc bpc" id="L199" title="1 of 2 branches missed.">        if (!(obj instanceof Arrow)) {</span>
+<span class="nc" id="L200">            return false;</span>
+        }
+<span class="fc" id="L202">        Arrow that = (Arrow) obj;</span>
+<span class="fc bfc" id="L203" title="All 2 branches covered.">        if (positiveArrowVisible != that.positiveArrowVisible) {</span>
+<span class="fc" id="L204">            return false;</span>
+        }
+<span class="fc bfc" id="L206" title="All 2 branches covered.">        if (negativeArrowVisible != that.negativeArrowVisible) {</span>
+<span class="fc" id="L207">            return false;</span>
+        }
+<span class="fc" id="L209">        return true;</span>
+    }
+
+    /**
+     * Provides serialization support.
+     *
+     * @param stream  the output stream.
+     *
+     * @throws IOException  if there is an I/O error.
+     */
+    private void writeObject(ObjectOutputStream stream) throws IOException {
+<span class="fc" id="L220">        stream.defaultWriteObject();</span>
+<span class="fc" id="L221">        SerialUtils.writeShape(upArrow, stream);</span>
+<span class="fc" id="L222">        SerialUtils.writeShape(downArrow, stream);</span>
+<span class="fc" id="L223">        SerialUtils.writeShape(leftArrow, stream);</span>
+<span class="fc" id="L224">        SerialUtils.writeShape(rightArrow, stream);</span>
+<span class="fc" id="L225">    }</span>
+
+    /**
+     * Provides serialization support.
+     *
+     * @param stream  the input stream.
+     *
+     * @throws IOException  if there is an I/O error.
+     * @throws ClassNotFoundException  if there is a classpath problem.
+     */
+    private void readObject(ObjectInputStream stream)
+            throws IOException, ClassNotFoundException {
+<span class="fc" id="L237">        stream.defaultReadObject();</span>
+<span class="fc" id="L238">        upArrow = SerialUtils.readShape(stream);</span>
+<span class="fc" id="L239">        downArrow = SerialUtils.readShape(stream);</span>
+<span class="fc" id="L240">        leftArrow = SerialUtils.readShape(stream);</span>
+<span class="fc" id="L241">        rightArrow = SerialUtils.readShape(stream);</span>
+<span class="fc" id="L242">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

@@ -1,0 +1,1036 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LogAxis.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.chart.axis</a> &gt; <span class="el_source">LogAxis.java</span></div><h1>LogAxis.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates.
+ * Other names may be trademarks of their respective owners.]
+ *
+ * ------------
+ * LogAxis.java
+ * ------------
+ * (C) Copyright 2006-2022, by David Gilbert and Contributors.
+ *
+ * Original Author:  David Gilbert;
+ * Contributor(s):   Andrew Mickish (patch 1868745);
+ *                   Peter Kolb (patches 1934255 and 2603321);
+ */
+
+package org.jfree.chart.axis;
+
+import java.awt.Font;
+import java.awt.Graphics2D;
+import java.awt.font.FontRenderContext;
+import java.awt.font.LineMetrics;
+import java.awt.font.TextAttribute;
+import java.awt.geom.Rectangle2D;
+import java.text.AttributedString;
+import java.text.DecimalFormat;
+import java.text.Format;
+import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+import org.jfree.chart.event.AxisChangeEvent;
+import org.jfree.chart.plot.Plot;
+import org.jfree.chart.plot.PlotRenderingInfo;
+import org.jfree.chart.plot.ValueAxisPlot;
+import org.jfree.chart.api.RectangleEdge;
+import org.jfree.chart.api.RectangleInsets;
+import org.jfree.chart.text.TextAnchor;
+import org.jfree.chart.util.AttrStringUtils;
+import org.jfree.chart.internal.Args;
+import org.jfree.data.Range;
+
+/**
+ * A numerical axis that uses a logarithmic scale.  The class is an
+ * alternative to the {@link LogarithmicAxis} class.
+ */
+public class LogAxis extends ValueAxis {
+
+<span class="fc" id="L70">    private LogAxisProduct logAxisProduct = new LogAxisProduct();</span>
+
+    /** The logarithm base. */
+<span class="fc" id="L73">    private double base = 10.0;</span>
+
+    /**
+     * The logarithm of the base value - cached for performance.
+     */
+<span class="fc" id="L78">    private double baseLog = Math.log(10.0);</span>
+
+    /**  The smallest value permitted on the axis. */
+<span class="fc" id="L81">    private double smallestValue = 1E-100;</span>
+
+    /**
+     * The current tick unit.
+     */
+    private NumberTickUnit tickUnit;
+
+    /**
+     * The override number format.
+     */
+    private NumberFormat numberFormatOverride;
+
+    /**
+     * Creates a new {@code LogAxis} with no label.
+     */
+    public LogAxis() {
+<span class="fc" id="L97">        this(null);</span>
+<span class="fc" id="L98">    }</span>
+
+    /**
+     * Creates a new {@code LogAxis} with the given label.
+     *
+     * @param label the axis label ({@code null} permitted).
+     */
+    public LogAxis(String label) {
+<span class="fc" id="L106">        super(label, new NumberTickUnitSource());</span>
+<span class="fc" id="L107">        setDefaultAutoRange(new Range(0.01, 1.0));</span>
+<span class="fc" id="L108">        this.tickUnit = new NumberTickUnit(1.0, new DecimalFormat(&quot;0.#&quot;), 10);</span>
+<span class="fc" id="L109">    }</span>
+
+    /**
+     * Returns the base for the logarithm calculation.  The default value is
+     * {@code 10.0}.
+     *
+     * @return The base for the logarithm calculation.
+     * @see #setBase(double)
+     */
+    public double getBase() {
+<span class="nc" id="L119">        return this.base;</span>
+    }
+
+    /**
+     * Sets the base for the logarithm calculation and sends a change event to
+     * all registered listeners.
+     *
+     * @param base the base value (must be &amp;gt; 1.0).
+     * @see #getBase()
+     */
+    public void setBase(double base) {
+<span class="pc bpc" id="L130" title="1 of 2 branches missed.">        if (base &lt;= 1.0) {</span>
+<span class="nc" id="L131">            throw new IllegalArgumentException(&quot;Requires 'base' &gt; 1.0.&quot;);</span>
+        }
+<span class="fc" id="L133">        this.base = base;</span>
+<span class="fc" id="L134">        this.baseLog = Math.log(base);</span>
+<span class="fc" id="L135">        fireChangeEvent();</span>
+<span class="fc" id="L136">    }</span>
+
+    /**
+     * Returns the symbol used to represent the base of the logarithmic scale
+     * for the axis.  If this is {@code null} (the default) then the
+     * numerical value of the base is displayed.
+     *
+     * @return The base symbol (possibly {@code null}).
+     */
+    public String getBaseSymbol() {
+<span class="nc" id="L146">        return this.logAxisProduct.getBaseSymbol();</span>
+    }
+
+    /**
+     * Sets the symbol used to represent the base value of the logarithmic
+     * scale and sends a change event to all registered listeners.
+     *
+     * @param symbol the symbol ({@code null} permitted).
+     */
+    public void setBaseSymbol(String symbol) {
+<span class="nc" id="L156">        logAxisProduct.setBaseSymbol(symbol, this);</span>
+<span class="nc" id="L157">    }</span>
+
+    /**
+     * Returns the formatter used to format the base value of the logarithmic
+     * scale when it is displayed numerically.  The default value is
+     * {@code new DecimalFormat(&quot;0&quot;)}.
+     *
+     * @return The base formatter (never {@code null}).
+     */
+    public Format getBaseFormatter() {
+<span class="nc" id="L167">        return this.logAxisProduct.getBaseFormatter();</span>
+    }
+
+    /**
+     * Sets the formatter used to format the base value of the logarithmic
+     * scale when it is displayed numerically and sends a change event to all
+     * registered listeners.
+     *
+     * @param formatter the formatter ({@code null} not permitted).
+     */
+    public void setBaseFormatter(Format formatter) {
+<span class="nc" id="L178">        logAxisProduct.setBaseFormatter(formatter, this);</span>
+<span class="nc" id="L179">    }</span>
+
+    /**
+     * Returns the smallest value represented by the axis.
+     *
+     * @return The smallest value represented by the axis.
+     * @see #setSmallestValue(double)
+     */
+    public double getSmallestValue() {
+<span class="nc" id="L188">        return this.smallestValue;</span>
+    }
+
+    /**
+     * Sets the smallest value represented by the axis and sends a change event
+     * to all registered listeners.
+     *
+     * @param value the value.
+     * @see #getSmallestValue()
+     */
+    public void setSmallestValue(double value) {
+<span class="pc bpc" id="L199" title="1 of 2 branches missed.">        if (value &lt;= 0.0) {</span>
+<span class="nc" id="L200">            throw new IllegalArgumentException(&quot;Requires 'value' &gt; 0.0.&quot;);</span>
+        }
+<span class="fc" id="L202">        this.smallestValue = value;</span>
+<span class="fc" id="L203">        fireChangeEvent();</span>
+<span class="fc" id="L204">    }</span>
+
+    /**
+     * Returns the current tick unit.
+     *
+     * @return The current tick unit.
+     * @see #setTickUnit(NumberTickUnit)
+     */
+    public NumberTickUnit getTickUnit() {
+<span class="fc" id="L213">        return this.tickUnit;</span>
+    }
+
+    /**
+     * Sets the tick unit for the axis and sends an {@link AxisChangeEvent} to
+     * all registered listeners.  A side effect of calling this method is that
+     * the &quot;auto-select&quot; feature for tick units is switched off (you can
+     * restore it using the {@link ValueAxis#setAutoTickUnitSelection(boolean)}
+     * method).
+     *
+     * @param unit the new tick unit ({@code null} not permitted).
+     * @see #getTickUnit()
+     */
+    public void setTickUnit(NumberTickUnit unit) {
+        // defer argument checking...
+<span class="nc" id="L228">        setTickUnit(unit, true, true);</span>
+<span class="nc" id="L229">    }</span>
+
+    /**
+     * Sets the tick unit for the axis and, if requested, sends an
+     * {@link AxisChangeEvent} to all registered listeners.  In addition, an
+     * option is provided to turn off the &quot;auto-select&quot; feature for tick units
+     * (you can restore it using the
+     * {@link ValueAxis#setAutoTickUnitSelection(boolean)} method).
+     *
+     * @param unit              the new tick unit ({@code null} not permitted).
+     * @param notify            notify listeners?
+     * @param turnOffAutoSelect turn off the auto-tick selection?
+     * @see #getTickUnit()
+     */
+    public void setTickUnit(NumberTickUnit unit, boolean notify,
+                            boolean turnOffAutoSelect) {
+<span class="fc" id="L245">        Args.nullNotPermitted(unit, &quot;unit&quot;);</span>
+<span class="fc" id="L246">        this.tickUnit = unit;</span>
+<span class="pc bpc" id="L247" title="1 of 2 branches missed.">        if (turnOffAutoSelect) {</span>
+<span class="nc" id="L248">            setAutoTickUnitSelection(false, false);</span>
+        }
+<span class="pc bpc" id="L250" title="1 of 2 branches missed.">        if (notify) {</span>
+<span class="nc" id="L251">            fireChangeEvent();</span>
+        }
+<span class="fc" id="L253">    }</span>
+
+    /**
+     * Returns the number format override.  If this is non-{@code null},
+     * then it will be used to format the numbers on the axis.
+     *
+     * @return The number formatter (possibly {@code null}).
+     * @see #setNumberFormatOverride(NumberFormat)
+     */
+    public NumberFormat getNumberFormatOverride() {
+<span class="nc" id="L263">        return this.numberFormatOverride;</span>
+    }
+
+    /**
+     * Sets the number format override and sends a change event to all
+     * registered listeners.  If this is non-{@code null}, then it will be
+     * used to format the numbers on the axis.
+     *
+     * @param formatter the number formatter ({@code null} permitted).
+     * @see #getNumberFormatOverride()
+     */
+    public void setNumberFormatOverride(NumberFormat formatter) {
+<span class="nc" id="L275">        this.numberFormatOverride = formatter;</span>
+<span class="nc" id="L276">        fireChangeEvent();</span>
+<span class="nc" id="L277">    }</span>
+
+    /**
+     * Calculates the log of the given value, using the current base.
+     *
+     * @param value the value.
+     * @return The log of the given value.
+     * @see #calculateValue(double)
+     * @see #getBase()
+     */
+    public double calculateLog(double value) {
+<span class="fc" id="L288">        return Math.log(value) / this.baseLog;</span>
+    }
+
+    /**
+     * Calculates the value from a given log.
+     *
+     * @param log the log value.
+     * @return The value with the given log.
+     * @see #calculateLog(double)
+     * @see #getBase()
+     */
+    public double calculateValue(double log) {
+<span class="fc" id="L300">        return Math.pow(this.base, log);</span>
+    }
+
+    private double calculateValueNoINF(double log) {
+<span class="fc" id="L304">        double result = calculateValue(log);</span>
+<span class="pc bpc" id="L305" title="1 of 2 branches missed.">        if (Double.isInfinite(result)) {</span>
+<span class="nc" id="L306">            result = Double.MAX_VALUE;</span>
+        }
+<span class="pc bpc" id="L308" title="1 of 2 branches missed.">        if (result &lt;= 0.0) {</span>
+<span class="nc" id="L309">            result = Double.MIN_VALUE;</span>
+        }
+<span class="fc" id="L311">        return result;</span>
+    }
+
+    private double setMin(RectangleEdge edge, Rectangle2D area){
+<span class="fc" id="L315">        double min = 0.0;</span>
+<span class="fc bfc" id="L316" title="All 2 branches covered.">        if(RectangleEdge.isTopOrBottom(edge)){</span>
+<span class="fc" id="L317">            min = area.getX();</span>
+<span class="pc bpc" id="L318" title="1 of 2 branches missed.">        } else if(RectangleEdge.isLeftOrRight(edge)){</span>
+<span class="fc" id="L319">            min = area.getMaxY();</span>
+        }
+<span class="fc" id="L321">        return min;</span>
+    }
+
+    private double setMax(RectangleEdge edge, Rectangle2D area){
+<span class="fc" id="L325">        double max = 0.0;</span>
+<span class="fc bfc" id="L326" title="All 2 branches covered.">        if(RectangleEdge.isTopOrBottom(edge)){</span>
+<span class="fc" id="L327">            max = area.getMaxX();</span>
+<span class="pc bpc" id="L328" title="1 of 2 branches missed.">        } else if(RectangleEdge.isLeftOrRight(edge)){</span>
+<span class="fc" id="L329">            max = area.getY();</span>
+        }
+<span class="fc" id="L331">        return max;</span>
+    }
+
+    /**
+     * Converts a Java2D coordinate to an axis value, assuming that the
+     * axis is aligned to the specified {@code edge} of the {@code area}.
+     *
+     * @param java2DValue the Java2D coordinate.
+     * @param area        the area for plotting data ({@code null} not
+     *                    permitted).
+     * @param edge        the edge that the axis is aligned to ({@code null} not
+     *                    permitted).
+     * @return A value along the axis scale.
+     */
+    @Override
+    public double java2DToValue(double java2DValue, Rectangle2D area,
+                                RectangleEdge edge) {
+
+<span class="fc" id="L349">        Range range = getRange();</span>
+<span class="fc" id="L350">        double axisMin = calculateLog(Math.max(this.smallestValue,</span>
+<span class="fc" id="L351">                range.getLowerBound()));</span>
+<span class="fc" id="L352">        double axisMax = calculateLog(range.getUpperBound());</span>
+
+<span class="fc" id="L354">        double min = setMin(edge, area);</span>
+<span class="fc" id="L355">        double max = setMax(edge, area);</span>
+
+        double log;
+<span class="fc bfc" id="L358" title="All 2 branches covered.">        if (isInverted()) {</span>
+<span class="fc" id="L359">            log = axisMax - (java2DValue - min) / (max - min)</span>
+                    * (axisMax - axisMin);
+        } else {
+<span class="fc" id="L362">            log = axisMin + (java2DValue - min) / (max - min)</span>
+                    * (axisMax - axisMin);
+        }
+<span class="fc" id="L365">        return calculateValue(log);</span>
+    }
+
+    /**
+     * Converts a value on the axis scale to a Java2D coordinate relative to
+     * the given {@code area}, based on the axis running along the
+     * specified {@code edge}.
+     *
+     * @param value the data value.
+     * @param area  the area ({@code null} not permitted).
+     * @param edge  the edge ({@code null} not permitted).
+     * @return The Java2D coordinate corresponding to {@code value}.
+     */
+    @Override
+    public double valueToJava2D(double value, Rectangle2D area,
+                                RectangleEdge edge) {
+
+<span class="fc" id="L382">        Range range = getRange();</span>
+<span class="fc" id="L383">        double axisMin = calculateLog(range.getLowerBound());</span>
+<span class="fc" id="L384">        double axisMax = calculateLog(range.getUpperBound());</span>
+<span class="fc" id="L385">        value = calculateLog(value);</span>
+
+<span class="fc" id="L387">        double min = 0.0;</span>
+<span class="fc" id="L388">        double max = 0.0;</span>
+<span class="pc bpc" id="L389" title="1 of 2 branches missed.">        if (RectangleEdge.isTopOrBottom(edge)) {</span>
+<span class="fc" id="L390">            min = area.getX();</span>
+<span class="fc" id="L391">            max = area.getMaxX();</span>
+<span class="nc bnc" id="L392" title="All 2 branches missed.">        } else if (RectangleEdge.isLeftOrRight(edge)) {</span>
+<span class="nc" id="L393">            max = area.getMinY();</span>
+<span class="nc" id="L394">            min = area.getMaxY();</span>
+        }
+<span class="pc bpc" id="L396" title="1 of 2 branches missed.">        if (isInverted()) {</span>
+<span class="nc" id="L397">            return max</span>
+                    - ((value - axisMin) / (axisMax - axisMin)) * (max - min);
+        } else {
+<span class="fc" id="L400">            return min</span>
+                    + ((value - axisMin) / (axisMax - axisMin)) * (max - min);
+        }
+    }
+
+    /**
+     * Configures the axis.  This method is typically called when an axis
+     * is assigned to a new plot.
+     */
+    @Override
+    public void configure() {
+<span class="fc bfc" id="L411" title="All 2 branches covered.">        if (isAutoRange()) {</span>
+<span class="fc" id="L412">            autoAdjustRange();</span>
+        }
+<span class="fc" id="L414">    }</span>
+
+    /**
+     * Adjusts the axis range to match the data range that the axis is
+     * required to display.
+     */
+    @Override
+    protected void autoAdjustRange() {
+<span class="fc" id="L422">        Plot plot = getPlot();</span>
+<span class="pc bpc" id="L423" title="1 of 2 branches missed.">        if (plot == null) {</span>
+<span class="nc" id="L424">            return;  // no plot, no data</span>
+        }
+
+<span class="pc bpc" id="L427" title="1 of 2 branches missed.">        if (plot instanceof ValueAxisPlot) {</span>
+<span class="fc" id="L428">            ValueAxisPlot vap = (ValueAxisPlot) plot;</span>
+
+<span class="fc" id="L430">            Range r = vap.getDataRange(this);</span>
+<span class="fc bfc" id="L431" title="All 2 branches covered.">            if (r == null) {</span>
+<span class="fc" id="L432">                r = getDefaultAutoRange();</span>
+            }
+
+<span class="fc" id="L435">            double upper = r.getUpperBound();</span>
+<span class="fc" id="L436">            double lower = Math.max(r.getLowerBound(), this.smallestValue);</span>
+<span class="fc" id="L437">            double range = upper - lower;</span>
+
+            // if fixed auto range, then derive lower bound...
+<span class="fc" id="L440">            double fixedAutoRange = getFixedAutoRange();</span>
+<span class="pc bpc" id="L441" title="1 of 2 branches missed.">            if (fixedAutoRange &gt; 0.0) {</span>
+<span class="nc" id="L442">                lower = Math.max(upper - fixedAutoRange, this.smallestValue);</span>
+            } else {
+                // ensure the autorange is at least &lt;minRange&gt; in size...
+<span class="fc" id="L445">                double minRange = getAutoRangeMinimumSize();</span>
+<span class="pc bpc" id="L446" title="1 of 2 branches missed.">                if (range &lt; minRange) {</span>
+<span class="nc" id="L447">                    double expand = (minRange - range) / 2;</span>
+<span class="nc" id="L448">                    upper = upper + expand;</span>
+<span class="nc" id="L449">                    lower = lower - expand;</span>
+                }
+
+                // apply the margins - these should apply to the exponent range
+<span class="fc" id="L453">                double logUpper = calculateLog(upper);</span>
+<span class="fc" id="L454">                double logLower = calculateLog(lower);</span>
+<span class="fc" id="L455">                double logRange = logUpper - logLower;</span>
+<span class="fc" id="L456">                logUpper = logUpper + getUpperMargin() * logRange;</span>
+<span class="fc" id="L457">                logLower = logLower - getLowerMargin() * logRange;</span>
+<span class="fc" id="L458">                upper = calculateValueNoINF(logUpper);</span>
+<span class="fc" id="L459">                lower = calculateValueNoINF(logLower);</span>
+            }
+<span class="fc" id="L461">            setRange(new Range(lower, upper), false, false);</span>
+        }
+
+<span class="fc" id="L464">    }</span>
+
+    /**
+     * Draws the axis on a Java 2D graphics device (such as the screen or a
+     * printer).
+     *
+     * @param g2        the graphics device ({@code null} not permitted).
+     * @param cursor    the cursor location (determines where to draw the axis).
+     * @param plotArea  the area within which the axes and plot should be drawn.
+     * @param dataArea  the area within which the data should be drawn.
+     * @param edge      the axis location ({@code null} not permitted).
+     * @param plotState collects information about the plot ({@code null}
+     *                  permitted).
+     * @return The axis state (never {@code null}).
+     */
+    @Override
+    public AxisState draw(Graphics2D g2, double cursor, Rectangle2D plotArea,
+                          Rectangle2D dataArea, RectangleEdge edge,
+                          PlotRenderingInfo plotState) {
+
+        AxisState state;
+        // if the axis is not visible, don't draw it...
+<span class="nc bnc" id="L486" title="All 2 branches missed.">        if (!isVisible()) {</span>
+<span class="nc" id="L487">            state = new AxisState(cursor);</span>
+            // even though the axis is not visible, we need ticks for the
+            // gridlines...
+<span class="nc" id="L490">            List ticks = refreshTicks(g2, state, dataArea, edge);</span>
+<span class="nc" id="L491">            state.setTicks(ticks);</span>
+<span class="nc" id="L492">            return state;</span>
+        }
+<span class="nc" id="L494">        state = drawTickMarksAndLabels(g2, cursor, plotArea, dataArea, edge);</span>
+<span class="nc bnc" id="L495" title="All 2 branches missed.">        if (getAttributedLabel() != null) {</span>
+<span class="nc" id="L496">            state = drawAttributedLabel(getAttributedLabel(), g2,</span>
+                    dataArea, edge, state);
+
+        } else {
+<span class="nc" id="L500">            state = drawLabel(getLabel(), g2, dataArea, edge, state);</span>
+        }
+<span class="nc" id="L502">        createAndAddEntity(cursor, state, dataArea, edge, plotState);</span>
+<span class="nc" id="L503">        return state;</span>
+    }
+
+    /**
+     * Calculates the positions of the tick labels for the axis, storing the
+     * results in the tick label list (ready for drawing).
+     *
+     * @param g2       the graphics device.
+     * @param state    the axis state.
+     * @param dataArea the area in which the plot should be drawn.
+     * @param edge     the location of the axis.
+     * @return A list of ticks.
+     */
+    @Override
+    public List refreshTicks(Graphics2D g2, AxisState state,
+                             Rectangle2D dataArea, RectangleEdge edge) {
+<span class="fc" id="L519">        List result = new java.util.ArrayList();</span>
+<span class="pc bpc" id="L520" title="1 of 2 branches missed.">        if (RectangleEdge.isTopOrBottom(edge)) {</span>
+<span class="fc" id="L521">            result = refreshTicksHorizontal(g2, dataArea, edge);</span>
+<span class="nc bnc" id="L522" title="All 2 branches missed.">        } else if (RectangleEdge.isLeftOrRight(edge)) {</span>
+<span class="nc" id="L523">            result = refreshTicksVertical(g2, dataArea, edge);</span>
+        }
+<span class="fc" id="L525">        return result;</span>
+    }
+
+    /**
+     * Returns a list of ticks for an axis at the top or bottom of the chart.
+     *
+     * @param g2       the graphics device ({@code null} not permitted).
+     * @param dataArea the data area ({@code null} not permitted).
+     * @param edge     the edge ({@code null} not permitted).
+     * @return A list of ticks.
+     */
+    protected List refreshTicksHorizontal(Graphics2D g2, Rectangle2D dataArea,
+                                          RectangleEdge edge) {
+
+<span class="fc" id="L539">        Range range = getRange();</span>
+<span class="fc" id="L540">        List ticks = new ArrayList();</span>
+<span class="fc" id="L541">        Font tickLabelFont = tickLabel.getTickLabelFont();</span>
+<span class="fc" id="L542">        g2.setFont(tickLabelFont);</span>
+        TextAnchor textAnchor;
+<span class="pc bpc" id="L544" title="1 of 2 branches missed.">        if (edge == RectangleEdge.TOP) {</span>
+<span class="fc" id="L545">            textAnchor = TextAnchor.BOTTOM_CENTER;</span>
+        } else {
+<span class="nc" id="L547">            textAnchor = TextAnchor.TOP_CENTER;</span>
+        }
+
+<span class="pc bpc" id="L550" title="1 of 2 branches missed.">        if (isAutoTickUnitSelection()) {</span>
+<span class="fc" id="L551">            selectAutoTickUnit(g2, dataArea, edge);</span>
+        }
+<span class="fc" id="L553">        int minorTickCount = this.tickUnit.getMinorTickCount();</span>
+<span class="fc" id="L554">        double unit = getTickUnit().getSize();</span>
+<span class="fc" id="L555">        double index = Math.ceil(calculateLog(getRange().getLowerBound())</span>
+                / unit);
+<span class="fc" id="L557">        double start = index * unit;</span>
+<span class="fc" id="L558">        double end = calculateLog(getUpperBound());</span>
+<span class="fc" id="L559">        double current = start;</span>
+<span class="pc bpc" id="L560" title="1 of 2 branches missed.">        boolean hasTicks = (this.tickUnit.getSize() &gt; 0.0)</span>
+<span class="pc bpc" id="L561" title="1 of 2 branches missed.">                &amp;&amp; !Double.isInfinite(start);</span>
+<span class="pc bpc" id="L562" title="3 of 4 branches missed.">        while (hasTicks &amp;&amp; current &lt;= end) {</span>
+<span class="nc" id="L563">            double v = calculateValueNoINF(current);</span>
+<span class="nc bnc" id="L564" title="All 2 branches missed.">            if (range.contains(v)) {</span>
+<span class="nc" id="L565">                ticks.add(new LogTick(TickType.MAJOR, v, createTickLabel(v),</span>
+                        textAnchor));
+            }
+            // add minor ticks (for gridlines)
+<span class="nc" id="L569">            double next = Math.pow(this.base, current</span>
+<span class="nc" id="L570">                    + this.tickUnit.getSize());</span>
+<span class="nc bnc" id="L571" title="All 2 branches missed.">            for (int i = 1; i &lt; minorTickCount; i++) {</span>
+<span class="nc" id="L572">                double minorV = v + i * ((next - v) / minorTickCount);</span>
+<span class="nc bnc" id="L573" title="All 2 branches missed.">                if (range.contains(minorV)) {</span>
+<span class="nc" id="L574">                    ticks.add(new LogTick(TickType.MINOR, minorV, null,</span>
+                            textAnchor));
+                }
+            }
+<span class="nc" id="L578">            current = current + this.tickUnit.getSize();</span>
+<span class="nc" id="L579">        }</span>
+<span class="fc" id="L580">        return ticks;</span>
+    }
+
+    /**
+     * Returns a list of ticks for an axis at the left or right of the chart.
+     *
+     * @param g2       the graphics device ({@code null} not permitted).
+     * @param dataArea the data area ({@code null} not permitted).
+     * @param edge     the edge that the axis is aligned to ({@code null}
+     *                 not permitted).
+     * @return A list of ticks.
+     */
+    protected List refreshTicksVertical(Graphics2D g2, Rectangle2D dataArea,
+                                        RectangleEdge edge) {
+
+<span class="nc" id="L595">        Range range = getRange();</span>
+<span class="nc" id="L596">        List ticks = new ArrayList();</span>
+<span class="nc" id="L597">        Font tickLabelFont = tickLabel.getTickLabelFont();</span>
+<span class="nc" id="L598">        g2.setFont(tickLabelFont);</span>
+        TextAnchor textAnchor;
+<span class="nc bnc" id="L600" title="All 2 branches missed.">        if (edge == RectangleEdge.RIGHT) {</span>
+<span class="nc" id="L601">            textAnchor = TextAnchor.CENTER_LEFT;</span>
+        } else {
+<span class="nc" id="L603">            textAnchor = TextAnchor.CENTER_RIGHT;</span>
+        }
+
+<span class="nc bnc" id="L606" title="All 2 branches missed.">        if (isAutoTickUnitSelection()) {</span>
+<span class="nc" id="L607">            selectAutoTickUnit(g2, dataArea, edge);</span>
+        }
+<span class="nc" id="L609">        int minorTickCount = this.tickUnit.getMinorTickCount();</span>
+<span class="nc" id="L610">        double unit = getTickUnit().getSize();</span>
+<span class="nc" id="L611">        double index = Math.ceil(calculateLog(getRange().getLowerBound())</span>
+                / unit);
+<span class="nc" id="L613">        double start = index * unit;</span>
+<span class="nc" id="L614">        double end = calculateLog(getUpperBound());</span>
+<span class="nc" id="L615">        double current = start;</span>
+<span class="nc bnc" id="L616" title="All 2 branches missed.">        boolean hasTicks = (this.tickUnit.getSize() &gt; 0.0)</span>
+<span class="nc bnc" id="L617" title="All 2 branches missed.">                &amp;&amp; !Double.isInfinite(start);</span>
+<span class="nc bnc" id="L618" title="All 4 branches missed.">        while (hasTicks &amp;&amp; current &lt;= end) {</span>
+<span class="nc" id="L619">            double v = calculateValueNoINF(current);</span>
+<span class="nc bnc" id="L620" title="All 2 branches missed.">            if (range.contains(v)) {</span>
+<span class="nc" id="L621">                ticks.add(new LogTick(TickType.MAJOR, v, createTickLabel(v),</span>
+                        textAnchor));
+            }
+            // add minor ticks (for gridlines)
+<span class="nc" id="L625">            double next = Math.pow(this.base, current</span>
+<span class="nc" id="L626">                    + this.tickUnit.getSize());</span>
+<span class="nc bnc" id="L627" title="All 2 branches missed.">            for (int i = 1; i &lt; minorTickCount; i++) {</span>
+<span class="nc" id="L628">                double minorV = v + i * ((next - v) / minorTickCount);</span>
+<span class="nc bnc" id="L629" title="All 2 branches missed.">                if (range.contains(minorV)) {</span>
+<span class="nc" id="L630">                    ticks.add(new LogTick(TickType.MINOR, minorV, null,</span>
+                            textAnchor));
+                }
+            }
+<span class="nc" id="L634">            current = current + this.tickUnit.getSize();</span>
+<span class="nc" id="L635">        }</span>
+<span class="nc" id="L636">        return ticks;</span>
+    }
+
+    /**
+     * Selects an appropriate tick value for the axis.  The strategy is to
+     * display as many ticks as possible (selected from an array of 'standard'
+     * tick units) without the labels overlapping.
+     *
+     * @param g2       the graphics device ({@code null} not permitted).
+     * @param dataArea the area defined by the axes ({@code null} not
+     *                 permitted).
+     * @param edge     the axis location ({@code null} not permitted).
+     */
+    protected void selectAutoTickUnit(Graphics2D g2, Rectangle2D dataArea,
+                                      RectangleEdge edge) {
+<span class="pc bpc" id="L651" title="1 of 2 branches missed.">        if (RectangleEdge.isTopOrBottom(edge)) {</span>
+<span class="fc" id="L652">            selectHorizontalAutoTickUnit(g2, dataArea, edge);</span>
+<span class="nc bnc" id="L653" title="All 2 branches missed.">        } else if (RectangleEdge.isLeftOrRight(edge)) {</span>
+<span class="nc" id="L654">            selectVerticalAutoTickUnit(g2, dataArea, edge);</span>
+        }
+<span class="fc" id="L656">    }</span>
+
+    private boolean selectHorizontalTickHelper(TickUnit candidate, Graphics2D g2, Rectangle2D dataArea, RectangleEdge edge, TickUnitSource tickUnits) {
+<span class="nc" id="L659">        TickUnit prevCandidate = candidate;</span>
+<span class="nc" id="L660">        boolean found = false;</span>
+<span class="nc" id="L661">        this.tickUnit = (NumberTickUnit) candidate;</span>
+<span class="nc" id="L662">        double tickLabelWidth = estimateMaximumTickLabelWidth(g2,</span>
+                candidate);
+        // what is the available space for one unit?
+<span class="nc" id="L665">        double candidateWidth = exponentLengthToJava2D(candidate.getSize(),</span>
+                dataArea, edge);
+<span class="nc bnc" id="L667" title="All 2 branches missed.">        if (tickLabelWidth &lt; candidateWidth) {</span>
+<span class="nc" id="L668">            found = true;</span>
+<span class="nc bnc" id="L669" title="All 2 branches missed.">        } else if (Double.isNaN(candidateWidth)) {</span>
+<span class="nc" id="L670">            candidate = prevCandidate;</span>
+<span class="nc" id="L671">            found = true;</span>
+        } else {
+<span class="nc" id="L673">            prevCandidate = candidate;</span>
+<span class="nc" id="L674">            candidate = tickUnits.getLargerTickUnit(prevCandidate);</span>
+<span class="nc bnc" id="L675" title="All 2 branches missed.">            if (candidate.equals(prevCandidate)) {</span>
+<span class="nc" id="L676">                found = true;  // there are no more candidates</span>
+            }
+        }
+<span class="nc" id="L679">        return found;</span>
+    }
+
+    /**
+     * Selects an appropriate tick value for the axis.  The strategy is to
+     * display as many ticks as possible (selected from an array of 'standard'
+     * tick units) without the labels overlapping.
+     *
+     * @param g2  the graphics device.
+     * @param dataArea  the area defined by the axes.
+     * @param edge  the axis location.
+     */
+    protected void selectHorizontalAutoTickUnit(Graphics2D g2, Rectangle2D dataArea, RectangleEdge edge) { // REFACTOR @ambco
+<span class="fc" id="L692">        TickUnitSource tickUnits = getStandardTickUnits();</span>
+<span class="fc" id="L693">        setTickUnit(findBestNumberTickUnit(g2, tickUnits, dataArea, edge, true), false, false);</span>
+<span class="fc" id="L694">    }</span>
+
+    /**
+     * REFACTOR - USADO PARA SIMPLIFICAR O CÓDIGO DUPLICADO ENTRE selectHorizontalAutoTickUnit e selectVerticalAutoTickUnit.
+     * @author Afonso Caniço
+     */
+    private NumberTickUnit findBestNumberTickUnit(Graphics2D g2, TickUnitSource tickUnits, Rectangle2D dataArea, RectangleEdge edge, boolean width) {
+<span class="fc" id="L701">        TickUnit candidate = getCeilingTickUnit(tickUnits);</span>
+<span class="fc" id="L702">        TickUnit prevCandidate = candidate;</span>
+<span class="fc" id="L703">        boolean found = false;</span>
+
+<span class="fc bfc" id="L705" title="All 2 branches covered.">        while (!found) {</span>
+            // while the tick labels overlap and there are more tick sizes available,
+            // choose the next bigger label
+<span class="fc" id="L708">            this.tickUnit = (NumberTickUnit) candidate;</span>
+            double tickLabelSize;
+<span class="pc bpc" id="L710" title="1 of 2 branches missed.">            if (width) tickLabelSize = estimateMaximumTickLabelWidth(g2, candidate);</span>
+<span class="nc" id="L711">            else tickLabelSize = estimateMaximumTickLabelHeight(g2);</span>
+
+            // what is the available space for one unit?
+<span class="fc" id="L714">            double candidateSize = exponentLengthToJava2D(candidate.getSize(), dataArea, edge);</span>
+<span class="pc bpc" id="L715" title="1 of 2 branches missed.">            if (tickLabelSize &lt; candidateSize) {</span>
+<span class="nc" id="L716">                found = true;</span>
+<span class="pc bpc" id="L717" title="1 of 2 branches missed.">            } else if (Double.isNaN(candidateSize)) {</span>
+<span class="fc" id="L718">                candidate = prevCandidate;</span>
+<span class="fc" id="L719">                found = true;</span>
+            } else {
+<span class="nc" id="L721">                prevCandidate = candidate;</span>
+<span class="nc" id="L722">                candidate = tickUnits.getLargerTickUnit(prevCandidate);</span>
+<span class="nc bnc" id="L723" title="All 2 branches missed.">                if (candidate.equals(prevCandidate)) {</span>
+<span class="nc" id="L724">                    found = true;  // there are no more candidates</span>
+                }
+            }
+<span class="fc" id="L727">        }</span>
+<span class="fc" id="L728">        return (NumberTickUnit) candidate;</span>
+    }
+
+    /**
+     * REFACTOR - USADO PARA SIMPLIFICAR CÓDIGO DUPLICADO ENTRE selectHorizontalAutoTickUnit e selectVerticalAutoTickUnit.
+     * @author Afonso Caniço
+     */
+    private TickUnit getCeilingTickUnit(TickUnitSource tickUnits) {
+        // select a tick unit that is the next one bigger than the current
+        // (log) range divided by 50
+<span class="fc" id="L738">        Range range = getRange();</span>
+<span class="fc" id="L739">        double logAxisMin = calculateLog(Math.max(this.smallestValue, range.getLowerBound()));</span>
+<span class="fc" id="L740">        double logAxisMax = calculateLog(range.getUpperBound());</span>
+<span class="fc" id="L741">        double size = (logAxisMax - logAxisMin) / 50;</span>
+<span class="fc" id="L742">        return tickUnits.getCeilingTickUnit(size);</span>
+    }
+
+    /**
+     * Converts a length in data coordinates into the corresponding length in
+     * Java2D coordinates.
+     *
+     * @param length  the length.
+     * @param area  the plot area.
+     * @param edge  the edge along which the axis lies.
+     *
+     * @return The length in Java2D coordinates.
+     */
+    public double exponentLengthToJava2D(double length, Rectangle2D area,
+                                         RectangleEdge edge) {
+<span class="fc" id="L757">        double one = valueToJava2D(calculateValueNoINF(1.0), area, edge);</span>
+<span class="fc" id="L758">        double l = valueToJava2D(calculateValueNoINF(length + 1.0), area, edge);</span>
+<span class="fc" id="L759">        return Math.abs(l - one);</span>
+    }
+
+    /**
+     * Selects an appropriate tick value for the axis.  The strategy is to
+     * display as many ticks as possible (selected from an array of 'standard'
+     * tick units) without the labels overlapping.
+     *
+     * @param g2  the graphics device.
+     * @param dataArea  the area in which the plot should be drawn.
+     * @param edge  the axis location.
+     */
+    protected void selectVerticalAutoTickUnit(Graphics2D g2, Rectangle2D dataArea, RectangleEdge edge) {  // REFACTOR @ambco
+<span class="nc" id="L772">        TickUnitSource tickUnits = getStandardTickUnits();</span>
+<span class="nc" id="L773">        setTickUnit(findBestNumberTickUnit(g2, tickUnits, dataArea, edge, false), false, false);</span>
+<span class="nc" id="L774">    }</span>
+
+    /**
+     * Creates a tick label for the specified value based on the current
+     * tick unit (used for formatting the exponent).
+     *
+     * @param value  the value.
+     *
+     * @return The label.
+     */
+    protected AttributedString createTickLabel(double value) {
+<span class="pc bpc" id="L785" title="1 of 2 branches missed.">        if (this.numberFormatOverride != null) {</span>
+<span class="nc" id="L786">            String text = this.numberFormatOverride.format(value);</span>
+<span class="nc" id="L787">            AttributedString as = new AttributedString(text);</span>
+<span class="nc" id="L788">            as.addAttribute(TextAttribute.FONT, tickLabel.getTickLabelFont());</span>
+<span class="nc" id="L789">            return as;</span>
+        } else {
+<span class="fc" id="L791">            String baseStr = this.logAxisProduct.getBaseSymbol();</span>
+<span class="pc bpc" id="L792" title="1 of 2 branches missed.">            if (baseStr == null) {</span>
+<span class="fc" id="L793">                baseStr = this.logAxisProduct.getBaseFormatter().format(this.base);</span>
+            }
+<span class="fc" id="L795">            double logy = calculateLog(value);</span>
+<span class="fc" id="L796">            String exponentStr = getTickUnit().valueToString(logy);</span>
+<span class="fc" id="L797">            AttributedString as = new AttributedString(baseStr + exponentStr);</span>
+<span class="fc" id="L798">            as.addAttributes(tickLabel.getTickLabelFont().getAttributes(), 0, (baseStr</span>
+<span class="fc" id="L799">                    + exponentStr).length());</span>
+<span class="fc" id="L800">            as.addAttribute(TextAttribute.SUPERSCRIPT,</span>
+<span class="fc" id="L801">                    TextAttribute.SUPERSCRIPT_SUPER, baseStr.length(),</span>
+<span class="fc" id="L802">                    baseStr.length() + exponentStr.length());</span>
+<span class="fc" id="L803">            return as;</span>
+        }
+    }
+
+    /**
+     * Estimates the maximum tick label height.
+     *
+     * @param g2  the graphics device.
+     *
+     * @return The maximum height.
+     */
+    protected double estimateMaximumTickLabelHeight(Graphics2D g2) {
+<span class="nc" id="L815">        RectangleInsets tickLabelInsets = tickLabel.getTickLabelInsets();</span>
+<span class="nc" id="L816">        double result = tickLabelInsets.getTop() + tickLabelInsets.getBottom();</span>
+
+<span class="nc" id="L818">        Font tickLabelFont = tickLabel.getTickLabelFont();</span>
+<span class="nc" id="L819">        FontRenderContext frc = g2.getFontRenderContext();</span>
+<span class="nc" id="L820">        result += tickLabelFont.getLineMetrics(&quot;123&quot;, frc).getHeight();</span>
+<span class="nc" id="L821">        return result;</span>
+    }
+
+    /**
+     * Estimates the maximum width of the tick labels, assuming the specified
+     * tick unit is used.
+     * &lt;P&gt;
+     * Rather than computing the string bounds of every tick on the axis, we
+     * just look at two values: the lower bound and the upper bound for the
+     * axis.  These two values will usually be representative.
+     *
+     * @param g2  the graphics device.
+     * @param unit  the tick unit to use for calculation.
+     *
+     * @return The estimated maximum width of the tick labels.
+     */
+    protected double estimateMaximumTickLabelWidth(Graphics2D g2,
+                                                   TickUnit unit) {
+
+<span class="fc" id="L840">        RectangleInsets tickLabelInsets = tickLabel.getTickLabelInsets();</span>
+<span class="fc" id="L841">        double result = tickLabelInsets.getLeft() + tickLabelInsets.getRight();</span>
+
+<span class="pc bpc" id="L843" title="1 of 2 branches missed.">        if (isVerticalTickLabels()) {</span>
+            // all tick labels have the same width (equal to the height of the
+            // font)...
+<span class="nc" id="L846">            FontRenderContext frc = g2.getFontRenderContext();</span>
+<span class="nc" id="L847">            LineMetrics lm = tickLabel.getTickLabelFont().getLineMetrics(&quot;0&quot;, frc);</span>
+<span class="nc" id="L848">            result += lm.getHeight();</span>
+<span class="nc" id="L849">        }</span>
+        else {
+            // look at lower and upper bounds...
+<span class="fc" id="L852">            Range range = getRange();</span>
+<span class="fc" id="L853">            double lower = range.getLowerBound();</span>
+<span class="fc" id="L854">            double upper = range.getUpperBound();</span>
+<span class="fc" id="L855">            AttributedString lowerStr = createTickLabel(lower);</span>
+<span class="fc" id="L856">            AttributedString upperStr = createTickLabel(upper);</span>
+<span class="fc" id="L857">            double w1 = AttrStringUtils.getTextBounds(lowerStr, g2).getWidth();</span>
+<span class="fc" id="L858">            double w2 = AttrStringUtils.getTextBounds(upperStr, g2).getWidth();</span>
+<span class="fc" id="L859">            result += Math.max(w1, w2);</span>
+        }
+<span class="fc" id="L861">        return result;</span>
+    }
+
+    /**
+     * Zooms in on the current range.
+     *
+     * @param lowerPercent  the new lower bound.
+     * @param upperPercent  the new upper bound.
+     */
+    @Override
+    public void zoomRange(double lowerPercent, double upperPercent) {
+<span class="nc" id="L872">        Range range = getRange();</span>
+<span class="nc" id="L873">        double start = range.getLowerBound();</span>
+<span class="nc" id="L874">        double end = range.getUpperBound();</span>
+<span class="nc" id="L875">        double log1 = calculateLog(start);</span>
+<span class="nc" id="L876">        double log2 = calculateLog(end);</span>
+<span class="nc" id="L877">        double length = log2 - log1;</span>
+        Range adjusted;
+<span class="nc bnc" id="L879" title="All 2 branches missed.">        if (isInverted()) {</span>
+<span class="nc" id="L880">            double logA = log1 + length * (1 - upperPercent);</span>
+<span class="nc" id="L881">            double logB = log1 + length * (1 - lowerPercent);</span>
+<span class="nc" id="L882">            adjusted = new Range(calculateValueNoINF(logA),</span>
+<span class="nc" id="L883">                    calculateValueNoINF(logB));</span>
+<span class="nc" id="L884">        }</span>
+        else {
+<span class="nc" id="L886">            double logA = log1 + length * lowerPercent;</span>
+<span class="nc" id="L887">            double logB = log1 + length * upperPercent;</span>
+<span class="nc" id="L888">            adjusted = new Range(calculateValueNoINF(logA),</span>
+<span class="nc" id="L889">                    calculateValueNoINF(logB));</span>
+        }
+<span class="nc" id="L891">        setRange(adjusted);</span>
+<span class="nc" id="L892">    }</span>
+
+    /**
+     * Slides the axis range by the specified percentage.
+     *
+     * @param percent  the percentage.
+     */
+    @Override
+    public void pan(double percent) {
+<span class="nc" id="L901">        Range range = getRange();</span>
+<span class="nc" id="L902">        double lower = range.getLowerBound();</span>
+<span class="nc" id="L903">        double upper = range.getUpperBound();</span>
+<span class="nc" id="L904">        double log1 = calculateLog(lower);</span>
+<span class="nc" id="L905">        double log2 = calculateLog(upper);</span>
+<span class="nc" id="L906">        double length = log2 - log1;</span>
+<span class="nc" id="L907">        double adj = length * percent;</span>
+<span class="nc" id="L908">        log1 = log1 + adj;</span>
+<span class="nc" id="L909">        log2 = log2 + adj;</span>
+<span class="nc" id="L910">        setRange(calculateValueNoINF(log1), calculateValueNoINF(log2));</span>
+<span class="nc" id="L911">    }</span>
+
+    /**
+     * Increases or decreases the axis range by the specified percentage about
+     * the central value and sends an {@link AxisChangeEvent} to all registered
+     * listeners.
+     * &lt;P&gt;
+     * To double the length of the axis range, use 200% (2.0).
+     * To halve the length of the axis range, use 50% (0.5).
+     *
+     * @param percent  the resize factor.
+     *
+     * @see #resizeRange(double, double)
+     */
+    @Override
+    public void resizeRange(double percent) {
+<span class="nc" id="L927">        Range range = getRange();</span>
+<span class="nc" id="L928">        double logMin = calculateLog(range.getLowerBound());</span>
+<span class="nc" id="L929">        double logMax = calculateLog(range.getUpperBound());</span>
+<span class="nc" id="L930">        double centralValue = calculateValueNoINF((logMin + logMax) / 2.0);</span>
+<span class="nc" id="L931">        resizeRange(percent, centralValue);</span>
+<span class="nc" id="L932">    }</span>
+
+    @Override
+    public void resizeRange(double percent, double anchorValue) {
+<span class="nc" id="L936">        resizeRange2(percent, anchorValue);</span>
+<span class="nc" id="L937">    }</span>
+
+    /**
+     * Resizes the axis length to the specified percentage of the current
+     * range and sends a change event to all registered listeners.  If
+     * {@code percent} is greater than 1.0 (100 percent) then the axis
+     * range is increased (which has the effect of zooming out), while if the
+     * {@code percent} is less than 1.0 the axis range is decreased
+     * (which has the effect of zooming in).  The resize occurs around an
+     * anchor value (which may not be in the center of the axis).  This is used
+     * to support mouse wheel zooming around an arbitrary point on the plot.
+     * &lt;br&gt;&lt;br&gt;
+     * This method is overridden to perform the percentage calculations on the
+     * log values (which are linear for this axis).
+     *
+     * @param percent  the percentage (must be greater than zero).
+     * @param anchorValue  the anchor value.
+     */
+    @Override
+    public void resizeRange2(double percent, double anchorValue) {
+<span class="nc bnc" id="L957" title="All 2 branches missed.">        if (percent &gt; 0.0) {</span>
+<span class="nc" id="L958">            double logAnchorValue = calculateLog(anchorValue);</span>
+<span class="nc" id="L959">            Range range = getRange();</span>
+<span class="nc" id="L960">            double logAxisMin = calculateLog(range.getLowerBound());</span>
+<span class="nc" id="L961">            double logAxisMax = calculateLog(range.getUpperBound());</span>
+
+<span class="nc" id="L963">            double left = percent * (logAnchorValue - logAxisMin);</span>
+<span class="nc" id="L964">            double right = percent * (logAxisMax - logAnchorValue);</span>
+
+<span class="nc" id="L966">            double upperBound = calculateValueNoINF(logAnchorValue + right);</span>
+<span class="nc" id="L967">            Range adjusted = new Range(calculateValueNoINF(</span>
+                    logAnchorValue - left), upperBound);
+<span class="nc" id="L969">            setRange(adjusted);</span>
+<span class="nc" id="L970">        }</span>
+        else {
+<span class="nc" id="L972">            setAutoRange(true);</span>
+        }
+<span class="nc" id="L974">    }</span>
+
+    /**
+     * Tests this axis for equality with an arbitrary object.
+     *
+     * @param obj  the object ({@code null} permitted).
+     *
+     * @return A boolean.
+     */
+    @Override
+    public boolean equals(Object obj) {
+<span class="pc bpc" id="L985" title="1 of 2 branches missed.">        if (obj == this) {</span>
+<span class="nc" id="L986">            return true;</span>
+        }
+<span class="pc bpc" id="L988" title="1 of 2 branches missed.">        if (!(obj instanceof LogAxis)) {</span>
+<span class="nc" id="L989">            return false;</span>
+        }
+<span class="fc" id="L991">        LogAxis that = (LogAxis) obj;</span>
+<span class="fc bfc" id="L992" title="All 2 branches covered.">        if (this.base != that.base) {</span>
+<span class="fc" id="L993">            return false;</span>
+        }
+<span class="pc bpc" id="L995" title="1 of 2 branches missed.">        if (!Objects.equals(this.logAxisProduct.getBaseSymbol(), that.logAxisProduct.getBaseSymbol())) {</span>
+<span class="nc" id="L996">            return false;</span>
+        }
+<span class="pc bpc" id="L998" title="1 of 2 branches missed.">        if (!this.logAxisProduct.getBaseFormatter().equals(that.logAxisProduct.getBaseFormatter())) {</span>
+<span class="nc" id="L999">            return false;</span>
+        }
+<span class="fc bfc" id="L1001" title="All 2 branches covered.">        if (this.smallestValue != that.smallestValue) {</span>
+<span class="fc" id="L1002">            return false;</span>
+        }
+<span class="pc bpc" id="L1004" title="1 of 2 branches missed.">        if (!Objects.equals(this.numberFormatOverride, that.numberFormatOverride)) {</span>
+<span class="nc" id="L1005">            return false;</span>
+        }
+<span class="fc" id="L1007">        return super.equals(obj);</span>
+    }
+
+    /**
+     * Returns a hash code for this instance.
+     *
+     * @return A hash code.
+     */
+    @Override
+    public int hashCode() {
+<span class="fc" id="L1017">        int result = 193;</span>
+<span class="fc" id="L1018">        long temp = Double.doubleToLongBits(this.base);</span>
+<span class="fc" id="L1019">        result = 37 * result + (int) (temp ^ (temp &gt;&gt;&gt; 32));</span>
+<span class="fc" id="L1020">        temp = Double.doubleToLongBits(this.smallestValue);</span>
+<span class="fc" id="L1021">        result = 37 * result + (int) (temp ^ (temp &gt;&gt;&gt; 32));</span>
+<span class="pc bpc" id="L1022" title="1 of 2 branches missed.">        if (this.numberFormatOverride != null) {</span>
+<span class="nc" id="L1023">            result = 37 * result + this.numberFormatOverride.hashCode();</span>
+        }
+<span class="fc" id="L1025">        result = 37 * result + this.tickUnit.hashCode();</span>
+<span class="fc" id="L1026">        return result;</span>
+    }
+
+    public Object clone() throws java.lang.CloneNotSupportedException {
+<span class="fc" id="L1030">        LogAxis clone = (LogAxis) super.clone();</span>
+<span class="fc" id="L1031">        clone.logAxisProduct = (LogAxisProduct) this.logAxisProduct.clone();</span>
+<span class="fc" id="L1032">        return clone;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

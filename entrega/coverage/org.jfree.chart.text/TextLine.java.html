@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TextLine.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.chart.text</a> &gt; <span class="el_source">TextLine.java</span></div><h1>TextLine.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ */
+
+package org.jfree.chart.text;
+
+import java.awt.Font;
+import java.awt.Graphics2D;
+import java.awt.Paint;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+import org.jfree.chart.block.Size2D;
+import org.jfree.chart.internal.Args;
+
+/**
+ * A sequence of {@link TextFragment} objects that together form a line of 
+ * text.  A sequence of text lines is managed by the {@link TextBlock} class.
+ */
+public class TextLine implements Serializable {
+
+    /** For serialization. */
+    private static final long serialVersionUID = 7100085690160465444L;
+    
+    /** Storage for the text fragments that make up the line. */
+    private List&lt;TextFragment&gt; fragments;
+
+    /**
+     * Creates a new empty line.
+     */
+<span class="nc" id="L55">    public TextLine() {</span>
+<span class="nc" id="L56">        this.fragments = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L57">    }</span>
+    
+    /**
+     * Creates a new text line using the default font.
+     * 
+     * @param text  the text ({@code null} not permitted).
+     */
+    public TextLine(String text) {
+<span class="fc" id="L65">        this(text, TextFragment.DEFAULT_FONT);   </span>
+<span class="fc" id="L66">    }</span>
+    
+    /**
+     * Creates a new text line.
+     * 
+     * @param text  the text ({@code null} not permitted).
+     * @param font  the text font ({@code null} not permitted).
+     */
+<span class="fc" id="L74">    public TextLine(String text, Font font) {</span>
+<span class="fc" id="L75">        this.fragments = new java.util.ArrayList&lt;&gt;();</span>
+<span class="fc" id="L76">        final TextFragment fragment = new TextFragment(text, font);</span>
+<span class="fc" id="L77">        this.fragments.add(fragment);</span>
+<span class="fc" id="L78">    }</span>
+    
+    /**
+     * Creates a new text line.
+     * 
+     * @param text  the text ({@code null} not permitted).
+     * @param font  the text font ({@code null} not permitted).
+     * @param paint  the text color ({@code null} not permitted).
+     */
+<span class="fc" id="L87">    public TextLine(String text, Font font, Paint paint) {</span>
+<span class="fc" id="L88">        Args.nullNotPermitted(text, &quot;text&quot;);</span>
+<span class="fc" id="L89">        Args.nullNotPermitted(font, &quot;font&quot;);</span>
+<span class="fc" id="L90">        Args.nullNotPermitted(paint, &quot;paint&quot;);</span>
+<span class="fc" id="L91">        this.fragments = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L92">        final TextFragment fragment = new TextFragment(text, font, paint);</span>
+<span class="fc" id="L93">        this.fragments.add(fragment);</span>
+<span class="fc" id="L94">    }</span>
+    
+    /**
+     * Adds a text fragment to the text line.
+     * 
+     * @param fragment  the text fragment ({@code null} not permitted).
+     */
+    public void addFragment(TextFragment fragment) {
+<span class="fc" id="L102">        Args.nullNotPermitted(fragment, &quot;fragment&quot;);</span>
+<span class="fc" id="L103">        this.fragments.add(fragment);        </span>
+<span class="fc" id="L104">    }</span>
+    
+    /**
+     * Removes a fragment from the line.
+     * 
+     * @param fragment  the fragment to remove.
+     */
+    public void removeFragment(TextFragment fragment) {
+<span class="fc" id="L112">        this.fragments.remove(fragment);</span>
+<span class="fc" id="L113">    }</span>
+    
+    /**
+     * Draws the text line.
+     * 
+     * @param g2  the graphics device.
+     * @param anchorX  the x-coordinate for the anchor point.
+     * @param anchorY  the y-coordinate for the anchor point.
+     * @param anchor  the point on the text line that is aligned to the anchor 
+     *                point.
+     * @param rotateX  the x-coordinate for the rotation point.
+     * @param rotateY  the y-coordinate for the rotation point.
+     * @param angle  the rotation angle (in radians).
+     */
+    public void draw(Graphics2D g2, float anchorX, float anchorY, 
+            TextAnchor anchor, float rotateX, float rotateY, double angle) {
+    
+<span class="fc" id="L130">        Size2D dim = calculateDimensions(g2);</span>
+<span class="fc" id="L131">        float xAdj = 0.0f;</span>
+<span class="pc bpc" id="L132" title="1 of 2 branches missed.">        if (anchor.isHorizontalCenter()) {</span>
+<span class="nc" id="L133">            xAdj = (float) -dim.getWidth() / 2.0f;</span>
+        }
+<span class="pc bpc" id="L135" title="1 of 2 branches missed.">        else if (anchor.isRight()) {</span>
+<span class="nc" id="L136">            xAdj = (float) -dim.getWidth();</span>
+        }
+<span class="fc" id="L138">        float x = anchorX + xAdj;</span>
+<span class="fc" id="L139">        final float yOffset = calculateBaselineOffset(g2, anchor);</span>
+<span class="fc bfc" id="L140" title="All 2 branches covered.">        for (TextFragment fragment : this.fragments) {</span>
+<span class="fc" id="L141">            final Size2D d = fragment.calculateDimensions(g2);</span>
+<span class="fc" id="L142">            fragment.draw(g2, x, anchorY + yOffset, TextAnchor.BASELINE_LEFT,</span>
+                    rotateX, rotateY, angle);
+<span class="fc" id="L144">            x = x + (float) d.getWidth();</span>
+<span class="fc" id="L145">        }</span>
+    
+<span class="fc" id="L147">    }</span>
+    
+    /**
+     * Calculates the width and height of the text line.
+     * 
+     * @param g2  the graphics device.
+     * 
+     * @return The width and height.
+     */
+    public Size2D calculateDimensions(Graphics2D g2) {
+<span class="fc" id="L157">        double width = 0.0;</span>
+<span class="fc" id="L158">        double height = 0.0;</span>
+<span class="fc bfc" id="L159" title="All 2 branches covered.">        for (TextFragment fragment : this.fragments) {</span>
+<span class="fc" id="L160">            final Size2D dimension = fragment.calculateDimensions(g2);</span>
+<span class="fc" id="L161">            width = width + dimension.getWidth();</span>
+<span class="fc" id="L162">            height = Math.max(height, dimension.getHeight());</span>
+<span class="fc" id="L163">        }</span>
+<span class="fc" id="L164">        return new Size2D(width, height);</span>
+    }
+    
+    /**
+     * Returns the first text fragment in the line.
+     * 
+     * @return The first text fragment in the line.
+     */
+    public TextFragment getFirstTextFragment() {
+<span class="nc" id="L173">        TextFragment result = null;</span>
+<span class="nc bnc" id="L174" title="All 2 branches missed.">        if (this.fragments.size() &gt; 0) {</span>
+<span class="nc" id="L175">            result = this.fragments.get(0);</span>
+        }    
+<span class="nc" id="L177">        return result;</span>
+    }
+    
+    /**
+     * Returns the last text fragment in the line.
+     * 
+     * @return The last text fragment in the line.
+     */
+    public TextFragment getLastTextFragment() {
+<span class="fc" id="L186">        TextFragment result = null;</span>
+<span class="pc bpc" id="L187" title="1 of 2 branches missed.">        if (this.fragments.size() &gt; 0) {</span>
+<span class="fc" id="L188">            result = this.fragments.get(this.fragments.size() - 1);</span>
+        }    
+<span class="fc" id="L190">        return result;</span>
+    }
+    
+    /**
+     * Calculate the offsets required to translate from the specified anchor 
+     * position to the left baseline position.
+     * 
+     * @param g2  the graphics device.
+     * @param anchor  the anchor position.
+     * 
+     * @return The offsets.
+     */
+    private float calculateBaselineOffset(Graphics2D g2, TextAnchor anchor) {
+<span class="fc" id="L203">        float result = 0.0f;</span>
+<span class="fc bfc" id="L204" title="All 2 branches covered.">        for (TextFragment fragment : this.fragments) {</span>
+<span class="fc" id="L205">            result = Math.max(result,</span>
+<span class="fc" id="L206">                    fragment.calculateBaselineOffset(g2, anchor));</span>
+<span class="fc" id="L207">        }</span>
+<span class="fc" id="L208">        return result;</span>
+    }
+    
+    /**
+     * Tests this object for equality with an arbitrary object.
+     * 
+     * @param obj  the object to test against ({@code null} permitted).
+     * 
+     * @return A boolean.
+     */
+    @Override
+    public boolean equals(Object obj) {
+<span class="pc bpc" id="L220" title="1 of 2 branches missed.">        if (obj == null) {</span>
+<span class="nc" id="L221">            return false;</span>
+        }
+<span class="pc bpc" id="L223" title="1 of 2 branches missed.">        if (obj == this) {</span>
+<span class="nc" id="L224">            return true;   </span>
+        }
+<span class="pc bpc" id="L226" title="1 of 2 branches missed.">        if (obj instanceof TextLine) {</span>
+<span class="fc" id="L227">            final TextLine line = (TextLine) obj;</span>
+<span class="fc" id="L228">            return this.fragments.equals(line.fragments);</span>
+        }
+<span class="nc" id="L230">        return false;</span>
+    }
+
+    /**
+     * Returns a hash code for this object.
+     * 
+     * @return A hash code.
+     */
+    @Override
+    public int hashCode() {
+<span class="pc bpc" id="L240" title="1 of 2 branches missed.">        return (this.fragments != null ? this.fragments.hashCode() : 0);</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

@@ -1,0 +1,365 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ImageTitle.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.chart.title</a> &gt; <span class="el_source">ImageTitle.java</span></div><h1>ImageTitle.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * ---------------
+ * ImageTitle.java
+ * ---------------
+ * (C) Copyright 2000-2021, by David Berry and Contributors;
+ *
+ * Original Author:  David Berry;
+ * Contributor(s):   David Gilbert;
+ *
+ */
+
+package org.jfree.chart.title;
+
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.geom.Rectangle2D;
+import java.util.Objects;
+
+import org.jfree.chart.block.RectangleConstraint;
+import org.jfree.chart.event.TitleChangeEvent;
+import org.jfree.chart.api.HorizontalAlignment;
+import org.jfree.chart.api.RectangleEdge;
+import org.jfree.chart.api.RectangleInsets;
+import org.jfree.chart.block.Size2D;
+import org.jfree.chart.api.VerticalAlignment;
+
+/**
+ * A chart title that displays an image.  This is useful, for example, if you
+ * have an image of your corporate logo and want to use as a footnote or part
+ * of a title in a chart you create.
+ * &lt;P&gt;
+ * ImageTitle needs an image passed to it in the constructor.  For ImageTitle
+ * to work, you must have already loaded this image from its source (disk or
+ * URL).  It is recommended you use something like
+ * Toolkit.getDefaultToolkit().getImage() to get the image.  Then, use
+ * MediaTracker or some other message to make sure the image is fully loaded
+ * from disk.
+ * &lt;P&gt;
+ * SPECIAL NOTE:  this class fails to serialize, so if you are
+ * relying on your charts to be serializable, please avoid using this class.
+ */
+public class ImageTitle extends Title {
+
+    /** The title image. */
+    private Image image;
+
+    /**
+     * Creates a new image title.
+     *
+     * @param image  the image ({@code null} not permitted).
+     */
+    public ImageTitle(Image image) {
+<span class="nc" id="L78">        this(image, image.getHeight(null), image.getWidth(null),</span>
+                Title.DEFAULT_POSITION, Title.DEFAULT_HORIZONTAL_ALIGNMENT,
+                Title.DEFAULT_VERTICAL_ALIGNMENT, Title.DEFAULT_PADDING);
+<span class="nc" id="L81">    }</span>
+
+    /**
+     * Creates a new image title.
+     *
+     * @param image  the image ({@code null} not permitted).
+     * @param position  the title position.
+     * @param horizontalAlignment  the horizontal alignment.
+     * @param verticalAlignment  the vertical alignment.
+     */
+    public ImageTitle(Image image, RectangleEdge position,
+                      HorizontalAlignment horizontalAlignment,
+                      VerticalAlignment verticalAlignment) {
+
+<span class="nc" id="L95">        this(image, image.getHeight(null), image.getWidth(null),</span>
+                position, horizontalAlignment, verticalAlignment,
+                Title.DEFAULT_PADDING);
+<span class="nc" id="L98">    }</span>
+
+    /**
+     * Creates a new image title with the given image scaled to the given
+     * width and height in the given location.
+     *
+     * @param image  the image ({@code null} not permitted).
+     * @param height  the height used to draw the image.
+     * @param width  the width used to draw the image.
+     * @param position  the title position.
+     * @param horizontalAlignment  the horizontal alignment.
+     * @param verticalAlignment  the vertical alignment.
+     * @param padding  the amount of space to leave around the outside of the
+     *                 title.
+     */
+    public ImageTitle(Image image, int height, int width,
+                      RectangleEdge position,
+                      HorizontalAlignment horizontalAlignment,
+                      VerticalAlignment verticalAlignment,
+                      RectangleInsets padding) {
+
+<span class="nc" id="L119">        super(position, horizontalAlignment, verticalAlignment, padding);</span>
+<span class="nc bnc" id="L120" title="All 2 branches missed.">        if (image == null) {</span>
+<span class="nc" id="L121">            throw new NullPointerException(&quot;Null 'image' argument.&quot;);</span>
+        }
+<span class="nc" id="L123">        this.image = image;</span>
+<span class="nc" id="L124">        setHeight(height);</span>
+<span class="nc" id="L125">        setWidth(width);</span>
+
+<span class="nc" id="L127">    }</span>
+
+    /**
+     * Returns the image for the title.
+     *
+     * @return The image for the title (never {@code null}).
+     */
+    public Image getImage() {
+<span class="nc" id="L135">        return this.image;</span>
+    }
+
+    /**
+     * Sets the image for the title and notifies registered listeners that the
+     * title has been modified.
+     *
+     * @param image  the new image ({@code null} not permitted).
+     */
+    public void setImage(Image image) {
+<span class="nc bnc" id="L145" title="All 2 branches missed.">        if (image == null) {</span>
+<span class="nc" id="L146">            throw new NullPointerException(&quot;Null 'image' argument.&quot;);</span>
+        }
+<span class="nc" id="L148">        this.image = image;</span>
+<span class="nc" id="L149">        notifyListeners(new TitleChangeEvent(this));</span>
+<span class="nc" id="L150">    }</span>
+
+    /**
+     * Arranges the contents of the block, within the given constraints, and
+     * returns the block size.
+     *
+     * @param g2  the graphics device.
+     * @param constraint  the constraint ({@code null} not permitted).
+     *
+     * @return The block size (in Java2D units, never {@code null}).
+     */
+    @Override
+    public Size2D arrange(Graphics2D g2, RectangleConstraint constraint) {
+<span class="nc" id="L163">        Size2D s = new Size2D(this.image.getWidth(null),</span>
+<span class="nc" id="L164">                this.image.getHeight(null));</span>
+<span class="nc" id="L165">        return new Size2D(calculateTotalWidth(s.getWidth()),</span>
+<span class="nc" id="L166">                calculateTotalHeight(s.getHeight()));</span>
+    }
+
+    /**
+     * Draws the title on a Java 2D graphics device (such as the screen or a
+     * printer).
+     *
+     * @param g2  the graphics device.
+     * @param area  the area allocated for the title.
+     */
+    @Override
+    public void draw(Graphics2D g2, Rectangle2D area) {
+<span class="nc" id="L178">        RectangleEdge position = getPosition();</span>
+<span class="nc bnc" id="L179" title="All 4 branches missed.">        if (position == RectangleEdge.TOP || position == RectangleEdge.BOTTOM) {</span>
+<span class="nc" id="L180">            drawHorizontal(g2, area);</span>
+        }
+<span class="nc bnc" id="L182" title="All 4 branches missed.">        else if (position == RectangleEdge.LEFT</span>
+                     || position == RectangleEdge.RIGHT) {
+<span class="nc" id="L184">            drawVertical(g2, area);</span>
+        }
+        else {
+<span class="nc" id="L187">            throw new RuntimeException(&quot;Invalid title position.&quot;);</span>
+        }
+<span class="nc" id="L189">    }</span>
+
+    /**
+     * Draws the title on a Java 2D graphics device (such as the screen or a
+     * printer).
+     *
+     * @param g2  the graphics device.
+     * @param chartArea  the area within which the title (and plot) should be
+     *                   drawn.
+     *
+     * @return The size of the area used by the title.
+     */
+    protected Size2D drawHorizontal(Graphics2D g2, Rectangle2D chartArea) {
+        double startY;
+        double topSpace;
+        double bottomSpace;
+        double leftSpace;
+        double rightSpace;
+
+<span class="nc" id="L208">        double w = getWidth();</span>
+<span class="nc" id="L209">        double h = getHeight();</span>
+<span class="nc" id="L210">        RectangleInsets padding = getPadding();</span>
+<span class="nc" id="L211">        topSpace = padding.calculateTopOutset(h);</span>
+<span class="nc" id="L212">        bottomSpace = padding.calculateBottomOutset(h);</span>
+<span class="nc" id="L213">        leftSpace = padding.calculateLeftOutset(w);</span>
+<span class="nc" id="L214">        rightSpace = padding.calculateRightOutset(w);</span>
+
+<span class="nc bnc" id="L216" title="All 2 branches missed.">        if (getPosition() == RectangleEdge.TOP) {</span>
+<span class="nc" id="L217">            startY = chartArea.getY() + topSpace;</span>
+        }
+        else {
+<span class="nc" id="L220">            startY = chartArea.getY() + chartArea.getHeight() - bottomSpace - h;</span>
+        }
+
+        // what is our alignment?
+<span class="nc" id="L224">        double startX = 0.0;</span>
+<span class="nc bnc" id="L225" title="All 4 branches missed.">        switch (getHorizontalAlignment()) {</span>
+            case CENTER:
+<span class="nc" id="L227">                startX = chartArea.getX() + leftSpace + chartArea.getWidth() / 2.0</span>
+                        - w / 2.0;
+<span class="nc" id="L229">                break;</span>
+            case LEFT:
+<span class="nc" id="L231">                startX = chartArea.getX() + leftSpace;</span>
+<span class="nc" id="L232">                break;</span>
+            case RIGHT:
+<span class="nc" id="L234">                startX = chartArea.getX() + chartArea.getWidth() - rightSpace - w;</span>
+<span class="nc" id="L235">                break;</span>
+            default:
+<span class="nc" id="L237">                throw new IllegalStateException(&quot;Unexpected horizontal alignment.&quot;);</span>
+        }
+<span class="nc" id="L239">        g2.drawImage(this.image, (int) startX, (int) startY, (int) w, (int) h,</span>
+                null);
+
+<span class="nc" id="L242">        return new Size2D(chartArea.getWidth() + leftSpace + rightSpace,</span>
+            h + topSpace + bottomSpace);
+
+    }
+
+    /**
+     * Draws the title on a Java 2D graphics device (such as the screen or a
+     * printer).
+     *
+     * @param g2  the graphics device.
+     * @param chartArea  the area within which the title (and plot) should be
+     *                   drawn.
+     *
+     * @return The size of the area used by the title.
+     */
+    protected Size2D drawVertical(Graphics2D g2, Rectangle2D chartArea) {
+
+        double startX;
+<span class="nc" id="L260">        double topSpace = 0.0;</span>
+<span class="nc" id="L261">        double bottomSpace = 0.0;</span>
+<span class="nc" id="L262">        double leftSpace = 0.0;</span>
+<span class="nc" id="L263">        double rightSpace = 0.0;</span>
+
+<span class="nc" id="L265">        double w = getWidth();</span>
+<span class="nc" id="L266">        double h = getHeight();</span>
+
+<span class="nc" id="L268">        RectangleInsets padding = getPadding();</span>
+<span class="nc bnc" id="L269" title="All 2 branches missed.">        if (padding != null) {</span>
+<span class="nc" id="L270">            topSpace = padding.calculateTopOutset(h);</span>
+<span class="nc" id="L271">            bottomSpace = padding.calculateBottomOutset(h);</span>
+<span class="nc" id="L272">            leftSpace = padding.calculateLeftOutset(w);</span>
+<span class="nc" id="L273">            rightSpace = padding.calculateRightOutset(w);</span>
+        }
+
+<span class="nc bnc" id="L276" title="All 2 branches missed.">        if (getPosition() == RectangleEdge.LEFT) {</span>
+<span class="nc" id="L277">            startX = chartArea.getX() + leftSpace;</span>
+        }
+        else {
+<span class="nc" id="L280">            startX = chartArea.getMaxX() - rightSpace - w;</span>
+        }
+
+        // what is our alignment?
+<span class="nc" id="L284">        double startY = 0.0;</span>
+<span class="nc bnc" id="L285" title="All 4 branches missed.">        switch (getVerticalAlignment()) {</span>
+            case CENTER:
+<span class="nc" id="L287">                startY = chartArea.getMinY() + topSpace</span>
+<span class="nc" id="L288">                        + chartArea.getHeight() / 2.0 - h / 2.0;</span>
+<span class="nc" id="L289">                break;</span>
+            case TOP:
+<span class="nc" id="L291">                startY = chartArea.getMinY() + topSpace;</span>
+<span class="nc" id="L292">                break;</span>
+            case BOTTOM:
+<span class="nc" id="L294">                startY = chartArea.getMaxY() - bottomSpace - h;</span>
+<span class="nc" id="L295">                break;</span>
+            default:
+<span class="nc" id="L297">                throw new IllegalStateException(&quot;Unexpected vertical alignment.&quot;);</span>
+        }
+
+<span class="nc" id="L300">        g2.drawImage(this.image, (int) startX, (int) startY, (int) w, (int) h,</span>
+                null);
+
+<span class="nc" id="L303">        return new Size2D(chartArea.getWidth() + leftSpace + rightSpace,</span>
+            h + topSpace + bottomSpace);
+
+    }
+
+    /**
+     * Draws the block within the specified area.
+     *
+     * @param g2  the graphics device.
+     * @param area  the area.
+     * @param params  ignored ({@code null} permitted).
+     *
+     * @return Always {@code null}.
+     */
+    @Override
+    public Object draw(Graphics2D g2, Rectangle2D area, Object params) {
+<span class="nc" id="L319">        draw(g2, area);</span>
+<span class="nc" id="L320">        return null;</span>
+    }
+
+    /**
+     * Tests this {@code ImageTitle} for equality with an arbitrary
+     * object.  Returns {@code true} if:
+     * &lt;ul&gt;
+     * &lt;li&gt;{@code obj} is an instance of {@code ImageTitle};
+     * &lt;li&gt;{@code obj} references the same image as this
+     *     {@code ImageTitle};
+     * &lt;li&gt;{@code super.equals(obj)} returns {@code true};
+     * &lt;/ul&gt;
+     *
+     * @param obj  the object ({@code null} permitted).
+     *
+     * @return A boolean.
+     */
+    @Override
+    public boolean equals(Object obj) {
+<span class="nc bnc" id="L339" title="All 2 branches missed.">        if (obj == this) {</span>
+<span class="nc" id="L340">            return true;</span>
+        }
+<span class="nc bnc" id="L342" title="All 2 branches missed.">        if (!(obj instanceof ImageTitle)) {</span>
+<span class="nc" id="L343">            return false;</span>
+        }
+<span class="nc" id="L345">        ImageTitle that = (ImageTitle) obj;</span>
+<span class="nc bnc" id="L346" title="All 2 branches missed.">        if (!Objects.equals(this.image, that.image)) {</span>
+<span class="nc" id="L347">            return false;</span>
+        }
+<span class="nc" id="L349">        return super.equals(obj);</span>
+    }
+
+    /**
+     * Returns a hash code for this instance.
+     * 
+     * @return A has code.
+     */
+    @Override
+    public int hashCode() {
+<span class="nc" id="L359">        int hash = super.hashCode();</span>
+<span class="nc" id="L360">        hash = 83 * hash + Objects.hashCode(this.image);</span>
+<span class="nc" id="L361">        return hash;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

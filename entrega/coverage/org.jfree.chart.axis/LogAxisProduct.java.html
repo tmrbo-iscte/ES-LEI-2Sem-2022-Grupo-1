@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LogAxisProduct.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.chart.axis</a> &gt; <span class="el_source">LogAxisProduct.java</span></div><h1>LogAxisProduct.java</h1><pre class="source lang-java linenums">package org.jfree.chart.axis;
+
+
+import java.text.Format;
+import java.text.DecimalFormat;
+import org.jfree.chart.internal.Args;
+import java.io.Serializable;
+
+<span class="fc" id="L9">public class LogAxisProduct implements Serializable, Cloneable {</span>
+<span class="fc" id="L10">    private String baseSymbol = null;</span>
+<span class="fc" id="L11">    private Format baseFormatter = new DecimalFormat(&quot;0&quot;);</span>
+
+    public String getBaseSymbol() {
+<span class="fc" id="L14">        return baseSymbol;</span>
+    }
+
+    public Format getBaseFormatter() {
+<span class="fc" id="L18">        return baseFormatter;</span>
+    }
+
+    /**
+     * Sets the symbol used to represent the base value of the logarithmic  scale and sends a change event to all registered listeners.
+     * @param symbol   the symbol ( {@code  null}  permitted).
+     */
+    public void setBaseSymbol(String symbol, LogAxis logAxis) {
+<span class="nc" id="L26">        this.baseSymbol = symbol;</span>
+<span class="nc" id="L27">        logAxis.fireChangeEvent();</span>
+<span class="nc" id="L28">    }</span>
+
+    /**
+     * Sets the formatter used to format the base value of the logarithmic  scale when it is displayed numerically and sends a change event to all registered listeners.
+     * @param formatter   the formatter ( {@code  null}  not permitted).
+     */
+    public void setBaseFormatter(Format formatter, LogAxis logAxis) {
+<span class="nc" id="L35">        Args.nullNotPermitted(formatter, &quot;formatter&quot;);</span>
+<span class="nc" id="L36">        this.baseFormatter = formatter;</span>
+<span class="nc" id="L37">        logAxis.fireChangeEvent();</span>
+<span class="nc" id="L38">    }</span>
+
+    public Object clone() throws CloneNotSupportedException {
+<span class="fc" id="L41">        return (LogAxisProduct) super.clone();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

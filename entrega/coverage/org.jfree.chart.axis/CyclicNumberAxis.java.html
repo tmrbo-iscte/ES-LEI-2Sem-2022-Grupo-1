@@ -1,0 +1,1078 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CyclicNumberAxis.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.chart.axis</a> &gt; <span class="el_source">CyclicNumberAxis.java</span></div><h1>CyclicNumberAxis.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * ---------------------
+ * CyclicNumberAxis.java
+ * ---------------------
+ * (C) Copyright 2003-2021, by Nicolas Brodu and Contributors.
+ *
+ * Original Author:  Nicolas Brodu;
+ * Contributor(s):   David Gilbert;
+ *
+ */
+
+package org.jfree.chart.axis;
+
+import org.jfree.chart.api.RectangleEdge;
+import org.jfree.chart.internal.SerialUtils;
+import org.jfree.chart.plot.Plot;
+import org.jfree.chart.plot.PlotRenderingInfo;
+import org.jfree.chart.text.TextAnchor;
+import org.jfree.chart.text.TextUtils;
+import org.jfree.data.Range;
+
+import java.awt.*;
+import java.awt.geom.Line2D;
+import java.awt.geom.Rectangle2D;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.text.NumberFormat;
+import java.util.List;
+/**
+This class extends NumberAxis and handles cycling.
+
+Traditional representation of data in the range x0..x1
+&lt;pre&gt;
+|-------------------------|
+x0                       x1
+&lt;/pre&gt;
+
+Here, the range bounds are at the axis extremities.
+With cyclic axis, however, the time is split in
+&quot;cycles&quot;, or &quot;time frames&quot;, or the same duration : the period.
+
+A cycle axis cannot by definition handle a larger interval
+than the period : &lt;pre&gt;x1 - x0 &amp;gt;= period&lt;/pre&gt;. Thus, at most a full
+period can be represented with such an axis.
+
+The cycle bound is the number between x0 and x1 which marks
+the beginning of new time frame:
+&lt;pre&gt;
+|---------------------|----------------------------|
+x0                   cb                           x1
+&amp;lt;---previous cycle---&amp;gt;&amp;lt;-------current cycle--------&amp;gt;
+&lt;/pre&gt;
+
+It is actually a multiple of the period, plus optionally
+a start offset: &lt;pre&gt;cb = n * period + offset&lt;/pre&gt;
+
+Thus, by definition, two consecutive cycle bounds
+period apart, which is precisely why it is called a
+period.
+
+The visual representation of a cyclic axis is like that:
+&lt;pre&gt;
+|----------------------------|---------------------|
+cb                         x1|x0                  cb
+&amp;lt;-------current cycle--------&amp;gt;&amp;lt;---previous cycle---&amp;gt;
+&lt;/pre&gt;
+
+The cycle bound is at the axis ends, then current
+cycle is shown, then the last cycle. When using
+dynamic data, the visual effect is the current cycle
+erases the last cycle as x grows. Then, the next cycle
+bound is reached, and the process starts over, erasing
+the previous cycle.
+
+A Cyclic item renderer is provided to do exactly this.
+
+ */
+public class CyclicNumberAxis extends NumberAxis {
+
+    /** For serialization. */
+    static final long serialVersionUID = -7514160997164582554L;
+
+    /** The offset. */
+    protected double offset;
+
+    /** The period.*/
+    protected double period;
+
+    /** ??. */
+    protected boolean boundMappedToLastCycle;
+
+<span class="fc" id="L118">    protected transient CyclicNumberAxisAdvanceLine advanceLine = new CyclicNumberAxisAdvanceLine(true);</span>
+
+    private transient boolean internalMarkerWhenTicksOverlap;
+
+    private transient Tick internalMarkerCycleBoundTick;
+
+    /**
+     * Creates a CycleNumberAxis with the given period.
+     *
+     * @param period  the period.
+     */
+    public CyclicNumberAxis(double period) {
+<span class="nc" id="L130">        this(period, 0.0);</span>
+<span class="nc" id="L131">    }</span>
+
+    /**
+     * Creates a CycleNumberAxis with the given period and offset.
+     *
+     * @param period  the period.
+     * @param offset  the offset.
+     */
+    public CyclicNumberAxis(double period, double offset) {
+<span class="nc" id="L140">        this(period, offset, null);</span>
+<span class="nc" id="L141">    }</span>
+
+    /**
+     * Creates a named CycleNumberAxis with the given period.
+     *
+     * @param period  the period.
+     * @param label  the label.
+     */
+    public CyclicNumberAxis(double period, String label) {
+<span class="nc" id="L150">        this(0, period, label);</span>
+<span class="nc" id="L151">    }</span>
+
+    /**
+     * Creates a named CycleNumberAxis with the given period and offset.
+     *
+     * @param period  the period.
+     * @param offset  the offset.
+     * @param label  the label.
+     */
+    public CyclicNumberAxis(double period, double offset, String label) {
+<span class="fc" id="L161">        super(label);</span>
+<span class="fc" id="L162">        this.period = period;</span>
+<span class="fc" id="L163">        this.offset = offset;</span>
+<span class="fc" id="L164">        setFixedAutoRange(period);</span>
+<span class="fc" id="L165">    }</span>
+
+    public CyclicNumberAxisAdvanceLine getAdvanceLine() {
+<span class="fc" id="L168">        return this.advanceLine;</span>
+    }
+
+    /**
+     * The cycle bound can be associated either with the current or with the
+     * last cycle.  It's up to the user's choice to decide which, as this is
+     * just a convention.  By default, the cycle bound is mapped to the current
+     * cycle.
+     * &lt;br&gt;
+     * Note that this has no effect on visual appearance, as the cycle bound is
+     * mapped successively for both axis ends. Use this function for correct
+     * results in translateValueToJava2D.
+     *
+     * @return {@code true} if the cycle bound is mapped to the last
+     *         cycle, {@code false} if it is bound to the current cycle
+     *         (default)
+     */
+    public boolean isBoundMappedToLastCycle() {
+<span class="fc" id="L186">        return this.boundMappedToLastCycle;</span>
+    }
+
+    /**
+     * The cycle bound can be associated either with the current or with the
+     * last cycle.  It's up to the user's choice to decide which, as this is
+     * just a convention. By default, the cycle bound is mapped to the current
+     * cycle.
+     * &lt;br&gt;
+     * Note that this has no effect on visual appearance, as the cycle bound is
+     * mapped successively for both axis ends. Use this function for correct
+     * results in valueToJava2D.
+     *
+     * @param boundMappedToLastCycle Set it to true to map the cycle bound to
+     *        the last cycle.
+     */
+    public void setBoundMappedToLastCycle(boolean boundMappedToLastCycle) {
+<span class="fc" id="L203">        this.boundMappedToLastCycle = boundMappedToLastCycle;</span>
+<span class="fc" id="L204">    }</span>
+
+    /**
+     * Selects a tick unit when the axis is displayed horizontally.
+     *
+     * @param g2  the graphics device.
+     * @param drawArea  the drawing area.
+     * @param dataArea  the data area.
+     * @param edge  the side of the rectangle on which the axis is displayed.
+     */
+    protected void selectHorizontalAutoTickUnit(Graphics2D g2,
+            Rectangle2D drawArea, Rectangle2D dataArea, RectangleEdge edge) {
+
+<span class="nc" id="L217">        double tickLabelWidth</span>
+<span class="nc" id="L218">            = estimateMaximumTickLabelWidth(g2, getTickUnit());</span>
+
+        // Compute number of labels
+<span class="nc" id="L221">        double n = getRange().getLength()</span>
+<span class="nc" id="L222">                   * tickLabelWidth / dataArea.getWidth();</span>
+
+<span class="nc" id="L224">        setTickUnit(</span>
+<span class="nc" id="L225">                (NumberTickUnit) getStandardTickUnits().getCeilingTickUnit(n),</span>
+                false, false);
+
+<span class="nc" id="L228">     }</span>
+
+    /**
+     * Selects a tick unit when the axis is displayed vertically.
+     *
+     * @param g2  the graphics device.
+     * @param drawArea  the drawing area.
+     * @param dataArea  the data area.
+     * @param edge  the side of the rectangle on which the axis is displayed.
+     */
+    protected void selectVerticalAutoTickUnit(Graphics2D g2,
+            Rectangle2D drawArea, Rectangle2D dataArea, RectangleEdge edge) {
+
+<span class="nc" id="L241">        double tickLabelWidth</span>
+<span class="nc" id="L242">            = estimateMaximumTickLabelWidth(g2, getTickUnit());</span>
+
+        // Compute number of labels
+<span class="nc" id="L245">        double n = getRange().getLength()</span>
+<span class="nc" id="L246">                   * tickLabelWidth / dataArea.getHeight();</span>
+
+<span class="nc" id="L248">        setTickUnit(</span>
+<span class="nc" id="L249">            (NumberTickUnit) getStandardTickUnits().getCeilingTickUnit(n),</span>
+            false, false);
+<span class="nc" id="L251">     }</span>
+
+    /**
+     * A special Number tick that also hold information about the cycle bound
+     * mapping for this tick.  This is especially useful for having a tick at
+     * each axis end with the cycle bound value.  See also
+     * isBoundMappedToLastCycle()
+     */
+    protected static class CycleBoundTick extends NumberTick {
+
+        /** Map to last cycle. */
+        public boolean mapToLastCycle;
+
+        /**
+         * Creates a new tick.
+         *
+         * @param mapToLastCycle  map to last cycle?
+         * @param number  the number.
+         * @param label  the label.
+         * @param textAnchor  the text anchor.
+         * @param rotationAnchor  the rotation anchor.
+         * @param angle  the rotation angle.
+         */
+        public CycleBoundTick(boolean mapToLastCycle, Number number,
+                              String label, TextAnchor textAnchor,
+                              TextAnchor rotationAnchor, double angle) {
+<span class="nc" id="L277">            super(number, label, textAnchor, rotationAnchor, angle);</span>
+<span class="nc" id="L278">            this.mapToLastCycle = mapToLastCycle;</span>
+<span class="nc" id="L279">        }</span>
+    }
+
+    /**
+     * Calculates the anchor point for a tick.
+     *
+     * @param tick  the tick.
+     * @param cursor  the cursor.
+     * @param dataArea  the data area.
+     * @param edge  the side on which the axis is displayed.
+     *
+     * @return The anchor point.
+     */
+    @Override
+    protected float[] calculateAnchorPoint(ValueTick tick, double cursor,
+            Rectangle2D dataArea, RectangleEdge edge) {
+<span class="nc bnc" id="L295" title="All 2 branches missed.">        if (tick instanceof CycleBoundTick) {</span>
+<span class="nc" id="L296">            boolean mapsav = this.boundMappedToLastCycle;</span>
+<span class="nc" id="L297">            this.boundMappedToLastCycle</span>
+                = ((CycleBoundTick) tick).mapToLastCycle;
+<span class="nc" id="L299">            float[] ret = super.calculateAnchorPoint(</span>
+                tick, cursor, dataArea, edge
+            );
+<span class="nc" id="L302">            this.boundMappedToLastCycle = mapsav;</span>
+<span class="nc" id="L303">            return ret;</span>
+        }
+<span class="nc" id="L305">        return super.calculateAnchorPoint(tick, cursor, dataArea, edge);</span>
+    }
+
+
+
+    /**
+     * Builds a list of ticks for the axis.  This method is called when the
+     * axis is at the top or bottom of the chart (so the axis is &quot;horizontal&quot;).
+     *
+     * @param g2  the graphics device.
+     * @param dataArea  the data area.
+     * @param edge  the edge.
+     *
+     * @return A list of ticks.
+     */
+    @Override
+    protected List refreshTicksHorizontal(Graphics2D g2, Rectangle2D dataArea,
+            RectangleEdge edge) {
+
+<span class="nc" id="L324">        List result = new java.util.ArrayList();</span>
+
+<span class="nc" id="L326">        Font tickLabelFont = tickLabel.getTickLabelFont();</span>
+<span class="nc" id="L327">        g2.setFont(tickLabelFont);</span>
+
+<span class="nc bnc" id="L329" title="All 2 branches missed.">        if (isAutoTickUnitSelection()) {</span>
+<span class="nc" id="L330">            selectAutoTickUnit(g2, dataArea, edge);</span>
+        }
+
+<span class="nc" id="L333">        double unit = getTickUnit().getSize();</span>
+<span class="nc" id="L334">        double cycleBound = getCycleBound();</span>
+<span class="nc" id="L335">        double currentTickValue = Math.ceil(cycleBound / unit) * unit;</span>
+<span class="nc" id="L336">        double upperValue = getRange().getUpperBound();</span>
+<span class="nc" id="L337">        boolean cycled = false;</span>
+
+<span class="nc" id="L339">        boolean boundMapping = this.boundMappedToLastCycle;</span>
+<span class="nc" id="L340">        this.boundMappedToLastCycle = false;</span>
+
+<span class="nc" id="L342">        CycleBoundTick lastTick = null;</span>
+<span class="nc" id="L343">        float lastX = 0.0f;</span>
+
+<span class="nc bnc" id="L345" title="All 2 branches missed.">        if (upperValue == cycleBound) {</span>
+<span class="nc" id="L346">            currentTickValue = calculateLowestVisibleTickValue();</span>
+<span class="nc" id="L347">            cycled = true;</span>
+<span class="nc" id="L348">            this.boundMappedToLastCycle = true;</span>
+        }
+
+<span class="nc bnc" id="L351" title="All 2 branches missed.">        while (currentTickValue &lt;= upperValue) {</span>
+
+            // Cycle when necessary
+<span class="nc" id="L354">            boolean cyclenow = false;</span>
+<span class="nc bnc" id="L355" title="All 4 branches missed.">            if ((currentTickValue + unit &gt; upperValue) &amp;&amp; !cycled) {</span>
+<span class="nc" id="L356">                cyclenow = true;</span>
+            }
+
+<span class="nc" id="L359">            double xx = valueToJava2D(currentTickValue, dataArea, edge);</span>
+            String tickLabel;
+<span class="nc" id="L361">            NumberFormat formatter = getNumberFormatOverride();</span>
+<span class="nc bnc" id="L362" title="All 2 branches missed.">            if (formatter != null) {</span>
+<span class="nc" id="L363">                tickLabel = formatter.format(currentTickValue);</span>
+            }
+            else {
+<span class="nc" id="L366">                tickLabel = getTickUnit().valueToString(currentTickValue);</span>
+            }
+<span class="nc" id="L368">            float x = (float) xx;</span>
+            TextAnchor anchor;
+            TextAnchor rotationAnchor;
+<span class="nc" id="L371">            double angle = 0.0;</span>
+<span class="nc bnc" id="L372" title="All 2 branches missed.">            if (isVerticalTickLabels()) {</span>
+<span class="nc bnc" id="L373" title="All 2 branches missed.">                if (edge == RectangleEdge.TOP) {</span>
+<span class="nc" id="L374">                    angle = Math.PI / 2.0;</span>
+                }
+                else {
+<span class="nc" id="L377">                    angle = -Math.PI / 2.0;</span>
+                }
+<span class="nc" id="L379">                anchor = TextAnchor.CENTER_RIGHT;</span>
+                // If tick overlap when cycling, update last tick too
+<span class="nc bnc" id="L381" title="All 6 branches missed.">                if ((lastTick != null) &amp;&amp; (lastX == x)</span>
+                        &amp;&amp; (currentTickValue != cycleBound)) {
+<span class="nc bnc" id="L383" title="All 2 branches missed.">                    anchor = isInverted()</span>
+<span class="nc" id="L384">                        ? TextAnchor.TOP_RIGHT : TextAnchor.BOTTOM_RIGHT;</span>
+<span class="nc" id="L385">                    result.remove(result.size() - 1);</span>
+<span class="nc" id="L386">                    result.add(new CycleBoundTick(</span>
+<span class="nc" id="L387">                        this.boundMappedToLastCycle, lastTick.getNumber(),</span>
+<span class="nc" id="L388">                        lastTick.getText(), anchor, anchor,</span>
+<span class="nc" id="L389">                        lastTick.getAngle())</span>
+                    );
+<span class="nc" id="L391">                    this.internalMarkerWhenTicksOverlap = true;</span>
+<span class="nc bnc" id="L392" title="All 2 branches missed.">                    anchor = isInverted()</span>
+<span class="nc" id="L393">                        ? TextAnchor.BOTTOM_RIGHT : TextAnchor.TOP_RIGHT;</span>
+                }
+<span class="nc" id="L395">                rotationAnchor = anchor;</span>
+            }
+            else {
+<span class="nc bnc" id="L398" title="All 2 branches missed.">                if (edge == RectangleEdge.TOP) {</span>
+<span class="nc" id="L399">                    anchor = TextAnchor.BOTTOM_CENTER;</span>
+<span class="nc bnc" id="L400" title="All 6 branches missed.">                    if ((lastTick != null) &amp;&amp; (lastX == x)</span>
+                            &amp;&amp; (currentTickValue != cycleBound)) {
+<span class="nc bnc" id="L402" title="All 2 branches missed.">                        anchor = isInverted()</span>
+<span class="nc" id="L403">                            ? TextAnchor.BOTTOM_LEFT : TextAnchor.BOTTOM_RIGHT;</span>
+<span class="nc" id="L404">                        result.remove(result.size() - 1);</span>
+<span class="nc" id="L405">                        result.add(new CycleBoundTick(</span>
+<span class="nc" id="L406">                            this.boundMappedToLastCycle, lastTick.getNumber(),</span>
+<span class="nc" id="L407">                            lastTick.getText(), anchor, anchor,</span>
+<span class="nc" id="L408">                            lastTick.getAngle())</span>
+                        );
+<span class="nc" id="L410">                        this.internalMarkerWhenTicksOverlap = true;</span>
+<span class="nc bnc" id="L411" title="All 2 branches missed.">                        anchor = isInverted()</span>
+<span class="nc" id="L412">                            ? TextAnchor.BOTTOM_RIGHT : TextAnchor.BOTTOM_LEFT;</span>
+                    }
+<span class="nc" id="L414">                    rotationAnchor = anchor;</span>
+                }
+                else {
+<span class="nc" id="L417">                    anchor = TextAnchor.TOP_CENTER;</span>
+<span class="nc bnc" id="L418" title="All 6 branches missed.">                    if ((lastTick != null) &amp;&amp; (lastX == x)</span>
+                            &amp;&amp; (currentTickValue != cycleBound)) {
+<span class="nc bnc" id="L420" title="All 2 branches missed.">                        anchor = isInverted()</span>
+<span class="nc" id="L421">                            ? TextAnchor.TOP_LEFT : TextAnchor.TOP_RIGHT;</span>
+<span class="nc" id="L422">                        result.remove(result.size() - 1);</span>
+<span class="nc" id="L423">                        result.add(new CycleBoundTick(</span>
+<span class="nc" id="L424">                            this.boundMappedToLastCycle, lastTick.getNumber(),</span>
+<span class="nc" id="L425">                            lastTick.getText(), anchor, anchor,</span>
+<span class="nc" id="L426">                            lastTick.getAngle())</span>
+                        );
+<span class="nc" id="L428">                        this.internalMarkerWhenTicksOverlap = true;</span>
+<span class="nc bnc" id="L429" title="All 2 branches missed.">                        anchor = isInverted()</span>
+<span class="nc" id="L430">                            ? TextAnchor.TOP_RIGHT : TextAnchor.TOP_LEFT;</span>
+                    }
+<span class="nc" id="L432">                    rotationAnchor = anchor;</span>
+                }
+            }
+
+<span class="nc" id="L436">            CycleBoundTick tick = new CycleBoundTick(this.boundMappedToLastCycle, </span>
+<span class="nc" id="L437">                    currentTickValue, tickLabel, anchor, rotationAnchor, angle);</span>
+<span class="nc bnc" id="L438" title="All 2 branches missed.">            if (currentTickValue == cycleBound) {</span>
+<span class="nc" id="L439">                this.internalMarkerCycleBoundTick = tick;</span>
+            }
+<span class="nc" id="L441">            result.add(tick);</span>
+<span class="nc" id="L442">            lastTick = tick;</span>
+<span class="nc" id="L443">            lastX = x;</span>
+
+<span class="nc" id="L445">            currentTickValue += unit;</span>
+
+<span class="nc bnc" id="L447" title="All 2 branches missed.">            if (cyclenow) {</span>
+<span class="nc" id="L448">                currentTickValue = calculateLowestVisibleTickValue();</span>
+<span class="nc" id="L449">                upperValue = cycleBound;</span>
+<span class="nc" id="L450">                cycled = true;</span>
+<span class="nc" id="L451">                this.boundMappedToLastCycle = true;</span>
+            }
+
+<span class="nc" id="L454">        }</span>
+<span class="nc" id="L455">        this.boundMappedToLastCycle = boundMapping;</span>
+<span class="nc" id="L456">        return result;</span>
+
+    }
+
+    /**
+     * Builds a list of ticks for the axis.  This method is called when the
+     * axis is at the left or right of the chart (so the axis is &quot;vertical&quot;).
+     *
+     * @param g2  the graphics device.
+     * @param dataArea  the data area.
+     * @param edge  the edge.
+     *
+     * @return A list of ticks.
+     */
+    protected List refreshVerticalTicks(Graphics2D g2, Rectangle2D dataArea,
+            RectangleEdge edge) {
+
+<span class="nc" id="L473">        List result = new java.util.ArrayList();</span>
+<span class="nc" id="L474">        result.clear();</span>
+
+<span class="nc" id="L476">        Font tickLabelFont = tickLabel.getTickLabelFont();</span>
+<span class="nc" id="L477">        g2.setFont(tickLabelFont);</span>
+<span class="nc bnc" id="L478" title="All 2 branches missed.">        if (isAutoTickUnitSelection()) {</span>
+<span class="nc" id="L479">            selectAutoTickUnit(g2, dataArea, edge);</span>
+        }
+
+<span class="nc" id="L482">        double unit = getTickUnit().getSize();</span>
+<span class="nc" id="L483">        double cycleBound = getCycleBound();</span>
+<span class="nc" id="L484">        double currentTickValue = Math.ceil(cycleBound / unit) * unit;</span>
+<span class="nc" id="L485">        double upperValue = getRange().getUpperBound();</span>
+<span class="nc" id="L486">        boolean cycled = false;</span>
+
+<span class="nc" id="L488">        boolean boundMapping = this.boundMappedToLastCycle;</span>
+<span class="nc" id="L489">        this.boundMappedToLastCycle = true;</span>
+
+<span class="nc" id="L491">        NumberTick lastTick = null;</span>
+<span class="nc" id="L492">        float lastY = 0.0f;</span>
+
+<span class="nc bnc" id="L494" title="All 2 branches missed.">        if (upperValue == cycleBound) {</span>
+<span class="nc" id="L495">            currentTickValue = calculateLowestVisibleTickValue();</span>
+<span class="nc" id="L496">            cycled = true;</span>
+<span class="nc" id="L497">            this.boundMappedToLastCycle = true;</span>
+        }
+
+<span class="nc bnc" id="L500" title="All 2 branches missed.">        while (currentTickValue &lt;= upperValue) {</span>
+
+            // Cycle when necessary
+<span class="nc" id="L503">            boolean cyclenow = false;</span>
+<span class="nc bnc" id="L504" title="All 4 branches missed.">            if ((currentTickValue + unit &gt; upperValue) &amp;&amp; !cycled) {</span>
+<span class="nc" id="L505">                cyclenow = true;</span>
+            }
+
+<span class="nc" id="L508">            double yy = valueToJava2D(currentTickValue, dataArea, edge);</span>
+            String tickLabel;
+<span class="nc" id="L510">            NumberFormat formatter = getNumberFormatOverride();</span>
+<span class="nc bnc" id="L511" title="All 2 branches missed.">            if (formatter != null) {</span>
+<span class="nc" id="L512">                tickLabel = formatter.format(currentTickValue);</span>
+            }
+            else {
+<span class="nc" id="L515">                tickLabel = getTickUnit().valueToString(currentTickValue);</span>
+            }
+
+<span class="nc" id="L518">            float y = (float) yy;</span>
+            TextAnchor anchor;
+            TextAnchor rotationAnchor;
+<span class="nc" id="L521">            double angle = 0.0;</span>
+<span class="nc bnc" id="L522" title="All 2 branches missed.">            if (isVerticalTickLabels()) {</span>
+
+<span class="nc bnc" id="L524" title="All 2 branches missed.">                if (edge == RectangleEdge.LEFT) {</span>
+<span class="nc" id="L525">                    anchor = TextAnchor.BOTTOM_CENTER;</span>
+<span class="nc bnc" id="L526" title="All 6 branches missed.">                    if ((lastTick != null) &amp;&amp; (lastY == y)</span>
+                            &amp;&amp; (currentTickValue != cycleBound)) {
+<span class="nc bnc" id="L528" title="All 2 branches missed.">                        anchor = isInverted()</span>
+<span class="nc" id="L529">                            ? TextAnchor.BOTTOM_LEFT : TextAnchor.BOTTOM_RIGHT;</span>
+<span class="nc" id="L530">                        result.remove(result.size() - 1);</span>
+<span class="nc" id="L531">                        result.add(new CycleBoundTick(</span>
+<span class="nc" id="L532">                            this.boundMappedToLastCycle, lastTick.getNumber(),</span>
+<span class="nc" id="L533">                            lastTick.getText(), anchor, anchor,</span>
+<span class="nc" id="L534">                            lastTick.getAngle())</span>
+                        );
+<span class="nc" id="L536">                        this.internalMarkerWhenTicksOverlap = true;</span>
+<span class="nc bnc" id="L537" title="All 2 branches missed.">                        anchor = isInverted()</span>
+<span class="nc" id="L538">                            ? TextAnchor.BOTTOM_RIGHT : TextAnchor.BOTTOM_LEFT;</span>
+                    }
+<span class="nc" id="L540">                    rotationAnchor = anchor;</span>
+<span class="nc" id="L541">                    angle = -Math.PI / 2.0;</span>
+                }
+                else {
+<span class="nc" id="L544">                    anchor = TextAnchor.BOTTOM_CENTER;</span>
+<span class="nc bnc" id="L545" title="All 6 branches missed.">                    if ((lastTick != null) &amp;&amp; (lastY == y)</span>
+                            &amp;&amp; (currentTickValue != cycleBound)) {
+<span class="nc bnc" id="L547" title="All 2 branches missed.">                        anchor = isInverted()</span>
+<span class="nc" id="L548">                            ? TextAnchor.BOTTOM_RIGHT : TextAnchor.BOTTOM_LEFT;</span>
+<span class="nc" id="L549">                        result.remove(result.size() - 1);</span>
+<span class="nc" id="L550">                        result.add(new CycleBoundTick(</span>
+<span class="nc" id="L551">                            this.boundMappedToLastCycle, lastTick.getNumber(),</span>
+<span class="nc" id="L552">                            lastTick.getText(), anchor, anchor,</span>
+<span class="nc" id="L553">                            lastTick.getAngle())</span>
+                        );
+<span class="nc" id="L555">                        this.internalMarkerWhenTicksOverlap = true;</span>
+<span class="nc bnc" id="L556" title="All 2 branches missed.">                        anchor = isInverted()</span>
+<span class="nc" id="L557">                            ? TextAnchor.BOTTOM_LEFT : TextAnchor.BOTTOM_RIGHT;</span>
+                    }
+<span class="nc" id="L559">                    rotationAnchor = anchor;</span>
+<span class="nc" id="L560">                    angle = Math.PI / 2.0;</span>
+                }
+            }
+            else {
+<span class="nc bnc" id="L564" title="All 2 branches missed.">                if (edge == RectangleEdge.LEFT) {</span>
+<span class="nc" id="L565">                    anchor = TextAnchor.CENTER_RIGHT;</span>
+<span class="nc bnc" id="L566" title="All 6 branches missed.">                    if ((lastTick != null) &amp;&amp; (lastY == y)</span>
+                            &amp;&amp; (currentTickValue != cycleBound)) {
+<span class="nc bnc" id="L568" title="All 2 branches missed.">                        anchor = isInverted()</span>
+<span class="nc" id="L569">                            ? TextAnchor.BOTTOM_RIGHT : TextAnchor.TOP_RIGHT;</span>
+<span class="nc" id="L570">                        result.remove(result.size() - 1);</span>
+<span class="nc" id="L571">                        result.add(new CycleBoundTick(</span>
+<span class="nc" id="L572">                            this.boundMappedToLastCycle, lastTick.getNumber(),</span>
+<span class="nc" id="L573">                            lastTick.getText(), anchor, anchor,</span>
+<span class="nc" id="L574">                            lastTick.getAngle())</span>
+                        );
+<span class="nc" id="L576">                        this.internalMarkerWhenTicksOverlap = true;</span>
+<span class="nc bnc" id="L577" title="All 2 branches missed.">                        anchor = isInverted()</span>
+<span class="nc" id="L578">                            ? TextAnchor.TOP_RIGHT : TextAnchor.BOTTOM_RIGHT;</span>
+                    }
+<span class="nc" id="L580">                    rotationAnchor = anchor;</span>
+                }
+                else {
+<span class="nc" id="L583">                    anchor = TextAnchor.CENTER_LEFT;</span>
+<span class="nc bnc" id="L584" title="All 6 branches missed.">                    if ((lastTick != null) &amp;&amp; (lastY == y)</span>
+                            &amp;&amp; (currentTickValue != cycleBound)) {
+<span class="nc bnc" id="L586" title="All 2 branches missed.">                        anchor = isInverted()</span>
+<span class="nc" id="L587">                            ? TextAnchor.BOTTOM_LEFT : TextAnchor.TOP_LEFT;</span>
+<span class="nc" id="L588">                        result.remove(result.size() - 1);</span>
+<span class="nc" id="L589">                        result.add(new CycleBoundTick(</span>
+<span class="nc" id="L590">                            this.boundMappedToLastCycle, lastTick.getNumber(),</span>
+<span class="nc" id="L591">                            lastTick.getText(), anchor, anchor,</span>
+<span class="nc" id="L592">                            lastTick.getAngle())</span>
+                        );
+<span class="nc" id="L594">                        this.internalMarkerWhenTicksOverlap = true;</span>
+<span class="nc bnc" id="L595" title="All 2 branches missed.">                        anchor = isInverted()</span>
+<span class="nc" id="L596">                            ? TextAnchor.TOP_LEFT : TextAnchor.BOTTOM_LEFT;</span>
+                    }
+<span class="nc" id="L598">                    rotationAnchor = anchor;</span>
+                }
+            }
+
+<span class="nc" id="L602">            CycleBoundTick tick = new CycleBoundTick(this.boundMappedToLastCycle, </span>
+<span class="nc" id="L603">                    currentTickValue, tickLabel, anchor, rotationAnchor, angle);</span>
+<span class="nc bnc" id="L604" title="All 2 branches missed.">            if (currentTickValue == cycleBound) {</span>
+<span class="nc" id="L605">                this.internalMarkerCycleBoundTick = tick;</span>
+            }
+<span class="nc" id="L607">            result.add(tick);</span>
+<span class="nc" id="L608">            lastTick = tick;</span>
+<span class="nc" id="L609">            lastY = y;</span>
+
+<span class="nc bnc" id="L611" title="All 2 branches missed.">            if (currentTickValue == cycleBound) {</span>
+<span class="nc" id="L612">                this.internalMarkerCycleBoundTick = tick;</span>
+            }
+
+<span class="nc" id="L615">            currentTickValue += unit;</span>
+
+<span class="nc bnc" id="L617" title="All 2 branches missed.">            if (cyclenow) {</span>
+<span class="nc" id="L618">                currentTickValue = calculateLowestVisibleTickValue();</span>
+<span class="nc" id="L619">                upperValue = cycleBound;</span>
+<span class="nc" id="L620">                cycled = true;</span>
+<span class="nc" id="L621">                this.boundMappedToLastCycle = false;</span>
+            }
+
+<span class="nc" id="L624">        }</span>
+<span class="nc" id="L625">        this.boundMappedToLastCycle = boundMapping;</span>
+<span class="nc" id="L626">        return result;</span>
+    }
+
+    /**
+     * Converts a coordinate from Java 2D space to data space.
+     *
+     * @param java2DValue  the coordinate in Java2D space.
+     * @param dataArea  the data area.
+     * @param edge  the edge.
+     *
+     * @return The data value.
+     */
+    @Override
+    public double java2DToValue(double java2DValue, Rectangle2D dataArea,
+            RectangleEdge edge) {
+<span class="nc" id="L641">        Range range = getRange();</span>
+
+<span class="nc" id="L643">        double vmax = range.getUpperBound();</span>
+<span class="nc" id="L644">        double vp = getCycleBound();</span>
+
+<span class="nc" id="L646">        double jmin = 0.0;</span>
+<span class="nc" id="L647">        double jmax = 0.0;</span>
+<span class="nc bnc" id="L648" title="All 2 branches missed.">        if (RectangleEdge.isTopOrBottom(edge)) {</span>
+<span class="nc" id="L649">            jmin = dataArea.getMinX();</span>
+<span class="nc" id="L650">            jmax = dataArea.getMaxX();</span>
+        }
+<span class="nc bnc" id="L652" title="All 2 branches missed.">        else if (RectangleEdge.isLeftOrRight(edge)) {</span>
+<span class="nc" id="L653">            jmin = dataArea.getMaxY();</span>
+<span class="nc" id="L654">            jmax = dataArea.getMinY();</span>
+        }
+
+<span class="nc bnc" id="L657" title="All 2 branches missed.">        if (isInverted()) {</span>
+<span class="nc" id="L658">            double jbreak = jmax - (vmax - vp) * (jmax - jmin) / this.period;</span>
+<span class="nc bnc" id="L659" title="All 2 branches missed.">            if (java2DValue &gt;= jbreak) {</span>
+<span class="nc" id="L660">                return vp + (jmax - java2DValue) * this.period / (jmax - jmin);</span>
+            }
+            else {
+<span class="nc" id="L663">                return vp - (java2DValue - jmin) * this.period / (jmax - jmin);</span>
+            }
+        }
+        else {
+<span class="nc" id="L667">            double jbreak = (vmax - vp) * (jmax - jmin) / this.period + jmin;</span>
+<span class="nc bnc" id="L668" title="All 2 branches missed.">            if (java2DValue &lt;= jbreak) {</span>
+<span class="nc" id="L669">                return vp + (java2DValue - jmin) * this.period / (jmax - jmin);</span>
+            }
+            else {
+<span class="nc" id="L672">                return vp - (jmax - java2DValue) * this.period / (jmax - jmin);</span>
+            }
+        }
+    }
+
+    /**
+     * Translates a value from data space to Java 2D space.
+     *
+     * @param value  the data value.
+     * @param dataArea  the data area.
+     * @param edge  the edge.
+     *
+     * @return The Java 2D value.
+     */
+    @Override
+    public double valueToJava2D(double value, Rectangle2D dataArea,
+            RectangleEdge edge) {
+<span class="nc" id="L689">        Range range = getRange();</span>
+
+<span class="nc" id="L691">        double vmin = range.getLowerBound();</span>
+<span class="nc" id="L692">        double vmax = range.getUpperBound();</span>
+<span class="nc" id="L693">        double vp = getCycleBound();</span>
+
+<span class="nc bnc" id="L695" title="All 4 branches missed.">        if ((value &lt; vmin) || (value &gt; vmax)) {</span>
+<span class="nc" id="L696">            return Double.NaN;</span>
+        }
+
+
+<span class="nc" id="L700">        double jmin = 0.0;</span>
+<span class="nc" id="L701">        double jmax = 0.0;</span>
+<span class="nc bnc" id="L702" title="All 2 branches missed.">        if (RectangleEdge.isTopOrBottom(edge)) {</span>
+<span class="nc" id="L703">            jmin = dataArea.getMinX();</span>
+<span class="nc" id="L704">            jmax = dataArea.getMaxX();</span>
+        }
+<span class="nc bnc" id="L706" title="All 2 branches missed.">        else if (RectangleEdge.isLeftOrRight(edge)) {</span>
+<span class="nc" id="L707">            jmax = dataArea.getMinY();</span>
+<span class="nc" id="L708">            jmin = dataArea.getMaxY();</span>
+        }
+
+<span class="nc bnc" id="L711" title="All 2 branches missed.">        if (isInverted()) {</span>
+<span class="nc bnc" id="L712" title="All 2 branches missed.">            if (value == vp) {</span>
+<span class="nc bnc" id="L713" title="All 2 branches missed.">                return this.boundMappedToLastCycle ? jmin : jmax;</span>
+            }
+<span class="nc bnc" id="L715" title="All 2 branches missed.">            else if (value &gt; vp) {</span>
+<span class="nc" id="L716">                return jmax - (value - vp) * (jmax - jmin) / this.period;</span>
+            }
+            else {
+<span class="nc" id="L719">                return jmin + (vp - value) * (jmax - jmin) / this.period;</span>
+            }
+        }
+        else {
+<span class="nc bnc" id="L723" title="All 2 branches missed.">            if (value == vp) {</span>
+<span class="nc bnc" id="L724" title="All 2 branches missed.">                return this.boundMappedToLastCycle ? jmax : jmin;</span>
+            }
+<span class="nc bnc" id="L726" title="All 2 branches missed.">            else if (value &gt;= vp) {</span>
+<span class="nc" id="L727">                return jmin + (value - vp) * (jmax - jmin) / this.period;</span>
+            }
+            else {
+<span class="nc" id="L730">                return jmax - (vp - value) * (jmax - jmin) / this.period;</span>
+            }
+        }
+    }
+
+    /**
+     * This function is nearly useless since the auto range is fixed for this
+     * class to the period.  The period is extended if necessary to fit the
+     * minimum size.
+     *
+     * @param size  the size.
+     * @param notify  notify?
+     *
+     * @see org.jfree.chart.axis.ValueAxis#setAutoRangeMinimumSize(double,
+     *      boolean)
+     */
+    @Override
+    public void setAutoRangeMinimumSize(double size, boolean notify) {
+<span class="nc bnc" id="L748" title="All 2 branches missed.">        if (size &gt; this.period) {</span>
+<span class="nc" id="L749">            this.period = size;</span>
+        }
+<span class="nc" id="L751">        super.setAutoRangeMinimumSize(size, notify);</span>
+<span class="nc" id="L752">    }</span>
+
+    /**
+     * The auto range is fixed for this class to the period by default.
+     * This function will thus set a new period.
+     *
+     * @param length  the length.
+     *
+     * @see org.jfree.chart.axis.ValueAxis#setFixedAutoRange(double)
+     */
+    @Override
+    public void setFixedAutoRange(double length) {
+<span class="fc" id="L764">        this.period = length;</span>
+<span class="fc" id="L765">        super.setFixedAutoRange(length);</span>
+<span class="fc" id="L766">    }</span>
+
+    /**
+     * Sets a new axis range. The period is extended to fit the range size, if
+     * necessary.
+     *
+     * @param range  the range.
+     * @param turnOffAutoRange  switch off the auto range.
+     * @param notify notify?
+     *
+     * @see org.jfree.chart.axis.ValueAxis#setRange(Range, boolean, boolean)
+     */
+    @Override
+    public void setRange(Range range, boolean turnOffAutoRange,
+            boolean notify) {
+<span class="nc" id="L781">        double size = range.getUpperBound() - range.getLowerBound();</span>
+<span class="nc bnc" id="L782" title="All 2 branches missed.">        if (size &gt; this.period) {</span>
+<span class="nc" id="L783">            this.period = size;</span>
+        }
+<span class="nc" id="L785">        super.setRange(range, turnOffAutoRange, notify);</span>
+<span class="nc" id="L786">    }</span>
+
+    /**
+     * The cycle bound is defined as the higest value x such that
+     * &quot;offset + period * i = x&quot;, with i and integer and x &amp;lt;
+     * range.getUpperBound() This is the value which is at both ends of the
+     * axis :  x...up|low...x
+     * The values from x to up are the valued in the current cycle.
+     * The values from low to x are the valued in the previous cycle.
+     *
+     * @return The cycle bound.
+     */
+    public double getCycleBound() {
+<span class="nc" id="L799">        return Math.floor(</span>
+<span class="nc" id="L800">            (getRange().getUpperBound() - this.offset) / this.period</span>
+        ) * this.period + this.offset;
+    }
+
+    /**
+     * The cycle bound is a multiple of the period, plus optionally a start
+     * offset.
+     * &lt;pre&gt;cb = n * period + offset&lt;/pre&gt;
+     *
+     * @return The current offset.
+     *
+     * @see #getCycleBound()
+     */
+    public double getOffset() {
+<span class="nc" id="L814">        return this.offset;</span>
+    }
+
+    /**
+     * The cycle bound is a multiple of the period, plus optionally a start
+     * offset.
+     * &lt;pre&gt;cb = n * period + offset&lt;/pre&gt;
+     *
+     * @param offset The offset to set.
+     *
+     * @see #getCycleBound()
+     */
+    public void setOffset(double offset) {
+<span class="fc" id="L827">        this.offset = offset;</span>
+<span class="fc" id="L828">    }</span>
+
+    /**
+     * The cycle bound is a multiple of the period, plus optionally a start
+     * offset.
+     * &lt;pre&gt;cb = n * period + offset&lt;/pre&gt;
+     *
+     * @return The current period.
+     *
+     * @see #getCycleBound()
+     */
+    public double getPeriod() {
+<span class="nc" id="L840">        return this.period;</span>
+    }
+
+    /**
+     * The cycle bound is a multiple of the period, plus optionally a start
+     * offset.
+     * &lt;pre&gt;cb = n * period + offset&lt;/pre&gt;
+     *
+     * @param period The period to set.
+     *
+     * @see #getCycleBound()
+     */
+    public void setPeriod(double period) {
+<span class="fc" id="L853">        this.period = period;</span>
+<span class="fc" id="L854">    }</span>
+
+    private void drawMark(Graphics2D g2, RectangleEdge edge, double cursor, double ol, double xx, double il){
+<span class="nc" id="L857">        Line2D mark = null;</span>
+<span class="nc" id="L858">        g2.setStroke(tickMarks.getTickMarkStroke());</span>
+<span class="nc" id="L859">        g2.setPaint(tickMarks.getTickMarkPaint());</span>
+<span class="nc bnc" id="L860" title="All 2 branches missed.">        if (edge == RectangleEdge.LEFT) {</span>
+<span class="nc" id="L861">            mark = new Line2D.Double(cursor - ol, xx, cursor + il, xx);</span>
+        }
+<span class="nc bnc" id="L863" title="All 2 branches missed.">        else if (edge == RectangleEdge.RIGHT) {</span>
+<span class="nc" id="L864">            mark = new Line2D.Double(cursor + ol, xx, cursor - il, xx);</span>
+        }
+<span class="nc bnc" id="L866" title="All 2 branches missed.">        else if (edge == RectangleEdge.TOP) {</span>
+<span class="nc" id="L867">            mark = new Line2D.Double(xx, cursor - ol, xx, cursor + il);</span>
+        }
+<span class="nc bnc" id="L869" title="All 2 branches missed.">        else if (edge == RectangleEdge.BOTTOM) {</span>
+<span class="nc" id="L870">            mark = new Line2D.Double(xx, cursor + ol, xx, cursor - il);</span>
+        }
+<span class="nc" id="L872">        g2.draw(mark);</span>
+<span class="nc" id="L873">    }</span>
+
+    private double getOL(Graphics2D g2){
+        double ol;
+<span class="nc" id="L877">        FontMetrics fm = g2.getFontMetrics(tickLabel.getTickLabelFont());</span>
+<span class="nc bnc" id="L878" title="All 2 branches missed.">        if (isVerticalTickLabels()) {</span>
+<span class="nc" id="L879">            ol = fm.getMaxAdvance();</span>
+        }
+        else {
+<span class="nc" id="L882">            ol = fm.getHeight();</span>
+        }
+<span class="nc" id="L884">        return ol;</span>
+    }
+
+    /**
+     * Draws the tick marks and labels.
+     *
+     * @param g2  the graphics device.
+     * @param cursor  the cursor.
+     * @param plotArea  the plot area.
+     * @param dataArea  the area inside the axes.
+     * @param edge  the side on which the axis is displayed.
+     *
+     * @return The axis state.
+     */
+    @Override
+    protected AxisState drawTickMarksAndLabels(Graphics2D g2, double cursor,
+            Rectangle2D plotArea, Rectangle2D dataArea, RectangleEdge edge) {
+<span class="nc" id="L901">        this.internalMarkerWhenTicksOverlap = false;</span>
+<span class="nc" id="L902">        AxisState ret = super.drawTickMarksAndLabels(g2, cursor, plotArea,</span>
+                dataArea, edge);
+
+        // continue and separate the labels only if necessary
+<span class="nc bnc" id="L906" title="All 2 branches missed.">        if (!this.internalMarkerWhenTicksOverlap) {</span>
+<span class="nc" id="L907">            return ret;</span>
+        }
+<span class="nc" id="L909">        double ol = getOL(g2);</span>
+<span class="nc" id="L910">        double il = 0;</span>
+<span class="nc bnc" id="L911" title="All 2 branches missed.">        if (tickMarks.isTickMarksVisible()) {</span>
+<span class="nc" id="L912">            float xx = (float) valueToJava2D(getRange().getUpperBound(),</span>
+                    dataArea, edge);
+<span class="nc" id="L914">            drawMark(g2, edge, cursor, ol, xx, il);</span>
+        }
+<span class="nc" id="L916">        return ret;</span>
+    }
+
+    private void drawHelper(Rectangle2D dataArea, RectangleEdge edge, Graphics2D g2, double cursor){
+<span class="nc" id="L920">        double xx = valueToJava2D(getRange().getUpperBound(), dataArea,</span>
+                edge);
+<span class="nc" id="L922">        Line2D mark = null;</span>
+<span class="nc" id="L923">        g2.setStroke(getAdvanceLine().getStroke());</span>
+<span class="nc" id="L924">        g2.setPaint(getAdvanceLine().getPaint());</span>
+<span class="nc bnc" id="L925" title="All 2 branches missed.">        if (edge == RectangleEdge.LEFT) {</span>
+<span class="nc" id="L926">            mark = new Line2D.Double(cursor, xx, cursor</span>
+<span class="nc" id="L927">                    + dataArea.getWidth(), xx);</span>
+        }
+<span class="nc bnc" id="L929" title="All 2 branches missed.">        else if (edge == RectangleEdge.RIGHT) {</span>
+<span class="nc" id="L930">            mark = new Line2D.Double(cursor - dataArea.getWidth(), xx,</span>
+                    cursor, xx);
+        }
+<span class="nc bnc" id="L933" title="All 2 branches missed.">        else if (edge == RectangleEdge.TOP) {</span>
+<span class="nc" id="L934">            mark = new Line2D.Double(xx, cursor + dataArea.getHeight(), xx,</span>
+                    cursor);
+        }
+<span class="nc bnc" id="L937" title="All 2 branches missed.">        else if (edge == RectangleEdge.BOTTOM) {</span>
+<span class="nc" id="L938">            mark = new Line2D.Double(xx, cursor, xx,</span>
+<span class="nc" id="L939">                    cursor - dataArea.getHeight());</span>
+        }
+<span class="nc" id="L941">        g2.draw(mark);</span>
+<span class="nc" id="L942">    }</span>
+
+    /**
+     * Draws the axis.
+     *
+     * @param g2  the graphics device ({@code null} not permitted).
+     * @param cursor  the cursor position.
+     * @param plotArea  the plot area ({@code null} not permitted).
+     * @param dataArea  the data area ({@code null} not permitted).
+     * @param edge  the edge ({@code null} not permitted).
+     * @param plotState  collects information about the plot
+     *                   ({@code null} permitted).
+     *
+     * @return The axis state (never {@code null}).
+     */
+    @Override
+    public AxisState draw(Graphics2D g2, double cursor, Rectangle2D plotArea,
+            Rectangle2D dataArea, RectangleEdge edge, PlotRenderingInfo plotState) {
+
+<span class="nc" id="L961">        AxisState ret = super.draw(g2, cursor, plotArea, dataArea, edge,</span>
+                plotState);
+<span class="nc bnc" id="L963" title="All 2 branches missed.">        if (advanceLine.isVisible()) {</span>
+<span class="nc" id="L964">            drawHelper(dataArea, edge, g2, cursor);</span>
+        }
+<span class="nc" id="L966">        return ret;</span>
+    }
+
+    private void addToSpace(RectangleEdge edge, AxisSpace space, Rectangle2D r){
+<span class="nc bnc" id="L970" title="All 2 branches missed.">        if (RectangleEdge.isTopOrBottom(edge)) {</span>
+<span class="nc bnc" id="L971" title="All 2 branches missed.">            if (isVerticalTickLabels()) {</span>
+<span class="nc" id="L972">                space.add(r.getHeight() / 2, RectangleEdge.RIGHT);</span>
+            }
+            else {
+<span class="nc" id="L975">                space.add(r.getWidth() / 2, RectangleEdge.RIGHT);</span>
+            }
+        }
+<span class="nc bnc" id="L978" title="All 2 branches missed.">        else if (RectangleEdge.isLeftOrRight(edge)) {</span>
+<span class="nc bnc" id="L979" title="All 2 branches missed.">            if (isVerticalTickLabels()) {</span>
+<span class="nc" id="L980">                space.add(r.getWidth() / 2, RectangleEdge.TOP);</span>
+            }
+            else {
+<span class="nc" id="L983">                space.add(r.getHeight() / 2, RectangleEdge.TOP);</span>
+            }
+        }
+<span class="nc" id="L986">    }</span>
+
+    /**
+     * Reserve some space on each axis side because we draw a centered label at
+     * each extremity.
+     *
+     * @param g2  the graphics device.
+     * @param plot  the plot.
+     * @param plotArea  the plot area.
+     * @param edge  the edge.
+     * @param space  the space already reserved.
+     *
+     * @return The reserved space.
+     */
+    @Override
+    public AxisSpace reserveSpace(Graphics2D g2, Plot plot,
+            Rectangle2D plotArea, RectangleEdge edge, AxisSpace space) {
+
+<span class="nc" id="L1004">        this.internalMarkerCycleBoundTick = null;</span>
+<span class="nc" id="L1005">        AxisSpace ret = super.reserveSpace(g2, plot, plotArea, edge, space);</span>
+<span class="nc bnc" id="L1006" title="All 2 branches missed.">        if (this.internalMarkerCycleBoundTick == null) {</span>
+<span class="nc" id="L1007">            return ret;</span>
+        }
+
+<span class="nc" id="L1010">        FontMetrics fm = g2.getFontMetrics(tickLabel.getTickLabelFont());</span>
+<span class="nc" id="L1011">        Rectangle2D r = TextUtils.getTextBounds(this.internalMarkerCycleBoundTick.getText(), g2, fm);</span>
+<span class="nc" id="L1012">        addToSpace(edge, space, r);</span>
+
+<span class="nc" id="L1014">        return ret;</span>
+
+    }
+
+    /**
+     * Provides serialization support.
+     *
+     * @param stream  the output stream.
+     *
+     * @throws IOException  if there is an I/O error.
+     */
+    private void writeObject(ObjectOutputStream stream) throws IOException {
+<span class="fc" id="L1026">        stream.defaultWriteObject();</span>
+<span class="fc" id="L1027">        SerialUtils.writePaint(advanceLine.getPaint(), stream);</span>
+<span class="fc" id="L1028">        SerialUtils.writeStroke(advanceLine.getStroke(), stream);</span>
+<span class="fc" id="L1029">    }</span>
+
+    /**
+     * Provides serialization support.
+     *
+     * @param stream  the input stream.
+     *
+     * @throws IOException  if there is an I/O error.
+     * @throws ClassNotFoundException  if there is a classpath problem.
+     */
+    private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
+<span class="fc" id="L1040">        stream.defaultReadObject();</span>
+<span class="fc" id="L1041">        this.advanceLine = new CyclicNumberAxisAdvanceLine(true);</span>
+<span class="fc" id="L1042">        this.advanceLine.setPaint(SerialUtils.readPaint(stream));</span>
+<span class="fc" id="L1043">        this.advanceLine.setStroke(SerialUtils.readStroke(stream));</span>
+<span class="fc" id="L1044">    }</span>
+
+
+    /**
+     * Tests the axis for equality with another object.
+     *
+     * @param obj  the object to test against.
+     *
+     * @return A boolean.
+     */
+    @Override
+    public boolean equals(Object obj) {
+<span class="pc bpc" id="L1056" title="1 of 2 branches missed.">        if (obj == this) {</span>
+<span class="nc" id="L1057">            return true;</span>
+        }
+<span class="pc bpc" id="L1059" title="1 of 2 branches missed.">        if (!(obj instanceof CyclicNumberAxis)) {</span>
+<span class="nc" id="L1060">            return false;</span>
+        }
+<span class="pc bpc" id="L1062" title="1 of 2 branches missed.">        if (!super.equals(obj)) {</span>
+<span class="nc" id="L1063">            return false;</span>
+        }
+<span class="fc" id="L1065">        CyclicNumberAxis that = (CyclicNumberAxis) obj;</span>
+<span class="fc bfc" id="L1066" title="All 2 branches covered.">        if (this.period != that.period) {</span>
+<span class="fc" id="L1067">            return false;</span>
+        }
+<span class="fc bfc" id="L1069" title="All 2 branches covered.">        if (this.offset != that.offset) {</span>
+<span class="fc" id="L1070">            return false;</span>
+        }
+<span class="fc bfc" id="L1072" title="All 2 branches covered.">        if (!this.advanceLine.equals(that.advanceLine)) {</span>
+<span class="fc" id="L1073">            return false;</span>
+        }
+<span class="fc bfc" id="L1075" title="All 2 branches covered.">        return this.boundMappedToLastCycle == that.boundMappedToLastCycle;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

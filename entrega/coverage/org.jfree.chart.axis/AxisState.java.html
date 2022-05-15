@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AxisState.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.chart.axis</a> &gt; <span class="el_source">AxisState.java</span></div><h1>AxisState.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * --------------
+ * AxisState.java
+ * --------------
+ * (C) Copyright 2003-2022, by David Gilbert and Contributors.
+ *
+ * Original Author:  David Gilbert;
+ * Contributor(s):   -;
+ *
+ */
+
+package org.jfree.chart.axis;
+
+import java.util.ArrayList;
+import java.util.List;
+import org.jfree.chart.api.RectangleEdge;
+import org.jfree.chart.internal.Args;
+
+/**
+ * Instances of this class are used to carry state information for an axis
+ * during the drawing process.  By retaining this information in a separate
+ * object, it is possible for multiple threads to draw the same axis to
+ * different output targets (each drawing will maintain separate state
+ * information).
+ */
+public class AxisState {
+
+    /** The cursor position. */
+    private double cursor;
+
+    /** The axis ticks. */
+    private List&lt;ValueTick&gt; ticks;
+
+    /** The maximum width/height. */
+    private double max;
+
+    /**
+     * Creates a new axis state.
+     */
+    public AxisState() {
+<span class="fc" id="L66">        this(0.0);</span>
+<span class="fc" id="L67">    }</span>
+
+    /**
+     * Creates a new axis state.
+     *
+     * @param cursor  the cursor.
+     */
+<span class="fc" id="L74">    public AxisState(double cursor) {</span>
+<span class="fc" id="L75">        this.cursor = cursor;</span>
+<span class="fc" id="L76">        this.ticks = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L77">    }</span>
+
+    /**
+     * Returns the cursor position.
+     *
+     * @return The cursor position.
+     */
+    public double getCursor() {
+<span class="fc" id="L85">        return this.cursor;</span>
+    }
+
+    /**
+     * Sets the cursor position.
+     *
+     * @param cursor  the cursor position.
+     */
+    public void setCursor(double cursor) {
+<span class="nc" id="L94">        this.cursor = cursor;</span>
+<span class="nc" id="L95">    }</span>
+
+    /**
+     * Moves the cursor outwards by the specified number of units.
+     *
+     * @param units  the units.
+     * @param edge  the edge ({@code null} not permitted).
+     */
+    public void moveCursor(double units, RectangleEdge edge) {
+<span class="fc" id="L104">        Args.nullNotPermitted(edge, &quot;edge&quot;);</span>
+<span class="pc bpc" id="L105" title="3 of 5 branches missed.">        switch (edge) {</span>
+            case TOP:
+<span class="nc" id="L107">                cursorUp(units);</span>
+<span class="nc" id="L108">                break;</span>
+            case BOTTOM:
+<span class="fc" id="L110">                cursorDown(units);</span>
+<span class="fc" id="L111">                break;</span>
+            case LEFT:
+<span class="fc" id="L113">                cursorLeft(units);</span>
+<span class="fc" id="L114">                break;</span>
+            case RIGHT:
+<span class="nc" id="L116">                cursorRight(units);</span>
+<span class="nc" id="L117">                break;</span>
+            default:
+<span class="nc" id="L119">                throw new IllegalStateException(&quot;Unexpected enum value &quot; + edge);</span>
+        }
+<span class="fc" id="L121">    }</span>
+
+    /**
+     * Moves the cursor up by the specified number of Java 2D units.
+     *
+     * @param units  the units.
+     */
+    public void cursorUp(double units) {
+<span class="fc" id="L129">        this.cursor = this.cursor - units;</span>
+<span class="fc" id="L130">    }</span>
+
+    /**
+     * Moves the cursor down by the specified number of Java 2D units.
+     *
+     * @param units  the units.
+     */
+    public void cursorDown(double units) {
+<span class="fc" id="L138">        this.cursor = this.cursor + units;</span>
+<span class="fc" id="L139">    }</span>
+
+    /**
+     * Moves the cursor left by the specified number of Java 2D units.
+     *
+     * @param units  the units.
+     */
+    public void cursorLeft(double units) {
+<span class="fc" id="L147">        this.cursor = this.cursor - units;</span>
+<span class="fc" id="L148">    }</span>
+
+    /**
+     * Moves the cursor right by the specified number of Java 2D units.
+     *
+     * @param units  the units.
+     */
+    public void cursorRight(double units) {
+<span class="nc" id="L156">        this.cursor = this.cursor + units;</span>
+<span class="nc" id="L157">    }</span>
+
+    /**
+     * Returns the list of ticks.
+     *
+     * @return The list of ticks.
+     */
+    public List&lt;ValueTick&gt; getTicks() {
+<span class="fc" id="L165">        return this.ticks;</span>
+    }
+
+    /**
+     * Sets the list of ticks.
+     *
+     * @param ticks  the ticks.
+     */
+    public void setTicks(List&lt;ValueTick&gt; ticks) {
+<span class="fc" id="L174">        this.ticks = ticks;</span>
+<span class="fc" id="L175">    }</span>
+
+    /**
+     * Returns the maximum width/height.
+     *
+     * @return The maximum width/height.
+     */
+    public double getMax() {
+<span class="fc" id="L183">        return this.max;</span>
+    }
+
+    /**
+     * Sets the maximum width/height.
+     *
+     * @param max the maximum width/height.
+     */
+    public void setMax(double max) {
+<span class="fc" id="L192">        this.max = max;</span>
+<span class="fc" id="L193">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

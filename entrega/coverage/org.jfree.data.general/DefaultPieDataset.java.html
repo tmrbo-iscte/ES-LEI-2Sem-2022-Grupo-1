@@ -1,0 +1,354 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DefaultPieDataset.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.data.general</a> &gt; <span class="el_source">DefaultPieDataset.java</span></div><h1>DefaultPieDataset.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * ----------------------
+ * DefaultPieDataset.java
+ * ----------------------
+ * (C) Copyright 2001-2022, by David Gilbert.
+ *
+ * Original Author:  David Gilbert;
+ * Contributor(s):   Sam (oldman);
+ *                   Tracy Hiltbrand (generics for bug fix to PiePlot);
+ */
+
+package org.jfree.data.general;
+
+import java.io.Serializable;
+import java.util.Collections;
+import java.util.List;
+import org.jfree.chart.internal.Args;
+import org.jfree.chart.internal.CloneUtils;
+import org.jfree.chart.api.PublicCloneable;
+import org.jfree.chart.api.SortOrder;
+
+import org.jfree.data.DefaultKeyedValues;
+import org.jfree.data.KeyedValues;
+import org.jfree.data.UnknownKeyException;
+
+/**
+ * A default implementation of the {@link PieDataset} interface.
+ * 
+ * @param &lt;K&gt; Key type for PieDataset
+ */
+public class DefaultPieDataset&lt;K extends Comparable&lt;K&gt;&gt; extends AbstractDataset
+        implements PieDataset&lt;K&gt;, Cloneable, PublicCloneable, Serializable {
+
+    /** For serialization. */
+    private static final long serialVersionUID = 2904745139106540618L;
+
+    /** Storage for the data. */
+    private DefaultKeyedValues&lt;K&gt; data;
+
+    /**
+     * Constructs a new dataset, initially empty.
+     */
+<span class="fc" id="L68">    public DefaultPieDataset() {</span>
+<span class="fc" id="L69">        this.data = new DefaultKeyedValues&lt;&gt;();</span>
+<span class="fc" id="L70">    }</span>
+
+    /**
+     * Creates a new dataset by copying data from a {@link KeyedValues}
+     * instance.
+     *
+     * @param source  the data ({@code null} not permitted).
+     */
+<span class="nc" id="L78">    public DefaultPieDataset(KeyedValues&lt;K&gt; source) {</span>
+<span class="nc" id="L79">        Args.nullNotPermitted(source, &quot;source&quot;);</span>
+<span class="nc" id="L80">        this.data = new DefaultKeyedValues&lt;&gt;();</span>
+<span class="nc bnc" id="L81" title="All 2 branches missed.">        for (int i = 0; i &lt; source.getItemCount(); i++) {</span>
+<span class="nc" id="L82">            this.data.addValue(source.getKey(i), source.getValue(i));</span>
+        }
+<span class="nc" id="L84">    }</span>
+
+    /**
+     * Returns the number of items in the dataset.
+     *
+     * @return The item count.
+     */
+    @Override
+    public int getItemCount() {
+<span class="fc" id="L93">        return this.data.getItemCount();</span>
+    }
+
+    /**
+     * Returns the categories in the dataset.  The returned list is
+     * unmodifiable.
+     *
+     * @return The categories in the dataset.
+     */
+    @Override
+    public List&lt;K&gt; getKeys() {
+<span class="fc" id="L104">        return Collections.unmodifiableList(this.data.getKeys());</span>
+    }
+
+    /**
+     * Returns the key for the specified item, or {@code null}.
+     *
+     * @param item  the item index (in the range {@code 0} to
+     *     {@code getItemCount() - 1}).
+     *
+     * @return The key, or {@code null}.
+     *
+     * @throws IndexOutOfBoundsException if {@code item} is not in the
+     *     specified range.
+     */
+    @Override
+    public K getKey(int item) {
+<span class="fc" id="L120">        return this.data.getKey(item);</span>
+    }
+
+    /**
+     * Returns the index for a key, or -1 if the key is not recognised.
+     *
+     * @param key  the key ({@code null} not permitted).
+     *
+     * @return The index, or {@code -1} if the key is unrecognised.
+     *
+     * @throws IllegalArgumentException if {@code key} is
+     *     {@code null}.
+     */
+    @Override
+    public int getIndex(K key) {
+<span class="fc" id="L135">        return this.data.getIndex(key);</span>
+    }
+
+    /**
+     * Returns a value.
+     *
+     * @param item  the value index.
+     *
+     * @return The value (possibly {@code null}).
+     */
+    @Override
+    public Number getValue(int item) {
+<span class="fc" id="L147">        return this.data.getValue(item);</span>
+    }
+
+    /**
+     * Returns the data value associated with a key.
+     *
+     * @param key  the key ({@code null} not permitted).
+     *
+     * @return The value (possibly {@code null}).
+     *
+     * @throws UnknownKeyException if the key is not recognised.
+     */
+    @Override
+    public Number getValue(K key) {
+<span class="fc" id="L161">        Args.nullNotPermitted(key, &quot;key&quot;);</span>
+<span class="fc" id="L162">        return this.data.getValue(key);</span>
+    }
+
+    /**
+     * Sets the data value for a key and sends a {@link DatasetChangeEvent} to
+     * all registered listeners.
+     *
+     * @param key  the key ({@code null} not permitted).
+     * @param value  the value.
+     *
+     * @throws IllegalArgumentException if {@code key} is
+     *     {@code null}.
+     */
+    public void setValue(K key, Number value) {
+<span class="fc" id="L176">        this.data.setValue(key, value);</span>
+<span class="fc" id="L177">        fireDatasetChanged();</span>
+<span class="fc" id="L178">    }</span>
+
+    /**
+     * Sets the data value for a key and sends a {@link DatasetChangeEvent} to
+     * all registered listeners.
+     *
+     * @param key  the key ({@code null} not permitted).
+     * @param value  the value.
+     *
+     * @throws IllegalArgumentException if {@code key} is
+     *     {@code null}.
+     */
+    public void setValue(K key, double value) {
+<span class="fc" id="L191">        setValue(key, Double.valueOf(value));</span>
+<span class="fc" id="L192">    }</span>
+
+    /**
+     * Inserts a new value at the specified position in the dataset or, if
+     * there is an existing item with the specified key, updates the value
+     * for that item and moves it to the specified position.  After the change
+     * is made, this methods sends a {@link DatasetChangeEvent} to all
+     * registered listeners.
+     *
+     * @param position  the position (in the range 0 to getItemCount()).
+     * @param key  the key ({@code null} not permitted).
+     * @param value  the value ({@code null} permitted).
+     *
+     * @since 1.0.6
+     */
+    public void insertValue(int position, K key, double value) {
+<span class="nc" id="L208">        insertValue(position, key, Double.valueOf(value));</span>
+<span class="nc" id="L209">    }</span>
+
+    /**
+     * Inserts a new value at the specified position in the dataset or, if
+     * there is an existing item with the specified key, updates the value
+     * for that item and moves it to the specified position.  After the change
+     * is made, this methods sends a {@link DatasetChangeEvent} to all
+     * registered listeners.
+     *
+     * @param position  the position (in the range 0 to getItemCount()).
+     * @param key  the key ({@code null} not permitted).
+     * @param value  the value ({@code null} permitted).
+     *
+     * @since 1.0.6
+     */
+    public void insertValue(int position, K key, Number value) {
+<span class="nc" id="L225">        this.data.insertValue(position, key, value);</span>
+<span class="nc" id="L226">        fireDatasetChanged();</span>
+<span class="nc" id="L227">    }</span>
+
+    /**
+     * Removes an item from the dataset and sends a {@link DatasetChangeEvent}
+     * to all registered listeners.
+     *
+     * @param key  the key ({@code null} not permitted).
+     *
+     * @throws IllegalArgumentException if {@code key} is
+     *     {@code null}.
+     */
+    public void remove(K key) {
+<span class="nc" id="L239">        this.data.removeValue(key);</span>
+<span class="nc" id="L240">        fireDatasetChanged();</span>
+<span class="nc" id="L241">    }</span>
+
+    /**
+     * Clears all data from this dataset and sends a {@link DatasetChangeEvent}
+     * to all registered listeners (unless the dataset was already empty).
+     *
+     * @since 1.0.2
+     */
+    public void clear() {
+<span class="fc bfc" id="L250" title="All 2 branches covered.">        if (getItemCount() &gt; 0) {</span>
+<span class="fc" id="L251">            this.data.clear();</span>
+<span class="fc" id="L252">            fireDatasetChanged();</span>
+        }
+<span class="fc" id="L254">    }</span>
+
+    /**
+     * Sorts the dataset's items by key and sends a {@link DatasetChangeEvent}
+     * to all registered listeners.
+     *
+     * @param order  the sort order ({@code null} not permitted).
+     *
+     * @since 1.0.3
+     */
+    public void sortByKeys(SortOrder order) {
+<span class="nc" id="L265">        this.data.sortByKeys(order);</span>
+<span class="nc" id="L266">        fireDatasetChanged();</span>
+<span class="nc" id="L267">    }</span>
+
+    /**
+     * Sorts the dataset's items by value and sends a {@link DatasetChangeEvent}
+     * to all registered listeners.
+     *
+     * @param order  the sort order ({@code null} not permitted).
+     *
+     * @since 1.0.3
+     */
+    public void sortByValues(SortOrder order) {
+<span class="nc" id="L278">        this.data.sortByValues(order);</span>
+<span class="nc" id="L279">        fireDatasetChanged();</span>
+<span class="nc" id="L280">    }</span>
+
+    /**
+     * Tests if this object is equal to another.
+     *
+     * @param obj  the other object.
+     *
+     * @return A boolean.
+     */
+    @Override
+    public boolean equals(Object obj) {
+<span class="pc bpc" id="L291" title="1 of 2 branches missed.">        if (obj == this) {</span>
+<span class="nc" id="L292">            return true;</span>
+        }
+
+<span class="pc bpc" id="L295" title="1 of 2 branches missed.">        if (!(obj instanceof PieDataset)) {</span>
+<span class="nc" id="L296">            return false;</span>
+        }
+<span class="fc" id="L298">        PieDataset&lt;K&gt; that = (PieDataset) obj;</span>
+<span class="fc" id="L299">        int count = getItemCount();</span>
+<span class="pc bpc" id="L300" title="1 of 2 branches missed.">        if (that.getItemCount() != count) {</span>
+<span class="nc" id="L301">            return false;</span>
+        }
+
+<span class="fc bfc" id="L304" title="All 2 branches covered.">        for (int i = 0; i &lt; count; i++) {</span>
+<span class="fc" id="L305">            K k1 = getKey(i);</span>
+<span class="fc" id="L306">            K k2 = that.getKey(i);</span>
+<span class="pc bpc" id="L307" title="1 of 2 branches missed.">            if (!k1.equals(k2)) {</span>
+<span class="nc" id="L308">                return false;</span>
+            }
+
+<span class="fc" id="L311">            Number v1 = getValue(i);</span>
+<span class="fc" id="L312">            Number v2 = that.getValue(i);</span>
+<span class="fc bfc" id="L313" title="All 2 branches covered.">            if (v1 == null) {</span>
+<span class="pc bpc" id="L314" title="1 of 2 branches missed.">                if (v2 != null) {</span>
+<span class="nc" id="L315">                    return false;</span>
+                }
+            }
+            else {
+<span class="pc bpc" id="L319" title="1 of 2 branches missed.">                if (!v1.equals(v2)) {</span>
+<span class="nc" id="L320">                    return false;</span>
+                }
+            }
+        }
+<span class="fc" id="L324">        return true;</span>
+
+    }
+
+    /**
+     * Returns a hash code.
+     *
+     * @return A hash code.
+     */
+    @Override
+    public int hashCode() {
+<span class="nc" id="L335">        return this.data.hashCode();</span>
+    }
+
+    /**
+     * Returns a clone of the dataset.
+     *
+     * @return A clone.
+     *
+     * @throws CloneNotSupportedException This class will not throw this
+     *         exception, but subclasses (if any) might.
+     */
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+<span class="fc" id="L348">        DefaultPieDataset&lt;K&gt; clone = (DefaultPieDataset) super.clone();</span>
+<span class="fc" id="L349">        clone.data = CloneUtils.clone(this.data);</span>
+<span class="fc" id="L350">        return clone;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

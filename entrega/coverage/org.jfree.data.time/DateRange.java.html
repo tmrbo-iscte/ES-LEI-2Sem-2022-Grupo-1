@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DateRange.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.data.time</a> &gt; <span class="el_source">DateRange.java</span></div><h1>DateRange.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * --------------
+ * DateRange.java
+ * --------------
+ * (C) Copyright 2002-2022, by David Gilbert and Contributors.
+ *
+ * Original Author:  David Gilbert;
+ * Contributor(s):   Bill Kelemen;
+ *
+ */
+
+package org.jfree.data.time;
+
+import java.io.Serializable;
+import java.text.DateFormat;
+import java.util.Date;
+
+import org.jfree.data.Range;
+
+/**
+ * A range specified in terms of two {@code java.util.Date} objects.
+ * Instances of this class are immutable.
+ */
+public class DateRange extends Range implements Serializable {
+
+    /** For serialization. */
+    private static final long serialVersionUID = -4705682568375418157L;
+
+    /** The lower bound for the range. */
+    private final long lowerDate;
+
+    /** The upper bound for the range. */
+    private final long upperDate;
+
+    /**
+     * Default constructor.
+     */
+    public DateRange() {
+<span class="fc" id="L64">        this(new Date(0), new Date(1));</span>
+<span class="fc" id="L65">    }</span>
+
+    /**
+     * Constructs a new range.
+     *
+     * @param lower  the lower bound ({@code null} not permitted).
+     * @param upper  the upper bound ({@code null} not permitted).
+     */
+    public DateRange(Date lower, Date upper) {
+<span class="fc" id="L74">        super(lower.getTime(), upper.getTime());</span>
+<span class="fc" id="L75">        this.lowerDate = lower.getTime();</span>
+<span class="fc" id="L76">        this.upperDate = upper.getTime();</span>
+<span class="fc" id="L77">    }</span>
+
+    /**
+     * Constructs a new range using two values that will be interpreted as
+     * &quot;milliseconds since midnight GMT, 1-Jan-1970&quot;.
+     *
+     * @param lower  the lower (oldest) date.
+     * @param upper  the upper (most recent) date.
+     */
+    public DateRange(double lower, double upper) {
+<span class="fc" id="L87">        super(lower, upper);</span>
+<span class="fc" id="L88">        this.lowerDate = (long) lower;</span>
+<span class="fc" id="L89">        this.upperDate = (long) upper;</span>
+<span class="fc" id="L90">    }</span>
+
+    /**
+     * Constructs a new range that is based on another {@link Range}.  The
+     * other range does not have to be a {@link DateRange}.  If it is not, the
+     * upper and lower bounds are evaluated as milliseconds since midnight
+     * GMT, 1-Jan-1970.
+     *
+     * @param other  the other range ({@code null} not permitted).
+     */
+    public DateRange(Range other) {
+<span class="nc" id="L101">        this(other.getLowerBound(), other.getUpperBound());</span>
+<span class="nc" id="L102">    }</span>
+
+    /**
+     * Returns the lower (earlier) date for the range.
+     *
+     * @return The lower date for the range.
+     *
+     * @see #getLowerMillis()
+     */
+    public Date getLowerDate() {
+<span class="fc" id="L112">        return new Date(this.lowerDate);</span>
+    }
+
+    /**
+     * Returns the lower bound of the range in milliseconds.
+     *
+     * @return The lower bound.
+     *
+     * @see #getLowerDate()
+     *
+     * @since 1.0.11
+     */
+    public long getLowerMillis() {
+<span class="fc" id="L125">        return this.lowerDate;</span>
+    }
+
+    /**
+     * Returns the upper (later) date for the range.
+     *
+     * @return The upper date for the range.
+     *
+     * @see #getUpperMillis()
+     */
+    public Date getUpperDate() {
+<span class="fc" id="L136">        return new Date(this.upperDate);</span>
+    }
+
+    /**
+     * Returns the upper bound of the range in milliseconds.
+     *
+     * @return The upper bound.
+     *
+     * @see #getUpperDate()
+     *
+     * @since 1.0.11
+     */
+    public long getUpperMillis() {
+<span class="fc" id="L149">        return this.upperDate;</span>
+    }
+
+    /**
+     * Returns a string representing the date range (useful for debugging).
+     *
+     * @return A string representing the date range.
+     */
+    @Override
+    public String toString() {
+<span class="nc" id="L159">        DateFormat df = DateFormat.getDateTimeInstance();</span>
+<span class="nc" id="L160">        return &quot;[&quot; + df.format(getLowerDate()) + &quot; --&gt; &quot;</span>
+<span class="nc" id="L161">                + df.format(getUpperDate()) + &quot;]&quot;;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

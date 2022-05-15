@@ -1,0 +1,858 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TextTitle.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.chart.title</a> &gt; <span class="el_source">TextTitle.java</span></div><h1>TextTitle.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * --------------
+ * TextTitle.java
+ * --------------
+ * (C) Copyright 2000-2021, by David Berry and Contributors.
+ *
+ * Original Author:  David Berry;
+ * Contributor(s):   David Gilbert;
+ *                   Nicolas Brodu;
+ *                   Peter Kolb - patch 2603321;
+ */
+
+package org.jfree.chart.title;
+
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics2D;
+import java.awt.Paint;
+import java.awt.geom.Rectangle2D;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.util.Objects;
+
+import org.jfree.chart.block.BlockResult;
+import org.jfree.chart.block.EntityBlockParams;
+import org.jfree.chart.block.LengthConstraintType;
+import org.jfree.chart.block.RectangleConstraint;
+import org.jfree.chart.entity.ChartEntity;
+import org.jfree.chart.entity.EntityCollection;
+import org.jfree.chart.entity.StandardEntityCollection;
+import org.jfree.chart.entity.TitleEntity;
+import org.jfree.chart.event.TitleChangeEvent;
+import org.jfree.chart.text.G2TextMeasurer;
+import org.jfree.chart.text.TextBlock;
+import org.jfree.chart.text.TextBlockAnchor;
+import org.jfree.chart.text.TextUtils;
+import org.jfree.chart.api.HorizontalAlignment;
+import org.jfree.chart.api.RectangleEdge;
+import org.jfree.chart.api.RectangleInsets;
+import org.jfree.chart.block.Size2D;
+import org.jfree.chart.api.VerticalAlignment;
+import org.jfree.chart.internal.PaintUtils;
+import org.jfree.chart.internal.Args;
+import org.jfree.chart.api.PublicCloneable;
+import org.jfree.chart.internal.SerialUtils;
+import org.jfree.data.Range;
+
+/**
+ * A chart title that displays a text string with automatic wrapping as
+ * required.
+ */
+<span class="pc bpc" id="L79" title="1 of 2 branches missed.">public class TextTitle extends Title implements Serializable, Cloneable, </span>
+        PublicCloneable {
+
+    /** For serialization. */
+    private static final long serialVersionUID = 8372008692127477443L;
+
+    /** The default font. */
+<span class="fc" id="L86">    public static final Font DEFAULT_FONT = new Font(&quot;SansSerif&quot;, Font.BOLD,</span>
+            12);
+
+    /** The default text color. */
+<span class="fc" id="L90">    public static final Paint DEFAULT_TEXT_PAINT = Color.BLACK;</span>
+
+    /** The title text. */
+    private String text;
+
+    /** The font used to display the title. */
+    private Font font;
+
+    /** The text alignment. */
+    private HorizontalAlignment textAlignment;
+
+    /** The paint used to display the title text. */
+    private transient Paint paint;
+
+    /** The background paint. */
+    private transient Paint backgroundPaint;
+
+    /** The tool tip text (can be {@code null}). */
+    private String toolTipText;
+
+    /** The URL text (can be {@code null}). */
+    private String urlText;
+
+    /** The content. */
+    private TextBlock content;
+
+    /**
+     * A flag that controls whether the title expands to fit the available
+     * space..
+     */
+<span class="fc" id="L120">    private boolean expandToFitSpace = false;</span>
+
+    /**
+     * The maximum number of lines to display.
+     */
+<span class="fc" id="L125">    private int maximumLinesToDisplay = Integer.MAX_VALUE;</span>
+
+    /**
+     * Creates a new title, using default attributes where necessary.
+     */
+    public TextTitle() {
+<span class="fc" id="L131">        this(&quot;&quot;);</span>
+<span class="fc" id="L132">    }</span>
+
+    /**
+     * Creates a new title, using default attributes where necessary.
+     *
+     * @param text  the title text ({@code null} not permitted).
+     */
+    public TextTitle(String text) {
+<span class="fc" id="L140">        this(text, TextTitle.DEFAULT_FONT, TextTitle.DEFAULT_TEXT_PAINT,</span>
+                Title.DEFAULT_POSITION, Title.DEFAULT_HORIZONTAL_ALIGNMENT,
+                Title.DEFAULT_VERTICAL_ALIGNMENT, Title.DEFAULT_PADDING);
+<span class="fc" id="L143">    }</span>
+
+    /**
+     * Creates a new title, using default attributes where necessary.
+     *
+     * @param text  the title text ({@code null} not permitted).
+     * @param font  the title font ({@code null} not permitted).
+     */
+    public TextTitle(String text, Font font) {
+<span class="fc" id="L152">        this(text, font, TextTitle.DEFAULT_TEXT_PAINT, Title.DEFAULT_POSITION,</span>
+                Title.DEFAULT_HORIZONTAL_ALIGNMENT,
+                Title.DEFAULT_VERTICAL_ALIGNMENT, Title.DEFAULT_PADDING);
+<span class="fc" id="L155">    }</span>
+
+    /**
+     * Creates a new title with the specified attributes.
+     *
+     * @param text  the text for the title ({@code null} not permitted).
+     * @param font  the title font ({@code null} not permitted).
+     * @param paint  the title paint ({@code null} not permitted).
+     * @param position  the title position ({@code null} not permitted).
+     * @param horizontalAlignment  the horizontal alignment ({@code null}
+     *                             not permitted).
+     * @param verticalAlignment  the vertical alignment ({@code null} not
+     *                           permitted).
+     * @param padding  the space to leave around the outside of the title.
+     */
+    public TextTitle(String text, Font font, Paint paint,
+                     RectangleEdge position,
+                     HorizontalAlignment horizontalAlignment,
+                     VerticalAlignment verticalAlignment,
+                     RectangleInsets padding) {
+<span class="fc" id="L175">        super(position, horizontalAlignment, verticalAlignment, padding);</span>
+<span class="fc" id="L176">        Args.nullNotPermitted(text, &quot;text&quot;);</span>
+<span class="fc" id="L177">        Args.nullNotPermitted(font, &quot;font&quot;);</span>
+<span class="fc" id="L178">        Args.nullNotPermitted(paint, &quot;paint&quot;);</span>
+<span class="fc" id="L179">        this.text = text;</span>
+<span class="fc" id="L180">        this.font = font;</span>
+<span class="fc" id="L181">        this.paint = paint;</span>
+        // the textAlignment and the horizontalAlignment are separate things,
+        // but it makes sense for the default textAlignment to match the
+        // title's horizontal alignment...
+<span class="fc" id="L185">        this.textAlignment = horizontalAlignment;</span>
+<span class="fc" id="L186">        this.backgroundPaint = null;</span>
+<span class="fc" id="L187">        this.content = null;</span>
+<span class="fc" id="L188">        this.toolTipText = null;</span>
+<span class="fc" id="L189">        this.urlText = null;</span>
+<span class="fc" id="L190">    }</span>
+
+    /**
+     * Returns the title text.
+     *
+     * @return The text (never {@code null}).
+     *
+     * @see #setText(String)
+     */
+    public String getText() {
+<span class="fc" id="L200">        return this.text;</span>
+    }
+
+    /**
+     * Sets the title to the specified text and sends a
+     * {@link TitleChangeEvent} to all registered listeners.
+     *
+     * @param text  the text ({@code null} not permitted).
+     */
+    public void setText(String text) {
+<span class="fc" id="L210">        Args.nullNotPermitted(text, &quot;text&quot;);</span>
+<span class="pc bpc" id="L211" title="1 of 2 branches missed.">        if (!this.text.equals(text)) {</span>
+<span class="fc" id="L212">            this.text = text;</span>
+<span class="fc" id="L213">            notifyListeners(new TitleChangeEvent(this));</span>
+        }
+<span class="fc" id="L215">    }</span>
+
+    /**
+     * Returns the text alignment.  This controls how the text is aligned
+     * within the title's bounds, whereas the title's horizontal alignment
+     * controls how the title's bounding rectangle is aligned within the
+     * drawing space.
+     *
+     * @return The text alignment.
+     */
+    public HorizontalAlignment getTextAlignment() {
+<span class="nc" id="L226">        return this.textAlignment;</span>
+    }
+
+    /**
+     * Sets the text alignment and sends a {@link TitleChangeEvent} to
+     * all registered listeners.
+     *
+     * @param alignment  the alignment ({@code null} not permitted).
+     */
+    public void setTextAlignment(HorizontalAlignment alignment) {
+<span class="fc" id="L236">        Args.nullNotPermitted(alignment, &quot;alignment&quot;);</span>
+<span class="fc" id="L237">        this.textAlignment = alignment;</span>
+<span class="fc" id="L238">        notifyListeners(new TitleChangeEvent(this));</span>
+<span class="fc" id="L239">    }</span>
+
+    /**
+     * Returns the font used to display the title string.
+     *
+     * @return The font (never {@code null}).
+     *
+     * @see #setFont(Font)
+     */
+    public Font getFont() {
+<span class="nc" id="L249">        return this.font;</span>
+    }
+
+    /**
+     * Sets the font used to display the title string.  Registered listeners
+     * are notified that the title has been modified.
+     *
+     * @param font  the new font ({@code null} not permitted).
+     *
+     * @see #getFont()
+     */
+    public void setFont(Font font) {
+<span class="fc" id="L261">        Args.nullNotPermitted(font, &quot;font&quot;);</span>
+<span class="fc bfc" id="L262" title="All 2 branches covered.">        if (!this.font.equals(font)) {</span>
+<span class="fc" id="L263">            this.font = font;</span>
+<span class="fc" id="L264">            notifyListeners(new TitleChangeEvent(this));</span>
+        }
+<span class="fc" id="L266">    }</span>
+
+    /**
+     * Returns the paint used to display the title string.
+     *
+     * @return The paint (never {@code null}).
+     *
+     * @see #setPaint(Paint)
+     */
+    public Paint getPaint() {
+<span class="nc" id="L276">        return this.paint;</span>
+    }
+
+    /**
+     * Sets the paint used to display the title string.  Registered listeners
+     * are notified that the title has been modified.
+     *
+     * @param paint  the new paint ({@code null} not permitted).
+     *
+     * @see #getPaint()
+     */
+    public void setPaint(Paint paint) {
+<span class="fc" id="L288">        Args.nullNotPermitted(paint, &quot;paint&quot;);</span>
+<span class="fc bfc" id="L289" title="All 2 branches covered.">        if (!this.paint.equals(paint)) {</span>
+<span class="fc" id="L290">            this.paint = paint;</span>
+<span class="fc" id="L291">            notifyListeners(new TitleChangeEvent(this));</span>
+        }
+<span class="fc" id="L293">    }</span>
+
+    /**
+     * Returns the background paint (defaults to {@code null} which makes the 
+     * background transparent).
+     *
+     * @return The paint (possibly {@code null}).
+     */
+    public Paint getBackgroundPaint() {
+<span class="nc" id="L302">        return this.backgroundPaint;</span>
+    }
+
+    /**
+     * Sets the background paint and sends a {@link TitleChangeEvent} to all
+     * registered listeners.  If you set this attribute to {@code null},
+     * no background is painted (which makes the title background transparent).
+     *
+     * @param paint  the background paint ({@code null} permitted).
+     */
+    public void setBackgroundPaint(Paint paint) {
+<span class="fc" id="L313">        this.backgroundPaint = paint;</span>
+<span class="fc" id="L314">        notifyListeners(new TitleChangeEvent(this));</span>
+<span class="fc" id="L315">    }</span>
+
+    /**
+     * Returns the tool tip text.
+     *
+     * @return The tool tip text (possibly {@code null}).
+     */
+    public String getToolTipText() {
+<span class="nc" id="L323">        return this.toolTipText;</span>
+    }
+
+    /**
+     * Sets the tool tip text to the specified text and sends a
+     * {@link TitleChangeEvent} to all registered listeners.
+     *
+     * @param text  the text ({@code null} permitted).
+     */
+    public void setToolTipText(String text) {
+<span class="fc" id="L333">        this.toolTipText = text;</span>
+<span class="fc" id="L334">        notifyListeners(new TitleChangeEvent(this));</span>
+<span class="fc" id="L335">    }</span>
+
+    /**
+     * Returns the URL text.
+     *
+     * @return The URL text (possibly {@code null}).
+     */
+    public String getURLText() {
+<span class="nc" id="L343">        return this.urlText;</span>
+    }
+
+    /**
+     * Sets the URL text to the specified text and sends a
+     * {@link TitleChangeEvent} to all registered listeners.
+     *
+     * @param text  the text ({@code null} permitted).
+     */
+    public void setURLText(String text) {
+<span class="fc" id="L353">        this.urlText = text;</span>
+<span class="fc" id="L354">        notifyListeners(new TitleChangeEvent(this));</span>
+<span class="fc" id="L355">    }</span>
+
+    /**
+     * Returns the flag that controls whether or not the title expands to fit
+     * the available space.
+     *
+     * @return The flag.
+     */
+    public boolean getExpandToFitSpace() {
+<span class="fc" id="L364">        return this.expandToFitSpace;</span>
+    }
+
+    /**
+     * Sets the flag that controls whether the title expands to fit the
+     * available space, and sends a {@link TitleChangeEvent} to all registered
+     * listeners.
+     *
+     * @param expand  the flag.
+     */
+    public void setExpandToFitSpace(boolean expand) {
+<span class="fc" id="L375">        this.expandToFitSpace = expand;</span>
+<span class="fc" id="L376">        notifyListeners(new TitleChangeEvent(this));</span>
+<span class="fc" id="L377">    }</span>
+
+    /**
+     * Returns the maximum number of lines to display.
+     *
+     * @return The maximum.
+     *
+     * @see #setMaximumLinesToDisplay(int)
+     */
+    public int getMaximumLinesToDisplay() {
+<span class="nc" id="L387">        return this.maximumLinesToDisplay;</span>
+    }
+
+    /**
+     * Sets the maximum number of lines to display and sends a
+     * {@link TitleChangeEvent} to all registered listeners.
+     *
+     * @param max  the maximum.
+     *
+     * @see #getMaximumLinesToDisplay()
+     */
+    public void setMaximumLinesToDisplay(int max) {
+<span class="fc" id="L399">        this.maximumLinesToDisplay = max;</span>
+<span class="fc" id="L400">        notifyListeners(new TitleChangeEvent(this));</span>
+<span class="fc" id="L401">    }</span>
+
+    /**
+     * Arranges the contents of the block, within the given constraints, and
+     * returns the block size.
+     *
+     * @param g2  the graphics device.
+     * @param constraint  the constraint ({@code null} not permitted).
+     *
+     * @return The block size (in Java2D units, never {@code null}).
+     */
+    @Override
+    public Size2D arrange(Graphics2D g2, RectangleConstraint constraint) {
+<span class="fc" id="L414">        RectangleConstraint cc = toContentConstraint(constraint);</span>
+<span class="fc" id="L415">        LengthConstraintType w = cc.getWidthConstraintType();</span>
+<span class="fc" id="L416">        LengthConstraintType h = cc.getHeightConstraintType();</span>
+<span class="fc" id="L417">        Size2D contentSize = null;</span>
+<span class="pc bpc" id="L418" title="1 of 2 branches missed.">        if (w == LengthConstraintType.NONE) {</span>
+<span class="nc bnc" id="L419" title="All 2 branches missed.">            if (h == LengthConstraintType.NONE) {</span>
+<span class="nc" id="L420">                contentSize = arrangeNN(g2);</span>
+            }
+<span class="nc bnc" id="L422" title="All 2 branches missed.">            else if (h == LengthConstraintType.RANGE) {</span>
+<span class="nc" id="L423">                throw new RuntimeException(&quot;Not yet implemented.&quot;);</span>
+            }
+<span class="nc bnc" id="L425" title="All 2 branches missed.">            else if (h == LengthConstraintType.FIXED) {</span>
+<span class="nc" id="L426">                throw new RuntimeException(&quot;Not yet implemented.&quot;);</span>
+            }
+        }
+<span class="pc bpc" id="L429" title="1 of 2 branches missed.">        else if (w == LengthConstraintType.RANGE) {</span>
+<span class="pc bpc" id="L430" title="1 of 2 branches missed.">            if (h == LengthConstraintType.NONE) {</span>
+<span class="nc" id="L431">                contentSize = arrangeRN(g2, cc.getWidthRange());</span>
+            }
+<span class="pc bpc" id="L433" title="1 of 2 branches missed.">            else if (h == LengthConstraintType.RANGE) {</span>
+<span class="fc" id="L434">                contentSize = arrangeRR(g2, cc.getWidthRange(),</span>
+<span class="fc" id="L435">                        cc.getHeightRange());</span>
+            }
+<span class="nc bnc" id="L437" title="All 2 branches missed.">            else if (h == LengthConstraintType.FIXED) {</span>
+<span class="nc" id="L438">                throw new RuntimeException(&quot;Not yet implemented.&quot;);</span>
+            }
+        }
+<span class="nc bnc" id="L441" title="All 2 branches missed.">        else if (w == LengthConstraintType.FIXED) {</span>
+<span class="nc bnc" id="L442" title="All 2 branches missed.">            if (h == LengthConstraintType.NONE) {</span>
+<span class="nc" id="L443">                contentSize = arrangeFN(g2, cc.getWidth());</span>
+            }
+<span class="nc bnc" id="L445" title="All 2 branches missed.">            else if (h == LengthConstraintType.RANGE) {</span>
+<span class="nc" id="L446">                throw new RuntimeException(&quot;Not yet implemented.&quot;);</span>
+            }
+<span class="nc bnc" id="L448" title="All 2 branches missed.">            else if (h == LengthConstraintType.FIXED) {</span>
+<span class="nc" id="L449">                throw new RuntimeException(&quot;Not yet implemented.&quot;);</span>
+            }
+        }
+<span class="pc bpc" id="L452" title="2 of 4 branches missed.">        assert contentSize != null; // suppress compiler warning</span>
+<span class="fc" id="L453">        return new Size2D(calculateTotalWidth(contentSize.getWidth()),</span>
+<span class="fc" id="L454">                calculateTotalHeight(contentSize.getHeight()));</span>
+    }
+
+    /**
+     * Arranges the content for this title assuming no bounds on the width
+     * or the height, and returns the required size.  This will reflect the
+     * fact that a text title positioned on the left or right of a chart will
+     * be rotated by 90 degrees.
+     *
+     * @param g2  the graphics target.
+     *
+     * @return The content size.
+     */
+    protected Size2D arrangeNN(Graphics2D g2) {
+<span class="nc" id="L468">        Range max = new Range(0.0, Float.MAX_VALUE);</span>
+<span class="nc" id="L469">        return arrangeRR(g2, max, max);</span>
+    }
+
+    /**
+     * Arranges the content for this title assuming a fixed width and no bounds
+     * on the height, and returns the required size.  This will reflect the
+     * fact that a text title positioned on the left or right of a chart will
+     * be rotated by 90 degrees.
+     *
+     * @param g2  the graphics target.
+     * @param w  the width.
+     *
+     * @return The content size.
+     */
+    protected Size2D arrangeFN(Graphics2D g2, double w) {
+<span class="nc" id="L484">        RectangleEdge position = getPosition();</span>
+<span class="nc bnc" id="L485" title="All 4 branches missed.">        if (position == RectangleEdge.TOP || position == RectangleEdge.BOTTOM) {</span>
+<span class="nc" id="L486">            float maxWidth = (float) w;</span>
+<span class="nc" id="L487">            g2.setFont(this.font);</span>
+<span class="nc" id="L488">            this.content = TextUtils.createTextBlock(this.text, this.font,</span>
+                    this.paint, maxWidth, this.maximumLinesToDisplay,
+                    new G2TextMeasurer(g2));
+<span class="nc" id="L491">            this.content.setLineAlignment(this.textAlignment);</span>
+<span class="nc" id="L492">            Size2D contentSize = this.content.calculateDimensions(g2);</span>
+<span class="nc bnc" id="L493" title="All 2 branches missed.">            if (this.expandToFitSpace) {</span>
+<span class="nc" id="L494">                return new Size2D(maxWidth, contentSize.getHeight());</span>
+            }
+            else {
+<span class="nc" id="L497">                return contentSize;</span>
+            }
+        }
+<span class="nc bnc" id="L500" title="All 4 branches missed.">        else if (position == RectangleEdge.LEFT || position</span>
+                == RectangleEdge.RIGHT) {
+<span class="nc" id="L502">            float maxWidth = Float.MAX_VALUE;</span>
+<span class="nc" id="L503">            g2.setFont(this.font);</span>
+<span class="nc" id="L504">            this.content = TextUtils.createTextBlock(this.text, this.font,</span>
+                    this.paint, maxWidth, this.maximumLinesToDisplay,
+                    new G2TextMeasurer(g2));
+<span class="nc" id="L507">            this.content.setLineAlignment(this.textAlignment);</span>
+<span class="nc" id="L508">            Size2D contentSize = this.content.calculateDimensions(g2);</span>
+
+            // transpose the dimensions, because the title is rotated
+<span class="nc bnc" id="L511" title="All 2 branches missed.">            if (this.expandToFitSpace) {</span>
+<span class="nc" id="L512">                return new Size2D(contentSize.getHeight(), maxWidth);</span>
+            }
+            else {
+<span class="nc" id="L515">                return new Size2D(contentSize.getHeight(), contentSize.getWidth());</span>
+            }
+        }
+        else {
+<span class="nc" id="L519">            throw new RuntimeException(&quot;Unrecognised exception.&quot;);</span>
+        }
+    }
+
+    /**
+     * Arranges the content for this title assuming a range constraint for the
+     * width and no bounds on the height, and returns the required size.  This
+     * will reflect the fact that a text title positioned on the left or right
+     * of a chart will be rotated by 90 degrees.
+     *
+     * @param g2  the graphics target.
+     * @param widthRange  the range for the width.
+     *
+     * @return The content size.
+     */
+    protected Size2D arrangeRN(Graphics2D g2, Range widthRange) {
+<span class="nc" id="L535">        Size2D s = arrangeNN(g2);</span>
+<span class="nc bnc" id="L536" title="All 2 branches missed.">        if (widthRange.contains(s.getWidth())) {</span>
+<span class="nc" id="L537">            return s;</span>
+        }
+<span class="nc" id="L539">        double ww = widthRange.constrain(s.getWidth());</span>
+<span class="nc" id="L540">        return arrangeFN(g2, ww);</span>
+    }
+
+    /**
+     * Returns the content size for the title.  This will reflect the fact that
+     * a text title positioned on the left or right of a chart will be rotated
+     * 90 degrees.
+     *
+     * @param g2  the graphics device.
+     * @param widthRange  the width range.
+     * @param heightRange  the height range.
+     *
+     * @return The content size.
+     */
+    protected Size2D arrangeRR(Graphics2D g2, Range widthRange,
+            Range heightRange) {
+<span class="fc" id="L556">        RectangleEdge position = getPosition();</span>
+<span class="pc bpc" id="L557" title="3 of 4 branches missed.">        if (position == RectangleEdge.TOP || position == RectangleEdge.BOTTOM) {</span>
+<span class="fc" id="L558">            float maxWidth = (float) widthRange.getUpperBound();</span>
+<span class="fc" id="L559">            g2.setFont(this.font);</span>
+<span class="fc" id="L560">            this.content = TextUtils.createTextBlock(this.text, this.font,</span>
+                    this.paint, maxWidth, this.maximumLinesToDisplay,
+                    new G2TextMeasurer(g2));
+<span class="fc" id="L563">            this.content.setLineAlignment(this.textAlignment);</span>
+<span class="fc" id="L564">            Size2D contentSize = this.content.calculateDimensions(g2);</span>
+<span class="pc bpc" id="L565" title="1 of 2 branches missed.">            if (this.expandToFitSpace) {</span>
+<span class="nc" id="L566">                return new Size2D(maxWidth, contentSize.getHeight());</span>
+            }
+            else {
+<span class="fc" id="L569">                return contentSize;</span>
+            }
+        }
+<span class="nc bnc" id="L572" title="All 4 branches missed.">        else if (position == RectangleEdge.LEFT || position</span>
+                == RectangleEdge.RIGHT) {
+<span class="nc" id="L574">            float maxWidth = (float) heightRange.getUpperBound();</span>
+<span class="nc" id="L575">            g2.setFont(this.font);</span>
+<span class="nc" id="L576">            this.content = TextUtils.createTextBlock(this.text, this.font,</span>
+                    this.paint, maxWidth, this.maximumLinesToDisplay,
+                    new G2TextMeasurer(g2));
+<span class="nc" id="L579">            this.content.setLineAlignment(this.textAlignment);</span>
+<span class="nc" id="L580">            Size2D contentSize = this.content.calculateDimensions(g2);</span>
+
+            // transpose the dimensions, because the title is rotated
+<span class="nc bnc" id="L583" title="All 2 branches missed.">            if (this.expandToFitSpace) {</span>
+<span class="nc" id="L584">                return new Size2D(contentSize.getHeight(), maxWidth);</span>
+            }
+            else {
+<span class="nc" id="L587">                return new Size2D(contentSize.getHeight(), contentSize.getWidth());</span>
+            }
+        }
+        else {
+<span class="nc" id="L591">            throw new RuntimeException(&quot;Unrecognised exception.&quot;);</span>
+        }
+    }
+
+    /**
+     * Draws the title on a Java 2D graphics device (such as the screen or a
+     * printer).
+     *
+     * @param g2  the graphics device.
+     * @param area  the area allocated for the title.
+     */
+    @Override
+    public void draw(Graphics2D g2, Rectangle2D area) {
+<span class="nc" id="L604">        draw(g2, area, null);</span>
+<span class="nc" id="L605">    }</span>
+
+    /**
+     * Draws the block within the specified area.
+     *
+     * @param g2  the graphics device.
+     * @param area  the area.
+     * @param params  if this is an instance of {@link EntityBlockParams} it
+     *                is used to determine whether or not an
+     *                {@link EntityCollection} is returned by this method.
+     *
+     * @return An {@link EntityCollection} containing a chart entity for the
+     *         title, or {@code null}.
+     */
+    @Override
+    public Object draw(Graphics2D g2, Rectangle2D area, Object params) {
+<span class="pc bpc" id="L621" title="1 of 2 branches missed.">        if (this.content == null) {</span>
+<span class="nc" id="L622">            return null;</span>
+        }
+<span class="fc" id="L624">        area = trimMargin(area);</span>
+<span class="fc" id="L625">        drawBorder(g2, area);</span>
+<span class="pc bpc" id="L626" title="1 of 2 branches missed.">        if (this.text.equals(&quot;&quot;)) {</span>
+<span class="nc" id="L627">            return null;</span>
+        }
+<span class="fc" id="L629">        ChartEntity entity = null;</span>
+<span class="pc bpc" id="L630" title="1 of 2 branches missed.">        if (params instanceof EntityBlockParams) {</span>
+<span class="fc" id="L631">            EntityBlockParams p = (EntityBlockParams) params;</span>
+<span class="fc bfc" id="L632" title="All 2 branches covered.">            if (p.getGenerateEntities()) {</span>
+<span class="fc" id="L633">                entity = new TitleEntity(area, this, this.toolTipText,</span>
+                        this.urlText);
+            }
+        }
+<span class="fc" id="L637">        area = trimBorder(area);</span>
+<span class="pc bpc" id="L638" title="1 of 2 branches missed.">        if (this.backgroundPaint != null) {</span>
+<span class="nc" id="L639">            g2.setPaint(this.backgroundPaint);</span>
+<span class="nc" id="L640">            g2.fill(area);</span>
+        }
+<span class="fc" id="L642">        area = trimPadding(area);</span>
+<span class="fc" id="L643">        RectangleEdge position = getPosition();</span>
+<span class="pc bpc" id="L644" title="3 of 4 branches missed.">        if (position == RectangleEdge.TOP || position == RectangleEdge.BOTTOM) {</span>
+<span class="fc" id="L645">            drawHorizontal(g2, area);</span>
+        }
+<span class="nc bnc" id="L647" title="All 4 branches missed.">        else if (position == RectangleEdge.LEFT</span>
+                 || position == RectangleEdge.RIGHT) {
+<span class="nc" id="L649">            drawVertical(g2, area);</span>
+        }
+<span class="fc" id="L651">        BlockResult result = new BlockResult();</span>
+<span class="fc bfc" id="L652" title="All 2 branches covered.">        if (entity != null) {</span>
+<span class="fc" id="L653">            StandardEntityCollection sec = new StandardEntityCollection();</span>
+<span class="fc" id="L654">            sec.add(entity);</span>
+<span class="fc" id="L655">            result.setEntityCollection(sec);</span>
+        }
+<span class="fc" id="L657">        return result;</span>
+    }
+
+    /**
+     * Draws a the title horizontally within the specified area.  This method
+     * will be called from the {@link #draw(Graphics2D, Rectangle2D) draw}
+     * method.
+     *
+     * @param g2  the graphics device.
+     * @param area  the area for the title.
+     */
+    protected void drawHorizontal(Graphics2D g2, Rectangle2D area) {
+<span class="fc" id="L669">        Rectangle2D titleArea = (Rectangle2D) area.clone();</span>
+<span class="fc" id="L670">        g2.setFont(this.font);</span>
+<span class="fc" id="L671">        g2.setPaint(this.paint);</span>
+<span class="fc" id="L672">        TextBlockAnchor anchor = null;</span>
+<span class="fc" id="L673">        float x = 0.0f;</span>
+<span class="fc" id="L674">        HorizontalAlignment horizontalAlignment = getHorizontalAlignment();</span>
+<span class="pc bpc" id="L675" title="1 of 2 branches missed.">        if (horizontalAlignment == HorizontalAlignment.LEFT) {</span>
+<span class="nc" id="L676">            x = (float) titleArea.getX();</span>
+<span class="nc" id="L677">            anchor = TextBlockAnchor.TOP_LEFT;</span>
+        }
+<span class="pc bpc" id="L679" title="1 of 2 branches missed.">        else if (horizontalAlignment == HorizontalAlignment.RIGHT) {</span>
+<span class="nc" id="L680">            x = (float) titleArea.getMaxX();</span>
+<span class="nc" id="L681">            anchor = TextBlockAnchor.TOP_RIGHT;</span>
+        }
+<span class="pc bpc" id="L683" title="1 of 2 branches missed.">        else if (horizontalAlignment == HorizontalAlignment.CENTER) {</span>
+<span class="fc" id="L684">            x = (float) titleArea.getCenterX();</span>
+<span class="fc" id="L685">            anchor = TextBlockAnchor.TOP_CENTER;</span>
+        }
+<span class="fc" id="L687">        float y = 0.0f;</span>
+<span class="fc" id="L688">        RectangleEdge position = getPosition();</span>
+<span class="pc bpc" id="L689" title="1 of 2 branches missed.">        if (position == RectangleEdge.TOP) {</span>
+<span class="fc" id="L690">            y = (float) titleArea.getY();</span>
+        }
+<span class="nc bnc" id="L692" title="All 2 branches missed.">        else if (position == RectangleEdge.BOTTOM) {</span>
+<span class="nc" id="L693">            y = (float) titleArea.getMaxY();</span>
+<span class="nc bnc" id="L694" title="All 2 branches missed.">            if (horizontalAlignment == HorizontalAlignment.LEFT) {</span>
+<span class="nc" id="L695">                anchor = TextBlockAnchor.BOTTOM_LEFT;</span>
+            }
+<span class="nc bnc" id="L697" title="All 2 branches missed.">            else if (horizontalAlignment == HorizontalAlignment.CENTER) {</span>
+<span class="nc" id="L698">                anchor = TextBlockAnchor.BOTTOM_CENTER;</span>
+            }
+<span class="nc bnc" id="L700" title="All 2 branches missed.">            else if (horizontalAlignment == HorizontalAlignment.RIGHT) {</span>
+<span class="nc" id="L701">                anchor = TextBlockAnchor.BOTTOM_RIGHT;</span>
+            }
+        }
+<span class="fc" id="L704">        this.content.draw(g2, x, y, anchor);</span>
+<span class="fc" id="L705">    }</span>
+
+    /**
+     * Draws a the title vertically within the specified area.  This method
+     * will be called from the {@link #draw(Graphics2D, Rectangle2D) draw}
+     * method.
+     *
+     * @param g2  the graphics device.
+     * @param area  the area for the title.
+     */
+    protected void drawVertical(Graphics2D g2, Rectangle2D area) {
+<span class="nc" id="L716">        Rectangle2D titleArea = (Rectangle2D) area.clone();</span>
+<span class="nc" id="L717">        g2.setFont(this.font);</span>
+<span class="nc" id="L718">        g2.setPaint(this.paint);</span>
+<span class="nc" id="L719">        TextBlockAnchor anchor = null;</span>
+<span class="nc" id="L720">        float y = 0.0f;</span>
+<span class="nc" id="L721">        VerticalAlignment verticalAlignment = getVerticalAlignment();</span>
+<span class="nc bnc" id="L722" title="All 2 branches missed.">        if (verticalAlignment == VerticalAlignment.TOP) {</span>
+<span class="nc" id="L723">            y = (float) titleArea.getY();</span>
+<span class="nc" id="L724">            anchor = TextBlockAnchor.TOP_RIGHT;</span>
+        }
+<span class="nc bnc" id="L726" title="All 2 branches missed.">        else if (verticalAlignment == VerticalAlignment.BOTTOM) {</span>
+<span class="nc" id="L727">            y = (float) titleArea.getMaxY();</span>
+<span class="nc" id="L728">            anchor = TextBlockAnchor.TOP_LEFT;</span>
+        }
+<span class="nc bnc" id="L730" title="All 2 branches missed.">        else if (verticalAlignment == VerticalAlignment.CENTER) {</span>
+<span class="nc" id="L731">            y = (float) titleArea.getCenterY();</span>
+<span class="nc" id="L732">            anchor = TextBlockAnchor.TOP_CENTER;</span>
+        }
+<span class="nc" id="L734">        float x = 0.0f;</span>
+<span class="nc" id="L735">        RectangleEdge position = getPosition();</span>
+<span class="nc bnc" id="L736" title="All 2 branches missed.">        if (position == RectangleEdge.LEFT) {</span>
+<span class="nc" id="L737">            x = (float) titleArea.getX();</span>
+        }
+<span class="nc bnc" id="L739" title="All 2 branches missed.">        else if (position == RectangleEdge.RIGHT) {</span>
+<span class="nc" id="L740">            x = (float) titleArea.getMaxX();</span>
+<span class="nc bnc" id="L741" title="All 2 branches missed.">            if (verticalAlignment == VerticalAlignment.TOP) {</span>
+<span class="nc" id="L742">                anchor = TextBlockAnchor.BOTTOM_RIGHT;</span>
+            }
+<span class="nc bnc" id="L744" title="All 2 branches missed.">            else if (verticalAlignment == VerticalAlignment.CENTER) {</span>
+<span class="nc" id="L745">                anchor = TextBlockAnchor.BOTTOM_CENTER;</span>
+            }
+<span class="nc bnc" id="L747" title="All 2 branches missed.">            else if (verticalAlignment == VerticalAlignment.BOTTOM) {</span>
+<span class="nc" id="L748">                anchor = TextBlockAnchor.BOTTOM_LEFT;</span>
+            }
+        }
+<span class="nc" id="L751">        this.content.draw(g2, x, y, anchor, x, y, -Math.PI / 2.0);</span>
+<span class="nc" id="L752">    }</span>
+
+    /**
+     * Tests this title for equality with another object.
+     *
+     * @param obj  the object ({@code null} permitted).
+     *
+     * @return {@code true} or {@code false}.
+     */
+    @Override
+    public boolean equals(Object obj) {
+<span class="fc bfc" id="L763" title="All 2 branches covered.">        if (obj == this) {</span>
+<span class="fc" id="L764">            return true;</span>
+        }
+<span class="fc bfc" id="L766" title="All 2 branches covered.">        if (!(obj instanceof TextTitle)) {</span>
+<span class="fc" id="L767">            return false;</span>
+        }
+<span class="fc" id="L769">        TextTitle that = (TextTitle) obj;</span>
+<span class="fc bfc" id="L770" title="All 2 branches covered.">        if (!Objects.equals(this.text, that.text)) {</span>
+<span class="fc" id="L771">            return false;</span>
+        }
+<span class="fc bfc" id="L773" title="All 2 branches covered.">        if (!Objects.equals(this.font, that.font)) {</span>
+<span class="fc" id="L774">            return false;</span>
+        }
+<span class="fc bfc" id="L776" title="All 2 branches covered.">        if (!PaintUtils.equal(this.paint, that.paint)) {</span>
+<span class="fc" id="L777">            return false;</span>
+        }
+<span class="fc bfc" id="L779" title="All 2 branches covered.">        if (this.textAlignment != that.textAlignment) {</span>
+<span class="fc" id="L780">            return false;</span>
+        }
+<span class="fc bfc" id="L782" title="All 2 branches covered.">        if (!PaintUtils.equal(this.backgroundPaint, that.backgroundPaint)) {</span>
+<span class="fc" id="L783">            return false;</span>
+        }
+<span class="fc bfc" id="L785" title="All 2 branches covered.">        if (this.maximumLinesToDisplay != that.maximumLinesToDisplay) {</span>
+<span class="fc" id="L786">            return false;</span>
+        }
+<span class="fc bfc" id="L788" title="All 2 branches covered.">        if (this.expandToFitSpace != that.expandToFitSpace) {</span>
+<span class="fc" id="L789">            return false;</span>
+        }
+<span class="fc bfc" id="L791" title="All 2 branches covered.">        if (!Objects.equals(this.toolTipText, that.toolTipText)) {</span>
+<span class="fc" id="L792">            return false;</span>
+        }
+<span class="fc bfc" id="L794" title="All 2 branches covered.">        if (!Objects.equals(this.urlText, that.urlText)) {</span>
+<span class="fc" id="L795">            return false;</span>
+        }
+<span class="fc" id="L797">        return super.equals(obj);</span>
+    }
+
+    /**
+     * Returns a hash code.
+     *
+     * @return A hash code.
+     */
+    @Override
+    public int hashCode() {
+<span class="fc" id="L807">        int result = super.hashCode();</span>
+<span class="pc bpc" id="L808" title="1 of 2 branches missed.">        result = 29 * result + (this.text != null ? this.text.hashCode() : 0);</span>
+<span class="pc bpc" id="L809" title="1 of 2 branches missed.">        result = 29 * result + (this.font != null ? this.font.hashCode() : 0);</span>
+<span class="pc bpc" id="L810" title="1 of 2 branches missed.">        result = 29 * result + (this.paint != null ? this.paint.hashCode() : 0);</span>
+<span class="pc bpc" id="L811" title="1 of 2 branches missed.">        result = 29 * result + (this.backgroundPaint != null</span>
+<span class="pc" id="L812">                ? this.backgroundPaint.hashCode() : 0);</span>
+<span class="fc" id="L813">        return result;</span>
+    }
+
+    /**
+     * Returns a clone of this object.
+     *
+     * @return A clone.
+     *
+     * @throws CloneNotSupportedException never.
+     */
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+<span class="fc" id="L825">        return super.clone();</span>
+    }
+
+    /**
+     * Provides serialization support.
+     *
+     * @param stream  the output stream.
+     *
+     * @throws IOException  if there is an I/O error.
+     */
+    private void writeObject(ObjectOutputStream stream) throws IOException {
+<span class="fc" id="L836">        stream.defaultWriteObject();</span>
+<span class="fc" id="L837">        SerialUtils.writePaint(this.paint, stream);</span>
+<span class="fc" id="L838">        SerialUtils.writePaint(this.backgroundPaint, stream);</span>
+<span class="fc" id="L839">    }</span>
+
+    /**
+     * Provides serialization support.
+     *
+     * @param stream  the input stream.
+     *
+     * @throws IOException  if there is an I/O error.
+     * @throws ClassNotFoundException  if there is a classpath problem.
+     */
+    private void readObject(ObjectInputStream stream)
+            throws IOException, ClassNotFoundException {
+<span class="fc" id="L851">        stream.defaultReadObject();</span>
+<span class="fc" id="L852">        this.paint = SerialUtils.readPaint(stream);</span>
+<span class="fc" id="L853">        this.backgroundPaint = SerialUtils.readPaint(stream);</span>
+<span class="fc" id="L854">    }</span>
+
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

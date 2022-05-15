@@ -1,0 +1,486 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>XYTaskDataset.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.data.gantt</a> &gt; <span class="el_source">XYTaskDataset.java</span></div><h1>XYTaskDataset.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * ------------------
+ * XYTaskDataset.java
+ * ------------------
+ * (C) Copyright 2008-2022, by David Gilbert.
+ *
+ * Original Author:  David Gilbert;
+ * Contributor(s):   -;
+ *
+ */
+
+package org.jfree.data.gantt;
+
+import java.util.Date;
+import java.util.Objects;
+
+import org.jfree.chart.axis.SymbolAxis;
+import org.jfree.chart.renderer.xy.XYBarRenderer;
+import org.jfree.chart.internal.Args;
+import org.jfree.data.general.DatasetChangeEvent;
+import org.jfree.data.general.DatasetChangeListener;
+import org.jfree.data.time.TimePeriod;
+import org.jfree.data.xy.AbstractXYDataset;
+import org.jfree.data.xy.IntervalXYDataset;
+
+/**
+ * A dataset implementation that wraps a {@link TaskSeriesCollection} and
+ * presents it as an {@link IntervalXYDataset}, allowing a set of tasks to
+ * be displayed using an {@link XYBarRenderer} (and usually a
+ * {@link SymbolAxis}).  This is a very specialised dataset implementation
+ * ---before using it, you should take some time to understand the use-cases
+ * that it is designed for.
+ *
+ * @since 1.0.11
+ */
+public class XYTaskDataset extends AbstractXYDataset
+        implements IntervalXYDataset, DatasetChangeListener {
+
+    /** The underlying tasks. */
+    private TaskSeriesCollection underlying;
+
+    /** The series interval width (typically 0.0 &amp;lt; w &amp;lt;= 1.0). */
+    private double seriesWidth;
+
+    /** A flag that controls whether or not the data values are transposed. */
+    private boolean transposed;
+
+    /**
+     * Creates a new dataset based on the supplied collection of tasks.
+     *
+     * @param tasks  the underlying dataset ({@code null} not permitted).
+     */
+<span class="fc" id="L78">    public XYTaskDataset(TaskSeriesCollection tasks) {</span>
+<span class="fc" id="L79">        Args.nullNotPermitted(tasks, &quot;tasks&quot;);</span>
+<span class="fc" id="L80">        this.underlying = tasks;</span>
+<span class="fc" id="L81">        this.seriesWidth = 0.8;</span>
+<span class="fc" id="L82">        this.underlying.addChangeListener(this);</span>
+<span class="fc" id="L83">    }</span>
+
+    /**
+     * Returns the underlying task series collection that was supplied to the
+     * constructor.
+     *
+     * @return The underlying collection (never {@code null}).
+     */
+    public TaskSeriesCollection getTasks() {
+<span class="fc" id="L92">        return this.underlying;</span>
+    }
+
+    /**
+     * Returns the width of the interval for each series this dataset.
+     *
+     * @return The width of the series interval.
+     *
+     * @see #setSeriesWidth(double)
+     */
+    public double getSeriesWidth() {
+<span class="nc" id="L103">        return this.seriesWidth;</span>
+    }
+
+    /**
+     * Sets the series interval width and sends a {@link DatasetChangeEvent} to
+     * all registered listeners.
+     *
+     * @param w  the width.
+     *
+     * @see #getSeriesWidth()
+     */
+    public void setSeriesWidth(double w) {
+<span class="pc bpc" id="L115" title="1 of 2 branches missed.">        if (w &lt;= 0.0) {</span>
+<span class="nc" id="L116">            throw new IllegalArgumentException(&quot;Requires 'w' &gt; 0.0.&quot;);</span>
+        }
+<span class="fc" id="L118">        this.seriesWidth = w;</span>
+<span class="fc" id="L119">        fireDatasetChanged();</span>
+<span class="fc" id="L120">    }</span>
+
+    /**
+     * Returns a flag that indicates whether or not the dataset is transposed.
+     * The default is {@code false} which means the x-values are integers
+     * corresponding to the series indices, and the y-values are millisecond
+     * values corresponding to the task date/time intervals.  If the flag
+     * is set to {@code true}, the x and y-values are reversed.
+     *
+     * @return The flag.
+     *
+     * @see #setTransposed(boolean)
+     */
+    public boolean isTransposed() {
+<span class="nc" id="L134">        return this.transposed;</span>
+    }
+
+    /**
+     * Sets the flag that controls whether or not the dataset is transposed
+     * and sends a {@link DatasetChangeEvent} to all registered listeners.
+     *
+     * @param transposed  the new flag value.
+     *
+     * @see #isTransposed()
+     */
+    public void setTransposed(boolean transposed) {
+<span class="fc" id="L146">        this.transposed = transposed;</span>
+<span class="fc" id="L147">        fireDatasetChanged();</span>
+<span class="fc" id="L148">    }</span>
+
+    /**
+     * Returns the number of series in the dataset.
+     *
+     * @return The series count.
+     */
+    @Override
+    public int getSeriesCount() {
+<span class="nc" id="L157">        return this.underlying.getSeriesCount();</span>
+    }
+
+    /**
+     * Returns the name of a series.
+     *
+     * @param series  the series index (zero-based).
+     *
+     * @return The name of a series.
+     */
+    @Override
+    public Comparable getSeriesKey(int series) {
+<span class="nc" id="L169">        return this.underlying.getSeriesKey(series);</span>
+    }
+
+    /**
+     * Returns the number of items (tasks) in the specified series.
+     *
+     * @param series  the series index (zero-based).
+     *
+     * @return The item count.
+     */
+    @Override
+    public int getItemCount(int series) {
+<span class="nc" id="L181">        return this.underlying.getSeries(series).getItemCount();</span>
+    }
+
+    /**
+     * Returns the x-value (as a double primitive) for an item within a series.
+     *
+     * @param series  the series index (zero-based).
+     * @param item  the item index (zero-based).
+     *
+     * @return The value.
+     */
+    @Override
+    public double getXValue(int series, int item) {
+<span class="nc bnc" id="L194" title="All 2 branches missed.">        if (!this.transposed) {</span>
+<span class="nc" id="L195">            return getSeriesValue(series);</span>
+        }
+        else {
+<span class="nc" id="L198">            return getItemValue(series, item);</span>
+        }
+    }
+
+    /**
+     * Returns the starting date/time for the specified item (task) in the
+     * given series, measured in milliseconds since 1-Jan-1970 (as in
+     * java.util.Date).
+     *
+     * @param series  the series index.
+     * @param item  the item (or task) index.
+     *
+     * @return The start date/time.
+     */
+    @Override
+    public double getStartXValue(int series, int item) {
+<span class="nc bnc" id="L214" title="All 2 branches missed.">        if (!this.transposed) {</span>
+<span class="nc" id="L215">            return getSeriesStartValue(series);</span>
+        }
+        else {
+<span class="nc" id="L218">            return getItemStartValue(series, item);</span>
+        }
+    }
+
+    /**
+     * Returns the ending date/time for the specified item (task) in the
+     * given series, measured in milliseconds since 1-Jan-1970 (as in
+     * java.util.Date).
+     *
+     * @param series  the series index.
+     * @param item  the item (or task) index.
+     *
+     * @return The end date/time.
+     */
+    @Override
+    public double getEndXValue(int series, int item) {
+<span class="nc bnc" id="L234" title="All 2 branches missed.">        if (!this.transposed) {</span>
+<span class="nc" id="L235">            return getSeriesEndValue(series);</span>
+        }
+        else {
+<span class="nc" id="L238">            return getItemEndValue(series, item);</span>
+        }
+    }
+
+    /**
+     * Returns the x-value for the specified series.
+     *
+     * @param series  the series index.
+     * @param item  the item index.
+     *
+     * @return The x-value (in milliseconds).
+     */
+    @Override
+    public Number getX(int series, int item) {
+<span class="nc" id="L252">        return getXValue(series, item);</span>
+    }
+
+    /**
+     * Returns the starting date/time for the specified item (task) in the
+     * given series, measured in milliseconds since 1-Jan-1970 (as in
+     * java.util.Date).
+     *
+     * @param series  the series index.
+     * @param item  the item (or task) index.
+     *
+     * @return The start date/time.
+     */
+    @Override
+    public Number getStartX(int series, int item) {
+<span class="nc" id="L267">        return getStartXValue(series, item);</span>
+    }
+
+    /**
+     * Returns the ending date/time for the specified item (task) in the
+     * given series, measured in milliseconds since 1-Jan-1970 (as in
+     * java.util.Date).
+     *
+     * @param series  the series index.
+     * @param item  the item (or task) index.
+     *
+     * @return The end date/time.
+     */
+    @Override
+    public Number getEndX(int series, int item) {
+<span class="nc" id="L282">        return getEndXValue(series, item);</span>
+    }
+
+    /**
+     * Returns the y-value (as a double primitive) for an item within a series.
+     *
+     * @param series  the series index (zero-based).
+     * @param item  the item index (zero-based).
+     *
+     * @return The value.
+     */
+    @Override
+    public double getYValue(int series, int item) {
+<span class="nc bnc" id="L295" title="All 2 branches missed.">        if (!this.transposed) {</span>
+<span class="nc" id="L296">            return getItemValue(series, item);</span>
+        }
+        else {
+<span class="nc" id="L299">            return getSeriesValue(series);</span>
+        }
+    }
+
+    /**
+     * Returns the starting value of the y-interval for an item in the
+     * given series.
+     *
+     * @param series  the series index.
+     * @param item  the item (or task) index.
+     *
+     * @return The y-interval start.
+     */
+    @Override
+    public double getStartYValue(int series, int item) {
+<span class="nc bnc" id="L314" title="All 2 branches missed.">        if (!this.transposed) {</span>
+<span class="nc" id="L315">            return getItemStartValue(series, item);</span>
+        }
+        else {
+<span class="nc" id="L318">            return getSeriesStartValue(series);</span>
+        }
+    }
+
+    /**
+     * Returns the ending value of the y-interval for an item in the
+     * given series.
+     *
+     * @param series  the series index.
+     * @param item  the item (or task) index.
+     *
+     * @return The y-interval end.
+     */
+    @Override
+    public double getEndYValue(int series, int item) {
+<span class="nc bnc" id="L333" title="All 2 branches missed.">        if (!this.transposed) {</span>
+<span class="nc" id="L334">            return getItemEndValue(series, item);</span>
+        }
+        else {
+<span class="nc" id="L337">            return getSeriesEndValue(series);</span>
+        }
+    }
+
+    /**
+     * Returns the y-value for the specified series/item.  In this
+     * implementation, we return the series index as the y-value (this means
+     * that every item in the series has a constant integer value).
+     *
+     * @param series  the series index.
+     * @param item  the item index.
+     *
+     * @return The y-value.
+     */
+    @Override
+    public Number getY(int series, int item) {
+<span class="nc" id="L353">        return getYValue(series, item);</span>
+    }
+
+    /**
+     * Returns the starting value of the y-interval for an item in the
+     * given series.
+     *
+     * @param series  the series index.
+     * @param item  the item (or task) index.
+     *
+     * @return The y-interval start.
+     */
+    @Override
+    public Number getStartY(int series, int item) {
+<span class="nc" id="L367">        return getStartYValue(series, item);</span>
+    }
+
+    /**
+     * Returns the ending value of the y-interval for an item in the
+     * given series.
+     *
+     * @param series  the series index.
+     * @param item  the item (or task) index.
+     *
+     * @return The y-interval end.
+     */
+    @Override
+    public Number getEndY(int series, int item) {
+<span class="nc" id="L381">        return getEndYValue(series, item);</span>
+    }
+
+    private double getSeriesValue(int series) {
+<span class="nc" id="L385">        return series;</span>
+    }
+
+    private double getSeriesStartValue(int series) {
+<span class="nc" id="L389">        return series - this.seriesWidth / 2.0;</span>
+    }
+
+    private double getSeriesEndValue(int series) {
+<span class="nc" id="L393">        return series + this.seriesWidth / 2.0;</span>
+    }
+
+    private double getItemValue(int series, int item) {
+<span class="nc" id="L397">        TaskSeries s = this.underlying.getSeries(series);</span>
+<span class="nc" id="L398">        Task t = s.get(item);</span>
+<span class="nc" id="L399">        TimePeriod duration = t.getDuration();</span>
+<span class="nc" id="L400">        Date start = duration.getStart();</span>
+<span class="nc" id="L401">        Date end = duration.getEnd();</span>
+<span class="nc" id="L402">        return (start.getTime() + end.getTime()) / 2.0;</span>
+    }
+
+    private double getItemStartValue(int series, int item) {
+<span class="nc" id="L406">        TaskSeries s = this.underlying.getSeries(series);</span>
+<span class="nc" id="L407">        Task t = s.get(item);</span>
+<span class="nc" id="L408">        TimePeriod duration = t.getDuration();</span>
+<span class="nc" id="L409">        Date start = duration.getStart();</span>
+<span class="nc" id="L410">        return start.getTime();</span>
+    }
+
+    private double getItemEndValue(int series, int item) {
+<span class="nc" id="L414">        TaskSeries s = this.underlying.getSeries(series);</span>
+<span class="nc" id="L415">        Task t = s.get(item);</span>
+<span class="nc" id="L416">        TimePeriod duration = t.getDuration();</span>
+<span class="nc" id="L417">        Date end = duration.getEnd();</span>
+<span class="nc" id="L418">        return end.getTime();</span>
+    }
+
+
+    /**
+     * Receives a change event from the underlying dataset and responds by
+     * firing a change event for this dataset.
+     *
+     * @param event  the event.
+     */
+    @Override
+    public void datasetChanged(DatasetChangeEvent event) {
+<span class="fc" id="L430">        fireDatasetChanged();</span>
+<span class="fc" id="L431">    }</span>
+
+    /**
+     * Tests this dataset for equality with an arbitrary object.
+     *
+     * @param obj  the object ({@code null} permitted).
+     *
+     * @return A boolean.
+     */
+    @Override
+    public boolean equals(Object obj) {
+<span class="pc bpc" id="L442" title="1 of 2 branches missed.">        if (obj == this) {</span>
+<span class="nc" id="L443">            return true;</span>
+        }
+<span class="pc bpc" id="L445" title="1 of 2 branches missed.">        if (!(obj instanceof XYTaskDataset)) {</span>
+<span class="nc" id="L446">            return false;</span>
+        }
+<span class="fc" id="L448">        XYTaskDataset that = (XYTaskDataset) obj;</span>
+<span class="fc bfc" id="L449" title="All 2 branches covered.">        if (this.seriesWidth != that.seriesWidth) {</span>
+<span class="fc" id="L450">            return false;</span>
+        }
+<span class="fc bfc" id="L452" title="All 2 branches covered.">        if (this.transposed != that.transposed) {</span>
+<span class="fc" id="L453">            return false;</span>
+        }
+<span class="fc bfc" id="L455" title="All 2 branches covered.">        if (!this.underlying.equals(that.underlying)) {</span>
+<span class="fc" id="L456">            return false;</span>
+        }
+<span class="fc" id="L458">        return true;</span>
+    }
+
+    @Override
+    public int hashCode(){
+<span class="nc" id="L463">        int hash = 7;</span>
+<span class="nc" id="L464">        hash = 17 * hash + Objects.hashCode(this.underlying);</span>
+<span class="nc" id="L465">        hash = 17 * hash + (int) (Double.doubleToLongBits(this.seriesWidth) ^ </span>
+<span class="nc" id="L466">                                 (Double.doubleToLongBits(this.seriesWidth) &gt;&gt;&gt; 32));</span>
+<span class="nc bnc" id="L467" title="All 2 branches missed.">        hash = 17 * hash + (this.transposed ? 1 : 0);</span>
+<span class="nc" id="L468">        return hash;</span>
+    }
+
+    /**
+     * Returns a clone of this dataset.
+     *
+     * @return A clone of this dataset.
+     *
+     * @throws CloneNotSupportedException if there is a problem cloning.
+     */
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+<span class="fc" id="L480">        XYTaskDataset clone = (XYTaskDataset) super.clone();</span>
+<span class="fc" id="L481">        clone.underlying = (TaskSeriesCollection) this.underlying.clone();</span>
+<span class="fc" id="L482">        return clone;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

@@ -1,0 +1,560 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SymbolAxis.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.chart.axis</a> &gt; <span class="el_source">SymbolAxis.java</span></div><h1>SymbolAxis.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * ---------------
+ * SymbolAxis.java
+ * ---------------
+ * (C) Copyright 2002-2021, by Anthony Boulestreau and Contributors.
+ *
+ * Original Author:  Anthony Boulestreau;
+ * Contributor(s):   David Gilbert;
+ *
+ */
+
+package org.jfree.chart.axis;
+
+import org.jfree.chart.api.RectangleEdge;
+import org.jfree.chart.internal.SerialUtils;
+import org.jfree.chart.plot.Plot;
+import org.jfree.chart.plot.PlotRenderingInfo;
+import org.jfree.chart.plot.ValueAxisPlot;
+import org.jfree.chart.text.TextAnchor;
+import org.jfree.chart.text.TextUtils;
+import org.jfree.data.Range;
+
+import java.awt.*;
+import java.awt.geom.Rectangle2D;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.text.NumberFormat;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+
+/**
+ * A standard linear value axis that replaces integer values with symbols.
+ */
+public class SymbolAxis extends NumberAxis implements Serializable {
+
+    /** For serialization. */
+    private static final long serialVersionUID = 7216330468770619716L;
+
+    public GridBand getGridBand() {
+<span class="nc" id="L68">        return gridBand;</span>
+    }
+
+<span class="fc" id="L71">    protected final GridBand gridBand = new GridBand(this);</span>
+
+    /** The list of symbols to display instead of the numeric values. */
+    private final List symbols;
+
+    /**
+     * Constructs a symbol axis, using default attribute values where
+     * necessary.
+     *
+     * @param label  the axis label ({@code null} permitted).
+     * @param sv  the list of symbols to display instead of the numeric
+     *            values.
+     */
+    public SymbolAxis(String label, String[] sv) {
+<span class="fc" id="L85">        super(label);</span>
+<span class="fc" id="L86">        this.symbols = Arrays.asList(sv);</span>
+<span class="fc" id="L87">        this.gridBand.setGridBandsVisible(true);</span>
+<span class="fc" id="L88">        this.gridBand.setGridBandPaint(GridBand.DEFAULT_GRID_BAND_PAINT);</span>
+<span class="fc" id="L89">        this.gridBand.setGridBandAlternatePaint(GridBand.DEFAULT_GRID_BAND_ALTERNATE_PAINT);</span>
+<span class="fc" id="L90">        setAutoTickUnitSelection(false, false);</span>
+<span class="fc" id="L91">        setAutoRangeStickyZero(false);</span>
+<span class="fc" id="L92">    }</span>
+
+    /**
+     * This operation is not supported by this axis.
+     *
+     * @param g2  the graphics device.
+     * @param dataArea  the area in which the plot and axes should be drawn.
+     * @param edge  the edge along which the axis is drawn.
+     */
+    @Override
+    protected void selectAutoTickUnit(Graphics2D g2, Rectangle2D dataArea,
+            RectangleEdge edge) {
+<span class="nc" id="L104">        throw new UnsupportedOperationException();</span>
+    }
+
+    /**
+     * Draws the axis on a Java 2D graphics device (such as the screen or a
+     * printer).
+     *
+     * @param g2  the graphics device ({@code null} not permitted).
+     * @param cursor  the cursor location.
+     * @param plotArea  the area within which the plot and axes should be drawn
+     *                  ({@code null} not permitted).
+     * @param dataArea  the area within which the data should be drawn
+     *                  ({@code null} not permitted).
+     * @param edge  the axis location ({@code null} not permitted).
+     * @param plotState  collects information about the plot
+     *                   ({@code null} permitted).
+     *
+     * @return The axis state (never {@code null}).
+     */
+    @Override
+    public AxisState draw(Graphics2D g2, double cursor, Rectangle2D plotArea,
+            Rectangle2D dataArea, RectangleEdge edge, 
+            PlotRenderingInfo plotState) {
+
+<span class="nc" id="L128">        AxisState info = new AxisState(cursor);</span>
+<span class="nc bnc" id="L129" title="All 2 branches missed.">        if (isVisible()) {</span>
+<span class="nc" id="L130">            info = super.draw(g2, cursor, plotArea, dataArea, edge, plotState);</span>
+        }
+<span class="nc bnc" id="L132" title="All 2 branches missed.">        if (this.gridBand.isGridBandsVisible()) {</span>
+<span class="nc" id="L133">            gridBand.drawGridBands(g2, dataArea, edge, info.getTicks());</span>
+        }
+<span class="nc" id="L135">        return info;</span>
+
+    }
+
+    /**
+     * Rescales the axis to ensure that all data is visible.
+     */
+    @Override
+    protected void autoAdjustRange() {
+<span class="fc" id="L144">        Plot plot = getPlot();</span>
+<span class="pc bpc" id="L145" title="1 of 2 branches missed.">        if (plot == null) {</span>
+<span class="fc" id="L146">            return;  // no plot, no data</span>
+        }
+
+<span class="nc bnc" id="L149" title="All 2 branches missed.">        if (plot instanceof ValueAxisPlot) {</span>
+
+            // ensure that all the symbols are displayed
+<span class="nc" id="L152">            double upper = this.symbols.size() - 1;</span>
+<span class="nc" id="L153">            double lower = 0;</span>
+<span class="nc" id="L154">            double range = upper - lower;</span>
+
+            // ensure the autorange is at least &lt;minRange&gt; in size...
+<span class="nc" id="L157">            double minRange = getAutoRangeMinimumSize();</span>
+<span class="nc bnc" id="L158" title="All 2 branches missed.">            if (range &lt; minRange) {</span>
+<span class="nc" id="L159">                upper = (upper + lower + minRange) / 2;</span>
+<span class="nc" id="L160">                lower = (upper + lower - minRange) / 2;</span>
+            }
+
+            // this ensure that the grid bands will be displayed correctly.
+<span class="nc" id="L164">            double upperMargin = 0.5;</span>
+<span class="nc" id="L165">            double lowerMargin = 0.5;</span>
+
+<span class="nc bnc" id="L167" title="All 2 branches missed.">            if (getAutoRangeIncludesZero()) {</span>
+<span class="nc bnc" id="L168" title="All 2 branches missed.">                if (getAutoRangeStickyZero()) {</span>
+<span class="nc bnc" id="L169" title="All 2 branches missed.">                    if (upper &lt;= 0.0) {</span>
+<span class="nc" id="L170">                        upper = 0.0;</span>
+                    } else {
+<span class="nc" id="L172">                        upper = upper + upperMargin;</span>
+                    }
+<span class="nc bnc" id="L174" title="All 2 branches missed.">                    if (lower &gt;= 0.0) {</span>
+<span class="nc" id="L175">                        lower = 0.0;</span>
+                    } else {
+<span class="nc" id="L177">                        lower = lower - lowerMargin;</span>
+                    }
+                } else {
+<span class="nc" id="L180">                    upper = Math.max(0.0, upper + upperMargin);</span>
+<span class="nc" id="L181">                    lower = Math.min(0.0, lower - lowerMargin);</span>
+                }
+            } else {
+<span class="nc bnc" id="L184" title="All 2 branches missed.">                if (getAutoRangeStickyZero()) {</span>
+<span class="nc bnc" id="L185" title="All 2 branches missed.">                    if (upper &lt;= 0.0) {</span>
+<span class="nc" id="L186">                        upper = Math.min(0.0, upper + upperMargin);</span>
+                    } else {
+<span class="nc" id="L188">                        upper = upper + upperMargin * range;</span>
+                    }
+<span class="nc bnc" id="L190" title="All 2 branches missed.">                    if (lower &gt;= 0.0) {</span>
+<span class="nc" id="L191">                        lower = Math.max(0.0, lower - lowerMargin);</span>
+                    } else {
+<span class="nc" id="L193">                        lower = lower - lowerMargin;</span>
+                    }
+                } else {
+<span class="nc" id="L196">                    upper = upper + upperMargin;</span>
+<span class="nc" id="L197">                    lower = lower - lowerMargin;</span>
+                }
+            }
+<span class="nc" id="L200">            setRange(new Range(lower, upper), false, false);</span>
+        }
+<span class="nc" id="L202">    }</span>
+
+    /**
+     * Calculates the positions of the tick labels for the axis, storing the
+     * results in the tick label list (ready for drawing).
+     *
+     * @param g2  the graphics device.
+     * @param state  the axis state.
+     * @param dataArea  the area in which the data should be drawn.
+     * @param edge  the location of the axis.
+     *
+     * @return A list of ticks.
+     */
+    @Override
+    public List refreshTicks(Graphics2D g2, AxisState state,
+            Rectangle2D dataArea, RectangleEdge edge) {
+<span class="nc" id="L218">        List ticks = null;</span>
+<span class="nc bnc" id="L219" title="All 2 branches missed.">        if (RectangleEdge.isTopOrBottom(edge)) {</span>
+<span class="nc" id="L220">            ticks = refreshTicksHorizontal(g2, dataArea, edge);</span>
+<span class="nc bnc" id="L221" title="All 2 branches missed.">        } else if (RectangleEdge.isLeftOrRight(edge)) {</span>
+<span class="nc" id="L222">            ticks = refreshTicksVertical(g2, dataArea, edge);</span>
+        }
+<span class="nc" id="L224">        return ticks;</span>
+    }
+
+    /**
+     * Calculates the positions of the tick labels for the axis, storing the
+     * results in the tick label list (ready for drawing).
+     *
+     * @param g2  the graphics device.
+     * @param dataArea  the area in which the data should be drawn.
+     * @param edge  the location of the axis.
+     *
+     * @return The ticks.
+     */
+    @Override
+    protected List refreshTicksHorizontal(Graphics2D g2, Rectangle2D dataArea,
+            RectangleEdge edge) {
+
+<span class="nc" id="L241">        List ticks = new java.util.ArrayList();</span>
+
+<span class="nc" id="L243">        Font tickLabelFont = tickLabel.getTickLabelFont();</span>
+<span class="nc" id="L244">        g2.setFont(tickLabelFont);</span>
+
+<span class="nc" id="L246">        double size = getTickUnit().getSize();</span>
+<span class="nc" id="L247">        int count = calculateVisibleTickCount();</span>
+<span class="nc" id="L248">        double lowestTickValue = calculateLowestVisibleTickValue();</span>
+
+<span class="nc" id="L250">        double previousDrawnTickLabelPos = 0.0;</span>
+<span class="nc" id="L251">        double previousDrawnTickLabelLength = 0.0;</span>
+
+<span class="nc bnc" id="L253" title="All 2 branches missed.">        if (count &lt;= ValueAxis.MAXIMUM_TICK_COUNT) {</span>
+<span class="nc bnc" id="L254" title="All 2 branches missed.">            for (int i = 0; i &lt; count; i++) {</span>
+<span class="nc" id="L255">                double currentTickValue = lowestTickValue + (i * size);</span>
+<span class="nc" id="L256">                double xx = valueToJava2D(currentTickValue, dataArea, edge);</span>
+                String tickLabel;
+<span class="nc" id="L258">                NumberFormat formatter = getNumberFormatOverride();</span>
+<span class="nc bnc" id="L259" title="All 2 branches missed.">                if (formatter != null) {</span>
+<span class="nc" id="L260">                    tickLabel = formatter.format(currentTickValue);</span>
+                }
+                else {
+<span class="nc" id="L263">                    tickLabel = valueToString(currentTickValue);</span>
+                }
+
+                // avoid to draw overlapping tick labels
+<span class="nc" id="L267">                Rectangle2D bounds = TextUtils.getTextBounds(tickLabel, g2,</span>
+<span class="nc" id="L268">                        g2.getFontMetrics());</span>
+<span class="nc bnc" id="L269" title="All 2 branches missed.">                double tickLabelLength = isVerticalTickLabels()</span>
+<span class="nc" id="L270">                        ? bounds.getHeight() : bounds.getWidth();</span>
+<span class="nc" id="L271">                boolean tickLabelsOverlapping = false;</span>
+<span class="nc bnc" id="L272" title="All 2 branches missed.">                if (i &gt; 0) {</span>
+<span class="nc" id="L273">                    double avgTickLabelLength = (previousDrawnTickLabelLength</span>
+                            + tickLabelLength) / 2.0;
+<span class="nc bnc" id="L275" title="All 2 branches missed.">                    if (Math.abs(xx - previousDrawnTickLabelPos)</span>
+                            &lt; avgTickLabelLength) {
+<span class="nc" id="L277">                        tickLabelsOverlapping = true;</span>
+                    }
+                }
+<span class="nc bnc" id="L280" title="All 2 branches missed.">                if (tickLabelsOverlapping) {</span>
+<span class="nc" id="L281">                    tickLabel = &quot;&quot;; // don't draw this tick label</span>
+                }
+                else {
+                    // remember these values for next comparison
+<span class="nc" id="L285">                    previousDrawnTickLabelPos = xx;</span>
+<span class="nc" id="L286">                    previousDrawnTickLabelLength = tickLabelLength;</span>
+                }
+
+                TextAnchor anchor;
+                TextAnchor rotationAnchor;
+<span class="nc" id="L291">                double angle = 0.0;</span>
+<span class="nc bnc" id="L292" title="All 2 branches missed.">                if (isVerticalTickLabels()) {</span>
+<span class="nc" id="L293">                    anchor = TextAnchor.CENTER_RIGHT;</span>
+<span class="nc" id="L294">                    rotationAnchor = TextAnchor.CENTER_RIGHT;</span>
+<span class="nc bnc" id="L295" title="All 2 branches missed.">                    if (edge == RectangleEdge.TOP) {</span>
+<span class="nc" id="L296">                        angle = Math.PI / 2.0;</span>
+                    }
+                    else {
+<span class="nc" id="L299">                        angle = -Math.PI / 2.0;</span>
+                    }
+                }
+                else {
+<span class="nc bnc" id="L303" title="All 2 branches missed.">                    if (edge == RectangleEdge.TOP) {</span>
+<span class="nc" id="L304">                        anchor = TextAnchor.BOTTOM_CENTER;</span>
+<span class="nc" id="L305">                        rotationAnchor = TextAnchor.BOTTOM_CENTER;</span>
+                    }
+                    else {
+<span class="nc" id="L308">                        anchor = TextAnchor.TOP_CENTER;</span>
+<span class="nc" id="L309">                        rotationAnchor = TextAnchor.TOP_CENTER;</span>
+                    }
+                }
+<span class="nc" id="L312">                Tick tick = new NumberTick(currentTickValue, tickLabel, anchor, </span>
+                        rotationAnchor, angle);
+<span class="nc" id="L314">                ticks.add(tick);</span>
+            }
+        }
+<span class="nc" id="L317">        return ticks;</span>
+
+    }
+
+    /**
+     * Calculates the positions of the tick labels for the axis, storing the
+     * results in the tick label list (ready for drawing).
+     *
+     * @param g2  the graphics device.
+     * @param dataArea  the area in which the plot should be drawn.
+     * @param edge  the location of the axis.
+     *
+     * @return The ticks.
+     */
+    @Override
+    protected List refreshTicksVertical(Graphics2D g2, Rectangle2D dataArea,
+            RectangleEdge edge) {
+
+<span class="nc" id="L335">        List ticks = new java.util.ArrayList();</span>
+
+<span class="nc" id="L337">        Font tickLabelFont = tickLabel.getTickLabelFont();</span>
+<span class="nc" id="L338">        g2.setFont(tickLabelFont);</span>
+
+<span class="nc" id="L340">        double size = getTickUnit().getSize();</span>
+<span class="nc" id="L341">        int count = calculateVisibleTickCount();</span>
+<span class="nc" id="L342">        double lowestTickValue = calculateLowestVisibleTickValue();</span>
+
+<span class="nc" id="L344">        double previousDrawnTickLabelPos = 0.0;</span>
+<span class="nc" id="L345">        double previousDrawnTickLabelLength = 0.0;</span>
+
+<span class="nc bnc" id="L347" title="All 2 branches missed.">        if (count &lt;= ValueAxis.MAXIMUM_TICK_COUNT) {</span>
+<span class="nc bnc" id="L348" title="All 2 branches missed.">            for (int i = 0; i &lt; count; i++) {</span>
+<span class="nc" id="L349">                double currentTickValue = lowestTickValue + (i * size);</span>
+<span class="nc" id="L350">                double yy = valueToJava2D(currentTickValue, dataArea, edge);</span>
+                String tickLabel;
+<span class="nc" id="L352">                NumberFormat formatter = getNumberFormatOverride();</span>
+<span class="nc bnc" id="L353" title="All 2 branches missed.">                if (formatter != null) {</span>
+<span class="nc" id="L354">                    tickLabel = formatter.format(currentTickValue);</span>
+                }
+                else {
+<span class="nc" id="L357">                    tickLabel = valueToString(currentTickValue);</span>
+                }
+
+                // avoid to draw overlapping tick labels
+<span class="nc" id="L361">                Rectangle2D bounds = TextUtils.getTextBounds(tickLabel, g2,</span>
+<span class="nc" id="L362">                        g2.getFontMetrics());</span>
+<span class="nc bnc" id="L363" title="All 2 branches missed.">                double tickLabelLength = isVerticalTickLabels()</span>
+<span class="nc" id="L364">                    ? bounds.getWidth() : bounds.getHeight();</span>
+<span class="nc" id="L365">                boolean tickLabelsOverlapping = false;</span>
+<span class="nc bnc" id="L366" title="All 2 branches missed.">                if (i &gt; 0) {</span>
+<span class="nc" id="L367">                    double avgTickLabelLength = (previousDrawnTickLabelLength</span>
+                            + tickLabelLength) / 2.0;
+<span class="nc bnc" id="L369" title="All 2 branches missed.">                    if (Math.abs(yy - previousDrawnTickLabelPos)</span>
+                            &lt; avgTickLabelLength) {
+<span class="nc" id="L371">                        tickLabelsOverlapping = true;</span>
+                    }
+                }
+<span class="nc bnc" id="L374" title="All 2 branches missed.">                if (tickLabelsOverlapping) {</span>
+<span class="nc" id="L375">                    tickLabel = &quot;&quot;; // don't draw this tick label</span>
+                }
+                else {
+                    // remember these values for next comparison
+<span class="nc" id="L379">                    previousDrawnTickLabelPos = yy;</span>
+<span class="nc" id="L380">                    previousDrawnTickLabelLength = tickLabelLength;</span>
+                }
+
+                TextAnchor anchor;
+                TextAnchor rotationAnchor;
+<span class="nc" id="L385">                double angle = 0.0;</span>
+<span class="nc bnc" id="L386" title="All 2 branches missed.">                if (isVerticalTickLabels()) {</span>
+<span class="nc" id="L387">                    anchor = TextAnchor.BOTTOM_CENTER;</span>
+<span class="nc" id="L388">                    rotationAnchor = TextAnchor.BOTTOM_CENTER;</span>
+<span class="nc bnc" id="L389" title="All 2 branches missed.">                    if (edge == RectangleEdge.LEFT) {</span>
+<span class="nc" id="L390">                        angle = -Math.PI / 2.0;</span>
+                    }
+                    else {
+<span class="nc" id="L393">                        angle = Math.PI / 2.0;</span>
+                    }
+                }
+                else {
+<span class="nc bnc" id="L397" title="All 2 branches missed.">                    if (edge == RectangleEdge.LEFT) {</span>
+<span class="nc" id="L398">                        anchor = TextAnchor.CENTER_RIGHT;</span>
+<span class="nc" id="L399">                        rotationAnchor = TextAnchor.CENTER_RIGHT;</span>
+                    }
+                    else {
+<span class="nc" id="L402">                        anchor = TextAnchor.CENTER_LEFT;</span>
+<span class="nc" id="L403">                        rotationAnchor = TextAnchor.CENTER_LEFT;</span>
+                    }
+                }
+<span class="nc" id="L406">                Tick tick = new NumberTick(currentTickValue, tickLabel, anchor, </span>
+                        rotationAnchor, angle);
+<span class="nc" id="L408">                ticks.add(tick);</span>
+            }
+        }
+<span class="nc" id="L411">        return ticks;</span>
+
+    }
+
+    /**
+     * Converts a value to a string, using the list of symbols.
+     *
+     * @param value  value to convert.
+     *
+     * @return The symbol.
+     */
+    public String valueToString(double value) {
+        String strToReturn;
+        try {
+<span class="nc" id="L425">            strToReturn = (String) this.symbols.get((int) value);</span>
+        }
+<span class="nc" id="L427">        catch (IndexOutOfBoundsException  ex) {</span>
+<span class="nc" id="L428">            strToReturn = &quot;&quot;;</span>
+<span class="nc" id="L429">        }</span>
+<span class="nc" id="L430">        return strToReturn;</span>
+    }
+
+    /**
+     * Tests this axis for equality with an arbitrary object.
+     *
+     * @param obj  the object ({@code null} permitted).
+     *
+     * @return A boolean.
+     */
+    @Override
+    public boolean equals(Object obj) {
+<span class="pc bpc" id="L442" title="1 of 2 branches missed.">        if (obj == this) {</span>
+<span class="nc" id="L443">            return true;</span>
+        }
+<span class="pc bpc" id="L445" title="1 of 2 branches missed.">        if (!(obj instanceof SymbolAxis)) {</span>
+<span class="nc" id="L446">            return false;</span>
+        }
+<span class="fc" id="L448">        SymbolAxis that = (SymbolAxis) obj;</span>
+<span class="fc bfc" id="L449" title="All 2 branches covered.">        if (!this.symbols.equals(that.symbols)) {</span>
+<span class="fc" id="L450">            return false;</span>
+        }
+<span class="fc bfc" id="L452" title="All 2 branches covered.">        if (!gridBand.equals(that.gridBand)) {</span>
+<span class="fc" id="L453">            return false;</span>
+        }
+<span class="fc" id="L455">        return super.equals(obj);</span>
+    }
+
+
+
+    /**
+     * Draws the grid bands for the axis when it is at the top or bottom of
+     * the plot.
+     *
+     * @param g2                  the graphics target ({@code null} not permitted).
+     * @param dataArea            the area for the data (to which the axes are aligned,
+     *                            {@code null} not permitted).
+     * @param firstGridBandIsDark True: the first grid band takes the
+     *                            color of {@code gridBandPaint}.
+     *                            False: the second grid band takes the
+     *                            color of {@code gridBandPaint}.
+     * @param ticks               a list of ticks ({@code null} not permitted).
+     */
+    public void drawGridBandsHorizontal(Graphics2D g2,
+                                        Rectangle2D dataArea,
+                                        boolean firstGridBandIsDark, List ticks, GridBand gridBand) {
+
+<span class="nc" id="L477">        boolean currentGridBandIsDark = firstGridBandIsDark;</span>
+<span class="nc" id="L478">        double yy = dataArea.getY();</span>
+        double xx1, xx2;
+
+        //gets the outline stroke width of the plot
+<span class="nc" id="L482">        double outlineStrokeWidth = 1.0;</span>
+<span class="nc" id="L483">        Stroke outlineStroke = getPlot().getOutlineStroke();</span>
+<span class="nc bnc" id="L484" title="All 4 branches missed.">        if (outlineStroke != null &amp;&amp; outlineStroke instanceof BasicStroke) {</span>
+<span class="nc" id="L485">            outlineStrokeWidth = ((BasicStroke) outlineStroke).getLineWidth();</span>
+        }
+
+<span class="nc" id="L488">        Iterator iterator = ticks.iterator();</span>
+        ValueTick tick;
+        Rectangle2D band;
+<span class="nc bnc" id="L491" title="All 2 branches missed.">        while (iterator.hasNext()) {</span>
+<span class="nc" id="L492">            tick = (ValueTick) iterator.next();</span>
+<span class="nc" id="L493">            xx1 = valueToJava2D(tick.getValue() - 0.5d, dataArea,</span>
+                    RectangleEdge.BOTTOM);
+<span class="nc" id="L495">            xx2 = valueToJava2D(tick.getValue() + 0.5d, dataArea,</span>
+                    RectangleEdge.BOTTOM);
+<span class="nc bnc" id="L497" title="All 2 branches missed.">            if (currentGridBandIsDark) {</span>
+<span class="nc" id="L498">                g2.setPaint(gridBand.gridBandPaint);</span>
+            } else {
+<span class="nc" id="L500">                g2.setPaint(gridBand.gridBandAlternatePaint);</span>
+            }
+<span class="nc" id="L502">            band = new Rectangle2D.Double(Math.min(xx1, xx2),</span>
+<span class="nc" id="L503">                    yy + outlineStrokeWidth, Math.abs(xx2 - xx1),</span>
+<span class="nc" id="L504">                    dataArea.getMaxY() - yy - outlineStrokeWidth);</span>
+<span class="nc" id="L505">            g2.fill(band);</span>
+<span class="nc bnc" id="L506" title="All 2 branches missed.">            currentGridBandIsDark = !currentGridBandIsDark;</span>
+        }
+<span class="nc" id="L508">    }</span>
+
+    /**
+     * Draws the grid bands for an axis that is aligned to the left or
+     * right of the data area (that is, a vertical axis).
+     *
+     * @param g2                  the graphics target ({@code null} not permitted).
+     * @param dataArea            the area for the data (to which the axes are aligned,
+     *                            {@code null} not permitted).
+     * @param firstGridBandIsDark True: the first grid band takes the
+     *                            color of {@code gridBandPaint}.
+     *                            False: the second grid band takes the
+     *                            color of {@code gridBandPaint}.
+     * @param ticks               a list of ticks ({@code null} not permitted).
+     */
+    public void drawGridBandsVertical(Graphics2D g2,
+                                      Rectangle2D dataArea, boolean firstGridBandIsDark,
+                                      List ticks, GridBand gridBand) {
+      
+<span class="nc" id="L527">        boolean currentGridBandIsDark = firstGridBandIsDark;</span>
+<span class="nc" id="L528">        double xx = dataArea.getX();</span>
+        double yy1, yy2;
+
+        //gets the outline stroke width of the plot
+<span class="nc" id="L532">        double outlineStrokeWidth = 1.0;</span>
+<span class="nc" id="L533">        Stroke outlineStroke = getPlot().getOutlineStroke();</span>
+<span class="nc bnc" id="L534" title="All 4 branches missed.">        if (outlineStroke != null &amp;&amp; outlineStroke instanceof BasicStroke) {</span>
+<span class="nc" id="L535">            outlineStrokeWidth = ((BasicStroke) outlineStroke).getLineWidth();</span>
+        }
+
+<span class="nc" id="L538">        Iterator iterator = ticks.iterator();</span>
+        ValueTick tick;
+        Rectangle2D band;
+<span class="nc bnc" id="L541" title="All 2 branches missed.">        while (iterator.hasNext()) {</span>
+<span class="nc" id="L542">            tick = (ValueTick) iterator.next();</span>
+<span class="nc" id="L543">            yy1 = valueToJava2D(tick.getValue() + 0.5d, dataArea,</span>
+                    RectangleEdge.LEFT);
+<span class="nc" id="L545">            yy2 = valueToJava2D(tick.getValue() - 0.5d, dataArea,</span>
+                    RectangleEdge.LEFT);
+<span class="nc bnc" id="L547" title="All 2 branches missed.">            if (currentGridBandIsDark) {</span>
+<span class="nc" id="L548">                g2.setPaint(gridBand.gridBandPaint);</span>
+            } else {
+<span class="nc" id="L550">                g2.setPaint(gridBand.gridBandAlternatePaint);</span>
+            }
+<span class="nc" id="L552">            band = new Rectangle2D.Double(xx + outlineStrokeWidth,</span>
+<span class="nc" id="L553">                    Math.min(yy1, yy2), dataArea.getMaxX() - xx</span>
+<span class="nc" id="L554">                    - outlineStrokeWidth, Math.abs(yy2 - yy1));</span>
+<span class="nc" id="L555">            g2.fill(band);</span>
+<span class="nc bnc" id="L556" title="All 2 branches missed.">            currentGridBandIsDark = !currentGridBandIsDark;</span>
+        }
+<span class="nc" id="L558">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

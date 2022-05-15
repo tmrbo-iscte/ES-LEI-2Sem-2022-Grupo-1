@@ -1,0 +1,635 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DefaultTableXYDataset.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.data.xy</a> &gt; <span class="el_source">DefaultTableXYDataset.java</span></div><h1>DefaultTableXYDataset.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * --------------------------
+ * DefaultTableXYDataset.java
+ * --------------------------
+ * (C) Copyright 2003-2021, by Richard Atkinson and Contributors.
+ *
+ * Original Author:  Richard Atkinson;
+ * Contributor(s):   Jody Brownell;
+ *                   David Gilbert;
+ *                   Andreas Schroeder;
+ * 
+ */
+
+package org.jfree.data.xy;
+
+import org.jfree.chart.api.PublicCloneable;
+import org.jfree.chart.internal.Args;
+import org.jfree.chart.internal.CloneUtils;
+import org.jfree.data.DomainInfo;
+import org.jfree.data.Range;
+import org.jfree.data.general.DatasetChangeEvent;
+import org.jfree.data.general.DatasetUtils;
+import org.jfree.data.general.SeriesChangeEvent;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+
+/**
+ * An {@link XYDataset} where every series shares the same x-values (required
+ * for generating stacked area charts).
+ * 
+ * @param &lt;S&gt; The type for the series keys.
+ */
+public class DefaultTableXYDataset&lt;S extends Comparable&lt;S&gt;&gt; 
+        extends AbstractIntervalXYDataset&lt;S&gt;
+        implements TableXYDataset&lt;S&gt;, IntervalXYDataset&lt;S&gt;, DomainInfo,
+                   PublicCloneable {
+
+    /**
+     * Storage for the data - this list will contain zero, one or many
+     * XYSeries objects.
+     */
+<span class="fc" id="L70">    private List&lt;XYSeries&lt;S&gt;&gt; data = null;</span>
+
+    /** Storage for the x values. */
+<span class="fc" id="L73">    private HashSet xPoints = null;</span>
+
+    /** A flag that controls whether or not events are propogated. */
+<span class="fc" id="L76">    private boolean propagateEvents = true;</span>
+
+    /** A flag that controls auto pruning. */
+<span class="fc" id="L79">    private boolean autoPrune = false;</span>
+
+    /** The delegate used to control the interval width. */
+    private IntervalXYDelegate intervalDelegate;
+
+    /**
+     * Creates a new empty dataset.
+     */
+    public DefaultTableXYDataset() {
+<span class="fc" id="L88">        this(false);</span>
+<span class="fc" id="L89">    }</span>
+
+    /**
+     * Creates a new empty dataset.
+     *
+     * @param autoPrune  a flag that controls whether or not x-values are
+     *                   removed whenever the corresponding y-values are all
+     *                   {@code null}.
+     */
+<span class="fc" id="L98">    public DefaultTableXYDataset(boolean autoPrune) {</span>
+<span class="fc" id="L99">        this.autoPrune = autoPrune;</span>
+<span class="fc" id="L100">        this.data = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L101">        this.xPoints = new HashSet();</span>
+<span class="fc" id="L102">        this.intervalDelegate = new IntervalXYDelegate(this, false);</span>
+<span class="fc" id="L103">        addChangeListener(this.intervalDelegate);</span>
+<span class="fc" id="L104">    }</span>
+
+    /**
+     * Returns the flag that controls whether or not x-values are removed from
+     * the dataset when the corresponding y-values are all {@code null}.
+     *
+     * @return A boolean.
+     */
+    public boolean isAutoPrune() {
+<span class="nc" id="L113">        return this.autoPrune;</span>
+    }
+
+    /**
+     * Adds a series to the collection and sends a {@link DatasetChangeEvent}
+     * to all registered listeners.  The series should be configured to NOT
+     * allow duplicate x-values.
+     *
+     * @param series  the series ({@code null} not permitted).
+     */
+    public void addSeries(XYSeries&lt;S&gt; series) {
+<span class="fc" id="L124">        Args.nullNotPermitted(series, &quot;series&quot;);</span>
+<span class="pc bpc" id="L125" title="1 of 2 branches missed.">        if (series.getAllowDuplicateXValues()) {</span>
+<span class="nc" id="L126">            throw new IllegalArgumentException(</span>
+                &quot;Cannot accept XYSeries that allow duplicate values. &quot;
+                + &quot;Use XYSeries(seriesName, &lt;sort&gt;, false) constructor.&quot;
+            );
+        }
+<span class="fc" id="L131">        updateXPoints(series);</span>
+<span class="fc" id="L132">        this.data.add(series);</span>
+<span class="fc" id="L133">        series.addChangeListener(this);</span>
+<span class="fc" id="L134">        fireDatasetChanged();</span>
+<span class="fc" id="L135">    }</span>
+
+    /**
+     * Adds any unique x-values from 'series' to the dataset, and also adds any
+     * x-values that are in the dataset but not in 'series' to the series.
+     *
+     * @param series  the series ({@code null} not permitted).
+     */
+    private void updateXPoints(XYSeries&lt;S&gt; series) {
+<span class="fc" id="L144">        Args.nullNotPermitted(series, &quot;series&quot;);</span>
+<span class="fc" id="L145">        HashSet seriesXPoints = new HashSet();</span>
+<span class="fc" id="L146">        boolean savedState = this.propagateEvents;</span>
+<span class="fc" id="L147">        this.propagateEvents = false;</span>
+<span class="fc bfc" id="L148" title="All 2 branches covered.">        for (int itemNo = 0; itemNo &lt; series.getItemCount(); itemNo++) {</span>
+<span class="fc" id="L149">            Number xValue = series.getX(itemNo);</span>
+<span class="fc" id="L150">            seriesXPoints.add(xValue);</span>
+<span class="fc bfc" id="L151" title="All 2 branches covered.">            if (!this.xPoints.contains(xValue)) {</span>
+<span class="fc" id="L152">                this.xPoints.add(xValue);</span>
+<span class="fc" id="L153">                int seriesCount = this.data.size();</span>
+<span class="fc bfc" id="L154" title="All 2 branches covered.">                for (int seriesNo = 0; seriesNo &lt; seriesCount; seriesNo++) {</span>
+<span class="fc" id="L155">                    XYSeries&lt;S&gt; dataSeries = this.data.get(seriesNo);</span>
+<span class="fc bfc" id="L156" title="All 2 branches covered.">                    if (!dataSeries.equals(series)) {</span>
+<span class="fc" id="L157">                        dataSeries.add(xValue, null);</span>
+                    }
+                }
+            }
+        }
+<span class="fc bfc" id="L162" title="All 2 branches covered.">        for (Object point : this.xPoints) {</span>
+<span class="fc" id="L163">            Number xPoint = (Number) point;</span>
+<span class="fc bfc" id="L164" title="All 2 branches covered.">            if (!seriesXPoints.contains(xPoint)) {</span>
+<span class="fc" id="L165">                series.add(xPoint, null);</span>
+            }
+<span class="fc" id="L167">        }</span>
+<span class="fc" id="L168">        this.propagateEvents = savedState;</span>
+<span class="fc" id="L169">    }</span>
+
+    /**
+     * Updates the x-values for all the series in the dataset.
+     */
+    public void updateXPoints() {
+<span class="fc" id="L175">        this.propagateEvents = false;</span>
+<span class="fc bfc" id="L176" title="All 2 branches covered.">        for (int s = 0; s &lt; this.data.size(); s++) {</span>
+<span class="fc" id="L177">            updateXPoints(this.data.get(s));</span>
+        }
+<span class="pc bpc" id="L179" title="1 of 2 branches missed.">        if (this.autoPrune) {</span>
+<span class="nc" id="L180">            prune();</span>
+        }
+<span class="fc" id="L182">        this.propagateEvents = true;</span>
+<span class="fc" id="L183">    }</span>
+
+    /**
+     * Returns the number of series in the collection.
+     *
+     * @return The series count.
+     */
+    @Override
+    public int getSeriesCount() {
+<span class="fc" id="L192">        return this.data.size();</span>
+    }
+
+    /**
+     * Returns the number of x values in the dataset.
+     *
+     * @return The number of x values in the dataset.
+     */
+    @Override
+    public int getItemCount() {
+<span class="pc bpc" id="L202" title="1 of 2 branches missed.">        if (this.xPoints == null) {</span>
+<span class="nc" id="L203">            return 0;</span>
+        }
+        else {
+<span class="fc" id="L206">            return this.xPoints.size();</span>
+        }
+    }
+
+    /**
+     * Returns a series.
+     *
+     * @param series  the series (zero-based index).
+     *
+     * @return The series (never {@code null}).
+     */
+    public XYSeries&lt;S&gt; getSeries(int series) {
+<span class="fc" id="L218">        Args.requireInRange(series, &quot;series&quot;, 0, this.data.size() - 1);</span>
+<span class="fc" id="L219">        return this.data.get(series);</span>
+    }
+
+    /**
+     * Returns the key for a series.
+     *
+     * @param series  the series (zero-based index).
+     *
+     * @return The key for a series.
+     */
+    @Override
+    public S getSeriesKey(int series) {
+        // check arguments...delegated
+<span class="fc" id="L232">        return getSeries(series).getKey();</span>
+    }
+
+    /**
+     * Returns the number of items in the specified series.
+     *
+     * @param series  the series (zero-based index).
+     *
+     * @return The number of items in the specified series.
+     */
+    @Override
+    public int getItemCount(int series) {
+        // check arguments...delegated
+<span class="fc" id="L245">        return getSeries(series).getItemCount();</span>
+    }
+
+    /**
+     * Returns the x-value for the specified series and item.
+     *
+     * @param series  the series (zero-based index).
+     * @param item  the item (zero-based index).
+     *
+     * @return The x-value for the specified series and item.
+     */
+    @Override
+    public Number getX(int series, int item) {
+<span class="fc" id="L258">        XYSeries&lt;S&gt; s = this.data.get(series);</span>
+<span class="fc" id="L259">        return s.getX(item);</span>
+
+    }
+
+    /**
+     * Returns the starting X value for the specified series and item.
+     *
+     * @param series  the series (zero-based index).
+     * @param item  the item (zero-based index).
+     *
+     * @return The starting X value.
+     */
+    @Override
+    public Number getStartX(int series, int item) {
+<span class="fc" id="L273">        return this.intervalDelegate.getStartX(series, item);</span>
+    }
+
+    /**
+     * Returns the ending X value for the specified series and item.
+     *
+     * @param series  the series (zero-based index).
+     * @param item  the item (zero-based index).
+     *
+     * @return The ending X value.
+     */
+    @Override
+    public Number getEndX(int series, int item) {
+<span class="fc" id="L286">        return this.intervalDelegate.getEndX(series, item);</span>
+    }
+
+    /**
+     * Returns the y-value for the specified series and item.
+     *
+     * @param series  the series (zero-based index).
+     * @param index  the index of the item of interest (zero-based).
+     *
+     * @return The y-value for the specified series and item (possibly
+     *         {@code null}).
+     */
+    @Override
+    public Number getY(int series, int index) {
+<span class="fc" id="L300">        XYSeries&lt;S&gt; s = this.data.get(series);</span>
+<span class="fc" id="L301">        return s.getY(index);</span>
+    }
+
+    /**
+     * Returns the starting Y value for the specified series and item.
+     *
+     * @param series  the series (zero-based index).
+     * @param item  the item (zero-based index).
+     *
+     * @return The starting Y value.
+     */
+    @Override
+    public Number getStartY(int series, int item) {
+<span class="nc" id="L314">        return getY(series, item);</span>
+    }
+
+    /**
+     * Returns the ending Y value for the specified series and item.
+     *
+     * @param series  the series (zero-based index).
+     * @param item  the item (zero-based index).
+     *
+     * @return The ending Y value.
+     */
+    @Override
+    public Number getEndY(int series, int item) {
+<span class="nc" id="L327">        return getY(series, item);</span>
+    }
+
+    /**
+     * Removes all the series from the collection and sends a
+     * {@link DatasetChangeEvent} to all registered listeners.
+     */
+    public void removeAllSeries() {
+
+        // Unregister the collection as a change listener to each series in
+        // the collection.
+<span class="fc bfc" id="L338" title="All 2 branches covered.">        for (XYSeries&lt;S&gt; series : this.data) {</span>
+<span class="fc" id="L339">            series.removeChangeListener(this);</span>
+<span class="fc" id="L340">        }</span>
+
+        // Remove all the series from the collection and notify listeners.
+<span class="fc" id="L343">        this.data.clear();</span>
+<span class="fc" id="L344">        this.xPoints.clear();</span>
+<span class="fc" id="L345">        fireDatasetChanged();</span>
+<span class="fc" id="L346">    }</span>
+
+    /**
+     * Removes a series from the collection and sends a
+     * {@link DatasetChangeEvent} to all registered listeners.
+     *
+     * @param series  the series ({@code null} not permitted).
+     */
+    public void removeSeries(XYSeries&lt;S&gt; series) {
+<span class="fc" id="L355">        Args.nullNotPermitted(series, &quot;series&quot;);</span>
+<span class="pc bpc" id="L356" title="1 of 2 branches missed.">        if (this.data.contains(series)) {</span>
+<span class="fc" id="L357">            series.removeChangeListener(this);</span>
+<span class="fc" id="L358">            this.data.remove(series);</span>
+<span class="fc bfc" id="L359" title="All 2 branches covered.">            if (this.data.isEmpty()) {</span>
+<span class="fc" id="L360">                this.xPoints.clear();</span>
+            }
+<span class="fc" id="L362">            fireDatasetChanged();</span>
+        }
+<span class="fc" id="L364">    }</span>
+
+    /**
+     * Removes a series from the collection and sends a
+     * {@link DatasetChangeEvent} to all registered listeners.
+     *
+     * @param series  the series (zero based index).
+     */
+    public void removeSeries(int series) {
+<span class="fc" id="L373">        Args.requireInRange(series, &quot;series&quot;, 0, this.data.size() - 1);</span>
+
+        // fetch the series, remove the change listener, then remove the series.
+<span class="fc" id="L376">        XYSeries&lt;S&gt; s = this.data.get(series);</span>
+<span class="fc" id="L377">        s.removeChangeListener(this);</span>
+<span class="fc" id="L378">        this.data.remove(series);</span>
+<span class="pc bpc" id="L379" title="1 of 2 branches missed.">        if (this.data.isEmpty()) {</span>
+<span class="nc" id="L380">            this.xPoints.clear();</span>
+        }
+<span class="fc bfc" id="L382" title="All 2 branches covered.">        else if (this.autoPrune) {</span>
+<span class="fc" id="L383">            prune();</span>
+        }
+<span class="fc" id="L385">        fireDatasetChanged();</span>
+
+<span class="fc" id="L387">    }</span>
+
+    /**
+     * Removes the items from all series for a given x value.
+     *
+     * @param x  the x-value.
+     */
+    public void removeAllValuesForX(Number x) {
+<span class="fc" id="L395">        Args.nullNotPermitted(x, &quot;x&quot;);</span>
+<span class="fc" id="L396">        boolean savedState = this.propagateEvents;</span>
+<span class="fc" id="L397">        this.propagateEvents = false;</span>
+<span class="fc bfc" id="L398" title="All 2 branches covered.">        for (int s = 0; s &lt; this.data.size(); s++) {</span>
+<span class="fc" id="L399">            XYSeries&lt;S&gt; series = this.data.get(s);</span>
+<span class="fc" id="L400">            series.remove(x);</span>
+        }
+<span class="fc" id="L402">        this.propagateEvents = savedState;</span>
+<span class="fc" id="L403">        this.xPoints.remove(x);</span>
+<span class="fc" id="L404">        fireDatasetChanged();</span>
+<span class="fc" id="L405">    }</span>
+
+    /**
+     * Returns {@code true} if all the y-values for the specified x-value
+     * are {@code null} and {@code false} otherwise.
+     *
+     * @param x  the x-value.
+     *
+     * @return A boolean.
+     */
+    protected boolean canPrune(Number x) {
+<span class="fc bfc" id="L416" title="All 2 branches covered.">        for (int s = 0; s &lt; this.data.size(); s++) {</span>
+<span class="fc" id="L417">            XYSeries&lt;S&gt; series = this.data.get(s);</span>
+<span class="fc bfc" id="L418" title="All 2 branches covered.">            if (series.getY(series.indexOf(x)) != null) {</span>
+<span class="fc" id="L419">                return false;</span>
+            }
+        }
+<span class="fc" id="L422">        return true;</span>
+    }
+
+    /**
+     * Removes all x-values for which all the y-values are {@code null}.
+     */
+    public void prune() {
+<span class="fc" id="L429">        HashSet hs = (HashSet) this.xPoints.clone();</span>
+<span class="fc bfc" id="L430" title="All 2 branches covered.">        for (Object h : hs) {</span>
+<span class="fc" id="L431">            Number x = (Number) h;</span>
+<span class="fc bfc" id="L432" title="All 2 branches covered.">            if (canPrune(x)) {</span>
+<span class="fc" id="L433">                removeAllValuesForX(x);</span>
+            }
+<span class="fc" id="L435">        }</span>
+<span class="fc" id="L436">    }</span>
+
+    /**
+     * This method receives notification when a series belonging to the dataset
+     * changes.  It responds by updating the x-points for the entire dataset
+     * and sending a {@link DatasetChangeEvent} to all registered listeners.
+     *
+     * @param event  information about the change.
+     */
+    @Override
+    public void seriesChanged(SeriesChangeEvent event) {
+<span class="fc bfc" id="L447" title="All 2 branches covered.">        if (this.propagateEvents) {</span>
+<span class="fc" id="L448">            updateXPoints();</span>
+<span class="fc" id="L449">            fireDatasetChanged();</span>
+        }
+<span class="fc" id="L451">    }</span>
+
+    /**
+     * Tests this collection for equality with an arbitrary object.
+     *
+     * @param obj  the object ({@code null} permitted).
+     *
+     * @return A boolean.
+     */
+    @Override
+    public boolean equals(Object obj) {
+<span class="fc bfc" id="L462" title="All 2 branches covered.">        if (obj == this) {</span>
+<span class="fc" id="L463">            return true;</span>
+        }
+<span class="pc bpc" id="L465" title="1 of 2 branches missed.">        if (!(obj instanceof DefaultTableXYDataset)) {</span>
+<span class="nc" id="L466">            return false;</span>
+        }
+<span class="fc" id="L468">        DefaultTableXYDataset that = (DefaultTableXYDataset) obj;</span>
+<span class="pc bpc" id="L469" title="1 of 2 branches missed.">        if (this.autoPrune != that.autoPrune) {</span>
+<span class="nc" id="L470">            return false;</span>
+        }
+<span class="pc bpc" id="L472" title="1 of 2 branches missed.">        if (this.propagateEvents != that.propagateEvents) {</span>
+<span class="nc" id="L473">            return false;</span>
+        }
+<span class="pc bpc" id="L475" title="1 of 2 branches missed.">        if (!this.intervalDelegate.equals(that.intervalDelegate)) {</span>
+<span class="nc" id="L476">            return false;</span>
+        }
+<span class="fc bfc" id="L478" title="All 2 branches covered.">        if (!Objects.equals(this.data, that.data)) {</span>
+<span class="fc" id="L479">            return false;</span>
+        }
+<span class="fc" id="L481">        return true;</span>
+    }
+
+    /**
+     * Returns a hash code.
+     *
+     * @return A hash code.
+     */
+    @Override
+    public int hashCode() {
+        int result;
+<span class="nc bnc" id="L492" title="All 2 branches missed.">        result = (this.data != null ? this.data.hashCode() : 0);</span>
+<span class="nc" id="L493">        result = 29 * result</span>
+<span class="nc bnc" id="L494" title="All 2 branches missed.">                 + (this.xPoints != null ? this.xPoints.hashCode() : 0);</span>
+<span class="nc bnc" id="L495" title="All 2 branches missed.">        result = 29 * result + (this.propagateEvents ? 1 : 0);</span>
+<span class="nc bnc" id="L496" title="All 2 branches missed.">        result = 29 * result + (this.autoPrune ? 1 : 0);</span>
+<span class="nc" id="L497">        return result;</span>
+    }
+
+    /**
+     * Returns an independent copy of this dataset.
+     *
+     * @return A clone.
+     *
+     * @throws CloneNotSupportedException if there is some reason that cloning
+     *     cannot be performed.
+     */
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+<span class="fc" id="L510">        DefaultTableXYDataset clone = (DefaultTableXYDataset) super.clone();</span>
+<span class="fc" id="L511">        int seriesCount = this.data.size();</span>
+<span class="fc" id="L512">        clone.data = new ArrayList&lt;&gt;(seriesCount);</span>
+<span class="fc bfc" id="L513" title="All 2 branches covered.">        for (XYSeries&lt;S&gt; series : this.data) {</span>
+<span class="fc" id="L514">            clone.data.add(CloneUtils.clone(series));</span>
+<span class="fc" id="L515">        }</span>
+
+<span class="fc" id="L517">        clone.intervalDelegate = new IntervalXYDelegate(clone);</span>
+        // need to configure the intervalDelegate to match the original
+<span class="fc" id="L519">        clone.intervalDelegate.setFixedIntervalWidth(getIntervalWidth());</span>
+<span class="fc" id="L520">        clone.intervalDelegate.setAutoWidth(isAutoWidth());</span>
+<span class="fc" id="L521">        clone.intervalDelegate.setIntervalPositionFactor(</span>
+<span class="fc" id="L522">                getIntervalPositionFactor());</span>
+<span class="fc" id="L523">        clone.updateXPoints();</span>
+<span class="fc" id="L524">        return clone;</span>
+    }
+
+    /**
+     * Returns the minimum x-value in the dataset.
+     *
+     * @param includeInterval  a flag that determines whether or not the
+     *                         x-interval is taken into account.
+     *
+     * @return The minimum value.
+     */
+    @Override
+    public double getDomainLowerBound(boolean includeInterval) {
+<span class="nc" id="L537">        return this.intervalDelegate.getDomainLowerBound(includeInterval);</span>
+    }
+
+    /**
+     * Returns the maximum x-value in the dataset.
+     *
+     * @param includeInterval  a flag that determines whether or not the
+     *                         x-interval is taken into account.
+     *
+     * @return The maximum value.
+     */
+    @Override
+    public double getDomainUpperBound(boolean includeInterval) {
+<span class="nc" id="L550">        return this.intervalDelegate.getDomainUpperBound(includeInterval);</span>
+    }
+
+    /**
+     * Returns the range of the values in this dataset's domain.
+     *
+     * @param includeInterval  a flag that determines whether or not the
+     *                         x-interval is taken into account.
+     *
+     * @return The range.
+     */
+    @Override
+    public Range getDomainBounds(boolean includeInterval) {
+<span class="nc bnc" id="L563" title="All 2 branches missed.">        if (includeInterval) {</span>
+<span class="nc" id="L564">            return this.intervalDelegate.getDomainBounds(includeInterval);</span>
+        }
+        else {
+<span class="nc" id="L567">            return DatasetUtils.iterateDomainBounds(this, includeInterval);</span>
+        }
+    }
+
+    /**
+     * Returns the interval position factor.
+     *
+     * @return The interval position factor.
+     */
+    public double getIntervalPositionFactor() {
+<span class="fc" id="L577">        return this.intervalDelegate.getIntervalPositionFactor();</span>
+    }
+
+    /**
+     * Sets the interval position factor. Must be between 0.0 and 1.0 inclusive.
+     * If the factor is 0.5, the gap is in the middle of the x values. If it
+     * is lesser than 0.5, the gap is farther to the left and if greater than
+     * 0.5 it gets farther to the right.
+     *
+     * @param d the new interval position factor.
+     */
+    public void setIntervalPositionFactor(double d) {
+<span class="nc" id="L589">        this.intervalDelegate.setIntervalPositionFactor(d);</span>
+<span class="nc" id="L590">        fireDatasetChanged();</span>
+<span class="nc" id="L591">    }</span>
+
+    /**
+     * returns the full interval width.
+     *
+     * @return The interval width to use.
+     */
+    public double getIntervalWidth() {
+<span class="fc" id="L599">        return this.intervalDelegate.getIntervalWidth();</span>
+    }
+
+    /**
+     * Sets the interval width to a fixed value, and sends a
+     * {@link DatasetChangeEvent} to all registered listeners.
+     *
+     * @param d  the new interval width (must be &amp;gt; 0).
+     */
+    public void setIntervalWidth(double d) {
+<span class="nc" id="L609">        this.intervalDelegate.setFixedIntervalWidth(d);</span>
+<span class="nc" id="L610">        fireDatasetChanged();</span>
+<span class="nc" id="L611">    }</span>
+
+    /**
+     * Returns whether the interval width is automatically calculated or not.
+     *
+     * @return A flag that determines whether or not the interval width is
+     *         automatically calculated.
+     */
+    public boolean isAutoWidth() {
+<span class="fc" id="L620">        return this.intervalDelegate.isAutoWidth();</span>
+    }
+
+    /**
+     * Sets the flag that indicates whether the interval width is automatically
+     * calculated or not.
+     *
+     * @param b  a boolean.
+     */
+    public void setAutoWidth(boolean b) {
+<span class="fc" id="L630">        this.intervalDelegate.setAutoWidth(b);</span>
+<span class="fc" id="L631">        fireDatasetChanged();</span>
+<span class="fc" id="L632">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

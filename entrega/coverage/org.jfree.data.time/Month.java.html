@@ -1,0 +1,535 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Month.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.data.time</a> &gt; <span class="el_source">Month.java</span></div><h1>Month.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * ----------
+ * Month.java
+ * ----------
+ * (C) Copyright 2001-2022, by David Gilbert and Contributors.
+ *
+ * Original Author:  David Gilbert;
+ * Contributor(s):   Chris Boek;
+ *
+ */
+
+package org.jfree.data.time;
+
+import java.io.Serializable;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
+import org.jfree.chart.date.MonthConstants;
+import org.jfree.chart.date.SerialDate;
+
+/**
+ * Represents a single month.  This class is immutable, which is a requirement
+ * for all {@link RegularTimePeriod} subclasses.
+ */
+public class Month extends RegularTimePeriod implements Serializable {
+
+    /** For serialization. */
+    private static final long serialVersionUID = -5090216912548722570L;
+
+    /** The month (1-12). */
+    private int month;
+
+    /** The year in which the month falls. */
+    private int year;
+
+    /** The first millisecond. */
+    private long firstMillisecond;
+
+    /** The last millisecond. */
+    private long lastMillisecond;
+
+    /**
+     * Constructs a new Month, based on the current system time.
+     * The time zone and locale are determined by the calendar
+     * returned by {@link RegularTimePeriod#getCalendarInstance()}.
+     */
+    public Month() {
+<span class="fc" id="L74">        this(new Date());</span>
+<span class="fc" id="L75">    }</span>
+
+    /**
+     * Constructs a new month instance.
+     * The time zone and locale are determined by the calendar
+     * returned by {@link RegularTimePeriod#getCalendarInstance()}.
+     *
+     * @param month  the month (in the range 1 to 12).
+     * @param year  the year.
+     */
+<span class="fc" id="L85">    public Month(int month, int year) {</span>
+<span class="pc bpc" id="L86" title="2 of 4 branches missed.">        if ((month &lt; 1) || (month &gt; 12)) {</span>
+<span class="nc" id="L87">            throw new IllegalArgumentException(&quot;Month outside valid range.&quot;);</span>
+        }
+<span class="fc" id="L89">        this.month = month;</span>
+<span class="fc" id="L90">        this.year = year;</span>
+<span class="fc" id="L91">        peg(getCalendarInstance());</span>
+<span class="fc" id="L92">    }</span>
+
+    /**
+     * Constructs a new month instance.
+     * The time zone and locale are determined by the calendar
+     * returned by {@link RegularTimePeriod#getCalendarInstance()}.
+     *
+     * @param month  the month (in the range 1 to 12).
+     * @param year  the year.
+     */
+<span class="fc" id="L102">    public Month(int month, Year year) {</span>
+<span class="pc bpc" id="L103" title="2 of 4 branches missed.">        if ((month &lt; 1) || (month &gt; 12)) {</span>
+<span class="nc" id="L104">            throw new IllegalArgumentException(&quot;Month outside valid range.&quot;);</span>
+        }
+<span class="fc" id="L106">        this.month = month;</span>
+<span class="fc" id="L107">        this.year = year.getYear();</span>
+<span class="fc" id="L108">        peg(getCalendarInstance());</span>
+<span class="fc" id="L109">    }</span>
+
+    /**
+     * Constructs a new {@code Month} instance, based on a date/time.
+     * The time zone and locale are determined by the calendar
+     * returned by {@link RegularTimePeriod#getCalendarInstance()}.
+     *
+     * @param time  the date/time ({@code null} not permitted).
+     *
+     * @see #Month(Date, TimeZone, Locale)
+     */
+    public Month(Date time) {
+<span class="fc" id="L121">        this(time, getCalendarInstance());</span>
+<span class="fc" id="L122">    }</span>
+
+    /**
+     * Creates a new {@code Month} instance, based on the specified time,
+     * zone and locale.
+     *
+     * @param time  the current time.
+     * @param zone  the time zone.
+     * @param locale  the locale.
+     *
+     * @since 1.0.12
+     */
+<span class="fc" id="L134">    public Month(Date time, TimeZone zone, Locale locale) {</span>
+<span class="fc" id="L135">        Calendar calendar = Calendar.getInstance(zone, locale);</span>
+<span class="fc" id="L136">        calendar.setTime(time);</span>
+<span class="fc" id="L137">        this.month = calendar.get(Calendar.MONTH) + 1;</span>
+<span class="fc" id="L138">        this.year = calendar.get(Calendar.YEAR);</span>
+<span class="fc" id="L139">        peg(calendar);</span>
+<span class="fc" id="L140">    }</span>
+
+    /**
+     * Constructs a new instance, based on a particular date/time.
+     * The time zone and locale are determined by the {@code calendar}
+     * parameter.
+     *
+     * @param time the date/time ({@code null} not permitted).
+     * @param calendar the calendar to use for calculations ({@code null} not permitted).
+     */
+<span class="fc" id="L150">    public Month(Date time, Calendar calendar) {</span>
+<span class="fc" id="L151">        calendar.setTime(time);</span>
+<span class="fc" id="L152">        this.month = calendar.get(Calendar.MONTH) + 1;</span>
+<span class="fc" id="L153">        this.year = calendar.get(Calendar.YEAR);</span>
+<span class="fc" id="L154">        peg(calendar);</span>
+<span class="fc" id="L155">    }</span>
+
+    /**
+     * Returns the year in which the month falls.
+     *
+     * @return The year in which the month falls (as a Year object).
+     */
+    public Year getYear() {
+<span class="fc" id="L163">        return new Year(this.year);</span>
+    }
+
+    /**
+     * Returns the year in which the month falls.
+     *
+     * @return The year in which the month falls (as an int).
+     */
+    public int getYearValue() {
+<span class="fc" id="L172">        return this.year;</span>
+    }
+
+    /**
+     * Returns the month.  Note that 1=JAN, 2=FEB, ...
+     *
+     * @return The month.
+     */
+    public int getMonth() {
+<span class="fc" id="L181">        return this.month;</span>
+    }
+
+    /**
+     * Returns the first millisecond of the month.  This will be determined
+     * relative to the time zone specified in the constructor, or in the
+     * calendar instance passed in the most recent call to the
+     * {@link #peg(Calendar)} method.
+     *
+     * @return The first millisecond of the month.
+     *
+     * @see #getLastMillisecond()
+     */
+    @Override
+    public long getFirstMillisecond() {
+<span class="fc" id="L196">        return this.firstMillisecond;</span>
+    }
+
+    /**
+     * Returns the last millisecond of the month.  This will be
+     * determined relative to the time zone specified in the constructor, or
+     * in the calendar instance passed in the most recent call to the
+     * {@link #peg(Calendar)} method.
+     *
+     * @return The last millisecond of the month.
+     *
+     * @see #getFirstMillisecond()
+     */
+    @Override
+    public long getLastMillisecond() {
+<span class="fc" id="L211">        return this.lastMillisecond;</span>
+    }
+
+    /**
+     * Recalculates the start date/time and end date/time for this time period
+     * relative to the supplied calendar (which incorporates a time zone).
+     *
+     * @param calendar  the calendar ({@code null} not permitted).
+     *
+     * @since 1.0.3
+     */
+    @Override
+    public void peg(Calendar calendar) {
+<span class="fc" id="L224">        this.firstMillisecond = getFirstMillisecond(calendar);</span>
+<span class="fc" id="L225">        this.lastMillisecond = getLastMillisecond(calendar);</span>
+<span class="fc" id="L226">    }</span>
+
+    /**
+     * Returns the month preceding this one.  Note that the returned
+     * {@link Month} is &quot;pegged&quot; using the default calendar, obtained
+     * with {@link RegularTimePeriod#getCalendarInstance()}, irrespective of
+     * the time-zone used to peg of the current month (which is not recorded
+     * anywhere).  See the {@link #peg(Calendar)} method.
+     *
+     * @return The month preceding this one.
+     */
+    @Override
+    public RegularTimePeriod previous() {
+        Month result;
+<span class="fc bfc" id="L240" title="All 2 branches covered.">        if (this.month != MonthConstants.JANUARY) {</span>
+<span class="fc" id="L241">            result = new Month(this.month - 1, this.year);</span>
+        }
+        else {
+<span class="fc bfc" id="L244" title="All 2 branches covered.">            if (this.year &gt; 1900) {</span>
+<span class="fc" id="L245">                result = new Month(MonthConstants.DECEMBER, this.year - 1);</span>
+            }
+            else {
+<span class="fc" id="L248">                result = null;</span>
+            }
+        }
+<span class="fc" id="L251">        return result;</span>
+    }
+
+    /**
+     * Returns the month following this one.  Note that the returned
+     * {@link Month} is &quot;pegged&quot; using the default calendar, obtained
+     * with {@link RegularTimePeriod#getCalendarInstance()}, irrespective of
+     * the time-zone used to peg of the current month (which is not recorded
+     * anywhere).  See the {@link #peg(Calendar)} method.
+     *
+     * @return The month following this one.
+     */
+    @Override
+    public RegularTimePeriod next() {
+        Month result;
+<span class="fc bfc" id="L266" title="All 2 branches covered.">        if (this.month != MonthConstants.DECEMBER) {</span>
+<span class="fc" id="L267">            result = new Month(this.month + 1, this.year);</span>
+        }
+        else {
+<span class="fc bfc" id="L270" title="All 2 branches covered.">            if (this.year &lt; 9999) {</span>
+<span class="fc" id="L271">                result = new Month(MonthConstants.JANUARY, this.year + 1);</span>
+            }
+            else {
+<span class="fc" id="L274">                result = null;</span>
+            }
+        }
+<span class="fc" id="L277">        return result;</span>
+    }
+
+    /**
+     * Returns a serial index number for the month.
+     *
+     * @return The serial index number.
+     */
+    @Override
+    public long getSerialIndex() {
+<span class="fc" id="L287">        return this.year * 12L + this.month;</span>
+    }
+
+    /**
+     * Returns a string representing the month (e.g. &quot;January 2002&quot;).
+     * &lt;P&gt;
+     * To do: look at internationalisation.
+     *
+     * @return A string representing the month.
+     */
+    @Override
+    public String toString() {
+<span class="nc" id="L299">        return SerialDate.monthCodeToString(this.month) + &quot; &quot; + this.year;</span>
+    }
+
+    /**
+     * Tests the equality of this Month object to an arbitrary object.
+     * Returns true if the target is a Month instance representing the same
+     * month as this object.  In all other cases, returns false.
+     *
+     * @param obj  the object ({@code null} permitted).
+     *
+     * @return {@code true} if month and year of this and object are the
+     *         same.
+     */
+    @Override
+    public boolean equals(Object obj) {
+<span class="fc bfc" id="L314" title="All 2 branches covered.">        if (obj == this) {</span>
+<span class="fc" id="L315">            return true;</span>
+        }
+<span class="pc bpc" id="L317" title="1 of 2 branches missed.">        if (!(obj instanceof Month)) {</span>
+<span class="nc" id="L318">            return false;</span>
+        }
+<span class="fc" id="L320">        Month that = (Month) obj;</span>
+<span class="pc bpc" id="L321" title="1 of 2 branches missed.">        if (this.month != that.month) {</span>
+<span class="nc" id="L322">            return false;</span>
+        }
+<span class="pc bpc" id="L324" title="1 of 2 branches missed.">        if (this.year != that.year) {</span>
+<span class="nc" id="L325">            return false;</span>
+        }
+<span class="fc" id="L327">        return true;</span>
+    }
+
+    /**
+     * Returns a hash code for this object instance.  The approach described by
+     * Joshua Bloch in &quot;Effective Java&quot; has been used here:
+     * &lt;p&gt;
+     * {@code http://developer.java.sun.com/developer/Books/effectivejava
+     * /Chapter3.pdf}
+     *
+     * @return A hash code.
+     */
+    @Override
+    public int hashCode() {
+<span class="fc" id="L341">        int result = 17;</span>
+<span class="fc" id="L342">        result = 37 * result + this.month;</span>
+<span class="fc" id="L343">        result = 37 * result + this.year;</span>
+<span class="fc" id="L344">        return result;</span>
+    }
+
+    /**
+     * Returns an integer indicating the order of this Month object relative to
+     * the specified
+     * object: negative == before, zero == same, positive == after.
+     *
+     * @param o1  the object to compare.
+     *
+     * @return negative == before, zero == same, positive == after.
+     */
+    @Override
+    public int compareTo(Object o1) {
+
+        int result;
+
+        // CASE 1 : Comparing to another Month object
+        // --------------------------------------------
+<span class="pc bpc" id="L363" title="1 of 2 branches missed.">        if (o1 instanceof Month) {</span>
+<span class="fc" id="L364">            Month m = (Month) o1;</span>
+<span class="fc" id="L365">            result = this.year - m.getYearValue();</span>
+<span class="fc bfc" id="L366" title="All 2 branches covered.">            if (result == 0) {</span>
+<span class="fc" id="L367">                result = this.month - m.getMonth();</span>
+            }
+<span class="fc" id="L369">        }</span>
+
+        // CASE 2 : Comparing to another TimePeriod object
+        // -----------------------------------------------
+<span class="nc bnc" id="L373" title="All 2 branches missed.">        else if (o1 instanceof RegularTimePeriod) {</span>
+            // more difficult case - evaluate later...
+<span class="nc" id="L375">            result = 0;</span>
+        }
+
+        // CASE 3 : Comparing to a non-TimePeriod object
+        // ---------------------------------------------
+        else {
+            // consider time periods to be ordered after general objects
+<span class="nc" id="L382">            result = 1;</span>
+        }
+
+<span class="fc" id="L385">        return result;</span>
+
+    }
+
+    /**
+     * Returns the first millisecond of the month, evaluated using the supplied
+     * calendar (which determines the time zone).
+     *
+     * @param calendar  the calendar ({@code null} not permitted).
+     *
+     * @return The first millisecond of the month.
+     *
+     * @throws NullPointerException if {@code calendar} is
+     *     {@code null}.
+     */
+    @Override
+    public long getFirstMillisecond(Calendar calendar) {
+<span class="fc" id="L402">        calendar.set(this.year, this.month - 1, 1, 0, 0, 0);</span>
+<span class="fc" id="L403">        calendar.set(Calendar.MILLISECOND, 0);</span>
+<span class="fc" id="L404">        return calendar.getTimeInMillis();</span>
+    }
+
+    /**
+     * Returns the last millisecond of the month, evaluated using the supplied
+     * calendar (which determines the time zone).
+     *
+     * @param calendar  the calendar ({@code null} not permitted).
+     *
+     * @return The last millisecond of the month.
+     *
+     * @throws NullPointerException if {@code calendar} is
+     *     {@code null}.
+     */
+    @Override
+    public long getLastMillisecond(Calendar calendar) {
+<span class="fc" id="L420">        int eom = SerialDate.lastDayOfMonth(this.month, this.year);</span>
+<span class="fc" id="L421">        calendar.set(this.year, this.month - 1, eom, 23, 59, 59);</span>
+<span class="fc" id="L422">        calendar.set(Calendar.MILLISECOND, 999);</span>
+<span class="fc" id="L423">        return calendar.getTimeInMillis();</span>
+    }
+
+    /**
+     * Parses the string argument as a month.  This method is required to
+     * accept the format &quot;YYYY-MM&quot;.  It will also accept &quot;MM-YYYY&quot;. Anything
+     * else, at the moment, is a bonus.
+     *
+     * @param s  the string to parse ({@code null} permitted).
+     *
+     * @return {@code null} if the string is not parseable, the month
+     *         otherwise.
+     */
+    public static Month parseMonth(String s) {
+<span class="fc" id="L437">        Month result = null;</span>
+<span class="pc bpc" id="L438" title="1 of 2 branches missed.">        if (s == null) {</span>
+<span class="nc" id="L439">            return result;</span>
+        }
+        // trim whitespace from either end of the string
+<span class="fc" id="L442">        s = s.trim();</span>
+<span class="fc" id="L443">        int i = Month.findSeparator(s);</span>
+        String s1, s2;
+        boolean yearIsFirst;
+        // if there is no separator, we assume the first four characters
+        // are YYYY
+<span class="pc bpc" id="L448" title="1 of 2 branches missed.">        if (i == -1) {</span>
+<span class="nc" id="L449">            yearIsFirst = true;</span>
+<span class="nc" id="L450">            s1 = s.substring(0, 5);</span>
+<span class="nc" id="L451">            s2 = s.substring(5);</span>
+        }
+        else {
+<span class="fc" id="L454">            s1 = s.substring(0, i).trim();</span>
+<span class="fc" id="L455">            s2 = s.substring(i + 1, s.length()).trim();</span>
+            // now it is trickier to determine if the month or year is first
+<span class="fc" id="L457">            Year y1 = Month.evaluateAsYear(s1);</span>
+<span class="fc bfc" id="L458" title="All 2 branches covered.">            if (y1 == null) {</span>
+<span class="fc" id="L459">                yearIsFirst = false;</span>
+            }
+            else {
+<span class="fc" id="L462">                Year y2 = Month.evaluateAsYear(s2);</span>
+<span class="pc bpc" id="L463" title="1 of 2 branches missed.">                if (y2 == null) {</span>
+<span class="nc" id="L464">                    yearIsFirst = true;</span>
+                }
+                else {
+<span class="fc bfc" id="L467" title="All 2 branches covered.">                    yearIsFirst = (s1.length() &gt; s2.length());</span>
+                }
+            }
+        }
+        Year year;
+        int month;
+<span class="fc bfc" id="L473" title="All 2 branches covered.">        if (yearIsFirst) {</span>
+<span class="fc" id="L474">            year = Month.evaluateAsYear(s1);</span>
+<span class="fc" id="L475">            month = SerialDate.stringToMonthCode(s2);</span>
+        }
+        else {
+<span class="fc" id="L478">            year = Month.evaluateAsYear(s2);</span>
+<span class="fc" id="L479">            month = SerialDate.stringToMonthCode(s1);</span>
+        }
+<span class="pc bpc" id="L481" title="1 of 2 branches missed.">        if (month == -1) {</span>
+<span class="nc" id="L482">            throw new TimePeriodFormatException(&quot;Can't evaluate the month.&quot;);</span>
+        }
+<span class="pc bpc" id="L484" title="1 of 2 branches missed.">        if (year == null) {</span>
+<span class="nc" id="L485">            throw new TimePeriodFormatException(&quot;Can't evaluate the year.&quot;);</span>
+        }
+<span class="fc" id="L487">        result = new Month(month, year);</span>
+<span class="fc" id="L488">        return result;</span>
+    }
+
+    /**
+     * Finds the first occurrence of '-', or if that character is not found,
+     * the first occurrence of ',', or the first occurrence of ' ' or '.'
+     *
+     * @param s  the string to parse.
+     *
+     * @return The position of the separator character, or {@code -1} if
+     *     none of the characters were found.
+     */
+    private static int findSeparator(String s) {
+<span class="fc" id="L501">        int result = s.indexOf('-');</span>
+<span class="fc bfc" id="L502" title="All 2 branches covered.">        if (result == -1) {</span>
+<span class="fc" id="L503">            result = s.indexOf(',');</span>
+        }
+<span class="fc bfc" id="L505" title="All 2 branches covered.">        if (result == -1) {</span>
+<span class="fc" id="L506">            result = s.indexOf(' ');</span>
+        }
+<span class="pc bpc" id="L508" title="1 of 2 branches missed.">        if (result == -1) {</span>
+<span class="nc" id="L509">            result = s.indexOf('.');</span>
+        }
+<span class="fc" id="L511">        return result;</span>
+    }
+
+    /**
+     * Creates a year from a string, or returns {@code null} (format
+     * exceptions suppressed).
+     *
+     * @param s  the string to parse.
+     *
+     * @return {@code null} if the string is not parseable, the year
+     *         otherwise.
+     */
+    private static Year evaluateAsYear(String s) {
+<span class="fc" id="L524">        Year result = null;</span>
+        try {
+<span class="fc" id="L526">            result = Year.parseYear(s);</span>
+        }
+<span class="fc" id="L528">        catch (TimePeriodFormatException e) {</span>
+            // suppress
+<span class="fc" id="L530">        }</span>
+<span class="fc" id="L531">        return result;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

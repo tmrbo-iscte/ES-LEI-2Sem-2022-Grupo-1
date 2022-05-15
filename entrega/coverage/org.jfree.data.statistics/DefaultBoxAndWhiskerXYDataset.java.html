@@ -1,0 +1,566 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DefaultBoxAndWhiskerXYDataset.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.data.statistics</a> &gt; <span class="el_source">DefaultBoxAndWhiskerXYDataset.java</span></div><h1>DefaultBoxAndWhiskerXYDataset.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * ----------------------------------
+ * DefaultBoxAndWhiskerXYDataset.java
+ * ----------------------------------
+ * (C) Copyright 2003-2020, by David Browning and Contributors.
+ *
+ * Original Author:  David Browning (for Australian Institute of Marine
+ *                   Science);
+ * Contributor(s):   David Gilbert;
+ *
+ */
+
+package org.jfree.data.statistics;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
+
+import org.jfree.data.Range;
+import org.jfree.data.RangeInfo;
+import org.jfree.data.general.DatasetChangeEvent;
+import org.jfree.data.xy.AbstractXYDataset;
+
+/**
+ * A simple implementation of the {@link BoxAndWhiskerXYDataset} interface.
+ * This dataset implementation can hold only one series.
+ */
+public class DefaultBoxAndWhiskerXYDataset&lt;S extends Comparable&lt;S&gt;&gt; 
+        extends AbstractXYDataset&lt;S&gt;
+        implements BoxAndWhiskerXYDataset&lt;S&gt;, RangeInfo {
+
+    /** The series key. */
+    private S seriesKey;
+
+    /** Storage for the dates. */
+    private List&lt;Date&gt; dates;
+
+    /** Storage for the box and whisker statistics. */
+    private List&lt;BoxAndWhiskerItem&gt; items;
+
+    /** The minimum range value. */
+    private Number minimumRangeValue;
+
+    /** The maximum range value. */
+    private Number maximumRangeValue;
+
+    /** The range of values. */
+    private Range rangeBounds;
+
+    /**
+     * The coefficient used to calculate outliers. Tukey's default value is
+     * 1.5 (see EDA) Any value which is greater than Q3 + (interquartile range
+     * * outlier coefficient) is considered to be an outlier.  Can be altered
+     * if the data is particularly skewed.
+     */
+<span class="fc" id="L82">    private double outlierCoefficient = 1.5;</span>
+
+    /**
+     * The coefficient used to calculate farouts. Tukey's default value is 2
+     * (see EDA) Any value which is greater than Q3 + (interquartile range *
+     * farout coefficient) is considered to be a farout.  Can be altered if the
+     * data is particularly skewed.
+     */
+<span class="fc" id="L90">    private double faroutCoefficient = 2.0;</span>
+
+    /**
+     * Constructs a new box and whisker dataset.
+     * &lt;p&gt;
+     * The current implementation allows only one series in the dataset.
+     * This may be extended in a future version.
+     *
+     * @param seriesKey  the key for the series.
+     */
+<span class="fc" id="L100">    public DefaultBoxAndWhiskerXYDataset(S seriesKey) {</span>
+<span class="fc" id="L101">        this.seriesKey = seriesKey;</span>
+<span class="fc" id="L102">        this.dates = new ArrayList();</span>
+<span class="fc" id="L103">        this.items = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L104">        this.minimumRangeValue = null;</span>
+<span class="fc" id="L105">        this.maximumRangeValue = null;</span>
+<span class="fc" id="L106">        this.rangeBounds = null;</span>
+<span class="fc" id="L107">    }</span>
+
+    /**
+     * Returns the value used as the outlier coefficient. The outlier
+     * coefficient gives an indication of the degree of certainty in an
+     * unskewed distribution.  Increasing the coefficient increases the number
+     * of values included. Currently only used to ensure farout coefficient is
+     * greater than the outlier coefficient
+     *
+     * @return A {@code double} representing the value used to calculate
+     *         outliers.
+     *
+     * @see #setOutlierCoefficient(double)
+     */
+    @Override
+    public double getOutlierCoefficient() {
+<span class="nc" id="L123">        return this.outlierCoefficient;</span>
+    }
+
+    /**
+     * Sets the value used as the outlier coefficient
+     *
+     * @param outlierCoefficient  being a {@code double} representing the
+     *                            value used to calculate outliers.
+     *
+     * @see #getOutlierCoefficient()
+     */
+    public void setOutlierCoefficient(double outlierCoefficient) {
+<span class="nc" id="L135">        this.outlierCoefficient = outlierCoefficient;</span>
+<span class="nc" id="L136">    }</span>
+
+    /**
+     * Returns the value used as the farout coefficient. The farout coefficient
+     * allows the calculation of which values will be off the graph.
+     *
+     * @return A {@code double} representing the value used to calculate
+     *         farouts.
+     *
+     * @see #setFaroutCoefficient(double)
+     */
+    @Override
+    public double getFaroutCoefficient() {
+<span class="nc" id="L149">        return this.faroutCoefficient;</span>
+    }
+
+    /**
+     * Sets the value used as the farouts coefficient. The farout coefficient
+     * must b greater than the outlier coefficient.
+     *
+     * @param faroutCoefficient being a {@code double} representing the
+     *                          value used to calculate farouts.
+     *
+     * @see #getFaroutCoefficient()
+     */
+    public void setFaroutCoefficient(double faroutCoefficient) {
+
+<span class="nc bnc" id="L163" title="All 2 branches missed.">        if (faroutCoefficient &gt; getOutlierCoefficient()) {</span>
+<span class="nc" id="L164">            this.faroutCoefficient = faroutCoefficient;</span>
+        }
+        else {
+<span class="nc" id="L167">            throw new IllegalArgumentException(&quot;Farout value must be greater &quot;</span>
+                + &quot;than the outlier value, which is currently set at: (&quot;
+<span class="nc" id="L169">                + getOutlierCoefficient() + &quot;)&quot;);</span>
+        }
+<span class="nc" id="L171">    }</span>
+
+    /**
+     * Returns the number of series in the dataset.
+     * &lt;p&gt;
+     * This implementation only allows one series.
+     *
+     * @return The number of series.
+     */
+    @Override
+    public int getSeriesCount() {
+<span class="fc" id="L182">        return 1;</span>
+    }
+
+    /**
+     * Returns the number of items in the specified series.
+     *
+     * @param series  the index (zero-based) of the series.
+     *
+     * @return The number of items in the specified series.
+     */
+    @Override
+    public int getItemCount(int series) {
+<span class="fc" id="L194">        return this.dates.size();</span>
+    }
+
+    /**
+     * Adds an item to the dataset and sends a {@link DatasetChangeEvent} to
+     * all registered listeners.
+     *
+     * @param date  the date ({@code null} not permitted).
+     * @param item  the item ({@code null} not permitted).
+     */
+    public void add(Date date, BoxAndWhiskerItem item) {
+<span class="fc" id="L205">        this.dates.add(date);</span>
+<span class="fc" id="L206">        this.items.add(item);</span>
+<span class="fc bfc" id="L207" title="All 2 branches covered.">        if (this.minimumRangeValue == null) {</span>
+<span class="fc" id="L208">            this.minimumRangeValue = item.getMinRegularValue();</span>
+        }
+        else {
+<span class="fc" id="L211">            if (item.getMinRegularValue().doubleValue()</span>
+<span class="pc bpc" id="L212" title="1 of 2 branches missed.">                    &lt; this.minimumRangeValue.doubleValue()) {</span>
+<span class="nc" id="L213">                this.minimumRangeValue = item.getMinRegularValue();</span>
+            }
+        }
+<span class="fc bfc" id="L216" title="All 2 branches covered.">        if (this.maximumRangeValue == null) {</span>
+<span class="fc" id="L217">            this.maximumRangeValue = item.getMaxRegularValue();</span>
+        }
+        else {
+<span class="fc" id="L220">            if (item.getMaxRegularValue().doubleValue()</span>
+<span class="fc bfc" id="L221" title="All 2 branches covered.">                    &gt; this.maximumRangeValue.doubleValue()) {</span>
+<span class="fc" id="L222">                this.maximumRangeValue = item.getMaxRegularValue();</span>
+            }
+        }
+<span class="fc" id="L225">        this.rangeBounds = new Range(this.minimumRangeValue.doubleValue(),</span>
+<span class="fc" id="L226">                this.maximumRangeValue.doubleValue());</span>
+<span class="fc" id="L227">        fireDatasetChanged();</span>
+<span class="fc" id="L228">    }</span>
+
+    /**
+     * Returns the name of the series stored in this dataset.
+     *
+     * @param i  the index of the series. Currently ignored.
+     *
+     * @return The name of this series.
+     */
+    @Override
+    public S getSeriesKey(int i) {
+<span class="fc" id="L239">        return this.seriesKey;</span>
+    }
+
+    /**
+     * Return an item from within the dataset.
+     *
+     * @param series  the series index (ignored, since this dataset contains
+     *                only one series).
+     * @param item  the item within the series (zero-based index)
+     *
+     * @return The item.
+     */
+    public BoxAndWhiskerItem getItem(int series, int item) {
+<span class="nc" id="L252">        return this.items.get(item);</span>
+    }
+
+    /**
+     * Returns the x-value for one item in a series.
+     * &lt;p&gt;
+     * The value returned is a Long object generated from the underlying Date
+     * object.
+     *
+     * @param series  the series (zero-based index).
+     * @param item  the item (zero-based index).
+     *
+     * @return The x-value.
+     */
+    @Override
+    public Number getX(int series, int item) {
+<span class="fc" id="L268">        return ((Date) this.dates.get(item)).getTime();</span>
+    }
+
+    /**
+     * Returns the x-value for one item in a series, as a Date.
+     * &lt;p&gt;
+     * This method is provided for convenience only.
+     *
+     * @param series  the series (zero-based index).
+     * @param item  the item (zero-based index).
+     *
+     * @return The x-value as a Date.
+     */
+    public Date getXDate(int series, int item) {
+<span class="nc" id="L282">        return this.dates.get(item);</span>
+    }
+
+    /**
+     * Returns the y-value for one item in a series.
+     * &lt;p&gt;
+     * This method (from the XYDataset interface) is mapped to the
+     * getMeanValue() method.
+     *
+     * @param series  the series (zero-based index).
+     * @param item  the item (zero-based index).
+     *
+     * @return The y-value.
+     */
+    @Override
+    public Number getY(int series, int item) {
+<span class="fc" id="L298">        return getMeanValue(series, item);</span>
+    }
+
+    /**
+     * Returns the mean for the specified series and item.
+     *
+     * @param series  the series (zero-based index).
+     * @param item  the item (zero-based index).
+     *
+     * @return The mean for the specified series and item.
+     */
+    @Override
+    public Number getMeanValue(int series, int item) {
+<span class="fc" id="L311">        Number result = null;</span>
+<span class="fc" id="L312">        BoxAndWhiskerItem stats = this.items.get(item);</span>
+<span class="pc bpc" id="L313" title="1 of 2 branches missed.">        if (stats != null) {</span>
+<span class="fc" id="L314">            result = stats.getMean();</span>
+        }
+<span class="fc" id="L316">        return result;</span>
+    }
+
+    /**
+     * Returns the median-value for the specified series and item.
+     *
+     * @param series  the series (zero-based index).
+     * @param item  the item (zero-based index).
+     *
+     * @return The median-value for the specified series and item.
+     */
+    @Override
+    public Number getMedianValue(int series, int item) {
+<span class="fc" id="L329">        Number result = null;</span>
+<span class="fc" id="L330">        BoxAndWhiskerItem stats = this.items.get(item);</span>
+<span class="pc bpc" id="L331" title="1 of 2 branches missed.">        if (stats != null) {</span>
+<span class="fc" id="L332">            result = stats.getMedian();</span>
+        }
+<span class="fc" id="L334">        return result;</span>
+    }
+
+    /**
+     * Returns the Q1 median-value for the specified series and item.
+     *
+     * @param series  the series (zero-based index).
+     * @param item  the item (zero-based index).
+     *
+     * @return The Q1 median-value for the specified series and item.
+     */
+    @Override
+    public Number getQ1Value(int series, int item) {
+<span class="fc" id="L347">        Number result = null;</span>
+<span class="fc" id="L348">        BoxAndWhiskerItem stats = this.items.get(item);</span>
+<span class="pc bpc" id="L349" title="1 of 2 branches missed.">        if (stats != null) {</span>
+<span class="fc" id="L350">            result = stats.getQ1();</span>
+        }
+<span class="fc" id="L352">        return result;</span>
+    }
+
+    /**
+     * Returns the Q3 median-value for the specified series and item.
+     *
+     * @param series  the series (zero-based index).
+     * @param item  the item (zero-based index).
+     *
+     * @return The Q3 median-value for the specified series and item.
+     */
+    @Override
+    public Number getQ3Value(int series, int item) {
+<span class="fc" id="L365">        Number result = null;</span>
+<span class="fc" id="L366">        BoxAndWhiskerItem stats = this.items.get(item);</span>
+<span class="pc bpc" id="L367" title="1 of 2 branches missed.">        if (stats != null) {</span>
+<span class="fc" id="L368">            result = stats.getQ3();</span>
+        }
+<span class="fc" id="L370">        return result;</span>
+    }
+
+    /**
+     * Returns the min-value for the specified series and item.
+     *
+     * @param series  the series (zero-based index).
+     * @param item  the item (zero-based index).
+     *
+     * @return The min-value for the specified series and item.
+     */
+    @Override
+    public Number getMinRegularValue(int series, int item) {
+<span class="fc" id="L383">        Number result = null;</span>
+<span class="fc" id="L384">        BoxAndWhiskerItem stats = this.items.get(item);</span>
+<span class="pc bpc" id="L385" title="1 of 2 branches missed.">        if (stats != null) {</span>
+<span class="fc" id="L386">            result = stats.getMinRegularValue();</span>
+        }
+<span class="fc" id="L388">        return result;</span>
+    }
+
+    /**
+     * Returns the max-value for the specified series and item.
+     *
+     * @param series  the series (zero-based index).
+     * @param item  the item (zero-based index).
+     *
+     * @return The max-value for the specified series and item.
+     */
+    @Override
+    public Number getMaxRegularValue(int series, int item) {
+<span class="fc" id="L401">        Number result = null;</span>
+<span class="fc" id="L402">        BoxAndWhiskerItem stats = this.items.get(item);</span>
+<span class="pc bpc" id="L403" title="1 of 2 branches missed.">        if (stats != null) {</span>
+<span class="fc" id="L404">            result = stats.getMaxRegularValue();</span>
+        }
+<span class="fc" id="L406">        return result;</span>
+    }
+
+    /**
+     * Returns the minimum value which is not a farout.
+     * @param series  the series (zero-based index).
+     * @param item  the item (zero-based index).
+     *
+     * @return A {@code Number} representing the maximum non-farout value.
+     */
+    @Override
+    public Number getMinOutlier(int series, int item) {
+<span class="fc" id="L418">        Number result = null;</span>
+<span class="fc" id="L419">        BoxAndWhiskerItem stats = this.items.get(item);</span>
+<span class="pc bpc" id="L420" title="1 of 2 branches missed.">        if (stats != null) {</span>
+<span class="fc" id="L421">            result = stats.getMinOutlier();</span>
+        }
+<span class="fc" id="L423">        return result;</span>
+    }
+
+    /**
+     * Returns the maximum value which is not a farout, ie Q3 + (interquartile
+     * range * farout coefficient).
+     *
+     * @param series  the series (zero-based index).
+     * @param item  the item (zero-based index).
+     *
+     * @return A {@code Number} representing the maximum non-farout value.
+     */
+    @Override
+    public Number getMaxOutlier(int series, int item) {
+<span class="fc" id="L437">        Number result = null;</span>
+<span class="fc" id="L438">        BoxAndWhiskerItem stats = this.items.get(item);</span>
+<span class="pc bpc" id="L439" title="1 of 2 branches missed.">        if (stats != null) {</span>
+<span class="fc" id="L440">            result = stats.getMaxOutlier();</span>
+        }
+<span class="fc" id="L442">        return result;</span>
+    }
+
+    /**
+     * Returns a list of outliers for the specified series and item.
+     *
+     * @param series  the series (zero-based index).
+     * @param item  the item (zero-based index).
+     *
+     * @return The list of outliers for the specified series and item
+     *         (possibly {@code null}).
+     */
+    @Override
+    public List getOutliers(int series, int item) {
+<span class="fc" id="L456">        List result = null;</span>
+<span class="fc" id="L457">        BoxAndWhiskerItem stats = this.items.get(item);</span>
+<span class="pc bpc" id="L458" title="1 of 2 branches missed.">        if (stats != null) {</span>
+<span class="fc" id="L459">            result = stats.getOutliers();</span>
+        }
+<span class="fc" id="L461">        return result;</span>
+    }
+
+    /**
+     * Returns the minimum y-value in the dataset.
+     *
+     * @param includeInterval  a flag that determines whether or not the
+     *                         y-interval is taken into account.
+     *
+     * @return The minimum value.
+     */
+    @Override
+    public double getRangeLowerBound(boolean includeInterval) {
+<span class="fc" id="L474">        double result = Double.NaN;</span>
+<span class="pc bpc" id="L475" title="1 of 2 branches missed.">        if (this.minimumRangeValue != null) {</span>
+<span class="nc" id="L476">            result = this.minimumRangeValue.doubleValue();</span>
+        }
+<span class="fc" id="L478">        return result;</span>
+    }
+
+    /**
+     * Returns the maximum y-value in the dataset.
+     *
+     * @param includeInterval  a flag that determines whether or not the
+     *                         y-interval is taken into account.
+     *
+     * @return The maximum value.
+     */
+    @Override
+    public double getRangeUpperBound(boolean includeInterval) {
+<span class="fc" id="L491">        double result = Double.NaN;</span>
+<span class="pc bpc" id="L492" title="1 of 2 branches missed.">        if (this.maximumRangeValue != null) {</span>
+<span class="nc" id="L493">            result = this.maximumRangeValue.doubleValue();</span>
+        }
+<span class="fc" id="L495">        return result;</span>
+    }
+
+    /**
+     * Returns the range of the values in this dataset's range.
+     *
+     * @param includeInterval  a flag that determines whether or not the
+     *                         y-interval is taken into account.
+     *
+     * @return The range.
+     */
+    @Override
+    public Range getRangeBounds(boolean includeInterval) {
+<span class="fc" id="L508">        return this.rangeBounds;</span>
+    }
+
+    /**
+     * Tests this dataset for equality with an arbitrary object.
+     *
+     * @param obj  the object ({@code null} permitted).
+     *
+     * @return A boolean.
+     */
+    @Override
+    public boolean equals(Object obj) {
+<span class="pc bpc" id="L520" title="1 of 2 branches missed.">        if (obj == this) {</span>
+<span class="nc" id="L521">            return true;</span>
+        }
+<span class="pc bpc" id="L523" title="1 of 2 branches missed.">        if (!(obj instanceof DefaultBoxAndWhiskerXYDataset)) {</span>
+<span class="nc" id="L524">            return false;</span>
+        }
+<span class="fc" id="L526">        DefaultBoxAndWhiskerXYDataset that</span>
+                = (DefaultBoxAndWhiskerXYDataset) obj;
+<span class="pc bpc" id="L528" title="1 of 2 branches missed.">        if (!Objects.equals(this.seriesKey, that.seriesKey)) {</span>
+<span class="nc" id="L529">            return false;</span>
+        }
+<span class="fc bfc" id="L531" title="All 2 branches covered.">        if (!this.dates.equals(that.dates)) {</span>
+<span class="fc" id="L532">            return false;</span>
+        }
+<span class="pc bpc" id="L534" title="1 of 2 branches missed.">        if (!this.items.equals(that.items)) {</span>
+<span class="nc" id="L535">            return false;</span>
+        }
+<span class="fc" id="L537">        return true;</span>
+    }
+
+    @Override
+    public int hashCode(){
+<span class="nc" id="L542">        int hash = 5;</span>
+<span class="nc" id="L543">        hash = 59 * hash + Objects.hashCode(this.seriesKey);</span>
+<span class="nc" id="L544">        hash = 59 * hash + Objects.hashCode(this.dates);</span>
+<span class="nc" id="L545">        hash = 59 * hash + Objects.hashCode(this.items);</span>
+<span class="nc" id="L546">        return hash;</span>
+    }
+
+    /**
+     * Returns a clone of the plot.
+     *
+     * @return A clone.
+     *
+     * @throws CloneNotSupportedException  if the cloning is not supported.
+     */
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+<span class="fc" id="L558">        DefaultBoxAndWhiskerXYDataset clone</span>
+<span class="fc" id="L559">                = (DefaultBoxAndWhiskerXYDataset) super.clone();</span>
+<span class="fc" id="L560">        clone.dates = new java.util.ArrayList(this.dates);</span>
+<span class="fc" id="L561">        clone.items = new java.util.ArrayList(this.items);</span>
+<span class="fc" id="L562">        return clone;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

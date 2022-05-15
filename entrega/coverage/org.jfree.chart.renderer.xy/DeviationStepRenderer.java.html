@@ -1,0 +1,313 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DeviationStepRenderer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">All in ES-LEI-2Sem-2022-Grupo-1 Coverage Results</a> &gt; <a href="index.source.html" class="el_package">org.jfree.chart.renderer.xy</a> &gt; <span class="el_source">DeviationStepRenderer.java</span></div><h1>DeviationStepRenderer.java</h1><pre class="source lang-java linenums">/* ===========================================================
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * ===========================================================
+ *
+ * (C) Copyright 2000-2022, by David Gilbert and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * Other names may be trademarks of their respective owners.]
+ *
+ * ----------------------
+ * DeviationStepRenderer.java
+ * ----------------------
+ * (C) Copyright 2007-2022, by David Gilbert and Contributors.
+ *
+ * Original Author:  David Gilbert;
+ * Contributor(s):   -;
+ * 
+ */
+
+package org.jfree.chart.renderer.xy;
+
+import org.jfree.chart.axis.ValueAxis;
+import org.jfree.chart.entity.EntityCollection;
+import org.jfree.chart.plot.CrosshairState;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.plot.PlotRenderingInfo;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.api.RectangleEdge;
+import org.jfree.data.xy.IntervalXYDataset;
+import org.jfree.data.xy.XYDataset;
+
+import java.awt.*;
+import java.awt.geom.GeneralPath;
+import java.awt.geom.Rectangle2D;
+
+/**
+ * A specialised subclass of the {@link DeviationRenderer} that requires
+ * an {@link IntervalXYDataset} and represents the y-interval by shading an
+ * area behind the y-values on the chart, drawing only horizontal or
+ * vertical lines (steps);
+ *
+ * @since 1.5.1
+ */
+public class DeviationStepRenderer extends DeviationRenderer {
+
+    /**
+     * Creates a new renderer that displays lines and shapes for the data
+     * items, as well as the shaded area for the y-interval.
+     */
+    public DeviationStepRenderer() {
+<span class="fc" id="L68">        super();</span>
+<span class="fc" id="L69">    }</span>
+
+    /**
+     * Creates a new renderer.
+     *
+     * @param lines  show lines between data items?
+     * @param shapes  show a shape for each data item?
+     */
+    public DeviationStepRenderer(boolean lines, boolean shapes) {
+<span class="nc" id="L78">        super(lines, shapes);</span>
+<span class="nc" id="L79">    }</span>
+
+    /**
+     * Draws the visual representation of a single data item.
+     *
+     * @param g2  the graphics device.
+     * @param state  the renderer state.
+     * @param dataArea  the area within which the data is being drawn.
+     * @param info  collects information about the drawing.
+     * @param plot  the plot (can be used to obtain standard color
+     *              information etc).
+     * @param domainAxis  the domain axis.
+     * @param rangeAxis  the range axis.
+     * @param dataset  the dataset.
+     * @param series  the series index (zero-based).
+     * @param item  the item index (zero-based).
+     * @param crosshairState  crosshair information for the plot
+     *                        ({@code null} permitted).
+     * @param pass  the pass index.
+     */
+    @Override
+    public void drawItem(Graphics2D g2, XYItemRendererState state,
+                         Rectangle2D dataArea, PlotRenderingInfo info, XYPlot plot,
+                         ValueAxis domainAxis, ValueAxis rangeAxis, XYDataset dataset,
+                         int series, int item, CrosshairState crosshairState, int pass) {
+
+        // do nothing if item is not visible
+<span class="nc bnc" id="L106" title="All 2 branches missed.">        if (!getItemVisible(series, item)) {</span>
+<span class="nc" id="L107">            return;</span>
+        }
+
+        // first pass draws the shading
+<span class="nc bnc" id="L111" title="All 2 branches missed.">        if (pass == 0) {</span>
+<span class="nc" id="L112">            IntervalXYDataset intervalDataset = (IntervalXYDataset) dataset;</span>
+<span class="nc" id="L113">            State drState = (State) state;</span>
+
+<span class="nc" id="L115">            double x = intervalDataset.getXValue(series, item);</span>
+<span class="nc" id="L116">            double yLow = intervalDataset.getStartYValue(series, item);</span>
+<span class="nc" id="L117">            double yHigh  = intervalDataset.getEndYValue(series, item);</span>
+
+<span class="nc" id="L119">            RectangleEdge xAxisLocation = plot.getDomainAxisEdge();</span>
+<span class="nc" id="L120">            RectangleEdge yAxisLocation = plot.getRangeAxisEdge();</span>
+
+<span class="nc" id="L122">            double xx = domainAxis.valueToJava2D(x, dataArea, xAxisLocation);</span>
+<span class="nc" id="L123">            double yyLow = rangeAxis.valueToJava2D(yLow, dataArea,</span>
+                    yAxisLocation);
+<span class="nc" id="L125">            double yyHigh = rangeAxis.valueToJava2D(yHigh, dataArea,</span>
+                    yAxisLocation);
+
+
+<span class="nc" id="L129">            PlotOrientation orientation = plot.getOrientation();</span>
+<span class="nc bnc" id="L130" title="All 4 branches missed.">            if (item &gt; 0 &amp;&amp; !Double.isNaN(xx)) {</span>
+<span class="nc" id="L131">                double yLowPrev = intervalDataset.getStartYValue(series, item-1);</span>
+<span class="nc" id="L132">                double yHighPrev  = intervalDataset.getEndYValue(series, item-1);</span>
+<span class="nc" id="L133">                double yyLowPrev = rangeAxis.valueToJava2D(yLowPrev, dataArea,</span>
+                        yAxisLocation);
+<span class="nc" id="L135">                double yyHighPrev = rangeAxis.valueToJava2D(yHighPrev, dataArea,</span>
+                        yAxisLocation);
+
+<span class="nc bnc" id="L138" title="All 4 branches missed.">                if(!Double.isNaN(yyLow) &amp;&amp; !Double.isNaN(yyHigh)) {</span>
+<span class="nc bnc" id="L139" title="All 2 branches missed.">                    if (orientation == PlotOrientation.HORIZONTAL) {</span>
+<span class="nc" id="L140">                        drState.lowerCoordinates.add(new double[]{yyLowPrev, xx});</span>
+<span class="nc" id="L141">                        drState.upperCoordinates.add(new double[]{yyHighPrev, xx});</span>
+<span class="nc bnc" id="L142" title="All 2 branches missed.">                    } else if (orientation == PlotOrientation.VERTICAL) {</span>
+<span class="nc" id="L143">                        drState.lowerCoordinates.add(new double[]{xx, yyLowPrev});</span>
+<span class="nc" id="L144">                        drState.upperCoordinates.add(new double[]{xx, yyHighPrev});</span>
+                    }
+                }
+            }
+
+<span class="nc bnc" id="L149" title="All 6 branches missed.">            boolean intervalGood = !Double.isNaN(xx) &amp;&amp; !Double.isNaN(yLow) &amp;&amp; !Double.isNaN(yHigh);</span>
+<span class="nc bnc" id="L150" title="All 2 branches missed.">            if (intervalGood) {</span>
+<span class="nc bnc" id="L151" title="All 2 branches missed.">                if (orientation == PlotOrientation.HORIZONTAL) {</span>
+<span class="nc" id="L152">                    drState.lowerCoordinates.add(new double[]{yyLow, xx});</span>
+<span class="nc" id="L153">                    drState.upperCoordinates.add(new double[]{yyHigh, xx});</span>
+<span class="nc bnc" id="L154" title="All 2 branches missed.">                } else if (orientation == PlotOrientation.VERTICAL) {</span>
+<span class="nc" id="L155">                    drState.lowerCoordinates.add(new double[]{xx, yyLow});</span>
+<span class="nc" id="L156">                    drState.upperCoordinates.add(new double[]{xx, yyHigh});</span>
+                }
+            }
+
+<span class="nc bnc" id="L160" title="All 4 branches missed.">            if (item == (dataset.getItemCount(series) - 1) ||</span>
+<span class="nc bnc" id="L161" title="All 2 branches missed.">                (!intervalGood &amp;&amp; drState.lowerCoordinates.size() &gt; 1)) {</span>
+                // draw items so far, either we reached the end of the series or the next interval is invalid
+                // last item in series, draw the lot...
+                // set up the alpha-transparency...
+<span class="nc" id="L165">                Composite originalComposite = g2.getComposite();</span>
+<span class="nc" id="L166">                g2.setComposite(AlphaComposite.getInstance(</span>
+                        AlphaComposite.SRC_OVER, this.alpha));
+<span class="nc" id="L168">                g2.setPaint(getItemFillPaint(series, item));</span>
+<span class="nc" id="L169">                GeneralPath area = new GeneralPath(GeneralPath.WIND_NON_ZERO,</span>
+<span class="nc" id="L170">                        drState.lowerCoordinates.size()</span>
+<span class="nc" id="L171">                                + drState.upperCoordinates.size());</span>
+<span class="nc" id="L172">                double[] coords = (double[]) drState.lowerCoordinates.get(0);</span>
+<span class="nc" id="L173">                area.moveTo((float) coords[0], (float) coords[1]);</span>
+<span class="nc bnc" id="L174" title="All 2 branches missed.">                for (int i = 1; i &lt; drState.lowerCoordinates.size(); i++) {</span>
+<span class="nc" id="L175">                    coords = (double[]) drState.lowerCoordinates.get(i);</span>
+<span class="nc" id="L176">                    area.lineTo((float) coords[0], (float) coords[1]);</span>
+                }
+<span class="nc" id="L178">                int count = drState.upperCoordinates.size();</span>
+<span class="nc" id="L179">                coords = (double[]) drState.upperCoordinates.get(count - 1);</span>
+<span class="nc" id="L180">                area.lineTo((float) coords[0], (float) coords[1]);</span>
+<span class="nc bnc" id="L181" title="All 2 branches missed.">                for (int i = count - 2; i &gt;= 0; i--) {</span>
+<span class="nc" id="L182">                    coords = (double[]) drState.upperCoordinates.get(i);</span>
+<span class="nc" id="L183">                    area.lineTo((float) coords[0], (float) coords[1]);</span>
+                }
+<span class="nc" id="L185">                area.closePath();</span>
+<span class="nc" id="L186">                g2.fill(area);</span>
+<span class="nc" id="L187">                g2.setComposite(originalComposite);</span>
+
+<span class="nc" id="L189">                drState.lowerCoordinates.clear();</span>
+<span class="nc" id="L190">                drState.upperCoordinates.clear();</span>
+            }
+        }
+<span class="nc bnc" id="L193" title="All 2 branches missed.">        if (isLinePass(pass)) {</span>
+
+            // the following code handles the line for the y-values...it's
+            // all done by code in the super class
+<span class="nc bnc" id="L197" title="All 2 branches missed.">            if (item == 0) {</span>
+<span class="nc" id="L198">                State s = (State) state;</span>
+<span class="nc" id="L199">                s.seriesPath.reset();</span>
+<span class="nc" id="L200">                s.setLastPointGood(false);</span>
+            }
+
+<span class="nc bnc" id="L203" title="All 2 branches missed.">            if (getItemLineVisible(series, item)) {</span>
+<span class="nc" id="L204">                drawPrimaryLineAsPath(state, g2, plot, dataset, pass,</span>
+                        series, item, domainAxis, rangeAxis, dataArea);
+            }
+        }
+
+        // second pass adds shapes where the items are ..
+<span class="nc bnc" id="L210" title="All 2 branches missed.">        else if (isItemPass(pass)) {</span>
+
+            // setup for collecting optional entity info...
+<span class="nc" id="L213">            EntityCollection entities = null;</span>
+<span class="nc bnc" id="L214" title="All 2 branches missed.">            if (info != null) {</span>
+<span class="nc" id="L215">                entities = info.getOwner().getEntityCollection();</span>
+            }
+
+<span class="nc" id="L218">            drawSecondaryPass(g2, plot, dataset, pass, series, item,</span>
+                    domainAxis, dataArea, rangeAxis, crosshairState, entities);
+        }
+<span class="nc" id="L221">    }</span>
+
+    /**
+     * Draws the item (first pass). This method draws the lines
+     * connecting the items. Instead of drawing separate lines,
+     * a {@code GeneralPath} is constructed and drawn at the end of
+     * the series painting.
+     *
+     * @param g2  the graphics device.
+     * @param state  the renderer state.
+     * @param plot  the plot (can be used to obtain standard color information
+     *              etc).
+     * @param dataset  the dataset.
+     * @param pass  the pass.
+     * @param series  the series index (zero-based).
+     * @param item  the item index (zero-based).
+     * @param domainAxis  the domain axis.
+     * @param rangeAxis  the range axis.
+     * @param dataArea  the area within which the data is being drawn.
+     */
+    protected void drawPrimaryLineAsPath(XYItemRendererState state,
+                                         Graphics2D g2, XYPlot plot, XYDataset dataset, int pass,
+                                         int series, int item, ValueAxis domainAxis, ValueAxis rangeAxis,
+                                         Rectangle2D dataArea) {
+
+<span class="nc" id="L246">        RectangleEdge xAxisLocation = plot.getDomainAxisEdge();</span>
+<span class="nc" id="L247">        RectangleEdge yAxisLocation = plot.getRangeAxisEdge();</span>
+
+        // get the data point...
+<span class="nc" id="L250">        double x1 = dataset.getXValue(series, item);</span>
+<span class="nc" id="L251">        double y1 = dataset.getYValue(series, item);</span>
+<span class="nc" id="L252">        double transX1 = domainAxis.valueToJava2D(x1, dataArea, xAxisLocation);</span>
+<span class="nc" id="L253">        double transY1 = rangeAxis.valueToJava2D(y1, dataArea, yAxisLocation);</span>
+
+<span class="nc" id="L255">        XYLineAndShapeRenderer.State s = (XYLineAndShapeRenderer.State) state;</span>
+        // update path to reflect latest point
+<span class="nc bnc" id="L257" title="All 4 branches missed.">        if (!Double.isNaN(transX1) &amp;&amp; !Double.isNaN(transY1)) {</span>
+<span class="nc" id="L258">            float x = (float) transX1;</span>
+<span class="nc" id="L259">            float y = (float) transY1;</span>
+<span class="nc" id="L260">            PlotOrientation orientation = plot.getOrientation();</span>
+<span class="nc bnc" id="L261" title="All 2 branches missed.">            if (orientation == PlotOrientation.HORIZONTAL) {</span>
+<span class="nc" id="L262">                x = (float) transY1;</span>
+<span class="nc" id="L263">                y = (float) transX1;</span>
+            }
+<span class="nc bnc" id="L265" title="All 2 branches missed.">            if (s.isLastPointGood()) {</span>
+<span class="nc bnc" id="L266" title="All 2 branches missed.">                if (item &gt; 0) {</span>
+<span class="nc bnc" id="L267" title="All 2 branches missed.">                    if (orientation == PlotOrientation.HORIZONTAL) {</span>
+<span class="nc" id="L268">                        s.seriesPath.lineTo(s.seriesPath.getCurrentPoint().getX(), y);</span>
+                    } else {
+<span class="nc" id="L270">                        s.seriesPath.lineTo(x, s.seriesPath.getCurrentPoint().getY());</span>
+                    }
+                }
+<span class="nc" id="L273">                s.seriesPath.lineTo(x, y);</span>
+            }
+            else {
+<span class="nc" id="L276">                s.seriesPath.moveTo(x, y);</span>
+            }
+<span class="nc" id="L278">            s.setLastPointGood(true);</span>
+<span class="nc" id="L279">        } else {</span>
+<span class="nc" id="L280">            s.setLastPointGood(false);</span>
+        }
+        // if this is the last item, draw the path ...
+<span class="nc bnc" id="L283" title="All 2 branches missed.">        if (item == s.getLastItemIndex()) {</span>
+            // draw path
+<span class="nc" id="L285">            drawFirstPassShape(g2, pass, series, item, s.seriesPath);</span>
+        }
+<span class="nc" id="L287">    }</span>
+
+
+    /**
+     * Tests this renderer for equality with an arbitrary object.
+     *
+     * @param obj  the object ({@code null} permitted).
+     *
+     * @return A boolean.
+     */
+    @Override
+    public boolean equals(Object obj) {
+<span class="pc bpc" id="L299" title="1 of 2 branches missed.">        if (obj == this) {</span>
+<span class="nc" id="L300">            return true;</span>
+        }
+<span class="pc bpc" id="L302" title="1 of 2 branches missed.">        if (!(obj instanceof DeviationStepRenderer)) {</span>
+<span class="nc" id="L303">            return false;</span>
+        }
+<span class="fc" id="L305">        DeviationStepRenderer that = (DeviationStepRenderer) obj;</span>
+<span class="fc bfc" id="L306" title="All 2 branches covered.">        if (this.alpha != that.alpha) {</span>
+<span class="fc" id="L307">            return false;</span>
+        }
+<span class="fc" id="L309">        return super.equals(obj);</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

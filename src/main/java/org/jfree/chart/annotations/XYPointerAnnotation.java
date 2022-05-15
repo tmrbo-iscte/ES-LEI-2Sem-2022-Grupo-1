@@ -347,34 +347,7 @@ public class XYPointerAnnotation extends XYTextAnnotation
         fireAnnotationChanged();
     }
 
-    /**
-     * Draws the annotation.
-     *
-     * @param g2  the graphics device.
-     * @param plot  the plot.
-     * @param dataArea  the data area.
-     * @param domainAxis  the domain axis.
-     * @param rangeAxis  the range axis.
-     * @param rendererIndex  the renderer index.
-     * @param info  the plot rendering info.
-     */
-    @Override
-    public void draw(Graphics2D g2, XYPlot plot, Rectangle2D dataArea,
-            ValueAxis domainAxis, ValueAxis rangeAxis, int rendererIndex, 
-            PlotRenderingInfo info) {
-
-        PlotOrientation orientation = plot.getOrientation();
-        RectangleEdge domainEdge = Plot.resolveDomainAxisLocation(
-                plot.getDomainAxisLocation(), orientation);
-        RectangleEdge rangeEdge = Plot.resolveRangeAxisLocation(
-                plot.getRangeAxisLocation(), orientation);
-        double j2DX = domainAxis.valueToJava2D(getX(), dataArea, domainEdge);
-        double j2DY = rangeAxis.valueToJava2D(getY(), dataArea, rangeEdge);
-        if (orientation == PlotOrientation.HORIZONTAL) {
-            double temp = j2DX;
-            j2DX = j2DY;
-            j2DY = temp;
-        }
+    private void drawLine(Graphics2D g2, double j2DX, double j2DY){
         double startX = j2DX + Math.cos(this.angle) * this.baseRadius;
         double startY = j2DY + Math.sin(this.angle) * this.baseRadius;
 
@@ -406,7 +379,9 @@ public class XYPointerAnnotation extends XYTextAnnotation
         g2.draw(line);
         g2.fill(arrow);
 
-        // draw the label
+    }
+
+    private Shape drawLabel(Graphics2D g2, double j2DX, double j2DY){
         double labelX = j2DX + Math.cos(this.angle) * (this.baseRadius
                 + this.labelOffset);
         double labelY = j2DY + Math.sin(this.angle) * (this.baseRadius
@@ -428,6 +403,41 @@ public class XYPointerAnnotation extends XYTextAnnotation
             g2.setPaint(getOutlinePaint());
             g2.draw(hotspot);
         }
+
+        return hotspot;
+    }
+
+    /**
+     * Draws the annotation.
+     *
+     * @param g2  the graphics device.
+     * @param plot  the plot.
+     * @param dataArea  the data area.
+     * @param domainAxis  the domain axis.
+     * @param rangeAxis  the range axis.
+     * @param rendererIndex  the renderer index.
+     * @param info  the plot rendering info.
+     */
+    @Override
+    public void draw(Graphics2D g2, XYPlot plot, Rectangle2D dataArea,
+            ValueAxis domainAxis, ValueAxis rangeAxis, int rendererIndex, 
+            PlotRenderingInfo info) {
+
+        PlotOrientation orientation = plot.getOrientation();
+        RectangleEdge domainEdge = Plot.resolveDomainAxisLocation(
+                plot.getDomainAxisLocation(), orientation);
+        RectangleEdge rangeEdge = Plot.resolveRangeAxisLocation(
+                plot.getRangeAxisLocation(), orientation);
+        double j2DX = domainAxis.valueToJava2D(getX(), dataArea, domainEdge);
+        double j2DY = rangeAxis.valueToJava2D(getY(), dataArea, rangeEdge);
+        if (orientation == PlotOrientation.HORIZONTAL) {
+            double temp = j2DX;
+            j2DX = j2DY;
+            j2DY = temp;
+        }
+        drawLine(g2, j2DX, j2DY);
+        // draw the label
+        Shape hotspot = drawLabel(g2, j2DX, j2DY);
 
         String toolTip = getToolTipText();
         String url = getURL();

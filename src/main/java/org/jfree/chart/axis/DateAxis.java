@@ -700,6 +700,26 @@ public class DateAxis extends ValueAxis implements Cloneable, Serializable {
         return valueToJava2D(value, area, edge);
     }
 
+    private double setMin(RectangleEdge edge, Rectangle2D area){
+        double min=0.0;
+        if (RectangleEdge.isTopOrBottom(edge)){
+            min = area.getX();
+        }else if(RectangleEdge.isLeftOrRight(edge)){
+            min = area.getMaxY();
+        }
+        return min;
+    }
+
+    private double setMax(RectangleEdge edge, Rectangle2D area){
+        double max=0.0;
+        if (RectangleEdge.isTopOrBottom(edge)){
+            max = area.getMaxX();
+        }else if(RectangleEdge.isLeftOrRight(edge)){
+            max = area.getY();
+        }
+        return max;
+    }
+
     /**
      * Translates a Java2D coordinate into the corresponding data value.  To
      * perform this translation, you need to know the area used for plotting
@@ -720,25 +740,17 @@ public class DateAxis extends ValueAxis implements Cloneable, Serializable {
         double axisMin = this.timeline.toTimelineValue(range.getLowerMillis());
         double axisMax = this.timeline.toTimelineValue(range.getUpperMillis());
 
-        double min = 0.0;
-        double max = 0.0;
-        if (RectangleEdge.isTopOrBottom(edge)) {
-            min = area.getX();
-            max = area.getMaxX();
-        }
-        else if (RectangleEdge.isLeftOrRight(edge)) {
-            min = area.getMaxY();
-            max = area.getY();
-        }
+        double min = setMin(edge, area);
+        double max = setMax(edge, area);
 
         double result;
+        double mean = (java2DValue - min) / (max - min)
+                * (axisMax - axisMin);
         if (isInverted()) {
-             result = axisMax - ((java2DValue - min) / (max - min)
-                      * (axisMax - axisMin));
+             result = axisMax - mean;
         }
         else {
-             result = axisMin + ((java2DValue - min) / (max - min)
-                      * (axisMax - axisMin));
+             result = axisMin + mean;
         }
 
         return this.timeline.toMillisecond((long) result);
@@ -977,6 +989,106 @@ public class DateAxis extends ValueAxis implements Cloneable, Serializable {
                 Locale.getDefault());
     }
 
+    private static void addMiliseconds(TickUnits units, DateFormat f1){
+        units.add(new DateTickUnit(DateTickUnitType.MILLISECOND, 1, f1));
+        units.add(new DateTickUnit(DateTickUnitType.MILLISECOND, 5,
+                DateTickUnitType.MILLISECOND, 1, f1));
+        units.add(new DateTickUnit(DateTickUnitType.MILLISECOND, 10,
+                DateTickUnitType.MILLISECOND, 1, f1));
+        units.add(new DateTickUnit(DateTickUnitType.MILLISECOND, 25,
+                DateTickUnitType.MILLISECOND, 5, f1));
+        units.add(new DateTickUnit(DateTickUnitType.MILLISECOND, 50,
+                DateTickUnitType.MILLISECOND, 10, f1));
+        units.add(new DateTickUnit(DateTickUnitType.MILLISECOND, 100,
+                DateTickUnitType.MILLISECOND, 10, f1));
+        units.add(new DateTickUnit(DateTickUnitType.MILLISECOND, 250,
+                DateTickUnitType.MILLISECOND, 10, f1));
+        units.add(new DateTickUnit(DateTickUnitType.MILLISECOND, 500,
+                DateTickUnitType.MILLISECOND, 50, f1));
+    }
+
+    private static void addSeconds(TickUnits units, DateFormat f2) {
+        units.add(new DateTickUnit(DateTickUnitType.SECOND, 1,
+                DateTickUnitType.MILLISECOND, 50, f2));
+        units.add(new DateTickUnit(DateTickUnitType.SECOND, 5,
+                DateTickUnitType.SECOND, 1, f2));
+        units.add(new DateTickUnit(DateTickUnitType.SECOND, 10,
+                DateTickUnitType.SECOND, 1, f2));
+        units.add(new DateTickUnit(DateTickUnitType.SECOND, 30,
+                DateTickUnitType.SECOND, 5, f2));
+    }
+
+    private static void addMinutes(TickUnits units, DateFormat f3) {
+        units.add(new DateTickUnit(DateTickUnitType.MINUTE, 1,
+                DateTickUnitType.SECOND, 5, f3));
+        units.add(new DateTickUnit(DateTickUnitType.MINUTE, 2,
+                DateTickUnitType.SECOND, 10, f3));
+        units.add(new DateTickUnit(DateTickUnitType.MINUTE, 5,
+                DateTickUnitType.MINUTE, 1, f3));
+        units.add(new DateTickUnit(DateTickUnitType.MINUTE, 10,
+                DateTickUnitType.MINUTE, 1, f3));
+        units.add(new DateTickUnit(DateTickUnitType.MINUTE, 15,
+                DateTickUnitType.MINUTE, 5, f3));
+        units.add(new DateTickUnit(DateTickUnitType.MINUTE, 20,
+                DateTickUnitType.MINUTE, 5, f3));
+        units.add(new DateTickUnit(DateTickUnitType.MINUTE, 30,
+                DateTickUnitType.MINUTE, 5, f3));
+    }
+
+    private static void addYears(TickUnits units, DateFormat f7) {
+        units.add(new DateTickUnit(DateTickUnitType.YEAR, 1,
+                DateTickUnitType.MONTH, 1, f7));
+        units.add(new DateTickUnit(DateTickUnitType.YEAR, 2,
+                DateTickUnitType.MONTH, 3, f7));
+        units.add(new DateTickUnit(DateTickUnitType.YEAR, 5,
+                DateTickUnitType.YEAR, 1, f7));
+        units.add(new DateTickUnit(DateTickUnitType.YEAR, 10,
+                DateTickUnitType.YEAR, 1, f7));
+        units.add(new DateTickUnit(DateTickUnitType.YEAR, 25,
+                DateTickUnitType.YEAR, 5, f7));
+        units.add(new DateTickUnit(DateTickUnitType.YEAR, 50,
+                DateTickUnitType.YEAR, 10, f7));
+        units.add(new DateTickUnit(DateTickUnitType.YEAR, 100,
+                DateTickUnitType.YEAR, 20, f7));
+    }
+
+    private static void addMonths(TickUnits units, DateFormat f6) {
+        units.add(new DateTickUnit(DateTickUnitType.MONTH, 1,
+                DateTickUnitType.DAY, 1, f6));
+        units.add(new DateTickUnit(DateTickUnitType.MONTH, 2,
+                DateTickUnitType.DAY, 1, f6));
+        units.add(new DateTickUnit(DateTickUnitType.MONTH, 3,
+                DateTickUnitType.MONTH, 1, f6));
+        units.add(new DateTickUnit(DateTickUnitType.MONTH, 4,
+                DateTickUnitType.MONTH, 1, f6));
+        units.add(new DateTickUnit(DateTickUnitType.MONTH, 6,
+                DateTickUnitType.MONTH, 1, f6));
+    }
+
+    private static void addDays(TickUnits units, DateFormat f5) {
+        units.add(new DateTickUnit(DateTickUnitType.DAY, 1,
+                DateTickUnitType.HOUR, 1, f5));
+        units.add(new DateTickUnit(DateTickUnitType.DAY, 2,
+                DateTickUnitType.HOUR, 1, f5));
+        units.add(new DateTickUnit(DateTickUnitType.DAY, 7,
+                DateTickUnitType.DAY, 1, f5));
+        units.add(new DateTickUnit(DateTickUnitType.DAY, 15,
+                DateTickUnitType.DAY, 1, f5));
+    }
+
+    private static void addHours(TickUnits units, DateFormat f3, DateFormat f4) {
+        units.add(new DateTickUnit(DateTickUnitType.HOUR, 1,
+                DateTickUnitType.MINUTE, 5, f3));
+        units.add(new DateTickUnit(DateTickUnitType.HOUR, 2,
+                DateTickUnitType.MINUTE, 10, f3));
+        units.add(new DateTickUnit(DateTickUnitType.HOUR, 4,
+                DateTickUnitType.MINUTE, 30, f3));
+        units.add(new DateTickUnit(DateTickUnitType.HOUR, 6,
+                DateTickUnitType.HOUR, 1, f3));
+        units.add(new DateTickUnit(DateTickUnitType.HOUR, 12,
+                DateTickUnitType.HOUR, 1, f4));
+    }
+
     /**
      * Returns a collection of standard date tick units.  This collection will
      * be used by default, but you are free to create your own collection if
@@ -1014,101 +1126,31 @@ public class DateAxis extends ValueAxis implements Cloneable, Serializable {
         f7.setTimeZone(zone);
 
         // milliseconds
-        units.add(new DateTickUnit(DateTickUnitType.MILLISECOND, 1, f1));
-        units.add(new DateTickUnit(DateTickUnitType.MILLISECOND, 5,
-                DateTickUnitType.MILLISECOND, 1, f1));
-        units.add(new DateTickUnit(DateTickUnitType.MILLISECOND, 10,
-                DateTickUnitType.MILLISECOND, 1, f1));
-        units.add(new DateTickUnit(DateTickUnitType.MILLISECOND, 25,
-                DateTickUnitType.MILLISECOND, 5, f1));
-        units.add(new DateTickUnit(DateTickUnitType.MILLISECOND, 50,
-                DateTickUnitType.MILLISECOND, 10, f1));
-        units.add(new DateTickUnit(DateTickUnitType.MILLISECOND, 100,
-                DateTickUnitType.MILLISECOND, 10, f1));
-        units.add(new DateTickUnit(DateTickUnitType.MILLISECOND, 250,
-                DateTickUnitType.MILLISECOND, 10, f1));
-        units.add(new DateTickUnit(DateTickUnitType.MILLISECOND, 500,
-                DateTickUnitType.MILLISECOND, 50, f1));
+        addMiliseconds(units, f1);
 
         // seconds
-        units.add(new DateTickUnit(DateTickUnitType.SECOND, 1,
-                DateTickUnitType.MILLISECOND, 50, f2));
-        units.add(new DateTickUnit(DateTickUnitType.SECOND, 5,
-                DateTickUnitType.SECOND, 1, f2));
-        units.add(new DateTickUnit(DateTickUnitType.SECOND, 10,
-                DateTickUnitType.SECOND, 1, f2));
-        units.add(new DateTickUnit(DateTickUnitType.SECOND, 30,
-                DateTickUnitType.SECOND, 5, f2));
+        addSeconds(units, f2);
 
         // minutes
-        units.add(new DateTickUnit(DateTickUnitType.MINUTE, 1,
-                DateTickUnitType.SECOND, 5, f3));
-        units.add(new DateTickUnit(DateTickUnitType.MINUTE, 2,
-                DateTickUnitType.SECOND, 10, f3));
-        units.add(new DateTickUnit(DateTickUnitType.MINUTE, 5,
-                DateTickUnitType.MINUTE, 1, f3));
-        units.add(new DateTickUnit(DateTickUnitType.MINUTE, 10,
-                DateTickUnitType.MINUTE, 1, f3));
-        units.add(new DateTickUnit(DateTickUnitType.MINUTE, 15,
-                DateTickUnitType.MINUTE, 5, f3));
-        units.add(new DateTickUnit(DateTickUnitType.MINUTE, 20,
-                DateTickUnitType.MINUTE, 5, f3));
-        units.add(new DateTickUnit(DateTickUnitType.MINUTE, 30,
-                DateTickUnitType.MINUTE, 5, f3));
+        addMinutes(units, f3);
 
         // hours
-        units.add(new DateTickUnit(DateTickUnitType.HOUR, 1,
-                DateTickUnitType.MINUTE, 5, f3));
-        units.add(new DateTickUnit(DateTickUnitType.HOUR, 2,
-                DateTickUnitType.MINUTE, 10, f3));
-        units.add(new DateTickUnit(DateTickUnitType.HOUR, 4,
-                DateTickUnitType.MINUTE, 30, f3));
-        units.add(new DateTickUnit(DateTickUnitType.HOUR, 6,
-                DateTickUnitType.HOUR, 1, f3));
-        units.add(new DateTickUnit(DateTickUnitType.HOUR, 12,
-                DateTickUnitType.HOUR, 1, f4));
+        addHours(units, f3, f4);
 
         // days
-        units.add(new DateTickUnit(DateTickUnitType.DAY, 1,
-                DateTickUnitType.HOUR, 1, f5));
-        units.add(new DateTickUnit(DateTickUnitType.DAY, 2,
-                DateTickUnitType.HOUR, 1, f5));
-        units.add(new DateTickUnit(DateTickUnitType.DAY, 7,
-                DateTickUnitType.DAY, 1, f5));
-        units.add(new DateTickUnit(DateTickUnitType.DAY, 15,
-                DateTickUnitType.DAY, 1, f5));
+        addDays(units, f5);
 
         // months
-        units.add(new DateTickUnit(DateTickUnitType.MONTH, 1,
-                DateTickUnitType.DAY, 1, f6));
-        units.add(new DateTickUnit(DateTickUnitType.MONTH, 2,
-                DateTickUnitType.DAY, 1, f6));
-        units.add(new DateTickUnit(DateTickUnitType.MONTH, 3,
-                DateTickUnitType.MONTH, 1, f6));
-        units.add(new DateTickUnit(DateTickUnitType.MONTH, 4,
-                DateTickUnitType.MONTH, 1, f6));
-        units.add(new DateTickUnit(DateTickUnitType.MONTH, 6,
-                DateTickUnitType.MONTH, 1, f6));
+        addMonths(units, f6);
 
         // years
-        units.add(new DateTickUnit(DateTickUnitType.YEAR, 1,
-                DateTickUnitType.MONTH, 1, f7));
-        units.add(new DateTickUnit(DateTickUnitType.YEAR, 2,
-                DateTickUnitType.MONTH, 3, f7));
-        units.add(new DateTickUnit(DateTickUnitType.YEAR, 5,
-                DateTickUnitType.YEAR, 1, f7));
-        units.add(new DateTickUnit(DateTickUnitType.YEAR, 10,
-                DateTickUnitType.YEAR, 1, f7));
-        units.add(new DateTickUnit(DateTickUnitType.YEAR, 25,
-                DateTickUnitType.YEAR, 5, f7));
-        units.add(new DateTickUnit(DateTickUnitType.YEAR, 50,
-                DateTickUnitType.YEAR, 10, f7));
-        units.add(new DateTickUnit(DateTickUnitType.YEAR, 100,
-                DateTickUnitType.YEAR, 20, f7));
+        addYears(units, f7);
 
         return units;
 
     }
+
+
 
     /**
      * Rescales the axis to ensure that all data is visible.
@@ -1683,6 +1725,26 @@ public class DateAxis extends ValueAxis implements Cloneable, Serializable {
 
     }
 
+    private long setAdjStart(double start, double length, double lowerPercent, double upperPercent) {
+        long adjStart;
+        if (isInverted()) {
+            adjStart = (long) (start + (length * (1 - upperPercent)));
+        } else {
+            adjStart = (long) (start + length * lowerPercent);
+        }
+        return adjStart;
+    }
+
+    private long setAdjEnd(double start, double length, double lowerPercent, double upperPercent) {
+        long adjEnd;
+        if (isInverted()) {
+            adjEnd = (long) (start + (length * (1 - lowerPercent)));
+        } else {
+            adjEnd = (long) (start + length * upperPercent);
+        }
+        return adjEnd;
+    }
+
     /**
      * Zooms in on the current range (zoom-in stops once the axis length 
      * reaches the equivalent of one millisecond).  
@@ -1698,15 +1760,8 @@ public class DateAxis extends ValueAxis implements Cloneable, Serializable {
                 (long) getRange().getUpperBound());
         double length = end - start;
         Range adjusted;
-        long adjStart, adjEnd;
-        if (isInverted()) {
-            adjStart = (long) (start + (length * (1 - upperPercent)));
-            adjEnd = (long) (start + (length * (1 - lowerPercent)));
-        }
-        else {
-            adjStart = (long) (start + length * lowerPercent);
-            adjEnd = (long) (start + length * upperPercent);
-        }
+        long adjStart = setAdjStart(start, length, lowerPercent, upperPercent);
+        long adjEnd = setAdjEnd(start, length, lowerPercent, upperPercent);
         // when zooming to sub-millisecond ranges, it can be the case that
         // adjEnd == adjStart...and we can't have an axis with zero length
         // so we apply this instead:

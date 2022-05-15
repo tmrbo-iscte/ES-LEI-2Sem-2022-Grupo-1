@@ -1029,6 +1029,30 @@ public abstract class Axis implements ChartElement, Cloneable, Serializable {
         return state;
     }
 
+    private Line2D getAxisLine(RectangleEdge edge, double x, double y, Rectangle2D dataArea, double cursor){
+        Line2D axisLine = null;
+        if (edge == RectangleEdge.TOP) {
+            axisLine = new Line2D.Double(x, cursor, dataArea.getMaxX(), cursor);
+        } else if (edge == RectangleEdge.BOTTOM) {
+            axisLine = new Line2D.Double(x, cursor, dataArea.getMaxX(), cursor);
+        } else if (edge == RectangleEdge.LEFT) {
+            axisLine = new Line2D.Double(cursor, y, cursor, dataArea.getMaxY());
+        } else if (edge == RectangleEdge.RIGHT) {
+            axisLine = new Line2D.Double(cursor, y, cursor, dataArea.getMaxY());
+        }
+        return axisLine;
+    }
+
+    private void g2PaintAndRender(Graphics2D g2, Line2D axisLine){
+        g2.setPaint(this.axisLinePaint);
+        g2.setStroke(this.axisLineStroke);
+        Object saved = g2.getRenderingHint(RenderingHints.KEY_STROKE_CONTROL);
+        g2.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL,
+                RenderingHints.VALUE_STROKE_NORMALIZE);
+        g2.draw(axisLine);
+        g2.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, saved);
+    }
+
     /**
      * Draws an axis line at the current cursor position and edge.
      *
@@ -1039,25 +1063,10 @@ public abstract class Axis implements ChartElement, Cloneable, Serializable {
      */
     protected void drawAxisLine(Graphics2D g2, double cursor,
             Rectangle2D dataArea, RectangleEdge edge) {
-        Line2D axisLine = null;
         double x = dataArea.getX();
         double y = dataArea.getY();
-        if (edge == RectangleEdge.TOP) {
-            axisLine = new Line2D.Double(x, cursor, dataArea.getMaxX(), cursor);
-        } else if (edge == RectangleEdge.BOTTOM) {
-            axisLine = new Line2D.Double(x, cursor, dataArea.getMaxX(), cursor);
-        } else if (edge == RectangleEdge.LEFT) {
-            axisLine = new Line2D.Double(cursor, y, cursor, dataArea.getMaxY());
-        } else if (edge == RectangleEdge.RIGHT) {
-            axisLine = new Line2D.Double(cursor, y, cursor, dataArea.getMaxY());
-        }
-        g2.setPaint(this.axisLinePaint);
-        g2.setStroke(this.axisLineStroke);
-        Object saved = g2.getRenderingHint(RenderingHints.KEY_STROKE_CONTROL);
-        g2.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, 
-                RenderingHints.VALUE_STROKE_NORMALIZE);
-        g2.draw(axisLine);
-        g2.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, saved);
+        Line2D axisLine = getAxisLine(edge, x, y, dataArea, cursor);
+        g2PaintAndRender(g2, axisLine);
     }
 
     /**

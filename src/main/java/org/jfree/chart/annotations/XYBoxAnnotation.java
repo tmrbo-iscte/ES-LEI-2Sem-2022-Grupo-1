@@ -248,21 +248,14 @@ public class XYBoxAnnotation extends AbstractXYAnnotation
         if (orientation == PlotOrientation.HORIZONTAL) {
             box = new Rectangle2D.Double(transY0, transX1, transY1 - transY0,
                     transX0 - transX1);
-        } else if (orientation == PlotOrientation.VERTICAL) {
+        } else {
             box = new Rectangle2D.Double(transX0, transY1, transX1 - transX0,
                     transY0 - transY1);
         }
 
-        if (this.fillPaint != null) {
-            g2.setPaint(this.fillPaint);
-            g2.fill(box);
-        }
+        Painter p = new Painter(box, stroke, outlinePaint, fillPaint);
+        p.paintBox(g2);
 
-        if (this.stroke != null && this.outlinePaint != null) {
-            g2.setPaint(this.outlinePaint);
-            g2.setStroke(this.stroke);
-            g2.draw(box);
-        }
         addEntity(info, box, rendererIndex, getToolTipText(), getURL());
     }
 

@@ -128,6 +128,34 @@ public class XYShapeAnnotation extends AbstractXYAnnotation
     }
 
     /**
+     * Made by Rodrigo Paulo
+     * @param orientation
+     * @param m02
+     * @param m11
+     * @param m00
+     * @param m12
+     * @return
+     */
+    private Shape getShape(PlotOrientation orientation, double m02, double m11, double m00, double m12){
+        Shape s;
+        if (orientation == PlotOrientation.HORIZONTAL) {
+            AffineTransform t1 = new AffineTransform(0.0f, 1.0f, 1.0f, 0.0f,
+                    0.0f, 0.0f);
+            AffineTransform t2 = new AffineTransform(m11, 0.0f, 0.0f, m00,
+                    m12, m02);
+            s = t1.createTransformedShape(this.shape);
+            s = t2.createTransformedShape(s);
+        }
+        else {
+            AffineTransform t = new AffineTransform(m00, 0, 0, m11, m02, m12);
+            s = t.createTransformedShape(this.shape);
+        }
+        return s;
+    }
+
+
+
+    /**
      * Draws the annotation.  This method is usually called by the
      * {@link XYPlot} class, you shouldn't need to call it directly.
      *
@@ -146,10 +174,8 @@ public class XYShapeAnnotation extends AbstractXYAnnotation
                      PlotRenderingInfo info) {
 
         PlotOrientation orientation = plot.getOrientation();
-        RectangleEdge domainEdge = Plot.resolveDomainAxisLocation(
-                plot.getDomainAxisLocation(), orientation);
-        RectangleEdge rangeEdge = Plot.resolveRangeAxisLocation(
-                plot.getRangeAxisLocation(), orientation);
+        RectangleEdge domainEdge = Plot.resolveDomainAxisLocation(plot.getDomainAxisLocation(), orientation);
+        RectangleEdge rangeEdge = Plot.resolveRangeAxisLocation(plot.getRangeAxisLocation(), orientation);
 
         // compute transform matrix elements via sample points. Assume no
         // rotation or shear.
@@ -169,33 +195,14 @@ public class XYShapeAnnotation extends AbstractXYAnnotation
         double m12 = yy0 - m11 * y0;
 
         //  create transform & transform shape
-        Shape s = null;
-        if (orientation == PlotOrientation.HORIZONTAL) {
-            AffineTransform t1 = new AffineTransform(0.0f, 1.0f, 1.0f, 0.0f,
-                    0.0f, 0.0f);
-            AffineTransform t2 = new AffineTransform(m11, 0.0f, 0.0f, m00,
-                    m12, m02);
-            s = t1.createTransformedShape(this.shape);
-            s = t2.createTransformedShape(s);
-        }
-        else if (orientation == PlotOrientation.VERTICAL) {
-            AffineTransform t = new AffineTransform(m00, 0, 0, m11, m02, m12);
-            s = t.createTransformedShape(this.shape);
-        }
-
-        if (this.fillPaint != null) {
-            g2.setPaint(this.fillPaint);
-            g2.fill(s);
-        }
-
-        if (this.stroke != null && this.outlinePaint != null) {
-            g2.setPaint(this.outlinePaint);
-            g2.setStroke(this.stroke);
-            g2.draw(s);
-        }
+        Shape s = getShape(orientation, m02, m11, m00, m12);
+        Painter p = new Painter(shape, stroke, outlinePaint, fillPaint);
+        p.paintShape(g2);
         addEntity(info, s, rendererIndex, getToolTipText(), getURL());
 
+
     }
+
 
     /**
      * Tests this annotation for equality with an arbitrary object.

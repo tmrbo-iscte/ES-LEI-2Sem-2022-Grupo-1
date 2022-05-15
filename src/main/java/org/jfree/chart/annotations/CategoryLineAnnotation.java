@@ -272,6 +272,24 @@ public class CategoryLineAnnotation extends AbstractAnnotation
         fireAnnotationChanged();
     }
 
+    private void drawLine(PlotOrientation orientation, Graphics2D g2, CategoryAxis domainAxis, ValueAxis rangeAxis, int catIndex1, int catIndex2, int catCount, Rectangle2D dataArea,
+                          RectangleEdge domainEdge, RectangleEdge rangeEdge){
+        double lineY1 = domainAxis.getCategoryJava2DCoordinate(
+                CategoryAnchor.MIDDLE, catIndex1, catCount, dataArea,
+                domainEdge);
+        double lineX1 = rangeAxis.valueToJava2D(this.value1, dataArea, rangeEdge);
+        double lineY2 = domainAxis.getCategoryJava2DCoordinate(
+                CategoryAnchor.MIDDLE, catIndex2, catCount, dataArea,
+                domainEdge);
+        double lineX2 = rangeAxis.valueToJava2D(this.value2, dataArea, rangeEdge);
+        if(orientation == PlotOrientation.HORIZONTAL){
+            g2.drawLine((int) lineX1, (int) lineY1, (int) lineX2, (int) lineY2);
+        }else {
+            g2.drawLine((int) lineY1, (int) lineX1, (int) lineY2, (int) lineX2);
+        }
+
+    }
+
     /**
      * Draws the annotation.
      *
@@ -290,38 +308,19 @@ public class CategoryLineAnnotation extends AbstractAnnotation
         int catIndex2 = dataset.getColumnIndex(this.category2);
         int catCount = dataset.getColumnCount();
 
-        double lineX1 = 0.0f;
-        double lineY1 = 0.0f;
-        double lineX2 = 0.0f;
-        double lineY2 = 0.0f;
         PlotOrientation orientation = plot.getOrientation();
         RectangleEdge domainEdge = Plot.resolveDomainAxisLocation(
             plot.getDomainAxisLocation(), orientation);
         RectangleEdge rangeEdge = Plot.resolveRangeAxisLocation(
             plot.getRangeAxisLocation(), orientation);
-
-        if (orientation == PlotOrientation.HORIZONTAL) {
-            lineY1 = domainAxis.getCategoryJava2DCoordinate(
-                CategoryAnchor.MIDDLE, catIndex1, catCount, dataArea,
-                domainEdge);
-            lineX1 = rangeAxis.valueToJava2D(this.value1, dataArea, rangeEdge);
-            lineY2 = domainAxis.getCategoryJava2DCoordinate(
-                CategoryAnchor.MIDDLE, catIndex2, catCount, dataArea,
-                domainEdge);
-            lineX2 = rangeAxis.valueToJava2D(this.value2, dataArea, rangeEdge);
-        } else if (orientation == PlotOrientation.VERTICAL) {
-            lineX1 = domainAxis.getCategoryJava2DCoordinate(
-                CategoryAnchor.MIDDLE, catIndex1, catCount, dataArea,
-                domainEdge);
-            lineY1 = rangeAxis.valueToJava2D(this.value1, dataArea, rangeEdge);
-            lineX2 = domainAxis.getCategoryJava2DCoordinate(
-                CategoryAnchor.MIDDLE, catIndex2, catCount, dataArea,
-                domainEdge);
-            lineY2 = rangeAxis.valueToJava2D(this.value2, dataArea, rangeEdge);
-        }
         g2.setPaint(this.paint);
         g2.setStroke(this.stroke);
-        g2.drawLine((int) lineX1, (int) lineY1, (int) lineX2, (int) lineY2);
+
+        if (orientation == PlotOrientation.HORIZONTAL) {
+            drawLine(orientation, g2, domainAxis, rangeAxis, catIndex1, catIndex2, catCount, dataArea, domainEdge, rangeEdge);
+        } else {
+            drawLine(orientation, g2, domainAxis, rangeAxis, catIndex2, catIndex2, catCount, dataArea, domainEdge, rangeEdge);
+        }
     }
 
     /**

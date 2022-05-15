@@ -754,6 +754,89 @@ public class CategoryAxis extends Axis implements Cloneable, Serializable {
 
     }
 
+    private double[] drawCategoryLabelsHelper(Object o, Graphics2D g2, RectangleEdge edge, int categoryIndex, List ticks, Rectangle2D dataArea, AxisState state,
+                                              CategoryTick tick){
+
+        g2.setFont(getTickLabelFont(tick.getCategory()));
+        g2.setPaint(getTickLabelPaint(tick.getCategory()));
+        double[] auxArray = new double[4];
+        if (edge == RectangleEdge.TOP) {
+            auxArray[0] = getCategoryStart(categoryIndex, ticks.size(), dataArea,
+                    edge);
+            auxArray[1] = getCategoryEnd(categoryIndex, ticks.size(), dataArea,
+                    edge);
+            auxArray[3] = state.getCursor() - this.categoryLabelPositionOffset;
+            auxArray[2] = auxArray[3] - state.getMax();
+            return auxArray;
+        }
+        else if (edge == RectangleEdge.BOTTOM) {
+            auxArray[0] = getCategoryStart(categoryIndex, ticks.size(), dataArea,
+                    edge);
+            auxArray[1]= getCategoryEnd(categoryIndex, ticks.size(), dataArea,
+                    edge);
+            auxArray[2] = state.getCursor() + this.categoryLabelPositionOffset;
+            auxArray[3] = auxArray[2] + state.getMax();
+            return auxArray;
+        }
+        else if (edge == RectangleEdge.LEFT) {
+            auxArray[2] = getCategoryStart(categoryIndex, ticks.size(), dataArea,
+                    edge);
+            auxArray[3] = getCategoryEnd(categoryIndex, ticks.size(), dataArea,
+                    edge);
+            auxArray[1] = state.getCursor() - this.categoryLabelPositionOffset;
+            auxArray[0] = auxArray[1] - state.getMax();
+            return auxArray;
+        }
+        else if (edge == RectangleEdge.RIGHT) {
+            auxArray[2] = getCategoryStart(categoryIndex, ticks.size(), dataArea,
+                    edge);
+            auxArray[3] = getCategoryEnd(categoryIndex, ticks.size(), dataArea,
+                    edge);
+            auxArray[0] = state.getCursor() + this.categoryLabelPositionOffset;
+            auxArray[1] = auxArray[0] - state.getMax();
+            return auxArray;
+        }
+
+        return null;
+    }
+
+    private Shape drawShape(double x0, double x1, double y0, double y1, RectangleEdge edge, CategoryTick tick, Graphics2D g2){
+        CategoryLabelPosition position
+                = this.categoryLabelPositions.getLabelPosition(edge);
+        Rectangle2D area = new Rectangle2D.Double(x0, y0, (x1 - x0),
+                (y1 - y0));
+        Point2D anchorPoint = position.getCategoryAnchor().getAnchorPoint(area);
+        TextBlock block = tick.getLabel();
+        block.draw(g2, (float) anchorPoint.getX(),
+                (float) anchorPoint.getY(), position.getLabelAnchor(),
+                (float) anchorPoint.getX(), (float) anchorPoint.getY(),
+                position.getAngle());
+        Shape bounds = block.calculateBounds(g2,
+                (float) anchorPoint.getX(), (float) anchorPoint.getY(),
+                position.getLabelAnchor(), (float) anchorPoint.getX(),
+                (float) anchorPoint.getY(), position.getAngle());
+        return bounds;
+    }
+
+    private void setState(RectangleEdge edge, AxisState state){
+        if (edge.equals(RectangleEdge.TOP)) {
+            double h = state.getMax() + this.categoryLabelPositionOffset;
+            state.cursorUp(h);
+        }
+        else if (edge.equals(RectangleEdge.BOTTOM)) {
+            double h = state.getMax() + this.categoryLabelPositionOffset;
+            state.cursorDown(h);
+        }
+        else if (edge == RectangleEdge.LEFT) {
+            double w = state.getMax() + this.categoryLabelPositionOffset;
+            state.cursorLeft(w);
+        }
+        else if (edge == RectangleEdge.RIGHT) {
+            double w = state.getMax() + this.categoryLabelPositionOffset;
+            state.cursorRight(w);
+        }
+    }
+
     /**
      * REFACTOR - USADO PARA SIMPLIFICAR CategoryAxis.drawCategoryLabels.
      *
@@ -817,8 +900,6 @@ public class CategoryAxis extends Axis implements Cloneable, Serializable {
         int categoryIndex = 0;
         for (Object o : ticks) {
             CategoryTick tick = (CategoryTick) o;
-            g2.setFont(getTickLabelFont(tick.getCategory()));
-            g2.setPaint(getTickLabelPaint(tick.getCategory()));
 
             CategoryLabelPosition position = helper.getCategoryLabelPositions().getLabelPosition(edge);
             Rectangle2D area = getRectangle(categoryIndex, state, ticks, dataArea, edge); // REFACTORED @ambco
@@ -905,6 +986,53 @@ public class CategoryAxis extends Axis implements Cloneable, Serializable {
 
     }
 
+    private void stateUp(List<Comparable> categories, Rectangle2D dataArea, RectangleEdge edge, Line2D line, double cursor, double il, double ol, Graphics2D g2,
+                         AxisState state){
+        for (Comparable category : categories) {
+            double x = getCategoryMiddle(category, categories, dataArea, edge);
+            line.setLine(x, cursor, x, cursor + il);
+            g2.draw(line);
+            line.setLine(x, cursor, x, cursor - ol);
+            g2.draw(line);
+        }
+        state.cursorUp(ol);
+    }
+
+    private void stateDown(List<Comparable> categories, Rectangle2D dataArea, RectangleEdge edge, Line2D line, double cursor, double il, double ol, Graphics2D g2,
+                           AxisState state){
+        for (Comparable category : categories) {
+            double x = getCategoryMiddle(category, categories, dataArea, edge);
+            line.setLine(x, cursor, x, cursor - il);
+            g2.draw(line);
+            line.setLine(x, cursor, x, cursor + ol);
+            g2.draw(line);
+        }
+        state.cursorDown(ol);
+    }
+
+    private void stateLeft(Graphics2D g2, double cursor, Rectangle2D dataArea, RectangleEdge edge, AxisState state, double il, double ol, Line2D line, List<Comparable> categories) {
+        for (Comparable category : categories) {
+            double y = getCategoryMiddle(category, categories, dataArea, edge);
+            line.setLine(cursor, y, cursor + il, y);
+            g2.draw(line);
+            line.setLine(cursor, y, cursor - ol, y);
+            g2.draw(line);
+        }
+        state.cursorLeft(ol);
+    }
+
+    private void stateRight(Graphics2D g2, double cursor, Rectangle2D dataArea, RectangleEdge edge, AxisState state, double il, double ol, Line2D line, List<Comparable> categories) {
+        for (Comparable category : categories) {
+            double y = getCategoryMiddle(category, categories, dataArea, edge);
+            line.setLine(cursor, y, cursor - il, y);
+            g2.draw(line);
+            line.setLine(cursor, y, cursor + ol, y);
+            g2.draw(line);
+        }
+        state.cursorRight(ol);
+    }
+
+
     /**
      * Draws the tick marks.
      *
@@ -926,53 +1054,21 @@ public class CategoryAxis extends Axis implements Cloneable, Serializable {
         g2.setPaint(tickMarks.getTickMarkPaint());
         g2.setStroke(tickMarks.getTickMarkStroke());
         Object saved = g2.getRenderingHint(RenderingHints.KEY_STROKE_CONTROL);
-        g2.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_NORMALIZE);
-
-        switch (edge) {
-            case TOP:
-                for (Comparable category : categories) {
-                    double x = getCategoryMiddle(category, categories, dataArea, edge);
-                    line.setLine(x, cursor, x, cursor + insideLength);
-                    g2.draw(line);
-                    line.setLine(x, cursor, x, cursor - outsideLength);
-                    g2.draw(line);
-                }
-                state.cursorUp(outsideLength);
-                break;
-            case BOTTOM:
-                for (Comparable category : categories) {
-                    double x = getCategoryMiddle(category, categories, dataArea, edge);
-                    line.setLine(x, cursor, x, cursor - insideLength);
-                    g2.draw(line);
-                    line.setLine(x, cursor, x, cursor + outsideLength);
-                    g2.draw(line);
-                }
-                state.cursorDown(outsideLength);
-                break;
-            case LEFT:
-                for (Comparable category : categories) {
-                    double y = getCategoryMiddle(category, categories, dataArea, edge);
-                    line.setLine(cursor, y, cursor + insideLength, y);
-                    g2.draw(line);
-                    line.setLine(cursor, y, cursor - outsideLength, y);
-                    g2.draw(line);
-                }
-                state.cursorLeft(outsideLength);
-                break;
-            case RIGHT:
-                for (Comparable category : categories) {
-                    double y = getCategoryMiddle(category, categories, dataArea, edge);
-                    line.setLine(cursor, y, cursor - insideLength, y);
-                    g2.draw(line);
-                    line.setLine(cursor, y, cursor + outsideLength, y);
-                    g2.draw(line);
-                }
-                state.cursorRight(outsideLength);
-                break;
+        g2.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, 
+                RenderingHints.VALUE_STROKE_NORMALIZE);
+        if (edge.equals(RectangleEdge.TOP)) {
+            stateUp(categories, dataArea, edge, line, cursor, il, ol, g2, state);
+        } else if (edge.equals(RectangleEdge.BOTTOM)) {
+            stateDown(categories, dataArea, edge, line, cursor, il, ol, g2, state);
+        } else if (edge.equals(RectangleEdge.LEFT)) {
+            stateLeft(g2, cursor, dataArea, edge, state, il, ol, line, categories);
+        } else if (edge.equals(RectangleEdge.RIGHT)) {
+            stateRight(g2, cursor, dataArea, edge, state, il, ol, line, categories);
         }
 
         g2.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, saved);
     }
+
 
     /**
      * Creates a label.

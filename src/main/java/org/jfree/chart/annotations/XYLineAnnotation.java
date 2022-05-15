@@ -192,6 +192,40 @@ public class XYLineAnnotation extends AbstractXYAnnotation
     }
 
     /**
+     * There were done by Rodrigo Paulo
+     * @param orientation
+     * @param domainAxis
+     * @param rangeAxis
+     * @param dataArea
+     * @param domainEdge
+     * @param rangeEdge
+     * @return
+     */
+    private float set2DX1(PlotOrientation orientation, ValueAxis domainAxis, ValueAxis rangeAxis,
+                         Rectangle2D dataArea, RectangleEdge domainEdge, RectangleEdge rangeEdge){
+        return orientation == PlotOrientation.VERTICAL ?  (float) domainAxis.valueToJava2D(this.x1, dataArea,
+                domainEdge) : (float) rangeAxis.valueToJava2D(this.y1, dataArea, rangeEdge);
+    }
+
+    private float set2DX2(PlotOrientation orientation, ValueAxis domainAxis, ValueAxis rangeAxis,
+                          Rectangle2D dataArea, RectangleEdge domainEdge, RectangleEdge rangeEdge){
+        return orientation == PlotOrientation.VERTICAL ?  (float) domainAxis.valueToJava2D(this.x2, dataArea,
+                domainEdge) : (float) rangeAxis.valueToJava2D(this.y2, dataArea, rangeEdge);
+    }
+
+    private float set2DY1(PlotOrientation orientation, ValueAxis domainAxis, ValueAxis rangeAxis,
+                          Rectangle2D dataArea, RectangleEdge domainEdge, RectangleEdge rangeEdge){
+        return orientation == PlotOrientation.VERTICAL ?  (float) domainAxis.valueToJava2D(this.y1, dataArea,
+                domainEdge) : (float) rangeAxis.valueToJava2D(this.x1, dataArea, rangeEdge);
+    }
+
+    private float set2DY2(PlotOrientation orientation, ValueAxis domainAxis, ValueAxis rangeAxis,
+                          Rectangle2D dataArea, RectangleEdge domainEdge, RectangleEdge rangeEdge){
+        return orientation == PlotOrientation.VERTICAL ?  (float) domainAxis.valueToJava2D(this.y2, dataArea,
+                domainEdge) : (float) rangeAxis.valueToJava2D(this.x2, dataArea, rangeEdge);
+    }
+
+    /**
      * Draws the annotation.  This method is called by the {@link XYPlot}
      * class, you won't normally need to call it yourself.
      *
@@ -206,38 +240,16 @@ public class XYLineAnnotation extends AbstractXYAnnotation
      */
     @Override
     public void draw(Graphics2D g2, XYPlot plot, Rectangle2D dataArea,
-                     ValueAxis domainAxis, ValueAxis rangeAxis,
-                     int rendererIndex,
-                     PlotRenderingInfo info) {
+                     ValueAxis domainAxis, ValueAxis rangeAxis, int rendererIndex, PlotRenderingInfo info) {
 
         PlotOrientation orientation = plot.getOrientation();
-        RectangleEdge domainEdge = Plot.resolveDomainAxisLocation(
-                plot.getDomainAxisLocation(), orientation);
-        RectangleEdge rangeEdge = Plot.resolveRangeAxisLocation(
-                plot.getRangeAxisLocation(), orientation);
-        float j2DX1 = 0.0f;
-        float j2DX2 = 0.0f;
-        float j2DY1 = 0.0f;
-        float j2DY2 = 0.0f;
-        if (orientation == PlotOrientation.VERTICAL) {
-            j2DX1 = (float) domainAxis.valueToJava2D(this.x1, dataArea,
-                    domainEdge);
-            j2DY1 = (float) rangeAxis.valueToJava2D(this.y1, dataArea,
-                    rangeEdge);
-            j2DX2 = (float) domainAxis.valueToJava2D(this.x2, dataArea,
-                    domainEdge);
-            j2DY2 = (float) rangeAxis.valueToJava2D(this.y2, dataArea,
-                    rangeEdge);
-        } else if (orientation == PlotOrientation.HORIZONTAL) {
-            j2DY1 = (float) domainAxis.valueToJava2D(this.x1, dataArea,
-                    domainEdge);
-            j2DX1 = (float) rangeAxis.valueToJava2D(this.y1, dataArea,
-                    rangeEdge);
-            j2DY2 = (float) domainAxis.valueToJava2D(this.x2, dataArea,
-                    domainEdge);
-            j2DX2 = (float) rangeAxis.valueToJava2D(this.y2, dataArea,
-                    rangeEdge);
-        }
+        RectangleEdge domainEdge = Plot.resolveDomainAxisLocation(plot.getDomainAxisLocation(), orientation);
+        RectangleEdge rangeEdge = Plot.resolveRangeAxisLocation(plot.getRangeAxisLocation(), orientation);
+        float j2DX1 = set2DX1(orientation, domainAxis, rangeAxis, dataArea, domainEdge, rangeEdge);
+        float j2DX2 = set2DX2(orientation, domainAxis, rangeAxis, dataArea, domainEdge, rangeEdge);
+        float j2DY1 = set2DY1(orientation, domainAxis, rangeAxis, dataArea, domainEdge, rangeEdge);
+        float j2DY2 = set2DY2(orientation, domainAxis, rangeAxis, dataArea, domainEdge, rangeEdge);
+
         g2.setPaint(this.paint);
         g2.setStroke(this.stroke);
         Line2D line = new Line2D.Float(j2DX1, j2DY1, j2DX2, j2DY2);
@@ -247,7 +259,6 @@ public class XYLineAnnotation extends AbstractXYAnnotation
         if (visible) {
             g2.draw(line);
         }
-
         String toolTip = getToolTipText();
         String url = getURL();
         if (toolTip != null || url != null) {

@@ -853,6 +853,37 @@ public class CyclicNumberAxis extends NumberAxis {
         this.period = period;
     }
 
+    private void drawMark(Graphics2D g2, RectangleEdge edge, double cursor, double ol, double xx, double il){
+        Line2D mark = null;
+        g2.setStroke(getTickMarkStroke());
+        g2.setPaint(getTickMarkPaint());
+        if (edge == RectangleEdge.LEFT) {
+            mark = new Line2D.Double(cursor - ol, xx, cursor + il, xx);
+        }
+        else if (edge == RectangleEdge.RIGHT) {
+            mark = new Line2D.Double(cursor + ol, xx, cursor - il, xx);
+        }
+        else if (edge == RectangleEdge.TOP) {
+            mark = new Line2D.Double(xx, cursor - ol, xx, cursor + il);
+        }
+        else if (edge == RectangleEdge.BOTTOM) {
+            mark = new Line2D.Double(xx, cursor + ol, xx, cursor - il);
+        }
+        g2.draw(mark);
+    }
+
+    private double getOL(Graphics2D g2){
+        double ol;
+        FontMetrics fm = g2.getFontMetrics(getTickLabelFont());
+        if (isVerticalTickLabels()) {
+            ol = fm.getMaxAdvance();
+        }
+        else {
+            ol = fm.getHeight();
+        }
+        return ol;
+    }
+
     /**
      * Draws the tick marks and labels.
      *
@@ -875,38 +906,39 @@ public class CyclicNumberAxis extends NumberAxis {
         if (!this.internalMarkerWhenTicksOverlap) {
             return ret;
         }
-
-        double ol;
-        FontMetrics fm = g2.getFontMetrics(tickLabel.getTickLabelFont());
-        if (isVerticalTickLabels()) {
-            ol = fm.getMaxAdvance();
-        }
-        else {
-            ol = fm.getHeight();
-        }
-
+        double ol = getOL(g2);
         double il = 0;
         if (tickMarks.isTickMarksVisible()) {
             float xx = (float) valueToJava2D(getRange().getUpperBound(),
                     dataArea, edge);
-            Line2D mark = null;
-            g2.setStroke(tickMarks.getTickMarkStroke());
-            g2.setPaint(tickMarks.getTickMarkPaint());
-            if (edge == RectangleEdge.LEFT) {
-                mark = new Line2D.Double(cursor - ol, xx, cursor + il, xx);
-            }
-            else if (edge == RectangleEdge.RIGHT) {
-                mark = new Line2D.Double(cursor + ol, xx, cursor - il, xx);
-            }
-            else if (edge == RectangleEdge.TOP) {
-                mark = new Line2D.Double(xx, cursor - ol, xx, cursor + il);
-            }
-            else if (edge == RectangleEdge.BOTTOM) {
-                mark = new Line2D.Double(xx, cursor + ol, xx, cursor - il);
-            }
-            g2.draw(mark);
+            drawMark(g2, edge, cursor, ol, xx, il);
         }
         return ret;
+    }
+
+    private void drawHelper(Rectangle2D dataArea, RectangleEdge edge, Graphics2D g2, double cursor){
+        double xx = valueToJava2D(getRange().getUpperBound(), dataArea,
+                edge);
+        Line2D mark = null;
+        g2.setStroke(getAdvanceLineStroke());
+        g2.setPaint(getAdvanceLinePaint());
+        if (edge == RectangleEdge.LEFT) {
+            mark = new Line2D.Double(cursor, xx, cursor
+                    + dataArea.getWidth(), xx);
+        }
+        else if (edge == RectangleEdge.RIGHT) {
+            mark = new Line2D.Double(cursor - dataArea.getWidth(), xx,
+                    cursor, xx);
+        }
+        else if (edge == RectangleEdge.TOP) {
+            mark = new Line2D.Double(xx, cursor + dataArea.getHeight(), xx,
+                    cursor);
+        }
+        else if (edge == RectangleEdge.BOTTOM) {
+            mark = new Line2D.Double(xx, cursor, xx,
+                    cursor - dataArea.getHeight());
+        }
+        g2.draw(mark);
     }
 
     /**
@@ -928,31 +960,29 @@ public class CyclicNumberAxis extends NumberAxis {
 
         AxisState ret = super.draw(g2, cursor, plotArea, dataArea, edge,
                 plotState);
-        if (advanceLine.isVisible()) {
-            double xx = valueToJava2D(getRange().getUpperBound(), dataArea,
-                    edge);
-            Line2D mark = null;
-            g2.setStroke(advanceLine.getStroke());
-            g2.setPaint(advanceLine.getPaint());
-            if (edge == RectangleEdge.LEFT) {
-                mark = new Line2D.Double(cursor, xx, cursor
-                        + dataArea.getWidth(), xx);
-            }
-            else if (edge == RectangleEdge.RIGHT) {
-                mark = new Line2D.Double(cursor - dataArea.getWidth(), xx,
-                        cursor, xx);
-            }
-            else if (edge == RectangleEdge.TOP) {
-                mark = new Line2D.Double(xx, cursor + dataArea.getHeight(), xx,
-                        cursor);
-            }
-            else if (edge == RectangleEdge.BOTTOM) {
-                mark = new Line2D.Double(xx, cursor, xx,
-                        cursor - dataArea.getHeight());
-            }
-            g2.draw(mark);
+        if (isAdvanceLineVisible()) {
+            drawHelper(dataArea, edge, g2, cursor);
         }
         return ret;
+    }
+
+    private void addToSpace(RectangleEdge edge, AxisSpace space, Rectangle2D r){
+        if (RectangleEdge.isTopOrBottom(edge)) {
+            if (isVerticalTickLabels()) {
+                space.add(r.getHeight() / 2, RectangleEdge.RIGHT);
+            }
+            else {
+                space.add(r.getWidth() / 2, RectangleEdge.RIGHT);
+            }
+        }
+        else if (RectangleEdge.isLeftOrRight(edge)) {
+            if (isVerticalTickLabels()) {
+                space.add(r.getWidth() / 2, RectangleEdge.TOP);
+            }
+            else {
+                space.add(r.getHeight() / 2, RectangleEdge.TOP);
+            }
+        }
     }
 
     /**
@@ -977,27 +1007,9 @@ public class CyclicNumberAxis extends NumberAxis {
             return ret;
         }
 
-        FontMetrics fm = g2.getFontMetrics(tickLabel.getTickLabelFont());
-        Rectangle2D r = TextUtils.getTextBounds(
-            this.internalMarkerCycleBoundTick.getText(), g2, fm
-        );
-
-        if (RectangleEdge.isTopOrBottom(edge)) {
-            if (isVerticalTickLabels()) {
-                space.add(r.getHeight() / 2, RectangleEdge.RIGHT);
-            }
-            else {
-                space.add(r.getWidth() / 2, RectangleEdge.RIGHT);
-            }
-        }
-        else if (RectangleEdge.isLeftOrRight(edge)) {
-            if (isVerticalTickLabels()) {
-                space.add(r.getWidth() / 2, RectangleEdge.TOP);
-            }
-            else {
-                space.add(r.getHeight() / 2, RectangleEdge.TOP);
-            }
-        }
+        FontMetrics fm = g2.getFontMetrics(getTickLabelFont());
+        Rectangle2D r = TextUtils.getTextBounds(this.internalMarkerCycleBoundTick.getText(), g2, fm);
+        addToSpace(edge, space, r);
 
         return ret;
 

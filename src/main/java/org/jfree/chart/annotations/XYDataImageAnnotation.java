@@ -247,7 +247,7 @@ public class XYDataImageAnnotation extends AbstractXYAnnotation
             yy0 = j2DX0;
             yy1 = j2DX1;
         }
-        else if (orientation == PlotOrientation.VERTICAL) {
+        else {
             xx0 = j2DX0;
             xx1 = j2DX1;
             yy0 = j2DY0;

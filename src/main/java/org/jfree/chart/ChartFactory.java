@@ -1143,8 +1143,8 @@ public abstract class ChartFactory {
         plot.setDataset(dataset);
         NumberAxis rangeAxis = new NumberAxis();
         rangeAxis.setAxisLineVisible(false);
-        rangeAxis.setTickMarksVisible(false);
-        rangeAxis.setTickLabelInsets(new RectangleInsets(0.0, 0.0, 0.0, 0.0));
+        rangeAxis.getTickMarks().setTickMarksVisible(false);
+        rangeAxis.getTickLabel().setTickLabelInsets(new RectangleInsets(0.0, 0.0, 0.0, 0.0));
         plot.setAxis(rangeAxis);
         plot.setRenderer(new DefaultPolarItemRenderer());
         JFreeChart chart = new JFreeChart(

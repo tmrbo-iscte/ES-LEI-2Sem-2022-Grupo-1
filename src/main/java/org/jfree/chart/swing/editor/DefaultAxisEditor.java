@@ -167,11 +167,11 @@ class DefaultAxisEditor extends JPanel implements ActionListener {
 
         this.labelFont = axis.getLabelFont();
         this.labelPaintSample = new PaintSample(axis.getLabelPaint());
-        this.tickLabelFont = axis.getTickLabelFont();
-        this.tickLabelPaintSample = new PaintSample(axis.getTickLabelPaint());
+        this.tickLabelFont = axis.getTickLabel().getTickLabelFont();
+        this.tickLabelPaintSample = new PaintSample(axis.getTickLabel().getTickLabelPaint());
 
         // Insets values
-        this.tickLabelInsets = axis.getTickLabelInsets();
+        this.tickLabelInsets = axis.getTickLabel().getTickLabelInsets();
         this.labelInsets = axis.getLabelInsets();
 
         setLayout(new BorderLayout());
@@ -246,7 +246,7 @@ class DefaultAxisEditor extends JPanel implements ActionListener {
 
         this.showTickLabelsCheckBox = new JCheckBox(
             localizationResources.getString("Show_tick_labels"),
-            axis.isTickLabelsVisible()
+            axis.getTickLabel().isTickLabelsVisible()
         );
         ticks.add(this.showTickLabelsCheckBox);
         ticks.add(new JPanel());
@@ -264,7 +264,7 @@ class DefaultAxisEditor extends JPanel implements ActionListener {
 
         this.showTickMarksCheckBox = new JCheckBox(
             localizationResources.getString("Show_tick_marks"),
-            axis.isTickMarksVisible()
+            axis.getTickMarks().isTickMarksVisible()
         );
         ticks.add(this.showTickMarksCheckBox);
         ticks.add(new JPanel());
@@ -501,12 +501,12 @@ class DefaultAxisEditor extends JPanel implements ActionListener {
         axis.setLabel(getLabel());
         axis.setLabelFont(getLabelFont());
         axis.setLabelPaint(getLabelPaint());
-        axis.setTickMarksVisible(isTickMarksVisible());
+        axis.getTickMarks().setTickMarksVisible(isTickMarksVisible());
         // axis.setTickMarkStroke(getTickMarkStroke());
-        axis.setTickLabelsVisible(isTickLabelsVisible());
-        axis.setTickLabelFont(getTickLabelFont());
-        axis.setTickLabelPaint(getTickLabelPaint());
-        axis.setTickLabelInsets(getTickLabelInsets());
+        axis.getTickLabel().setTickLabelsVisible(isTickLabelsVisible());
+        axis.getTickLabel().setTickLabelFont(getTickLabelFont());
+        axis.getTickLabel().setTickLabelPaint(getTickLabelPaint());
+        axis.getTickLabel().setTickLabelInsets(getTickLabelInsets());
         axis.setLabelInsets(getLabelInsets());
     }
 

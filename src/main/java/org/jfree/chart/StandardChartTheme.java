@@ -49,12 +49,7 @@ import java.util.Objects;
 
 import org.jfree.chart.annotations.XYAnnotation;
 import org.jfree.chart.annotations.XYTextAnnotation;
-import org.jfree.chart.axis.CategoryAxis;
-import org.jfree.chart.axis.PeriodAxis;
-import org.jfree.chart.axis.PeriodAxisLabelInfo;
-import org.jfree.chart.axis.SubCategoryAxis;
-import org.jfree.chart.axis.SymbolAxis;
-import org.jfree.chart.axis.ValueAxis;
+import org.jfree.chart.axis.*;
 import org.jfree.chart.block.Block;
 import org.jfree.chart.block.BlockContainer;
 import org.jfree.chart.block.LabelBlock;
@@ -209,11 +204,11 @@ public class StandardChartTheme implements ChartTheme, Cloneable,
     private transient Paint errorIndicatorPaint;
 
     /** The grid band paint for a {@link SymbolAxis}. */
-    private transient Paint gridBandPaint = SymbolAxis.DEFAULT_GRID_BAND_PAINT;
+    private transient Paint gridBandPaint = GridBand.DEFAULT_GRID_BAND_PAINT;
 
     /** The grid band alternate paint for a {@link SymbolAxis}. */
     private transient Paint gridBandAlternatePaint
-            = SymbolAxis.DEFAULT_GRID_BAND_ALTERNATE_PAINT;
+            = GridBand.DEFAULT_GRID_BAND_ALTERNATE_PAINT;
 
     /**
      * The shadow generator (can be null).

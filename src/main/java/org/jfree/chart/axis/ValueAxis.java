@@ -60,7 +60,6 @@ import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 
@@ -69,12 +68,8 @@ import java.util.Objects;
  * using the {@code double} primitive.  The two key subclasses are
  * {@link DateAxis} and {@link NumberAxis}.
  */
-public abstract class ValueAxis extends Axis implements Cloneable, PublicCloneable, Serializable {
-
-    /**
-     * For serialization.
-     */
-    private static final long serialVersionUID = 3698345477322391456L;
+public abstract class ValueAxis extends Axis
+        implements Cloneable, PublicCloneable {
 
     /**
      * The default axis range.
@@ -116,37 +111,12 @@ public abstract class ValueAxis extends Axis implements Cloneable, PublicCloneab
      */
     public static final int MAXIMUM_TICK_COUNT = 500;
 
-    /**
-     * A flag that controls whether an arrow is drawn at the positive end of
-     * the axis line.
-     */
-    private boolean positiveArrowVisible;
+    protected Arrow arrow;
 
     /**
-     * A flag that controls whether an arrow is drawn at the negative end of
-     * the axis line.
+     * The standard tick units for the axis.
      */
-    private boolean negativeArrowVisible;
-
-    /**
-     * The shape used for an up arrow.
-     */
-    private transient Shape upArrow;
-
-    /**
-     * The shape used for a down arrow.
-     */
-    private transient Shape downArrow;
-
-    /**
-     * The shape used for a left arrow.
-     */
-    private transient Shape leftArrow;
-
-    /**
-     * The shape used for a right arrow.
-     */
-    private transient Shape rightArrow;
+    private TickUnitSource standardTickUnits;
 
     /**
      * A flag that affects the orientation of the values on the axis.
@@ -203,16 +173,6 @@ public abstract class ValueAxis extends Axis implements Cloneable, PublicCloneab
     private boolean autoTickUnitSelection;
 
     /**
-     * The standard tick units for the axis.
-     */
-    private TickUnitSource standardTickUnits;
-
-    /**
-     * An index into an array of standard tick values.
-     */
-    private int autoTickIndex;
-
-    /**
      * The number of minor ticks per major tick unit.  This is an override
      * field, if the value is &gt; 0 it is used, otherwise the axis refers to the
      * minorTickCount in the current tickUnit.
@@ -234,9 +194,7 @@ public abstract class ValueAxis extends Axis implements Cloneable, PublicCloneab
     protected ValueAxis(String label, TickUnitSource standardTickUnits) {
 
         super(label);
-
-        this.positiveArrowVisible = false;
-        this.negativeArrowVisible = false;
+        arrow = new Arrow(this);
 
         this.range = DEFAULT_RANGE;
         this.autoRange = DEFAULT_AUTO_RANGE;
@@ -258,32 +216,57 @@ public abstract class ValueAxis extends Axis implements Cloneable, PublicCloneab
         p1.addPoint(-2, 2);
         p1.addPoint(2, 2);
 
-        this.upArrow = p1;
+        this.arrow.setUpArrow(p1);
 
         Polygon p2 = new Polygon();
         p2.addPoint(0, 0);
         p2.addPoint(-2, -2);
         p2.addPoint(2, -2);
 
-        this.downArrow = p2;
+        this.arrow.setDownArrow(p2);
 
         Polygon p3 = new Polygon();
         p3.addPoint(0, 0);
         p3.addPoint(-2, -2);
         p3.addPoint(-2, 2);
 
-        this.rightArrow = p3;
+        this.arrow.setRightArrow(p3);
 
         Polygon p4 = new Polygon();
         p4.addPoint(0, 0);
         p4.addPoint(2, -2);
         p4.addPoint(2, 2);
 
-        this.leftArrow = p4;
+        this.arrow.setLeftArrow(p4);
 
         this.verticalTickLabels = false;
         this.minorTickCount = 0;
 
+    }
+
+    /**
+     * Returns the source for obtaining standard tick units for the axis.
+     *
+     * @return The source (possibly {@code null}).
+     * @see #setStandardTickUnits(TickUnitSource)
+     */
+    public TickUnitSource getStandardTickUnits() {
+        return standardTickUnits;
+    }
+
+    /**
+     * Sets the source for obtaining standard tick units for the axis and sends
+     * an {@link AxisChangeEvent} to all registered listeners.  The axis will
+     * try to select the smallest tick unit from the source that does not cause
+     * the tick labels to overlap (see also the
+     *
+     * @param source the source for standard tick units ({@code null}
+     *               permitted).
+     * @see #getStandardTickUnits()
+     */
+    public void setStandardTickUnits(TickUnitSource source) {
+        this.standardTickUnits = source;
+        fireChangeEvent();
     }
 
     /**
@@ -314,154 +297,6 @@ public abstract class ValueAxis extends Axis implements Cloneable, PublicCloneab
     }
 
     /**
-     * Returns a flag that controls whether or not the axis line has an arrow
-     * drawn that points in the positive direction for the axis.
-     *
-     * @return A boolean.
-     * @see #setPositiveArrowVisible(boolean)
-     */
-    public boolean isPositiveArrowVisible() {
-        return this.positiveArrowVisible;
-    }
-
-    /**
-     * Sets a flag that controls whether or not the axis lines has an arrow
-     * drawn that points in the positive direction for the axis, and sends an
-     * {@link AxisChangeEvent} to all registered listeners.
-     *
-     * @param visible the flag.
-     * @see #isPositiveArrowVisible()
-     */
-    public void setPositiveArrowVisible(boolean visible) {
-        this.positiveArrowVisible = visible;
-        fireChangeEvent();
-    }
-
-    /**
-     * Returns a flag that controls whether or not the axis line has an arrow
-     * drawn that points in the negative direction for the axis.
-     *
-     * @return A boolean.
-     * @see #setNegativeArrowVisible(boolean)
-     */
-    public boolean isNegativeArrowVisible() {
-        return this.negativeArrowVisible;
-    }
-
-    /**
-     * Sets a flag that controls whether or not the axis lines has an arrow
-     * drawn that points in the negative direction for the axis, and sends an
-     * {@link AxisChangeEvent} to all registered listeners.
-     *
-     * @param visible the flag.
-     * @see #setNegativeArrowVisible(boolean)
-     */
-    public void setNegativeArrowVisible(boolean visible) {
-        this.negativeArrowVisible = visible;
-        fireChangeEvent();
-    }
-
-    /**
-     * Returns a shape that can be displayed as an arrow pointing upwards at
-     * the end of an axis line.
-     *
-     * @return A shape (never {@code null}).
-     * @see #setUpArrow(Shape)
-     */
-    public Shape getUpArrow() {
-        return this.upArrow;
-    }
-
-    /**
-     * Sets the shape that can be displayed as an arrow pointing upwards at
-     * the end of an axis line and sends an {@link AxisChangeEvent} to all
-     * registered listeners.
-     *
-     * @param arrow the arrow shape ({@code null} not permitted).
-     * @see #getUpArrow()
-     */
-    public void setUpArrow(Shape arrow) {
-        Args.nullNotPermitted(arrow, "arrow");
-        this.upArrow = arrow;
-        fireChangeEvent();
-    }
-
-    /**
-     * Returns a shape that can be displayed as an arrow pointing downwards at
-     * the end of an axis line.
-     *
-     * @return A shape (never {@code null}).
-     * @see #setDownArrow(Shape)
-     */
-    public Shape getDownArrow() {
-        return this.downArrow;
-    }
-
-    /**
-     * Sets the shape that can be displayed as an arrow pointing downwards at
-     * the end of an axis line and sends an {@link AxisChangeEvent} to all
-     * registered listeners.
-     *
-     * @param arrow the arrow shape ({@code null} not permitted).
-     * @see #getDownArrow()
-     */
-    public void setDownArrow(Shape arrow) {
-        Args.nullNotPermitted(arrow, "arrow");
-        this.downArrow = arrow;
-        fireChangeEvent();
-    }
-
-    /**
-     * Returns a shape that can be displayed as an arrow pointing left at the
-     * end of an axis line.
-     *
-     * @return A shape (never {@code null}).
-     * @see #setLeftArrow(Shape)
-     */
-    public Shape getLeftArrow() {
-        return this.leftArrow;
-    }
-
-    /**
-     * Sets the shape that can be displayed as an arrow pointing left at the
-     * end of an axis line and sends an {@link AxisChangeEvent} to all
-     * registered listeners.
-     *
-     * @param arrow the arrow shape ({@code null} not permitted).
-     * @see #getLeftArrow()
-     */
-    public void setLeftArrow(Shape arrow) {
-        Args.nullNotPermitted(arrow, "arrow");
-        this.leftArrow = arrow;
-        fireChangeEvent();
-    }
-
-    /**
-     * Returns a shape that can be displayed as an arrow pointing right at the
-     * end of an axis line.
-     *
-     * @return A shape (never {@code null}).
-     * @see #setRightArrow(Shape)
-     */
-    public Shape getRightArrow() {
-        return this.rightArrow;
-    }
-
-    /**
-     * Sets the shape that can be displayed as an arrow pointing rightwards at
-     * the end of an axis line and sends an {@link AxisChangeEvent} to all
-     * registered listeners.
-     *
-     * @param arrow the arrow shape ({@code null} not permitted).
-     * @see #getRightArrow()
-     */
-    public void setRightArrow(Shape arrow) {
-        Args.nullNotPermitted(arrow, "arrow");
-        this.rightArrow = arrow;
-        fireChangeEvent();
-    }
-
-    /**
      * Draws an axis line at the current cursor position and edge.
      *
      * @param g2       the graphics device ({@code null} not permitted).
@@ -473,18 +308,17 @@ public abstract class ValueAxis extends Axis implements Cloneable, PublicCloneab
     protected void drawAxisLine(Graphics2D g2, double cursor,
                                 Rectangle2D dataArea, RectangleEdge edge) {
         Line2D axisLine = null;
-        double c = cursor;
         if (edge == RectangleEdge.TOP) {
-            axisLine = new Line2D.Double(dataArea.getX(), c, dataArea.getMaxX(),
-                    c);
+            axisLine = new Line2D.Double(dataArea.getX(), cursor, dataArea.getMaxX(),
+                    cursor);
         } else if (edge == RectangleEdge.BOTTOM) {
-            axisLine = new Line2D.Double(dataArea.getX(), c, dataArea.getMaxX(),
-                    c);
+            axisLine = new Line2D.Double(dataArea.getX(), cursor, dataArea.getMaxX(),
+                    cursor);
         } else if (edge == RectangleEdge.LEFT) {
-            axisLine = new Line2D.Double(c, dataArea.getY(), c,
+            axisLine = new Line2D.Double(cursor, dataArea.getY(), cursor,
                     dataArea.getMaxY());
         } else if (edge == RectangleEdge.RIGHT) {
-            axisLine = new Line2D.Double(c, dataArea.getY(), c,
+            axisLine = new Line2D.Double(cursor, dataArea.getY(), cursor,
                     dataArea.getMaxY());
         }
         g2.setPaint(getAxisLinePaint());
@@ -497,14 +331,14 @@ public abstract class ValueAxis extends Axis implements Cloneable, PublicCloneab
 
         boolean drawUpOrRight = false;
         boolean drawDownOrLeft = false;
-        if (this.positiveArrowVisible) {
+        if (this.arrow.isPositiveArrowVisible()) {
             if (this.inverted) {
                 drawDownOrLeft = true;
             } else {
                 drawUpOrRight = true;
             }
         }
-        if (this.negativeArrowVisible) {
+        if (this.arrow.isNegativeArrowVisible()) {
             if (this.inverted) {
                 drawUpOrRight = true;
             } else {
@@ -518,12 +352,12 @@ public abstract class ValueAxis extends Axis implements Cloneable, PublicCloneab
             if (edge == RectangleEdge.TOP || edge == RectangleEdge.BOTTOM) {
                 x = dataArea.getMaxX();
                 y = cursor;
-                arrow = this.rightArrow;
+                arrow = this.arrow.getRightArrow();
             } else if (edge == RectangleEdge.LEFT
                     || edge == RectangleEdge.RIGHT) {
                 x = cursor;
                 y = dataArea.getMinY();
-                arrow = this.upArrow;
+                arrow = this.arrow.getUpArrow();
             }
 
             // draw the arrow...
@@ -541,12 +375,12 @@ public abstract class ValueAxis extends Axis implements Cloneable, PublicCloneab
             if (edge == RectangleEdge.TOP || edge == RectangleEdge.BOTTOM) {
                 x = dataArea.getMinX();
                 y = cursor;
-                arrow = this.leftArrow;
+                arrow = this.arrow.getLeftArrow();
             } else if (edge == RectangleEdge.LEFT
                     || edge == RectangleEdge.RIGHT) {
                 x = cursor;
                 y = dataArea.getMaxY();
-                arrow = this.downArrow;
+                arrow = this.arrow.getDownArrow();
             }
 
             // draw the arrow...
@@ -571,7 +405,7 @@ public abstract class ValueAxis extends Axis implements Cloneable, PublicCloneab
     protected float[] calculateAnchorPoint(ValueTick tick, double cursor,
                                            Rectangle2D dataArea, RectangleEdge edge) {
 
-        RectangleInsets insets = getTickLabelInsets();
+        RectangleInsets insets = tickLabel.getTickLabelInsets();
         float[] result = new float[2];
         if (edge == RectangleEdge.TOP) {
             result[0] = (float) valueToJava2D(tick.getValue(), dataArea, edge);
@@ -610,35 +444,36 @@ public abstract class ValueAxis extends Axis implements Cloneable, PublicCloneab
         }
         List ticks = refreshTicks(g2, state, dataArea, edge);
         state.setTicks(ticks);
-        g2.setFont(getTickLabelFont());
+        g2.setFont(tickLabel.getTickLabelFont());
         Object saved = g2.getRenderingHint(RenderingHints.KEY_STROKE_CONTROL);
         g2.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL,
                 RenderingHints.VALUE_STROKE_NORMALIZE);
         for (Object o : ticks) {
             ValueTick tick = (ValueTick) o;
-            if (isTickLabelsVisible()) {
-                g2.setPaint(getTickLabelPaint());
+            if (tickLabel.isTickLabelsVisible()) {
+                g2.setPaint(tickLabel.getTickLabelPaint());
                 float[] anchorPoint = calculateAnchorPoint(tick, cursor,
                         dataArea, edge);
                 tick.drawLabel(g2, anchorPoint[0], anchorPoint[1]);
             }
 
-            if ((isTickMarksVisible() && tick.isMajor()) || (isMinorTickMarksVisible()
-                    && tick.isMinor())) {
+            if ((tickMarks.isTickMarksVisible() && tick.getTickType().equals(
+                    TickType.MAJOR)) || (tickMarks.isMinorTickMarksVisible()
+                    && tick.getTickType().equals(TickType.MINOR))) {
 
-                double ol = tick.isMinor()
-                        ? getMinorTickMarkOutsideLength()
-                        : getTickMarkOutsideLength();
+                double ol = (tick.getTickType().equals(TickType.MINOR))
+                        ? tickMarks.getMinorTickMarkOutsideLength()
+                        : tickMarks.getTickMarkOutsideLength();
 
-                double il = tick.isMinor()
-                        ? getMinorTickMarkInsideLength()
-                        : getTickMarkInsideLength();
+                double il = (tick.getTickType().equals(TickType.MINOR))
+                        ? tickMarks.getMinorTickMarkInsideLength()
+                        : tickMarks.getTickMarkInsideLength();
 
                 float xx = (float) valueToJava2D(tick.getValue(), dataArea,
                         edge);
                 Line2D mark = null;
-                g2.setStroke(getTickMarkStroke());
-                g2.setPaint(getTickMarkPaint());
+                g2.setStroke(tickMarks.getTickMarkStroke());
+                g2.setPaint(tickMarks.getTickMarkPaint());
                 if (edge == RectangleEdge.LEFT) {
                     mark = new Line2D.Double(cursor - ol, xx, cursor + il, xx);
                 } else if (edge == RectangleEdge.RIGHT) {
@@ -656,21 +491,21 @@ public abstract class ValueAxis extends Axis implements Cloneable, PublicCloneab
         // need to work out the space used by the tick labels...
         // so we can update the cursor...
         double used = 0.0;
-        if (isTickLabelsVisible()) {
+        if (tickLabel.isTickLabelsVisible()) {
             if (edge == RectangleEdge.LEFT) {
-                used += findMaximumTickLabelWidth(ticks, g2, plotArea,
+                used += findMaximumTickLabelWidth(ticks, g2,
                         isVerticalTickLabels());
                 state.cursorLeft(used);
             } else if (edge == RectangleEdge.RIGHT) {
-                used = findMaximumTickLabelWidth(ticks, g2, plotArea,
+                used = findMaximumTickLabelWidth(ticks, g2,
                         isVerticalTickLabels());
                 state.cursorRight(used);
             } else if (edge == RectangleEdge.TOP) {
-                used = findMaximumTickLabelHeight(ticks, g2, plotArea,
+                used = findMaximumTickLabelHeight(ticks, g2,
                         isVerticalTickLabels());
                 state.cursorUp(used);
             } else if (edge == RectangleEdge.BOTTOM) {
-                used = findMaximumTickLabelHeight(ticks, g2, plotArea,
+                used = findMaximumTickLabelHeight(ticks, g2,
                         isVerticalTickLabels());
                 state.cursorDown(used);
             }
@@ -714,14 +549,15 @@ public abstract class ValueAxis extends Axis implements Cloneable, PublicCloneab
         // calculate the max size of the tick labels (if visible)...
         double tickLabelHeight = 0.0;
         double tickLabelWidth = 0.0;
-        if (isTickLabelsVisible()) {
-            g2.setFont(getTickLabelFont());
+        if (tickLabel.isTickLabelsVisible()) {
+            g2.setFont(tickLabel.getTickLabelFont());
             List ticks = refreshTicks(g2, new AxisState(), plotArea, edge);
             if (RectangleEdge.isTopOrBottom(edge)) {
                 tickLabelHeight = findMaximumTickLabelHeight(ticks, g2,
-                        plotArea, isVerticalTickLabels());
-            } else if (RectangleEdge.isLeftOrRight(edge)) {
-                tickLabelWidth = findMaximumTickLabelWidth(ticks, g2, plotArea,
+                        isVerticalTickLabels());
+            }
+            else if (RectangleEdge.isLeftOrRight(edge)) {
+                tickLabelWidth = findMaximumTickLabelWidth(ticks, g2,
                         isVerticalTickLabels());
             }
         }
@@ -740,27 +576,48 @@ public abstract class ValueAxis extends Axis implements Cloneable, PublicCloneab
 
     }
 
+    private Rectangle2D setLabelBounds(Graphics2D g2, FontMetrics fm, Tick o) {
+        Rectangle2D labelBounds;
+        if (o instanceof LogTick) {
+            LogTick lt = (LogTick) o;
+            if (lt.getAttributedLabel() != null) {
+                labelBounds = AttrStringUtils.getTextBounds(
+                        lt.getAttributedLabel(), g2);
+                return labelBounds;
+            }
+        } else if (o.getText() != null) {
+            labelBounds = TextUtils.getTextBounds(
+                    o.getText(), g2, fm);
+            return labelBounds;
+        }
+        return null;
+    }
+
     /**
      * A utility method for determining the height of the tallest tick label.
      *
-     * @param ticks    the ticks.
-     * @param g2       the graphics device.
-     * @param drawArea the area within which the plot and axes should be drawn.
-     * @param vertical a flag that indicates whether or not the tick labels
-     *                 are 'vertical'.
+     * @param ticks  the ticks.
+     * @param g2  the graphics device.
+     * @param vertical  a flag that indicates whether or not the tick labels
+     *                  are 'vertical'.
+     *
      * @return The height of the tallest tick label.
      */
-    protected double findMaximumTickLabelHeight(List ticks, Graphics2D g2, Rectangle2D drawArea, boolean vertical) {
-        RectangleInsets insets = getTickLabelInsets();
-        Font font = getTickLabelFont();
+    protected double findMaximumTickLabelHeight(List ticks, Graphics2D g2,
+                                                boolean vertical) {
+
+        RectangleInsets insets = tickLabel.getTickLabelInsets();
+        Font font = tickLabel.getTickLabelFont();
         g2.setFont(font);
         double maxHeight = 0.0;
         if (vertical) {
             FontMetrics fm = g2.getFontMetrics(font);
             for (Object o : ticks) {
-                Rectangle2D labelBounds = getLabelBounds(g2, fm, (Tick) o);
-                if (labelBounds != null && labelBounds.getWidth() + insets.getTop() + insets.getBottom() > maxHeight) {
-                    maxHeight = labelBounds.getWidth() + insets.getTop() + insets.getBottom();
+                Rectangle2D labelBounds = setLabelBounds(g2, fm, (Tick) o);
+                if (labelBounds != null && labelBounds.getWidth()
+                        + insets.getTop() + insets.getBottom() > maxHeight) {
+                    maxHeight = labelBounds.getWidth()
+                            + insets.getTop() + insets.getBottom();
                 }
             }
         } else {
@@ -774,23 +631,28 @@ public abstract class ValueAxis extends Axis implements Cloneable, PublicCloneab
     /**
      * A utility method for determining the width of the widest tick label.
      *
-     * @param ticks    the ticks.
-     * @param g2       the graphics device.
-     * @param drawArea the area within which the plot and axes should be drawn.
-     * @param vertical a flag that indicates whether or not the tick labels
-     *                 are 'vertical'.
+     * @param ticks  the ticks.
+     * @param g2  the graphics device.
+     * @param vertical  a flag that indicates whether or not the tick labels
+     *                  are 'vertical'.
+     *
      * @return The width of the tallest tick label.
      */
-    protected double findMaximumTickLabelWidth(List ticks, Graphics2D g2, Rectangle2D drawArea, boolean vertical) {
-        RectangleInsets insets = getTickLabelInsets();
-        Font font = getTickLabelFont();
+    protected double findMaximumTickLabelWidth(List ticks, Graphics2D g2,
+                                               boolean vertical) {
+
+        RectangleInsets insets = tickLabel.getTickLabelInsets();
+        Font font = tickLabel.getTickLabelFont();
         double maxWidth = 0.0;
         if (!vertical) {
             FontMetrics fm = g2.getFontMetrics(font);
             for (Object o : ticks) {
-                Rectangle2D labelBounds = getLabelBounds(g2, fm, (Tick) o);
-                if (labelBounds != null && labelBounds.getWidth() + insets.getLeft() + insets.getRight() > maxWidth) {
-                    maxWidth = labelBounds.getWidth() + insets.getLeft() + insets.getRight();
+                Rectangle2D labelBounds = setLabelBounds(g2, fm, (Tick) o);
+                if (labelBounds != null
+                        && labelBounds.getWidth() + insets.getLeft()
+                        + insets.getRight() > maxWidth) {
+                    maxWidth = labelBounds.getWidth()
+                            + insets.getLeft() + insets.getRight();
                 }
             }
         } else {
@@ -1469,26 +1331,6 @@ public abstract class ValueAxis extends Axis implements Cloneable, PublicCloneab
     }
 
     /**
-     * Returns the auto tick index.
-     *
-     * @return The auto tick index.
-     * @see #setAutoTickIndex(int)
-     */
-    protected int getAutoTickIndex() {
-        return this.autoTickIndex;
-    }
-
-    /**
-     * Sets the auto tick index.
-     *
-     * @param index the new value.
-     * @see #getAutoTickIndex()
-     */
-    protected void setAutoTickIndex(int index) {
-        this.autoTickIndex = index;
-    }
-
-    /**
      * Tests the axis for equality with an arbitrary object.
      *
      * @param obj the object ({@code null} permitted).
@@ -1503,12 +1345,6 @@ public abstract class ValueAxis extends Axis implements Cloneable, PublicCloneab
             return false;
         }
         ValueAxis that = (ValueAxis) obj;
-        if (this.positiveArrowVisible != that.positiveArrowVisible) {
-            return false;
-        }
-        if (this.negativeArrowVisible != that.negativeArrowVisible) {
-            return false;
-        }
         if (this.inverted != that.inverted) {
             return false;
         }
@@ -1546,6 +1382,9 @@ public abstract class ValueAxis extends Axis implements Cloneable, PublicCloneab
         if (this.minorTickCount != that.minorTickCount) {
             return false;
         }
+        if (!arrow.equals(that.arrow)) {
+            return false;
+        }
         return super.equals(obj);
     }
 
@@ -1558,39 +1397,7 @@ public abstract class ValueAxis extends Axis implements Cloneable, PublicCloneab
      */
     @Override
     public Object clone() throws CloneNotSupportedException {
-        ValueAxis clone = (ValueAxis) super.clone();
-        return clone;
-    }
-
-    /**
-     * Provides serialization support.
-     *
-     * @param stream the output stream.
-     * @throws IOException if there is an I/O error.
-     */
-    private void writeObject(ObjectOutputStream stream) throws IOException {
-        stream.defaultWriteObject();
-        SerialUtils.writeShape(this.upArrow, stream);
-        SerialUtils.writeShape(this.downArrow, stream);
-        SerialUtils.writeShape(this.leftArrow, stream);
-        SerialUtils.writeShape(this.rightArrow, stream);
-    }
-
-    /**
-     * Provides serialization support.
-     *
-     * @param stream the input stream.
-     * @throws IOException            if there is an I/O error.
-     * @throws ClassNotFoundException if there is a classpath problem.
-     */
-    private void readObject(ObjectInputStream stream)
-            throws IOException, ClassNotFoundException {
-
-        stream.defaultReadObject();
-        this.upArrow = SerialUtils.readShape(stream);
-        this.downArrow = SerialUtils.readShape(stream);
-        this.leftArrow = SerialUtils.readShape(stream);
-        this.rightArrow = SerialUtils.readShape(stream);
+        return super.clone();
     }
 
     @Override

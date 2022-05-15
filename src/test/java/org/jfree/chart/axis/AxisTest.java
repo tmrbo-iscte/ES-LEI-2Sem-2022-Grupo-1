@@ -162,60 +162,60 @@ public class AxisTest  {
         assertEquals(a1, a2);
 
         // tick labels visible flag...
-        a1.setTickLabelsVisible(false);
+        a1.tickLabel.setTickLabelsVisible(false);
         assertNotEquals(a1, a2);
-        a2.setTickLabelsVisible(false);
+        a2.tickLabel.setTickLabelsVisible(false);
         assertEquals(a1, a2);
 
         // tick label font...
-        a1.setTickLabelFont(new Font("Dialog", Font.PLAIN, 12));
+        a1.getTickLabel().setTickLabelFont(new Font("Dialog", Font.PLAIN, 12));
         assertNotEquals(a1, a2);
-        a2.setTickLabelFont(new Font("Dialog", Font.PLAIN, 12));
+        a2.getTickLabel().setTickLabelFont(new Font("Dialog", Font.PLAIN, 12));
         assertEquals(a1, a2);
 
         // tick label paint...
-        a1.setTickLabelPaint(new GradientPaint(1.0f, 2.0f, Color.YELLOW,
+        a1.getTickLabel().setTickLabelPaint(new GradientPaint(1.0f, 2.0f, Color.YELLOW,
                 3.0f, 4.0f, Color.BLACK));
         assertNotEquals(a1, a2);
-        a2.setTickLabelPaint(new GradientPaint(1.0f, 2.0f, Color.YELLOW,
+        a2.getTickLabel().setTickLabelPaint(new GradientPaint(1.0f, 2.0f, Color.YELLOW,
                 3.0f, 4.0f, Color.BLACK));
         assertEquals(a1, a2);
 
         // tick label insets...
-        a1.setTickLabelInsets(new RectangleInsets(10.0, 10.0, 10.0, 10.0));
+        a1.getTickLabel().setTickLabelInsets(new RectangleInsets(10.0, 10.0, 10.0, 10.0));
         assertNotEquals(a1, a2);
-        a2.setTickLabelInsets(new RectangleInsets(10.0, 10.0, 10.0, 10.0));
+        a2.getTickLabel().setTickLabelInsets(new RectangleInsets(10.0, 10.0, 10.0, 10.0));
         assertEquals(a1, a2);
 
         // tick marks visible flag...
-        a1.setTickMarksVisible(false);
+        a1.getTickMarks().setTickMarksVisible(false);
         assertNotEquals(a1, a2);
-        a2.setTickMarksVisible(false);
+        a2.getTickMarks().setTickMarksVisible(false);
         assertEquals(a1, a2);
 
         // tick mark inside length...
-        a1.setTickMarkInsideLength(1.23f);
+        a1.getTickMarks().setTickMarkInsideLength(1.23f);
         assertNotEquals(a1, a2);
-        a2.setTickMarkInsideLength(1.23f);
+        a2.getTickMarks().setTickMarkInsideLength(1.23f);
         assertEquals(a1, a2);
 
         // tick mark outside length...
-        a1.setTickMarkOutsideLength(1.23f);
+        a1.getTickMarks().setTickMarkOutsideLength(1.23f);
         assertNotEquals(a1, a2);
-        a2.setTickMarkOutsideLength(1.23f);
+        a2.getTickMarks().setTickMarkOutsideLength(1.23f);
         assertEquals(a1, a2);
 
         // tick mark stroke...
-        a1.setTickMarkStroke(new BasicStroke(2.0f));
+        a1.getTickMarks().setTickMarkStroke(new BasicStroke(2.0f));
         assertNotEquals(a1, a2);
-        a2.setTickMarkStroke(new BasicStroke(2.0f));
+        a2.getTickMarks().setTickMarkStroke(new BasicStroke(2.0f));
         assertEquals(a1, a2);
 
         // tick mark paint...
-        a1.setTickMarkPaint(new GradientPaint(1.0f, 2.0f, Color.CYAN,
+        a1.getTickMarks().setTickMarkPaint(new GradientPaint(1.0f, 2.0f, Color.CYAN,
                 3.0f, 4.0f, Color.BLACK));
         assertNotEquals(a1, a2);
-        a2.setTickMarkPaint(new GradientPaint(1.0f, 2.0f, Color.CYAN,
+        a2.getTickMarks().setTickMarkPaint(new GradientPaint(1.0f, 2.0f, Color.CYAN,
                 3.0f, 4.0f, Color.BLACK));
         assertEquals(a1, a2);
 
@@ -225,19 +225,19 @@ public class AxisTest  {
         a2.setFixedDimension(3.21f);
         assertEquals(a1, a2);
 
-        a1.setMinorTickMarksVisible(true);
+        a1.getTickMarks().setMinorTickMarksVisible(true);
         assertNotEquals(a1, a2);
-        a2.setMinorTickMarksVisible(true);
+        a2.getTickMarks().setMinorTickMarksVisible(true);
         assertEquals(a1, a2);
 
-        a1.setMinorTickMarkInsideLength(1.23f);
+        a1.getTickMarks().setMinorTickMarkInsideLength(1.23f);
         assertNotEquals(a1, a2);
-        a2.setMinorTickMarkInsideLength(1.23f);
+        a2.getTickMarks().setMinorTickMarkInsideLength(1.23f);
         assertEquals(a1, a2);
 
-        a1.setMinorTickMarkOutsideLength(3.21f);
+        a1.getTickMarks().setMinorTickMarkOutsideLength(3.21f);
         assertNotEquals(a1, a2);
-        a2.setMinorTickMarkOutsideLength(3.21f);
+        a2.getTickMarks().setMinorTickMarkOutsideLength(3.21f);
         assertEquals(a1, a2);
     }
 

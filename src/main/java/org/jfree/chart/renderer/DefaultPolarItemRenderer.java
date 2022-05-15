@@ -574,7 +574,7 @@ public class DefaultPolarItemRenderer extends AbstractRenderer
             ValueAxis radialAxis, List ticks, Rectangle2D dataArea) {
 
         Args.nullNotPermitted(radialAxis, "radialAxis");
-        g2.setFont(radialAxis.getTickLabelFont());
+        g2.setFont(radialAxis.getTickLabel().getTickLabelFont());
         g2.setPaint(plot.getRadiusGridlinePaint());
         g2.setStroke(plot.getRadiusGridlineStroke());
 

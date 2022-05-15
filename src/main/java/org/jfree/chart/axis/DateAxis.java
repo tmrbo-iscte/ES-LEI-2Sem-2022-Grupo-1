@@ -306,7 +306,7 @@ public class DateAxis extends ValueAxis implements Cloneable, Serializable {
     public void setTimeZone(TimeZone zone) {
         Args.nullNotPermitted(zone, "zone");
         this.timeZone = zone;
-        setStandardTickUnits(createStandardDateTickUnits(zone, this.locale));
+        this.setStandardTickUnits(createStandardDateTickUnits(zone, this.locale));
         fireChangeEvent();
     }
     
@@ -328,7 +328,7 @@ public class DateAxis extends ValueAxis implements Cloneable, Serializable {
     public void setLocale(Locale locale) {
         Args.nullNotPermitted(locale, "locale");
         this.locale = locale;
-        setStandardTickUnits(createStandardDateTickUnits(this.timeZone, 
+        this.setStandardTickUnits(createStandardDateTickUnits(this.timeZone,
                 this.locale));
         fireChangeEvent();
     }
@@ -1274,10 +1274,10 @@ public class DateAxis extends ValueAxis implements Cloneable, Serializable {
     private double estimateMaximumTickLabelWidth(Graphics2D g2, 
             DateTickUnit unit) {
 
-        RectangleInsets tickLabelInsets = getTickLabelInsets();
+        RectangleInsets tickLabelInsets = tickLabel.getTickLabelInsets();
         double result = tickLabelInsets.getLeft() + tickLabelInsets.getRight();
 
-        Font tickLabelFont = getTickLabelFont();
+        Font tickLabelFont = tickLabel.getTickLabelFont();
         FontRenderContext frc = g2.getFontRenderContext();
         LineMetrics lm = tickLabelFont.getLineMetrics("ABCxyz", frc);
         if (isVerticalTickLabels()) {
@@ -1326,10 +1326,10 @@ public class DateAxis extends ValueAxis implements Cloneable, Serializable {
     private double estimateMaximumTickLabelHeight(Graphics2D g2,
             DateTickUnit unit) {
 
-        RectangleInsets tickLabelInsets = getTickLabelInsets();
+        RectangleInsets tickLabelInsets = tickLabel.getTickLabelInsets();
         double result = tickLabelInsets.getTop() + tickLabelInsets.getBottom();
 
-        Font tickLabelFont = getTickLabelFont();
+        Font tickLabelFont = tickLabel.getTickLabelFont();
         FontRenderContext frc = g2.getFontRenderContext();
         LineMetrics lm = tickLabelFont.getLineMetrics("ABCxyz", frc);
         if (!isVerticalTickLabels()) {
@@ -1419,7 +1419,7 @@ public class DateAxis extends ValueAxis implements Cloneable, Serializable {
 
         List<DateTick> result = new ArrayList<>();
 
-        Font tickLabelFont = getTickLabelFont();
+        Font tickLabelFont = tickLabel.getTickLabelFont();
         g2.setFont(tickLabelFont);
 
         if (isAutoTickUnitSelection()) {
@@ -1535,7 +1535,7 @@ public class DateAxis extends ValueAxis implements Cloneable, Serializable {
 
         List<DateTick> result = new ArrayList<>();
 
-        Font tickLabelFont = getTickLabelFont();
+        Font tickLabelFont = tickLabel.getTickLabelFont();
         g2.setFont(tickLabelFont);
 
         if (isAutoTickUnitSelection()) {
@@ -1672,11 +1672,11 @@ public class DateAxis extends ValueAxis implements Cloneable, Serializable {
         // draw the axis label (note that 'state' is passed in *and*
         // returned)...
         if (getAttributedLabel() != null) {
-            state = drawAttributedLabel(getAttributedLabel(), g2, plotArea, 
+            state = drawAttributedLabel(getAttributedLabel(), g2,
                     dataArea, edge, state);
             
         } else {
-            state = drawLabel(getLabel(), g2, plotArea, dataArea, edge, state);
+            state = drawLabel(getLabel(), g2, dataArea, edge, state);
         }
         createAndAddEntity(cursor, state, dataArea, edge, plotState);
         return state;

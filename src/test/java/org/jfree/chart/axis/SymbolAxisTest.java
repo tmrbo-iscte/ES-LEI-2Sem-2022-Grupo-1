@@ -92,19 +92,19 @@ public class SymbolAxisTest {
         a2 = new SymbolAxis("Axis 2", new String[] {"C", "B"});
         assertEquals(a1, a2);
 
-        a1.setGridBandsVisible(false);
+        a1.gridBand.setGridBandsVisible(false);
         assertNotEquals(a1, a2);
-        a2.setGridBandsVisible(false);
+        a2.gridBand.setGridBandsVisible(false);
         assertEquals(a1, a2);
 
-        a1.setGridBandPaint(Color.BLACK);
+        a1.gridBand.setGridBandPaint(Color.BLACK);
         assertNotEquals(a1, a2);
-        a2.setGridBandPaint(Color.BLACK);
+        a2.gridBand.setGridBandPaint(Color.BLACK);
         assertEquals(a1, a2);
 
-        a1.setGridBandAlternatePaint(Color.RED);
+        a1.gridBand.setGridBandAlternatePaint(Color.RED);
         assertNotEquals(a1, a2);
-        a2.setGridBandAlternatePaint(Color.RED);
+        a2.gridBand.setGridBandAlternatePaint(Color.RED);
         assertEquals(a1, a2);
     }
 

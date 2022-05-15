@@ -323,7 +323,7 @@ public class CyclicNumberAxis extends NumberAxis {
 
         List result = new java.util.ArrayList();
 
-        Font tickLabelFont = getTickLabelFont();
+        Font tickLabelFont = tickLabel.getTickLabelFont();
         g2.setFont(tickLabelFont);
 
         if (isAutoTickUnitSelection()) {
@@ -473,7 +473,7 @@ public class CyclicNumberAxis extends NumberAxis {
         List result = new java.util.ArrayList();
         result.clear();
 
-        Font tickLabelFont = getTickLabelFont();
+        Font tickLabelFont = tickLabel.getTickLabelFont();
         g2.setFont(tickLabelFont);
         if (isAutoTickUnitSelection()) {
             selectAutoTickUnit(g2, dataArea, edge);
@@ -733,16 +733,6 @@ public class CyclicNumberAxis extends NumberAxis {
     }
 
     /**
-     * Centers the range about the given value.
-     *
-     * @param value  the data value.
-     */
-    @Override
-    public void centerRange(double value) {
-        setRange(value - this.period / 2.0, value + this.period / 2.0);
-    }
-
-    /**
      * This function is nearly useless since the auto range is fixed for this
      * class to the period.  The period is extended if necessary to fit the
      * minimum size.
@@ -887,7 +877,7 @@ public class CyclicNumberAxis extends NumberAxis {
         }
 
         double ol;
-        FontMetrics fm = g2.getFontMetrics(getTickLabelFont());
+        FontMetrics fm = g2.getFontMetrics(tickLabel.getTickLabelFont());
         if (isVerticalTickLabels()) {
             ol = fm.getMaxAdvance();
         }
@@ -896,12 +886,12 @@ public class CyclicNumberAxis extends NumberAxis {
         }
 
         double il = 0;
-        if (isTickMarksVisible()) {
+        if (tickMarks.isTickMarksVisible()) {
             float xx = (float) valueToJava2D(getRange().getUpperBound(),
                     dataArea, edge);
             Line2D mark = null;
-            g2.setStroke(getTickMarkStroke());
-            g2.setPaint(getTickMarkPaint());
+            g2.setStroke(tickMarks.getTickMarkStroke());
+            g2.setPaint(tickMarks.getTickMarkPaint());
             if (edge == RectangleEdge.LEFT) {
                 mark = new Line2D.Double(cursor - ol, xx, cursor + il, xx);
             }
@@ -987,7 +977,7 @@ public class CyclicNumberAxis extends NumberAxis {
             return ret;
         }
 
-        FontMetrics fm = g2.getFontMetrics(getTickLabelFont());
+        FontMetrics fm = g2.getFontMetrics(tickLabel.getTickLabelFont());
         Rectangle2D r = TextUtils.getTextBounds(
             this.internalMarkerCycleBoundTick.getText(), g2, fm
         );

@@ -37,9 +37,18 @@
 
 package org.jfree.chart.axis;
 
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics2D;
+import org.jfree.chart.api.RectangleEdge;
+import org.jfree.chart.api.RectangleInsets;
+import org.jfree.chart.event.AxisChangeEvent;
+import org.jfree.chart.internal.Args;
+import org.jfree.chart.plot.Plot;
+import org.jfree.chart.plot.PlotRenderingInfo;
+import org.jfree.chart.plot.ValueAxisPlot;
+import org.jfree.chart.text.TextAnchor;
+import org.jfree.data.Range;
+import org.jfree.data.RangeType;
+
+import java.awt.*;
 import java.awt.font.FontRenderContext;
 import java.awt.font.LineMetrics;
 import java.awt.geom.Rectangle2D;
@@ -49,17 +58,6 @@ import java.text.NumberFormat;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
-
-import org.jfree.chart.event.AxisChangeEvent;
-import org.jfree.chart.plot.Plot;
-import org.jfree.chart.plot.PlotRenderingInfo;
-import org.jfree.chart.plot.ValueAxisPlot;
-import org.jfree.chart.api.RectangleEdge;
-import org.jfree.chart.api.RectangleInsets;
-import org.jfree.chart.text.TextAnchor;
-import org.jfree.chart.internal.Args;
-import org.jfree.data.Range;
-import org.jfree.data.RangeType;
 
 /**
  * An axis for displaying numerical data.
@@ -95,11 +93,6 @@ public class NumberAxis extends ValueAxis implements Cloneable, Serializable {
     public static final NumberTickUnit DEFAULT_TICK_UNIT = new NumberTickUnit(1.0, new DecimalFormat("0"));
 
     /**
-     * The default setting for the vertical tick labels flag.
-     */
-    public static final boolean DEFAULT_VERTICAL_TICK_LABELS = false;
-
-    /**
      * The range type (can be used to force the axis to display only positive
      * values or only negative values).
      */
@@ -128,11 +121,6 @@ public class NumberAxis extends ValueAxis implements Cloneable, Serializable {
      * The override number format.
      */
     private NumberFormat numberFormatOverride;
-
-    /**
-     * An optional band for marking regions on the axis.
-     */
-    private MarkerAxisBand markerBand;
 
     /**
      * Default constructor.
@@ -319,30 +307,6 @@ public class NumberAxis extends ValueAxis implements Cloneable, Serializable {
     }
 
     /**
-     * Returns the (optional) marker band for the axis.
-     *
-     * @return The marker band (possibly {@code null}).
-     * @see #setMarkerBand(MarkerAxisBand)
-     */
-    public MarkerAxisBand getMarkerBand() {
-        return this.markerBand;
-    }
-
-    /**
-     * Sets the marker band for the axis.
-     * <p>
-     * The marker band is optional, leave it set to {@code null} if you
-     * don't require it.
-     *
-     * @param band the new band ({@code null} permitted).
-     * @see #getMarkerBand()
-     */
-    public void setMarkerBand(MarkerAxisBand band) {
-        this.markerBand = band;
-        notifyListeners(new AxisChangeEvent(this));
-    }
-
-    /**
      * Configures the axis to work with the specified plot.  If the axis has
      * auto-scaling, then sets the maximum and minimum values.
      */
@@ -366,7 +330,6 @@ public class NumberAxis extends ValueAxis implements Cloneable, Serializable {
 
         if (plot instanceof ValueAxisPlot) {
             ValueAxisPlot vap = (ValueAxisPlot) plot;
-
             Range r = vap.getDataRange(this);
             if (r == null) {
                 r = getDefaultAutoRange();
@@ -519,23 +482,11 @@ public class NumberAxis extends ValueAxis implements Cloneable, Serializable {
      * Calculates the value of the lowest visible tick on the axis.
      *
      * @return The value of the lowest visible tick on the axis.
-     * @see #calculateHighestVisibleTickValue()
+     *
      */
     protected double calculateLowestVisibleTickValue() {
         double unit = getTickUnit().getSize();
         double index = Math.ceil(getRange().getLowerBound() / unit);
-        return index * unit;
-    }
-
-    /**
-     * Calculates the value of the highest visible tick on the axis.
-     *
-     * @return The value of the highest visible tick on the axis.
-     * @see #calculateLowestVisibleTickValue()
-     */
-    protected double calculateHighestVisibleTickValue() {
-        double unit = getTickUnit().getSize();
-        double index = Math.floor(getRange().getUpperBound() / unit);
         return index * unit;
     }
 
@@ -586,11 +537,11 @@ public class NumberAxis extends ValueAxis implements Cloneable, Serializable {
         state = drawTickMarksAndLabels(g2, cursor, plotArea, dataArea, edge);
 
         if (getAttributedLabel() != null) {
-            state = drawAttributedLabel(getAttributedLabel(), g2, plotArea,
+            state = drawAttributedLabel(getAttributedLabel(), g2,
                     dataArea, edge, state);
 
         } else {
-            state = drawLabel(getLabel(), g2, plotArea, dataArea, edge, state);
+            state = drawLabel(getLabel(), g2, dataArea, edge, state);
         }
         createAndAddEntity(cursor, state, dataArea, edge, plotState);
         return state;
@@ -605,7 +556,7 @@ public class NumberAxis extends ValueAxis implements Cloneable, Serializable {
      * NumberAxis class.
      *
      * @return The standard tick units.
-     * @see #setStandardTickUnits(TickUnitSource)
+     *
      * @see #createIntegerTickUnits()
      */
     public static TickUnitSource createStandardTickUnits() {
@@ -616,7 +567,7 @@ public class NumberAxis extends ValueAxis implements Cloneable, Serializable {
      * Returns a collection of tick units for integer values.
      *
      * @return A collection of tick units for integer values.
-     * @see #setStandardTickUnits(TickUnitSource)
+     *
      * @see #createStandardTickUnits()
      */
     public static TickUnitSource createIntegerTickUnits() {
@@ -634,7 +585,6 @@ public class NumberAxis extends ValueAxis implements Cloneable, Serializable {
      *
      * @param locale the locale.
      * @return A tick unit collection.
-     * @see #setStandardTickUnits(TickUnitSource)
      */
     public static TickUnitSource createStandardTickUnits(Locale locale) {
         NumberFormat numberFormat = NumberFormat.getNumberInstance(locale);
@@ -647,7 +597,6 @@ public class NumberAxis extends ValueAxis implements Cloneable, Serializable {
      *
      * @param locale the locale to use to represent Numbers.
      * @return A collection of tick units for integer values.
-     * @see #setStandardTickUnits(TickUnitSource)
      */
     public static TickUnitSource createIntegerTickUnits(Locale locale) {
         NumberFormat numberFormat = NumberFormat.getNumberInstance(locale);
@@ -661,10 +610,10 @@ public class NumberAxis extends ValueAxis implements Cloneable, Serializable {
      * @return The maximum height.
      */
     protected double estimateMaximumTickLabelHeight(Graphics2D g2) {
-        RectangleInsets tickLabelInsets = getTickLabelInsets();
+        RectangleInsets tickLabelInsets = tickLabel.getTickLabelInsets();
         double result = tickLabelInsets.getTop() + tickLabelInsets.getBottom();
 
-        Font tickLabelFont = getTickLabelFont();
+        Font tickLabelFont = tickLabel.getTickLabelFont();
         FontRenderContext frc = g2.getFontRenderContext();
         result += tickLabelFont.getLineMetrics("123", frc).getHeight();
         return result;
@@ -685,18 +634,18 @@ public class NumberAxis extends ValueAxis implements Cloneable, Serializable {
     protected double estimateMaximumTickLabelWidth(Graphics2D g2,
                                                    TickUnit unit) {
 
-        RectangleInsets tickLabelInsets = getTickLabelInsets();
+        RectangleInsets tickLabelInsets = tickLabel.getTickLabelInsets();
         double result = tickLabelInsets.getLeft() + tickLabelInsets.getRight();
 
         if (isVerticalTickLabels()) {
             // all tick labels have the same width (equal to the height of the
             // font)...
             FontRenderContext frc = g2.getFontRenderContext();
-            LineMetrics lm = getTickLabelFont().getLineMetrics("0", frc);
+            LineMetrics lm = tickLabel.getTickLabelFont().getLineMetrics("0", frc);
             result += lm.getHeight();
         } else {
             // look at lower and upper bounds...
-            FontMetrics fm = g2.getFontMetrics(getTickLabelFont());
+            FontMetrics fm = g2.getFontMetrics(tickLabel.getTickLabelFont());
             Range range = getRange();
             double lower = range.getLowerBound();
             double upper = range.getUpperBound();
@@ -860,7 +809,7 @@ public class NumberAxis extends ValueAxis implements Cloneable, Serializable {
 
         List result = new java.util.ArrayList();
 
-        Font tickLabelFont = getTickLabelFont();
+        Font tickLabelFont = tickLabel.getTickLabelFont();
         g2.setFont(tickLabelFont);
 
         if (isAutoTickUnitSelection()) {
@@ -951,7 +900,7 @@ public class NumberAxis extends ValueAxis implements Cloneable, Serializable {
         List result = new java.util.ArrayList();
         result.clear();
 
-        Font tickLabelFont = getTickLabelFont();
+        Font tickLabelFont = tickLabel.getTickLabelFont();
         g2.setFont(tickLabelFont);
         if (isAutoTickUnitSelection()) {
             selectAutoTickUnit(g2, dataArea, edge);
@@ -1077,6 +1026,9 @@ public class NumberAxis extends ValueAxis implements Cloneable, Serializable {
             return false;
         }
         if (!this.rangeType.equals(that.rangeType)) {
+            return false;
+        }
+        if (!arrow.equals(that.arrow)) {
             return false;
         }
         return super.equals(obj);

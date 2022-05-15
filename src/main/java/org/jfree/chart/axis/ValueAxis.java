@@ -1120,32 +1120,6 @@ public abstract class ValueAxis extends Axis
     }
 
     /**
-     * Returns the source for obtaining standard tick units for the axis.
-     *
-     * @return The source (possibly {@code null}).
-     * @see #setStandardTickUnits(TickUnitSource)
-     */
-    public TickUnitSource getStandardTickUnits() {
-        return this.standardTickUnits;
-    }
-
-    /**
-     * Sets the source for obtaining standard tick units for the axis and sends
-     * an {@link AxisChangeEvent} to all registered listeners.  The axis will
-     * try to select the smallest tick unit from the source that does not cause
-     * the tick labels to overlap (see also the
-     * {@link #setAutoTickUnitSelection(boolean)} method.
-     *
-     * @param source the source for standard tick units ({@code null}
-     *               permitted).
-     * @see #getStandardTickUnits()
-     */
-    public void setStandardTickUnits(TickUnitSource source) {
-        this.standardTickUnits = source;
-        fireChangeEvent();
-    }
-
-    /**
      * Returns the number of minor tick marks to display.
      *
      * @return The number of minor tick marks to display.
@@ -1404,10 +1378,8 @@ public abstract class ValueAxis extends Axis
     public void apply(StandardChartTheme theme) {
         setLabelFont(theme.getLargeFont());
         setLabelPaint(theme.getAxisLabelPaint());
-        setTickLabelFont(theme.getRegularFont());
-        setTickLabelPaint(theme.getTickLabelPaint());
-        if (this instanceof SymbolAxis) this.apply(theme);
-        if (this instanceof PeriodAxis) this.apply(theme);
+        tickLabel.setTickLabelFont(theme.getRegularFont());
+        tickLabel.setTickLabelPaint(theme.getTickLabelPaint());
     }
 
 }

@@ -176,8 +176,7 @@ public class SubCategoryAxis extends CategoryAxis implements Cloneable, Serializ
 
         // draw the category labels and axis label
         AxisState state = new AxisState(cursor);
-        state = drawSubCategoryLabels(g2, plotArea, dataArea, edge, state, 
-                plotState);
+        state = drawSubCategoryLabels(g2, dataArea, edge, state);
         state = drawCategoryLabels(g2, plotArea, dataArea, edge, state,
                 plotState);
         if (getAttributedLabel() != null) {

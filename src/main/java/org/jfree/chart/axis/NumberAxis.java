@@ -141,7 +141,6 @@ public class NumberAxis extends ValueAxis implements Cloneable, Serializable {
         this.autoRangeStickyZero = DEFAULT_AUTO_RANGE_STICKY_ZERO;
         this.tickUnit = DEFAULT_TICK_UNIT;
         this.numberFormatOverride = null;
-        this.markerBand = null;
     }
 
     /**

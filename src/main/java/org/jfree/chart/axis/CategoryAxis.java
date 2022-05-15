@@ -1182,8 +1182,8 @@ public class CategoryAxis extends Axis implements Cloneable, Serializable {
     public void apply(StandardChartTheme theme) {
         setLabelFont(theme.getLargeFont());
         setLabelPaint(theme.getAxisLabelPaint());
-        setTickLabelFont(theme.getRegularFont());
-        setTickLabelPaint(theme.getTickLabelPaint());
+        tickLabel.setTickLabelFont(theme.getRegularFont());
+        tickLabel.setTickLabelPaint(theme.getTickLabelPaint());
         if (this instanceof SubCategoryAxis) {
             SubCategoryAxis sca = (SubCategoryAxis) this;
             sca.getSubHelper().setSubLabelFont(theme.getRegularFont());

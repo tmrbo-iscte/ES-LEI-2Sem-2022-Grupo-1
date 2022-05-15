@@ -56,6 +56,7 @@ import java.util.Objects;
 
 import org.jfree.chart.ChartRenderingInfo;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.StandardChartTheme;
 import org.jfree.chart.legend.LegendItem;
 import org.jfree.chart.legend.LegendItemCollection;
 import org.jfree.chart.event.PlotChangeEvent;
@@ -630,6 +631,11 @@ public class MultiplePiePlot extends Plot implements Cloneable, Serializable {
         this.aggregatedItemsPaint = SerialUtils.readPaint(stream);
         this.legendItemShape = SerialUtils.readShape(stream);
         this.sectionPaints = new HashMap();
+    }
+
+    @Override
+    public void apply(StandardChartTheme theme) {
+
     }
 
 }

@@ -21,7 +21,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- * [Oracle and Java are registered trademarks of Oracle and/or its affiliates. 
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates.
  * Other names may be trademarks of their respective owners.]
  *
  * ---------------
@@ -153,7 +153,7 @@ public class PeriodAxis extends ValueAxis
      * @param locale  the locale ({@code null} not permitted).
      */
     public PeriodAxis(String label, RegularTimePeriod first,
-            RegularTimePeriod last, TimeZone timeZone, Locale locale) {
+                      RegularTimePeriod last, TimeZone timeZone, Locale locale) {
         super(label, null);
         Args.nullNotPermitted(timeZone, "timeZone");
         Args.nullNotPermitted(locale, "locale");
@@ -327,8 +327,8 @@ public class PeriodAxis extends ValueAxis
      *                notified.
      */
     @Override
-    public void setRange(Range range, boolean turnOffAutoRange, 
-            boolean notify) {
+    public void setRange(Range range, boolean turnOffAutoRange,
+                         boolean notify) {
         long upper = Math.round(range.getUpperBound());
         long lower = Math.round(range.getLowerBound());
         this.first = createInstance(this.autoRangeTimePeriodClass,
@@ -336,7 +336,7 @@ public class PeriodAxis extends ValueAxis
         this.last = createInstance(this.autoRangeTimePeriodClass,
                 new Date(upper), this.timeZone, this.locale);
         super.setRange(new Range(this.first.getFirstMillisecond(),
-                this.last.getLastMillisecond() + 1.0), turnOffAutoRange,
+                        this.last.getLastMillisecond() + 1.0), turnOffAutoRange,
                 notify);
     }
 
@@ -365,8 +365,8 @@ public class PeriodAxis extends ValueAxis
      *         space).
      */
     @Override
-    public AxisSpace reserveSpace(Graphics2D g2, Plot plot, 
-            Rectangle2D plotArea, RectangleEdge edge, AxisSpace space) {
+    public AxisSpace reserveSpace(Graphics2D g2, Plot plot,
+                                  Rectangle2D plotArea, RectangleEdge edge, AxisSpace space) {
         // create a new space object if one wasn't supplied...
         if (space == null) {
             space = new AxisSpace();
@@ -391,7 +391,7 @@ public class PeriodAxis extends ValueAxis
         for (PeriodAxisLabelInfo info : this.labelInfo) {
             FontMetrics fm = g2.getFontMetrics(info.getLabelFont());
             tickLabelBandsDimension
-                += info.getPadding().extendHeight(fm.getHeight());
+                    += info.getPadding().extendHeight(fm.getHeight());
         }
 
         if (RectangleEdge.isTopOrBottom(edge)) {
@@ -432,8 +432,8 @@ public class PeriodAxis extends ValueAxis
      */
     @Override
     public AxisState draw(Graphics2D g2, double cursor, Rectangle2D plotArea,
-            Rectangle2D dataArea, RectangleEdge edge,
-            PlotRenderingInfo plotState) {
+                          Rectangle2D dataArea, RectangleEdge edge,
+                          PlotRenderingInfo plotState) {
 
         // if the axis is not visible, don't draw it... bug#198
         if (!isVisible()) {
@@ -464,7 +464,7 @@ public class PeriodAxis extends ValueAxis
         } else {
             axisState = drawLabel(getLabel(), g2, dataArea, edge,
                     axisState);
-        } 
+        }
         return axisState;
 
     }
@@ -477,8 +477,8 @@ public class PeriodAxis extends ValueAxis
      * @param dataArea  the data area.
      * @param edge  the edge.
      */
-    protected void drawTickMarks(Graphics2D g2, AxisState state, 
-            Rectangle2D dataArea, RectangleEdge edge) {
+    protected void drawTickMarks(Graphics2D g2, AxisState state,
+                                 Rectangle2D dataArea, RectangleEdge edge) {
         if (RectangleEdge.isTopOrBottom(edge)) {
             drawTickMarksHorizontal(g2, state, dataArea, edge);
         }
@@ -497,7 +497,7 @@ public class PeriodAxis extends ValueAxis
      * @param edge  the edge.
      */
     protected void drawTickMarksHorizontal(Graphics2D g2, AxisState state,
-            Rectangle2D dataArea, RectangleEdge edge) {
+                                           Rectangle2D dataArea, RectangleEdge edge) {
         List ticks = new ArrayList();
         double x0;
         double y0 = state.getCursor();
@@ -600,7 +600,7 @@ public class PeriodAxis extends ValueAxis
      * @return The updated axis state.
      */
     protected AxisState drawTickLabels(int band, Graphics2D g2, AxisState state,
-            Rectangle2D dataArea, RectangleEdge edge) {
+                                       Rectangle2D dataArea, RectangleEdge edge) {
 
         // work out the initial gap
         double delta1 = 0.0;
@@ -642,7 +642,7 @@ public class PeriodAxis extends ValueAxis
             ww = ww - axisMin;
         }
         long length = p1.getLastMillisecond()
-                      - p1.getFirstMillisecond();
+                - p1.getFirstMillisecond();
         int periods = (int) (ww / length) + 1;
 
         RegularTimePeriod p = this.labelInfo[band].createInstance(
@@ -745,7 +745,7 @@ public class PeriodAxis extends ValueAxis
      */
     @Override
     public List refreshTicks(Graphics2D g2, AxisState state,
-            Rectangle2D dataArea, RectangleEdge edge) {
+                             Rectangle2D dataArea, RectangleEdge edge) {
         return Collections.EMPTY_LIST;
     }
 
@@ -763,7 +763,7 @@ public class PeriodAxis extends ValueAxis
      */
     @Override
     public double valueToJava2D(double value, Rectangle2D area,
-            RectangleEdge edge) {
+                                RectangleEdge edge) {
 
         double result = Double.NaN;
         double axisMin = this.first.getFirstMillisecond();
@@ -773,11 +773,11 @@ public class PeriodAxis extends ValueAxis
             double maxX = area.getMaxX();
             if (isInverted()) {
                 result = maxX + ((value - axisMin) / (axisMax - axisMin))
-                         * (minX - maxX);
+                        * (minX - maxX);
             }
             else {
                 result = minX + ((value - axisMin) / (axisMax - axisMin))
-                         * (maxX - minX);
+                        * (maxX - minX);
             }
         }
         else if (RectangleEdge.isLeftOrRight(edge)) {
@@ -808,7 +808,7 @@ public class PeriodAxis extends ValueAxis
      */
     @Override
     public double java2DToValue(double java2DValue, Rectangle2D area,
-            RectangleEdge edge) {
+                                RectangleEdge edge) {
 
         double result;
         double min = 0.0;
@@ -947,8 +947,8 @@ public class PeriodAxis extends ValueAxis
      *
      * @return The time period.
      */
-    private RegularTimePeriod createInstance(Class periodClass, 
-            Date millisecond, TimeZone zone, Locale locale) {
+    private RegularTimePeriod createInstance(Class periodClass,
+                                             Date millisecond, TimeZone zone, Locale locale) {
         RegularTimePeriod result = null;
         try {
             Constructor c = periodClass.getDeclaredConstructor(new Class[] {
@@ -968,5 +968,4 @@ public class PeriodAxis extends ValueAxis
         }
         return result;
     }
-
 }

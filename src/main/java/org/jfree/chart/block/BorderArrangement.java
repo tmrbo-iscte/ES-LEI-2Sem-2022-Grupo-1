@@ -177,24 +177,24 @@ public class BorderArrangement implements Arrangement, Serializable {
         double[] h = new double[5];
         if (this.topBlock != null) {
             Size2D size = this.topBlock.arrange(g2, RectangleConstraint.NONE);
-            w[0] = size.width;
-            h[0] = size.height;
+            w[0] = size.getWidth();
+            h[0] = size.getHeight();
         }
         if (this.bottomBlock != null) {
             Size2D size = this.bottomBlock.arrange(g2,
                     RectangleConstraint.NONE);
-            w[1] = size.width;
-            h[1] = size.height;
+            w[1] = size.getWidth();
+            h[1] = size.getHeight();
         }
         if (this.leftBlock != null) {
             Size2D size = this.leftBlock.arrange(g2, RectangleConstraint.NONE);
-            w[2] = size.width;
-            h[2] = size.height;
+            w[2] = size.getWidth();
+            h[2] = size.getHeight();
        }
         if (this.rightBlock != null) {
             Size2D size = this.rightBlock.arrange(g2, RectangleConstraint.NONE);
-            w[3] = size.width;
-            h[3] = size.height;
+            w[3] = size.getWidth();
+            h[3] = size.getHeight();
         }
 
         h[2] = Math.max(h[2], h[3]);
@@ -203,8 +203,8 @@ public class BorderArrangement implements Arrangement, Serializable {
         if (this.centerBlock != null) {
             Size2D size = this.centerBlock.arrange(g2,
                     RectangleConstraint.NONE);
-            w[4] = size.width;
-            h[4] = size.height;
+            w[4] = size.getWidth();
+            h[4] = size.getHeight();
         }
         double width = Math.max(w[0], Math.max(w[1], w[2] + w[4] + w[3]));
         double centerHeight = Math.max(h[2], Math.max(h[3], h[4]));
@@ -274,21 +274,21 @@ public class BorderArrangement implements Arrangement, Serializable {
                 LengthConstraintType.NONE);
         if (this.topBlock != null) {
             Size2D size = this.topBlock.arrange(g2, c1);
-            w[0] = size.width;
-            h[0] = size.height;
+            w[0] = size.getWidth();
+            h[0] = size.getHeight();
         }
         if (this.bottomBlock != null) {
             Size2D size = this.bottomBlock.arrange(g2, c1);
-            w[1] = size.width;
-            h[1] = size.height;
+            w[1] = size.getWidth();
+            h[1] = size.getHeight();
         }
         RectangleConstraint c2 = new RectangleConstraint(0.0,
                 new Range(0.0, width), LengthConstraintType.RANGE,
                 0.0, null, LengthConstraintType.NONE);
         if (this.leftBlock != null) {
             Size2D size = this.leftBlock.arrange(g2, c2);
-            w[2] = size.width;
-            h[2] = size.height;
+            w[2] = size.getWidth();
+            h[2] = size.getHeight();
         }
         if (this.rightBlock != null) {
             double maxW = Math.max(width - w[2], 0.0);
@@ -297,8 +297,8 @@ public class BorderArrangement implements Arrangement, Serializable {
                     LengthConstraintType.RANGE, 0.0, null,
                     LengthConstraintType.NONE);
             Size2D size = this.rightBlock.arrange(g2, c3);
-            w[3] = size.width;
-            h[3] = size.height;
+            w[3] = size.getWidth();
+            h[3] = size.getHeight();
         }
 
         h[2] = Math.max(h[2], h[3]);
@@ -309,8 +309,8 @@ public class BorderArrangement implements Arrangement, Serializable {
                     - w[3], null, LengthConstraintType.FIXED, 0.0, null,
                     LengthConstraintType.NONE);
             Size2D size = this.centerBlock.arrange(g2, c4);
-            w[4] = size.width;
-            h[4] = size.height;
+            w[4] = size.getWidth();
+            h[4] = size.getHeight();
         }
         double height = h[0] + h[1] + Math.max(h[2], Math.max(h[3], h[4]));
         return arrange(container, g2, new RectangleConstraint(width, height));
@@ -336,32 +336,32 @@ public class BorderArrangement implements Arrangement, Serializable {
             RectangleConstraint c1 = new RectangleConstraint(widthRange,
                     heightRange);
             Size2D size = this.topBlock.arrange(g2, c1);
-            w[0] = size.width;
-            h[0] = size.height;
+            w[0] = size.getWidth();
+            h[0] = size.getHeight();
         }
         if (this.bottomBlock != null) {
             Range heightRange2 = Range.shift(heightRange, -h[0], false);
             RectangleConstraint c2 = new RectangleConstraint(widthRange,
                     heightRange2);
             Size2D size = this.bottomBlock.arrange(g2, c2);
-            w[1] = size.width;
-            h[1] = size.height;
+            w[1] = size.getWidth();
+            h[1] = size.getHeight();
         }
         Range heightRange3 = Range.shift(heightRange, -(h[0] + h[1]));
         if (this.leftBlock != null) {
             RectangleConstraint c3 = new RectangleConstraint(widthRange,
                     heightRange3);
             Size2D size = this.leftBlock.arrange(g2, c3);
-            w[2] = size.width;
-            h[2] = size.height;
+            w[2] = size.getWidth();
+            h[2] = size.getHeight();
         }
         Range widthRange2 = Range.shift(widthRange, -w[2], false);
         if (this.rightBlock != null) {
             RectangleConstraint c4 = new RectangleConstraint(widthRange2,
                     heightRange3);
             Size2D size = this.rightBlock.arrange(g2, c4);
-            w[3] = size.width;
-            h[3] = size.height;
+            w[3] = size.getWidth();
+            h[3] = size.getHeight();
         }
 
         h[2] = Math.max(h[2], h[3]);
@@ -371,8 +371,8 @@ public class BorderArrangement implements Arrangement, Serializable {
             RectangleConstraint c5 = new RectangleConstraint(widthRange3,
                     heightRange3);
             Size2D size = this.centerBlock.arrange(g2, c5);
-            w[4] = size.width;
-            h[4] = size.height;
+            w[4] = size.getWidth();
+            h[4] = size.getHeight();
         }
         double width = Math.max(w[0], Math.max(w[1], w[2] + w[4] + w[3]));
         double height = h[0] + h[1] + Math.max(h[2], Math.max(h[3], h[4]));
@@ -420,7 +420,7 @@ public class BorderArrangement implements Arrangement, Serializable {
                     new Range(0.0, constraint.getHeight()),
                     LengthConstraintType.RANGE);
             Size2D size = this.topBlock.arrange(g2, c1);
-            h[0] = size.height;
+            h[0] = size.getHeight();
         }
         w[1] = w[0];
         if (this.bottomBlock != null) {
@@ -428,7 +428,7 @@ public class BorderArrangement implements Arrangement, Serializable {
                     LengthConstraintType.FIXED, 0.0, new Range(0.0,
                     constraint.getHeight() - h[0]), LengthConstraintType.RANGE);
             Size2D size = this.bottomBlock.arrange(g2, c2);
-            h[1] = size.height;
+            h[1] = size.getHeight();
         }
         h[2] = constraint.getHeight() - h[1] - h[0];
         if (this.leftBlock != null) {
@@ -437,7 +437,7 @@ public class BorderArrangement implements Arrangement, Serializable {
                     LengthConstraintType.RANGE, h[2], null,
                     LengthConstraintType.FIXED);
             Size2D size = this.leftBlock.arrange(g2, c3);
-            w[2] = size.width;
+            w[2] = size.getWidth();
         }
         h[3] = h[2];
         if (this.rightBlock != null) {
@@ -446,7 +446,7 @@ public class BorderArrangement implements Arrangement, Serializable {
                     LengthConstraintType.RANGE, h[2], null,
                     LengthConstraintType.FIXED);
             Size2D size = this.rightBlock.arrange(g2, c4);
-            w[3] = size.width;
+            w[3] = size.getWidth();
         }
         h[4] = h[2];
         w[4] = constraint.getWidth() - w[3] - w[2];

@@ -3056,4 +3056,13 @@ public abstract class AbstractRenderer implements ChartElement, Cloneable, Seria
         this.listenerList = new EventListenerList();
     }
 
+    /**
+     * REFACTOR - USADO PARA CORRIGIR FEATURE ENVY DE org.jfree.chart.StandardChartTheme.applyToAbstractRenderer
+     * @author Afonso Caniço, Gustavo Ferreira
+     */
+    public void apply() {
+        if (getAutoPopulateSeriesPaint()) clearSeriesPaints(false);
+        if (getAutoPopulateSeriesStroke()) clearSeriesStrokes(false);
+    }
+
 }

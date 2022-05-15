@@ -43,10 +43,10 @@ public class Size2D implements Cloneable, PublicCloneable, Serializable {
     private static final long serialVersionUID = 2558191683786418168L;
     
     /** The width. */
-    public double width;
+    private double width;
 
     /** The height. */
-    public double height;
+    private double height;
 
     /**
      * Creates a new instance with zero width and height.

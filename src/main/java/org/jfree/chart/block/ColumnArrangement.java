@@ -202,37 +202,37 @@ public class ColumnArrangement implements Arrangement, Serializable {
         List<Block> itemsInColumn = new ArrayList<>();
         for (Block block : blocks) {
             Size2D size = block.arrange(g2, RectangleConstraint.NONE);
-            if (y + size.height <= height) {
+            if (y + size.getHeight() <= height) {
                 itemsInColumn.add(block);
                 block.setBounds(
-                    new Rectangle2D.Double(x, y, size.width, size.height)
+                    new Rectangle2D.Double(x, y, size.getWidth(), size.getHeight())
                 );
-                y = y + size.height + this.verticalGap;
-                maxWidth = Math.max(maxWidth, size.width);
+                y = y + size.getHeight() + this.verticalGap;
+                maxWidth = Math.max(maxWidth, size.getWidth());
             }
             else {
                 if (itemsInColumn.isEmpty()) {
                     // place in this column (truncated) anyway
                     block.setBounds(
                         new Rectangle2D.Double(
-                            x, y, size.width, Math.min(size.height, height - y)
+                            x, y, size.getWidth(), Math.min(size.getHeight(), height - y)
                         )
                     );
                     y = 0.0;
-                    x = x + size.width + this.horizontalGap;
+                    x = x + size.getWidth() + this.horizontalGap;
                 }
                 else {
                     // start new column
                     itemsInColumn.clear();
                     x = x + maxWidth + this.horizontalGap;
                     y = 0.0;
-                    maxWidth = size.width;
+                    maxWidth = size.getWidth();
                     block.setBounds(
                         new Rectangle2D.Double(
-                            x, y, size.width, Math.min(size.height, height)
+                            x, y, size.getWidth(), Math.min(size.getHeight(), height)
                         )
                     );
-                    y = size.height + this.verticalGap;
+                    y = size.getHeight() + this.verticalGap;
                     itemsInColumn.add(block);
                 }
             }
@@ -256,7 +256,7 @@ public class ColumnArrangement implements Arrangement, Serializable {
         // first arrange without constraints, and see if this fits within
         // the required ranges...
         Size2D s1 = arrangeNN(container, g2);
-        if (constraint.getHeightRange().contains(s1.height)) {
+        if (constraint.getHeightRange().contains(s1.getHeight())) {
             return s1;  // TODO: we didn't check the width yet
         }
         else {
@@ -281,7 +281,7 @@ public class ColumnArrangement implements Arrangement, Serializable {
                                RectangleConstraint constraint) {
 
         Size2D s = arrangeNF(container, g2, constraint);
-        if (constraint.getWidthRange().contains(s.width)) {
+        if (constraint.getWidthRange().contains(s.getWidth())) {
             return s;
         }
         else {
@@ -313,13 +313,13 @@ public class ColumnArrangement implements Arrangement, Serializable {
                 Block block = blocks.get(i);
                 sizes[i] = block.arrange(g2, RectangleConstraint.NONE);
                 height = height + sizes[i].getHeight();
-                maxWidth = Math.max(sizes[i].width, maxWidth);
+                maxWidth = Math.max(sizes[i].getWidth(), maxWidth);
                 block.setBounds(
                     new Rectangle2D.Double(
-                        0.0, y, sizes[i].width, sizes[i].height
+                        0.0, y, sizes[i].getWidth(), sizes[i].getHeight()
                     )
                 );
-                y = y + sizes[i].height + this.verticalGap;
+                y = y + sizes[i].getHeight() + this.verticalGap;
             }
             if (blockCount > 1) {
                 height = height + this.verticalGap * (blockCount - 1);

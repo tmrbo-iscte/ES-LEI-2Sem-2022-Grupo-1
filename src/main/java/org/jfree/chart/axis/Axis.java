@@ -63,6 +63,7 @@ import javax.swing.event.EventListenerList;
 import org.jfree.chart.ChartElement;
 import org.jfree.chart.ChartElementVisitor;
 
+import org.jfree.chart.StandardChartTheme;
 import org.jfree.chart.entity.AxisEntity;
 import org.jfree.chart.entity.EntityCollection;
 import org.jfree.chart.event.AxisChangeEvent;
@@ -1184,4 +1185,9 @@ public abstract class Axis implements ChartElement, Cloneable, Serializable {
         this.axisLinePaint = SerialUtils.readPaint(stream);
     }
 
+    /**
+     * REFACTOR - USADO PARA SIMPLIFICAR VÁRIOS FEATURE ENVIES EM org.jfree.chart.StandardChartTheme
+     * @author Afonso Caniço, Gustavo Ferreira
+     */
+    public abstract void apply(StandardChartTheme theme);
 }

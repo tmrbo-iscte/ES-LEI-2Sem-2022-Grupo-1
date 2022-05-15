@@ -523,7 +523,7 @@ public class SymbolAxis extends NumberAxis implements Serializable {
     public void drawGridBandsVertical(Graphics2D g2,
                                       Rectangle2D dataArea, boolean firstGridBandIsDark,
                                       List ticks, GridBand gridBand) {
-
+      
         boolean currentGridBandIsDark = firstGridBandIsDark;
         double xx = dataArea.getX();
         double yy1, yy2;

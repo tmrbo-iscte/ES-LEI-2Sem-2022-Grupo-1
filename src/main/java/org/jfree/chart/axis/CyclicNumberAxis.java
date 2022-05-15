@@ -36,13 +36,15 @@
 
 package org.jfree.chart.axis;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics2D;
-import java.awt.Paint;
-import java.awt.Stroke;
+import org.jfree.chart.api.RectangleEdge;
+import org.jfree.chart.internal.SerialUtils;
+import org.jfree.chart.plot.Plot;
+import org.jfree.chart.plot.PlotRenderingInfo;
+import org.jfree.chart.text.TextAnchor;
+import org.jfree.chart.text.TextUtils;
+import org.jfree.data.Range;
+
+import java.awt.*;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
@@ -50,17 +52,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.text.NumberFormat;
 import java.util.List;
-import java.util.Objects;
-
-import org.jfree.chart.plot.Plot;
-import org.jfree.chart.plot.PlotRenderingInfo;
-import org.jfree.chart.text.TextUtils;
-import org.jfree.chart.api.RectangleEdge;
-import org.jfree.chart.text.TextAnchor;
-import org.jfree.chart.internal.PaintUtils;
-import org.jfree.chart.internal.Args;
-import org.jfree.chart.internal.SerialUtils;
-import org.jfree.data.Range;
 /**
 This class extends NumberAxis and handles cycling.
 
@@ -115,12 +106,6 @@ public class CyclicNumberAxis extends NumberAxis {
     /** For serialization. */
     static final long serialVersionUID = -7514160997164582554L;
 
-    /** The default axis line stroke. */
-    public static Stroke DEFAULT_ADVANCE_LINE_STROKE = new BasicStroke(1.0f);
-
-    /** The default axis line paint. */
-    public static final Paint DEFAULT_ADVANCE_LINE_PAINT = Color.GRAY;
-
     /** The offset. */
     protected double offset;
 
@@ -130,16 +115,10 @@ public class CyclicNumberAxis extends NumberAxis {
     /** ??. */
     protected boolean boundMappedToLastCycle;
 
-    /** A flag that controls whether or not the advance line is visible. */
-    protected boolean advanceLineVisible;
-
-    /** The advance line stroke. */
-    protected transient Stroke advanceLineStroke = DEFAULT_ADVANCE_LINE_STROKE;
-
-    /** The advance line paint. */
-    protected transient Paint advanceLinePaint;
+    protected transient CyclicNumberAxisAdvanceLine advanceLine = new CyclicNumberAxisAdvanceLine(true);
 
     private transient boolean internalMarkerWhenTicksOverlap;
+
     private transient Tick internalMarkerCycleBoundTick;
 
     /**
@@ -183,69 +162,10 @@ public class CyclicNumberAxis extends NumberAxis {
         this.period = period;
         this.offset = offset;
         setFixedAutoRange(period);
-        this.advanceLineVisible = true;
-        this.advanceLinePaint = DEFAULT_ADVANCE_LINE_PAINT;
     }
 
-    /**
-     * The advance line is the line drawn at the limit of the current cycle,
-     * when erasing the previous cycle.
-     *
-     * @return A boolean.
-     */
-    public boolean isAdvanceLineVisible() {
-        return this.advanceLineVisible;
-    }
-
-    /**
-     * The advance line is the line drawn at the limit of the current cycle,
-     * when erasing the previous cycle.
-     *
-     * @param visible  the flag.
-     */
-    public void setAdvanceLineVisible(boolean visible) {
-        this.advanceLineVisible = visible;
-    }
-
-    /**
-     * The advance line is the line drawn at the limit of the current cycle,
-     * when erasing the previous cycle.
-     *
-     * @return The paint (never {@code null}).
-     */
-    public Paint getAdvanceLinePaint() {
-        return this.advanceLinePaint;
-    }
-
-    /**
-     * The advance line is the line drawn at the limit of the current cycle,
-     * when erasing the previous cycle.
-     *
-     * @param paint  the paint ({@code null} not permitted).
-     */
-    public void setAdvanceLinePaint(Paint paint) {
-        Args.nullNotPermitted(paint, "paint");
-        this.advanceLinePaint = paint;
-    }
-
-    /**
-     * The advance line is the line drawn at the limit of the current cycle,
-     * when erasing the previous cycle.
-     *
-     * @return The stroke (never {@code null}).
-     */
-    public Stroke getAdvanceLineStroke() {
-        return this.advanceLineStroke;
-    }
-    /**
-     * The advance line is the line drawn at the limit of the current cycle,
-     * when erasing the previous cycle.
-     *
-     * @param stroke  the stroke ({@code null} not permitted).
-     */
-    public void setAdvanceLineStroke(Stroke stroke) {
-        Args.nullNotPermitted(stroke, "stroke");
-        this.advanceLineStroke = stroke;
+    public CyclicNumberAxisAdvanceLine getAdvanceLine() {
+        return this.advanceLine;
     }
 
     /**
@@ -403,7 +323,7 @@ public class CyclicNumberAxis extends NumberAxis {
 
         List result = new java.util.ArrayList();
 
-        Font tickLabelFont = getTickLabelFont();
+        Font tickLabelFont = tickLabel.getTickLabelFont();
         g2.setFont(tickLabelFont);
 
         if (isAutoTickUnitSelection()) {
@@ -553,7 +473,7 @@ public class CyclicNumberAxis extends NumberAxis {
         List result = new java.util.ArrayList();
         result.clear();
 
-        Font tickLabelFont = getTickLabelFont();
+        Font tickLabelFont = tickLabel.getTickLabelFont();
         g2.setFont(tickLabelFont);
         if (isAutoTickUnitSelection()) {
             selectAutoTickUnit(g2, dataArea, edge);
@@ -813,16 +733,6 @@ public class CyclicNumberAxis extends NumberAxis {
     }
 
     /**
-     * Centers the range about the given value.
-     *
-     * @param value  the data value.
-     */
-    @Override
-    public void centerRange(double value) {
-        setRange(value - this.period / 2.0, value + this.period / 2.0);
-    }
-
-    /**
      * This function is nearly useless since the auto range is fixed for this
      * class to the period.  The period is extended if necessary to fit the
      * minimum size.
@@ -998,7 +908,7 @@ public class CyclicNumberAxis extends NumberAxis {
         }
         double ol = getOL(g2);
         double il = 0;
-        if (isTickMarksVisible()) {
+        if (tickMarks.isTickMarksVisible()) {
             float xx = (float) valueToJava2D(getRange().getUpperBound(),
                     dataArea, edge);
             drawMark(g2, edge, cursor, ol, xx, il);
@@ -1048,7 +958,7 @@ public class CyclicNumberAxis extends NumberAxis {
     public AxisState draw(Graphics2D g2, double cursor, Rectangle2D plotArea,
             Rectangle2D dataArea, RectangleEdge edge, PlotRenderingInfo plotState) {
 
-        AxisState ret = super.draw(g2, cursor, plotArea, dataArea, edge, 
+        AxisState ret = super.draw(g2, cursor, plotArea, dataArea, edge,
                 plotState);
         if (isAdvanceLineVisible()) {
             drawHelper(dataArea, edge, g2, cursor);
@@ -1114,8 +1024,8 @@ public class CyclicNumberAxis extends NumberAxis {
      */
     private void writeObject(ObjectOutputStream stream) throws IOException {
         stream.defaultWriteObject();
-        SerialUtils.writePaint(this.advanceLinePaint, stream);
-        SerialUtils.writeStroke(this.advanceLineStroke, stream);
+        SerialUtils.writePaint(advanceLine.getPaint(), stream);
+        SerialUtils.writeStroke(advanceLine.getStroke(), stream);
     }
 
     /**
@@ -1126,11 +1036,11 @@ public class CyclicNumberAxis extends NumberAxis {
      * @throws IOException  if there is an I/O error.
      * @throws ClassNotFoundException  if there is a classpath problem.
      */
-    private void readObject(ObjectInputStream stream)
-            throws IOException, ClassNotFoundException {
+    private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
         stream.defaultReadObject();
-        this.advanceLinePaint = SerialUtils.readPaint(stream);
-        this.advanceLineStroke = SerialUtils.readStroke(stream);
+        this.advanceLine = new CyclicNumberAxisAdvanceLine(true);
+        this.advanceLine.setPaint(SerialUtils.readPaint(stream));
+        this.advanceLine.setStroke(SerialUtils.readStroke(stream));
     }
 
 
@@ -1159,19 +1069,9 @@ public class CyclicNumberAxis extends NumberAxis {
         if (this.offset != that.offset) {
             return false;
         }
-        if (!PaintUtils.equal(this.advanceLinePaint,
-                that.advanceLinePaint)) {
+        if (!this.advanceLine.equals(that.advanceLine)) {
             return false;
         }
-        if (!Objects.equals(this.advanceLineStroke, that.advanceLineStroke)) {
-            return false;
-        }
-        if (this.advanceLineVisible != that.advanceLineVisible) {
-            return false;
-        }
-        if (this.boundMappedToLastCycle != that.boundMappedToLastCycle) {
-            return false;
-        }
-        return true;
+        return this.boundMappedToLastCycle == that.boundMappedToLastCycle;
     }
 }

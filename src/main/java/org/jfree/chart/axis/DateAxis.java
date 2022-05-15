@@ -306,7 +306,7 @@ public class DateAxis extends ValueAxis implements Cloneable, Serializable {
     public void setTimeZone(TimeZone zone) {
         Args.nullNotPermitted(zone, "zone");
         this.timeZone = zone;
-        setStandardTickUnits(createStandardDateTickUnits(zone, this.locale));
+        this.setStandardTickUnits(createStandardDateTickUnits(zone, this.locale));
         fireChangeEvent();
     }
     
@@ -328,7 +328,7 @@ public class DateAxis extends ValueAxis implements Cloneable, Serializable {
     public void setLocale(Locale locale) {
         Args.nullNotPermitted(locale, "locale");
         this.locale = locale;
-        setStandardTickUnits(createStandardDateTickUnits(this.timeZone, 
+        this.setStandardTickUnits(createStandardDateTickUnits(this.timeZone,
                 this.locale));
         fireChangeEvent();
     }
@@ -920,8 +920,7 @@ public class DateAxis extends ValueAxis implements Cloneable, Serializable {
             calendar.set(years, value, 1, 0, 0, 0);
             Month month = new Month(calendar.getTime(), this.timeZone,
                     this.locale);
-            Date standardDate = calculateDateForPosition(
-                    month, this.tickMarkPosition);
+            Date standardDate = tickMarkPosition.calculateDate(month);
             long millis = standardDate.getTime();
             if (millis >= date.getTime()) {
                 for (int i = 0; i < count; i++) {
@@ -930,8 +929,7 @@ public class DateAxis extends ValueAxis implements Cloneable, Serializable {
                 // need to peg the month in case the time zone isn't the
                 // default - see bug 2078057
                 month.peg(Calendar.getInstance(this.timeZone));
-                standardDate = calculateDateForPosition(
-                        month, this.tickMarkPosition);
+                standardDate = tickMarkPosition.calculateDate(month);
             }
             return standardDate;
         }
@@ -958,32 +956,6 @@ public class DateAxis extends ValueAxis implements Cloneable, Serializable {
             return d3;
         }
         return null;
-    }
-
-    /**
-     * Returns a {@link java.util.Date} corresponding to the specified position
-     * within a {@link RegularTimePeriod}.
-     *
-     * @param period  the period.
-     * @param position  the position ({@code null} not permitted).
-     *
-     * @return A date.
-     */
-    private Date calculateDateForPosition(RegularTimePeriod period,
-            DateTickMarkPosition position) {
-        Args.nullNotPermitted(period, "period");
-        Date result = null;
-        if (position == DateTickMarkPosition.START) {
-            result = new Date(period.getFirstMillisecond());
-        }
-        else if (position == DateTickMarkPosition.MIDDLE) {
-            result = new Date(period.getMiddleMillisecond());
-        }
-        else if (position == DateTickMarkPosition.END) {
-            result = new Date(period.getLastMillisecond());
-        }
-        return result;
-
     }
 
     /**
@@ -1344,10 +1316,10 @@ public class DateAxis extends ValueAxis implements Cloneable, Serializable {
     private double estimateMaximumTickLabelWidth(Graphics2D g2, 
             DateTickUnit unit) {
 
-        RectangleInsets tickLabelInsets = getTickLabelInsets();
+        RectangleInsets tickLabelInsets = tickLabel.getTickLabelInsets();
         double result = tickLabelInsets.getLeft() + tickLabelInsets.getRight();
 
-        Font tickLabelFont = getTickLabelFont();
+        Font tickLabelFont = tickLabel.getTickLabelFont();
         FontRenderContext frc = g2.getFontRenderContext();
         LineMetrics lm = tickLabelFont.getLineMetrics("ABCxyz", frc);
         if (isVerticalTickLabels()) {
@@ -1396,10 +1368,10 @@ public class DateAxis extends ValueAxis implements Cloneable, Serializable {
     private double estimateMaximumTickLabelHeight(Graphics2D g2,
             DateTickUnit unit) {
 
-        RectangleInsets tickLabelInsets = getTickLabelInsets();
+        RectangleInsets tickLabelInsets = tickLabel.getTickLabelInsets();
         double result = tickLabelInsets.getTop() + tickLabelInsets.getBottom();
 
-        Font tickLabelFont = getTickLabelFont();
+        Font tickLabelFont = tickLabel.getTickLabelFont();
         FontRenderContext frc = g2.getFontRenderContext();
         LineMetrics lm = tickLabelFont.getLineMetrics("ABCxyz", frc);
         if (!isVerticalTickLabels()) {
@@ -1467,17 +1439,12 @@ public class DateAxis extends ValueAxis implements Cloneable, Serializable {
      *
      * @return The adjusted time.
      */
-    private Date correctTickDateForPosition(Date time, DateTickUnit unit,
-            DateTickMarkPosition position) {
-        Date result = time;
-        if (unit.getUnitType().equals(DateTickUnitType.MONTH)) {
-            result = calculateDateForPosition(new Month(time, this.timeZone,
-                    this.locale), position);
-        } else if (unit.getUnitType().equals(DateTickUnitType.YEAR)) {
-            result = calculateDateForPosition(new Year(time, this.timeZone,
-                    this.locale), position);
+    private Date correctTickDateForPosition(Date time, DateTickUnit unit, DateTickMarkPosition position) {
+        switch (unit.getUnitType()) {
+            case MONTH: return position.calculateDate(new Month(time, this.timeZone, this.locale));
+            case YEAR: return position.calculateDate(new Year(time, this.timeZone, this.locale));
         }
-        return result;
+        return time;
     }
 
     /**
@@ -1494,7 +1461,7 @@ public class DateAxis extends ValueAxis implements Cloneable, Serializable {
 
         List<DateTick> result = new ArrayList<>();
 
-        Font tickLabelFont = getTickLabelFont();
+        Font tickLabelFont = tickLabel.getTickLabelFont();
         g2.setFont(tickLabelFont);
 
         if (isAutoTickUnitSelection()) {
@@ -1610,7 +1577,7 @@ public class DateAxis extends ValueAxis implements Cloneable, Serializable {
 
         List<DateTick> result = new ArrayList<>();
 
-        Font tickLabelFont = getTickLabelFont();
+        Font tickLabelFont = tickLabel.getTickLabelFont();
         g2.setFont(tickLabelFont);
 
         if (isAutoTickUnitSelection()) {
@@ -1747,11 +1714,11 @@ public class DateAxis extends ValueAxis implements Cloneable, Serializable {
         // draw the axis label (note that 'state' is passed in *and*
         // returned)...
         if (getAttributedLabel() != null) {
-            state = drawAttributedLabel(getAttributedLabel(), g2, plotArea, 
+            state = drawAttributedLabel(getAttributedLabel(), g2,
                     dataArea, edge, state);
             
         } else {
-            state = drawLabel(getLabel(), g2, plotArea, dataArea, edge, state);
+            state = drawLabel(getLabel(), g2, dataArea, edge, state);
         }
         createAndAddEntity(cursor, state, dataArea, edge, plotState);
         return state;

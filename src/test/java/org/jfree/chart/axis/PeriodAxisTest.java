@@ -123,9 +123,9 @@ public class PeriodAxisTest implements AxisChangeListener {
         a2.setMajorTickTimePeriodClass(Minute.class);
         assertEquals(a1, a2);
 
-        a1.setMinorTickMarksVisible(!a1.isMinorTickMarksVisible());
+        a1.tickMarks.setMinorTickMarksVisible(!a1.tickMarks.isMinorTickMarksVisible());
         assertNotEquals(a1, a2);
-        a2.setMinorTickMarksVisible(a1.isMinorTickMarksVisible());
+        a2.tickMarks.setMinorTickMarksVisible(a1.tickMarks.isMinorTickMarksVisible());
         assertEquals(a1, a2);
 
         a1.setMinorTickTimePeriodClass(Minute.class);
@@ -134,14 +134,14 @@ public class PeriodAxisTest implements AxisChangeListener {
         assertEquals(a1, a2);
 
         Stroke s = new BasicStroke(1.23f);
-        a1.setMinorTickMarkStroke(s);
+        a1.tickMarks.setMinorTickMarkStroke(s);
         assertNotEquals(a1, a2);
-        a2.setMinorTickMarkStroke(s);
+        a2.tickMarks.setMinorTickMarkStroke(s);
         assertEquals(a1, a2);
 
-        a1.setMinorTickMarkPaint(Color.BLUE);
+        a1.tickMarks.setMinorTickMarkPaint(Color.BLUE);
         assertNotEquals(a1, a2);
-        a2.setMinorTickMarkPaint(Color.BLUE);
+        a2.tickMarks.setMinorTickMarkPaint(Color.BLUE);
         assertEquals(a1, a2);
     }
 

@@ -55,11 +55,14 @@
 
 package org.jfree.chart.axis;
 
+import org.jfree.chart.event.AxisChangeEvent;
+
 import java.io.Serializable;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A collection of tick units, used by the {@link DateAxis} and
@@ -72,6 +75,7 @@ public class TickUnits implements TickUnitSource, Cloneable, Serializable {
 
     /** Storage for the tick units. */
     private List tickUnits;
+
 
     /**
      * Constructs a new collection of tick units.

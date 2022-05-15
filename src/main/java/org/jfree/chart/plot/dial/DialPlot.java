@@ -51,6 +51,7 @@ import java.util.Objects;
 import org.jfree.chart.ChartElementVisitor;
 
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.StandardChartTheme;
 import org.jfree.chart.event.PlotChangeEvent;
 import org.jfree.chart.plot.Plot;
 import org.jfree.chart.plot.PlotRenderingInfo;
@@ -817,6 +818,11 @@ public class DialPlot extends Plot implements DialLayerChangeListener {
     private void readObject(ObjectInputStream stream)
             throws IOException, ClassNotFoundException {
         stream.defaultReadObject();
+    }
+
+    @Override
+    public void apply(StandardChartTheme theme) {
+
     }
 
 }

@@ -102,7 +102,7 @@ public class YIntervalDataItemTest {
 
     /**
      * Some checks for the clone() met
-     * @throws java.lang.CloneNotSupportedExceptionhod.
+     * @throws java.lang.CloneNotSupportedException
      */
     @Test
     public void testCloning() throws CloneNotSupportedException {

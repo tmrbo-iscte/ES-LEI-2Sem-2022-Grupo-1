@@ -52,9 +52,11 @@ package org.jfree.chart.plot;
 
 import org.jfree.chart.ChartElementVisitor;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.StandardChartTheme;
 import org.jfree.chart.annotations.Annotation;
 import org.jfree.chart.annotations.XYAnnotation;
 import org.jfree.chart.annotations.XYAnnotationBoundsInfo;
+import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.api.Layer;
 import org.jfree.chart.api.PublicCloneable;
 import org.jfree.chart.api.RectangleEdge;
@@ -67,8 +69,10 @@ import org.jfree.chart.internal.PaintUtils;
 import org.jfree.chart.internal.SerialUtils;
 import org.jfree.chart.legend.LegendItem;
 import org.jfree.chart.legend.LegendItemCollection;
+import org.jfree.chart.renderer.AbstractRenderer;
 import org.jfree.chart.renderer.RendererUtils;
 import org.jfree.chart.renderer.xy.AbstractXYItemRenderer;
+import org.jfree.chart.renderer.xy.XYBarRenderer;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYItemRendererState;
 import org.jfree.chart.util.ShadowGenerator;
@@ -3560,12 +3564,12 @@ public class XYPlot<S extends Comparable<S>> extends Plot
             Paint gridPaint = null;
             for (ValueTick tick : ticks) {
                 boolean paintLine = false;
-                if ((tick.getTickType() == TickType.MINOR)
+                if (tick.isMinor()
                         && isDomainMinorGridlinesVisible()) {
                     gridStroke = getDomainMinorGridlineStroke();
                     gridPaint = getDomainMinorGridlinePaint();
                     paintLine = true;
-                } else if ((tick.getTickType() == TickType.MAJOR)
+                } else if (tick.isMajor()
                         && isDomainGridlinesVisible()) {
                     gridStroke = getDomainGridlineStroke();
                     gridPaint = getDomainGridlinePaint();
@@ -3607,12 +3611,12 @@ public class XYPlot<S extends Comparable<S>> extends Plot
             if (axis != null) {
                 for (ValueTick tick : ticks) {
                      boolean paintLine = false;
-                    if ((tick.getTickType() == TickType.MINOR)
+                    if (tick.isMinor()
                             && isRangeMinorGridlinesVisible()) {
                         gridStroke = getRangeMinorGridlineStroke();
                         gridPaint = getRangeMinorGridlinePaint();
                         paintLine = true;
-                    } else if ((tick.getTickType() == TickType.MAJOR)
+                    } else if (tick.isMajor()
                             && isRangeGridlinesVisible()) {
                         gridStroke = getRangeGridlineStroke();
                         gridPaint = getRangeGridlinePaint();
@@ -5388,6 +5392,82 @@ public class XYPlot<S extends Comparable<S>> extends Plot
             }
         }
 
+    }
+
+    @Override
+    public void apply(StandardChartTheme theme) {
+        setAxisOffset(theme.getAxisOffset());
+        setDomainZeroBaselinePaint(theme.getBaselinePaint());
+        setRangeZeroBaselinePaint(theme.getBaselinePaint());
+        setDomainGridlinePaint(theme.getDomainGridlinePaint());
+        setRangeGridlinePaint(theme.getRangeGridlinePaint());
+        setDomainCrosshairPaint(theme.getCrosshairPaint());
+        setRangeCrosshairPaint(theme.getCrosshairPaint());
+        setShadowGenerator(theme.getShadowGenerator());
+
+        // process all domain axes
+        int domainAxisCount = getDomainAxisCount();
+        for (int i = 0; i < domainAxisCount; i++) {
+            ValueAxis axis = getDomainAxis(i);
+            if (axis != null) axis.apply(theme);
+        }
+
+        // process all range axes
+        int rangeAxisCount = getRangeAxisCount();
+        for (int i = 0; i < rangeAxisCount; i++) {
+            ValueAxis axis = getRangeAxis(i);
+            if (axis != null) axis.apply(theme);
+        }
+
+        // process all renderers
+        int rendererCount = getRendererCount();
+        for (int i = 0; i < rendererCount; i++) {
+            XYItemRenderer r = getRenderer(i);
+            if (r != null) {
+                applyToXYItemRenderer(r, theme);
+            }
+        }
+        // process all annotations
+
+        for (XYAnnotation a : getAnnotations()) {
+            applyToXYAnnotation(a, theme);
+        }
+
+        if (this instanceof CombinedDomainXYPlot) {
+            CombinedDomainXYPlot<S> cp = (CombinedDomainXYPlot) this;
+            for (XYPlot<S> subplot : cp.getSubplots()) {
+                if (subplot != null) subplot.apply(theme);
+            }
+        }
+        if (this instanceof CombinedRangeXYPlot) {
+            CombinedRangeXYPlot<S> cp = (CombinedRangeXYPlot) this;
+            for (XYPlot subplot : cp.getSubplots()) {
+                if (subplot != null) subplot.apply(theme);
+            }
+        }
+    }
+
+    // Muito feio, mas não vimos outra maneira de fazer :( - Afonso e Gustavo
+    private void applyToXYItemRenderer(XYItemRenderer renderer, StandardChartTheme theme) {
+        Args.nullNotPermitted(renderer, "renderer");
+        if (renderer instanceof AbstractRenderer) ((AbstractRenderer) renderer).apply();
+        renderer.setDefaultItemLabelFont(theme.getRegularFont());
+        renderer.setDefaultItemLabelPaint(theme.getItemLabelPaint());
+        if (renderer instanceof XYBarRenderer) {
+            XYBarRenderer br = (XYBarRenderer) renderer;
+            br.setBarPainter(theme.getXYBarPainter());
+            br.setShadowVisible(theme.getShadowVisible());
+        }
+    }
+
+    // Muito feio, mas não vimos outra maneira de fazer :( - Afonso e Gustavo
+    private void applyToXYAnnotation(XYAnnotation annotation, StandardChartTheme theme) {
+        Args.nullNotPermitted(annotation, "annotation");
+        if (annotation instanceof XYTextAnnotation) {
+            XYTextAnnotation xyta = (XYTextAnnotation) annotation;
+            xyta.setFont(theme.getSmallFont());
+            xyta.setPaint(theme.getItemLabelPaint());
+        }
     }
 
 }

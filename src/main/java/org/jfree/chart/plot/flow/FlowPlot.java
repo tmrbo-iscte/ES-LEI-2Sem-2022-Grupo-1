@@ -52,6 +52,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+
+import org.jfree.chart.StandardChartTheme;
 import org.jfree.chart.api.PublicCloneable;
 import org.jfree.chart.api.RectangleInsets;
 import org.jfree.chart.api.VerticalAlignment;
@@ -822,6 +824,11 @@ public class FlowPlot extends Plot implements Cloneable, PublicCloneable,
         FlowPlot clone = (FlowPlot) super.clone();
         clone.nodeColorMap = new HashMap<>(this.nodeColorMap);
         return clone;
+    }
+
+    @Override
+    public void apply(StandardChartTheme theme) {
+
     }
 
 }

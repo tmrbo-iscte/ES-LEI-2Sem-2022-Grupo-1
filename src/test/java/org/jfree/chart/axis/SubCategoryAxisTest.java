@@ -68,21 +68,21 @@ public class SubCategoryAxisTest {
         assertEquals(a2, a1);
 
         // subcategories
-        a1.addSubCategory("Sub 1");
+        a1.getSubHelper().addSubCategory("Sub 1");
         assertNotEquals(a1, a2);
-        a2.addSubCategory("Sub 1");
+        a2.getSubHelper().addSubCategory("Sub 1");
         assertEquals(a1, a2);
 
         // subLabelFont
-        a1.setSubLabelFont(new Font("Serif", Font.BOLD, 15));
+        a1.getSubHelper().setSubLabelFont(new Font("Serif", Font.BOLD, 15));
         assertNotEquals(a1, a2);
-        a2.setSubLabelFont(new Font("Serif", Font.BOLD, 15));
+        a2.getSubHelper().setSubLabelFont(new Font("Serif", Font.BOLD, 15));
         assertEquals(a1, a2);
 
         // subLabelPaint
-        a1.setSubLabelPaint(Color.RED);
+        a1.getSubHelper().setSubLabelPaint(Color.RED);
         assertNotEquals(a1, a2);
-        a2.setSubLabelPaint(Color.RED);
+        a2.getSubHelper().setSubLabelPaint(Color.RED);
         assertEquals(a1, a2);
     }
 
@@ -107,7 +107,7 @@ public class SubCategoryAxisTest {
     @Test
     public void testCloning() throws CloneNotSupportedException {
         SubCategoryAxis a1 = new SubCategoryAxis("Test");
-        a1.addSubCategory("SubCategoryA");
+        a1.getSubHelper().addSubCategory("SubCategoryA");
         SubCategoryAxis a2 = CloneUtils.clone(a1);
         assertNotSame(a1, a2);
         assertSame(a1.getClass(), a2.getClass());
@@ -120,7 +120,7 @@ public class SubCategoryAxisTest {
     @Test
     public void testSerialization() {
         SubCategoryAxis a1 = new SubCategoryAxis("Test Axis");
-        a1.addSubCategory("SubCategoryA");
+        a1.getSubHelper().addSubCategory("SubCategoryA");
         SubCategoryAxis a2 = TestUtils.serialised(a1);
         assertEquals(a1, a2);
     }

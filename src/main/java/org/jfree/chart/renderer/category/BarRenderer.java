@@ -53,6 +53,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Objects;
 
+import org.jfree.chart.StandardChartTheme;
 import org.jfree.chart.legend.LegendItem;
 import org.jfree.chart.axis.CategoryAxis;
 import org.jfree.chart.axis.ValueAxis;
@@ -861,6 +862,16 @@ public class BarRenderer extends AbstractCategoryItemRenderer
             result.setFillPaintTransformer(this.gradientPaintTransformer);
         }
         return result;
+    }
+
+    /**
+     * REFACTOR
+     * @author Afonso Caniço, Gustavo Ferreira
+     */
+    public void apply(StandardChartTheme theme) {
+        setBarPainter(theme.getBarPainter());
+        setShadowVisible(theme.getShadowVisible());
+        setShadowPaint(theme.getShadowPaint());
     }
 
     /**

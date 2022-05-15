@@ -67,6 +67,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.ResourceBundle;
 
+import org.jfree.chart.StandardChartTheme;
 import org.jfree.chart.legend.LegendItem;
 import org.jfree.chart.legend.LegendItemCollection;
 import org.jfree.chart.event.PlotChangeEvent;
@@ -1275,6 +1276,21 @@ public class MeterPlot extends Plot implements Serializable, Cloneable {
         if (this.dataset != null) {
             this.dataset.addChangeListener(this);
         }
+    }
+
+    /**
+     * REFACTOR
+     * @author Afonso Caniço, Gustavo Ferreira
+     */
+    @Override
+    public void apply(StandardChartTheme theme) {
+        setDialBackgroundPaint(theme.getPlotBackgroundPaint());
+        setValueFont(theme.getLargeFont());
+        setValuePaint(theme.getAxisLabelPaint());
+        setDialOutlinePaint(theme.getPlotOutlinePaint());
+        setNeedlePaint(theme.getThermometerPaint());
+        setTickLabelFont(theme.getRegularFont());
+        setTickLabelPaint(theme.getTickLabelPaint());
     }
 
     /**

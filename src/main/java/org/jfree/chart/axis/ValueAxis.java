@@ -299,13 +299,11 @@ public abstract class ValueAxis extends Axis
     /**
      * Draws an axis line at the current cursor position and edge.
      *
-     * @param g2       the graphics device ({@code null} not permitted).
      * @param cursor   the cursor position.
      * @param dataArea the data area.
      * @param edge     the edge.
      */
-    @Override
-    protected void drawAxisLine(Graphics2D g2, double cursor,
+    protected Line2D setAxisLine(double cursor,
                                 Rectangle2D dataArea, RectangleEdge edge) {
         Line2D axisLine = null;
         if (edge == RectangleEdge.TOP) {
@@ -349,12 +347,12 @@ public abstract class ValueAxis extends Axis
         if (edge == RectangleEdge.TOP || edge == RectangleEdge.BOTTOM) {
             x = dataArea.getMinX();
             y = cursor;
-            arrow = this.leftArrow;
+            arrow = this.arrow.getLeftArrow();
         } else if (edge == RectangleEdge.LEFT
                 || edge == RectangleEdge.RIGHT) {
             x = cursor;
             y = dataArea.getMaxY();
-            arrow = this.downArrow;
+            arrow = this.arrow.getDownArrow();
         }
 
         // draw the arrow...
@@ -368,11 +366,11 @@ public abstract class ValueAxis extends Axis
         if (edge == RectangleEdge.TOP || edge == RectangleEdge.BOTTOM) {
             x = dataArea.getMaxX();
             y = cursor;
-            arrow = this.rightArrow;
+            arrow = this.arrow.getRightArrow();
         } else if (edge == RectangleEdge.LEFT || edge == RectangleEdge.RIGHT) {
             x = cursor;
             y = dataArea.getMinY();
-            arrow = this.upArrow;
+            arrow = this.arrow.getUpArrow();
         }
 
         // draw the arrow...
@@ -390,7 +388,7 @@ public abstract class ValueAxis extends Axis
     @Override
     protected void drawAxisLine(Graphics2D g2, double cursor,
             Rectangle2D dataArea, RectangleEdge edge) {
-        Line2D axisLine = setAxisLine(edge, dataArea, cursor);
+        Line2D axisLine = setAxisLine(cursor,dataArea, edge);
         paintAndRender(g2, axisLine);
 
         boolean drawUpOrRight = false;
@@ -451,8 +449,8 @@ public abstract class ValueAxis extends Axis
 
     private float[] setAnchorPoint(Graphics2D g2, ValueTick tick, double cursor, Rectangle2D dataArea, RectangleEdge edge){
         float[] anchorPoint = new float[0];
-        if (isTickLabelsVisible()) {
-            g2.setPaint(getTickLabelPaint());
+        if (tickLabel.isTickLabelsVisible()) {
+            g2.setPaint(tickLabel.getTickLabelPaint());
             anchorPoint = calculateAnchorPoint(tick, cursor,
                     dataArea, edge);
         }
@@ -461,20 +459,20 @@ public abstract class ValueAxis extends Axis
 
     private double getOL(ValueTick tick){
         return (tick.getTickType().equals(TickType.MINOR))
-                ? getMinorTickMarkOutsideLength()
-                : getTickMarkOutsideLength();
+                ? tickMarks.getMinorTickMarkOutsideLength()
+                : tickMarks.getTickMarkOutsideLength();
     }
 
     private double getIL(ValueTick tick){
         return (tick.getTickType().equals(TickType.MINOR))
-                ? getMinorTickMarkInsideLength()
-                : getTickMarkInsideLength();
+                ? tickMarks.getMinorTickMarkInsideLength()
+                : tickMarks.getTickMarkInsideLength();
     }
 
     private void drawMark(Graphics2D g2, RectangleEdge edge, double cursor, double ol, double xx, double il){
         Line2D mark = null;
-        g2.setStroke(getTickMarkStroke());
-        g2.setPaint(getTickMarkPaint());
+        g2.setStroke(tickMarks.getTickMarkStroke());
+        g2.setPaint(tickMarks.getTickMarkPaint());
         if (edge == RectangleEdge.LEFT) {
             mark = new Line2D.Double(cursor - ol, xx, cursor + il, xx);
         }
@@ -491,8 +489,8 @@ public abstract class ValueAxis extends Axis
     }
 
     private void drawTickMarksHelper(ValueTick tick, RectangleEdge edge, Rectangle2D dataArea, Graphics2D g2, double cursor){
-        if ((isTickMarksVisible() && tick.getTickType().equals(
-                TickType.MAJOR)) || (isMinorTickMarksVisible()
+        if ((tickMarks.isTickMarksVisible() && tick.getTickType().equals(
+                TickType.MAJOR)) || (tickMarks.isMinorTickMarksVisible()
                 && tick.getTickType().equals(TickType.MINOR))) {
 
             double ol = getOL(tick);
@@ -508,19 +506,19 @@ public abstract class ValueAxis extends Axis
     private void setCursor(RectangleEdge edge, double used, List ticks, Graphics2D g2, Rectangle2D plotArea,
                            AxisState state){
         if (edge == RectangleEdge.LEFT) {
-            used += findMaximumTickLabelWidth(ticks, g2, plotArea,
+            used += findMaximumTickLabelWidth(ticks, g2,
                     isVerticalTickLabels());
             state.cursorLeft(used);
         } else if (edge == RectangleEdge.RIGHT) {
-            used = findMaximumTickLabelWidth(ticks, g2, plotArea,
+            used = findMaximumTickLabelWidth(ticks, g2,
                     isVerticalTickLabels());
             state.cursorRight(used);
         } else if (edge == RectangleEdge.TOP) {
-            used = findMaximumTickLabelHeight(ticks, g2, plotArea,
+            used = findMaximumTickLabelHeight(ticks, g2,
                     isVerticalTickLabels());
             state.cursorUp(used);
         } else if (edge == RectangleEdge.BOTTOM) {
-            used = findMaximumTickLabelHeight(ticks, g2, plotArea,
+            used = findMaximumTickLabelHeight(ticks, g2,
                     isVerticalTickLabels());
             state.cursorDown(used);
         }

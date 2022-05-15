@@ -1129,8 +1129,8 @@ public class JFreeChart implements Drawable, TitleChangeListener,
      */
     public void draw(Graphics2D g2, Rectangle2D chartArea, Point2D anchor,
              ChartRenderingInfo info) {
-        notifyListeners(new ChartProgressEvent(this, this, ChartProgressEventType.DRAWING_STARTED, 
-                0));
+        (new ChartProgressEvent(this, this, ChartProgressEventType.DRAWING_STARTED,
+                0)).notifyListeners(this);
         if (this.elementHinting) hasher(g2);
         
         EntityCollection entities = setEntities(info, chartArea);
@@ -1214,9 +1214,9 @@ public class JFreeChart implements Drawable, TitleChangeListener,
     private Object drawTitleHelperTop(Title t, Graphics2D g2, Rectangle2D area, BlockParams p, Size2D size){
         Rectangle2D titleArea = createAlignedRectangle2D(size, area, t.getHorizontalAlignment(), VerticalAlignment.TOP);
         Object retValue = t.draw(g2, titleArea, p);
-        area.setRect(area.getX(), Math.min(area.getY() + size.height,
+        area.setRect(area.getX(), Math.min(area.getY() + size.getHeight(),
                 area.getMaxY()), area.getWidth(), Math.max(area.getHeight()
-                - size.height, 0));
+                - size.getHeight(), 0));
         return retValue;
     }
 
@@ -1224,15 +1224,15 @@ public class JFreeChart implements Drawable, TitleChangeListener,
         Rectangle2D titleArea = createAlignedRectangle2D(size, area, t.getHorizontalAlignment(), VerticalAlignment.BOTTOM);
         Object retValue = t.draw(g2, titleArea, p);
         area.setRect(area.getX(), area.getY(), area.getWidth(),
-                area.getHeight() - size.height);
+                area.getHeight() - size.getHeight());
         return retValue;
     }
 
     private Object drawTitleHelperLeft(Title t, Graphics2D g2, Rectangle2D area, BlockParams p, Size2D size){
         Rectangle2D titleArea = createAlignedRectangle2D(size, area, HorizontalAlignment.LEFT, t.getVerticalAlignment());
         Object retValue = t.draw(g2, titleArea, p);
-        area.setRect(area.getX() + size.width, area.getY(), area.getWidth()
-                - size.width, area.getHeight());
+        area.setRect(area.getX() + size.getWidth(), area.getY(), area.getWidth()
+                - size.getWidth(), area.getHeight());
         return retValue;
     }
 
@@ -1240,7 +1240,7 @@ public class JFreeChart implements Drawable, TitleChangeListener,
         Rectangle2D titleArea = createAlignedRectangle2D(size, area, HorizontalAlignment.RIGHT, t.getVerticalAlignment());
         Object retValue = t.draw(g2, titleArea, p);
         area.setRect(area.getX(), area.getY(), area.getWidth()
-                - size.width, area.getHeight());
+                - size.getWidth(), area.getHeight());
         return retValue;
     }
 

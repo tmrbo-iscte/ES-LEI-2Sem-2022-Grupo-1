@@ -855,8 +855,8 @@ public class CyclicNumberAxis extends NumberAxis {
 
     private void drawMark(Graphics2D g2, RectangleEdge edge, double cursor, double ol, double xx, double il){
         Line2D mark = null;
-        g2.setStroke(getTickMarkStroke());
-        g2.setPaint(getTickMarkPaint());
+        g2.setStroke(tickMarks.getTickMarkStroke());
+        g2.setPaint(tickMarks.getTickMarkPaint());
         if (edge == RectangleEdge.LEFT) {
             mark = new Line2D.Double(cursor - ol, xx, cursor + il, xx);
         }
@@ -874,7 +874,7 @@ public class CyclicNumberAxis extends NumberAxis {
 
     private double getOL(Graphics2D g2){
         double ol;
-        FontMetrics fm = g2.getFontMetrics(getTickLabelFont());
+        FontMetrics fm = g2.getFontMetrics(tickLabel.getTickLabelFont());
         if (isVerticalTickLabels()) {
             ol = fm.getMaxAdvance();
         }
@@ -920,8 +920,8 @@ public class CyclicNumberAxis extends NumberAxis {
         double xx = valueToJava2D(getRange().getUpperBound(), dataArea,
                 edge);
         Line2D mark = null;
-        g2.setStroke(getAdvanceLineStroke());
-        g2.setPaint(getAdvanceLinePaint());
+        g2.setStroke(getAdvanceLine().getStroke());
+        g2.setPaint(getAdvanceLine().getPaint());
         if (edge == RectangleEdge.LEFT) {
             mark = new Line2D.Double(cursor, xx, cursor
                     + dataArea.getWidth(), xx);
@@ -960,7 +960,7 @@ public class CyclicNumberAxis extends NumberAxis {
 
         AxisState ret = super.draw(g2, cursor, plotArea, dataArea, edge,
                 plotState);
-        if (isAdvanceLineVisible()) {
+        if (advanceLine.isVisible()) {
             drawHelper(dataArea, edge, g2, cursor);
         }
         return ret;
@@ -1007,7 +1007,7 @@ public class CyclicNumberAxis extends NumberAxis {
             return ret;
         }
 
-        FontMetrics fm = g2.getFontMetrics(getTickLabelFont());
+        FontMetrics fm = g2.getFontMetrics(tickLabel.getTickLabelFont());
         Rectangle2D r = TextUtils.getTextBounds(this.internalMarkerCycleBoundTick.getText(), g2, fm);
         addToSpace(edge, space, r);
 
